@@ -2038,5 +2038,332 @@
   "checklistSyncError": "Saved locally — will sync to the cloud when you're back online",
   "@checklistSyncError": {
     "description": "Shown when the local save succeeded but pushing it to the cloud failed"
+  },
+  "homeFeatureRamadan": "Ramadan",
+  "@homeFeatureRamadan": {
+    "description": "Home feature-grid label for the Ramadan tracker, only shown during the Hijri month of Ramadan"
+  },
+  "ramadanTrackerAppBarTitle": "Ramadan Tracker",
+  "@ramadanTrackerAppBarTitle": {
+    "description": "App bar title of the Ramadan tracker screen"
+  },
+  "ramadanNotRamadanMessage": "It's not Ramadan right now",
+  "@ramadanNotRamadanMessage": {
+    "description": "Defensive empty state if the Ramadan tracker screen is somehow opened outside Ramadan"
+  },
+  "ramadanSuhoorEndsIn": "Suhoor ends in",
+  "@ramadanSuhoorEndsIn": {
+    "description": "Label before a countdown to Fajr (end of Suhoor) on the Ramadan tracker"
+  },
+  "ramadanIftarIn": "Iftar in",
+  "@ramadanIftarIn": {
+    "description": "Label before a countdown to Maghrib (Iftar) on the Ramadan tracker"
+  },
+  "ramadanIftarTimeReached": "It's iftar time! 🌙",
+  "@ramadanIftarTimeReached": {
+    "description": "Shown on the Ramadan tracker once Maghrib has passed for today"
+  },
+  "ramadanDuaOfDayTitle": "Dua of the Day",
+  "@ramadanDuaOfDayTitle": {
+    "description": "Section title for the curated daily Ramadan dua"
+  },
+  "ramadanIhyaLaylLabel": "Night Prayer (Qiyam)",
+  "@ramadanIhyaLaylLabel": {
+    "description": "Toggle label: whether the user performed night prayer (Qiyam) this Ramadan night"
+  },
+  "ramadanIhyaLaylSublabel": "Did you perform night prayer tonight?",
+  "@ramadanIhyaLaylSublabel": {
+    "description": "Sublabel/explainer for the Qiyam toggle on the Ramadan tracker"
+  },
+  "ramadanFastingStatusTitle": "Today's Fast",
+  "@ramadanFastingStatusTitle": {
+    "description": "Section title for today's fasting status on the Ramadan tracker"
+  },
+  "ramadanFastingDoneFard": "You fasted today (obligatory) ✅",
+  "@ramadanFastingDoneFard": {
+    "description": "Shown when today's fasting type is logged as obligatory (fard)"
+  },
+  "ramadanFastingDoneNafl": "You fasted today (voluntary) ✅",
+  "@ramadanFastingDoneNafl": {
+    "description": "Shown when today's fasting type is logged as voluntary (nafl)"
+  },
+  "ramadanFastingNotLogged": "You haven't logged today's fast yet",
+  "@ramadanFastingNotLogged": {
+    "description": "Shown when today has no fasting type logged yet"
+  },
+  "ramadanLogFastingButton": "Log your fast",
+  "@ramadanLogFastingButton": {
+    "description": "Button on the Ramadan tracker that opens the daily checklist to log today's fast"
+  },
+  "ramadanProgressStripTitle": "Ramadan Days Progress",
+  "@ramadanProgressStripTitle": {
+    "description": "Section title for the 30-day Ramadan fasting progress strip"
+  },
+  "homeFeatureZakat": "Zakat",
+  "@homeFeatureZakat": {
+    "description": "Home feature-grid label for the Zakat calculator"
+  },
+  "zakatCalculatorAppBarTitle": "Zakat Calculator",
+  "@zakatCalculatorAppBarTitle": {
+    "description": "App bar title of the Zakat calculator screen"
+  },
+  "zakatDisclaimer": "This is a simplified Zakat calculator. For your specific situation, it's best to consult a qualified scholar.",
+  "@zakatDisclaimer": {
+    "description": "Disclaimer shown on the Zakat calculator: it's a simplified tool, not a fatwa"
+  },
+  "zakatAssetsSectionTitle": "Zakatable Assets",
+  "@zakatAssetsSectionTitle": {
+    "description": "Section title for the assets input fields"
+  },
+  "zakatCashLabel": "Cash on Hand",
+  "@zakatCashLabel": {
+    "description": "Input label: cash on hand"
+  },
+  "zakatBankLabel": "Bank Savings",
+  "@zakatBankLabel": {
+    "description": "Input label: bank savings"
+  },
+  "zakatGoldGramsLabel": "Gold Weight (grams)",
+  "@zakatGoldGramsLabel": {
+    "description": "Input label: gold weight in grams"
+  },
+  "zakatGoldPriceLabel": "Today's Gold Price per Gram",
+  "@zakatGoldPriceLabel": {
+    "description": "Input label: user-supplied current gold price per gram"
+  },
+  "zakatSilverGramsLabel": "Silver Weight (grams)",
+  "@zakatSilverGramsLabel": {
+    "description": "Input label: silver weight in grams"
+  },
+  "zakatSilverPriceLabel": "Today's Silver Price per Gram",
+  "@zakatSilverPriceLabel": {
+    "description": "Input label: user-supplied current silver price per gram"
+  },
+  "zakatPriceHelperText": "Enter today's price — check your bank or a local market",
+  "@zakatPriceHelperText": {
+    "description": "Helper text explaining the user must supply today's price themselves"
+  },
+  "zakatTradeGoodsLabel": "Trade Goods Value",
+  "@zakatTradeGoodsLabel": {
+    "description": "Input label: trade goods value"
+  },
+  "zakatDebtLabel": "Deductible Short-Term Debt",
+  "@zakatDebtLabel": {
+    "description": "Input label: deductible short-term debt"
+  },
+  "zakatCurrencyLabel": "Currency (e.g. USD, MAD, €)",
+  "@zakatCurrencyLabel": {
+    "description": "Input label: free-text currency symbol/code for display only"
+  },
+  "zakatNisabSectionTitle": "Nisab Standard",
+  "@zakatNisabSectionTitle": {
+    "description": "Section title for choosing the Nisab standard"
+  },
+  "zakatNisabGoldOption": "Gold (85g)",
+  "@zakatNisabGoldOption": {
+    "description": "Nisab standard option: gold (85g)"
+  },
+  "zakatNisabSilverOption": "Silver (595g)",
+  "@zakatNisabSilverOption": {
+    "description": "Nisab standard option: silver (595g)"
+  },
+  "zakatHawlLabel": "Hawl (Full Lunar Year)",
+  "@zakatHawlLabel": {
+    "description": "Toggle label: whether the wealth has been held for a full Hijri year"
+  },
+  "zakatHawlSublabel": "Has this wealth stayed in your possession for a full Hijri year?",
+  "@zakatHawlSublabel": {
+    "description": "Explainer for the Hawl toggle"
+  },
+  "zakatCalculateButton": "Calculate Zakat",
+  "@zakatCalculateButton": {
+    "description": "Button that runs the Zakat calculation"
+  },
+  "zakatSaveButton": "Save This Calculation",
+  "@zakatSaveButton": {
+    "description": "Button that persists the current calculation locally"
+  },
+  "zakatSavedMessage": "Calculation saved",
+  "@zakatSavedMessage": {
+    "description": "Confirmation snackbar after saving a calculation"
+  },
+  "zakatResultTitle": "Result",
+  "@zakatResultTitle": {
+    "description": "Result card title"
+  },
+  "zakatResultWealthLabel": "Net Zakatable Wealth",
+  "@zakatResultWealthLabel": {
+    "description": "Result row label: net zakatable wealth"
+  },
+  "zakatResultNisabLabel": "Nisab Threshold",
+  "@zakatResultNisabLabel": {
+    "description": "Result row label: the Nisab threshold in the chosen currency"
+  },
+  "zakatResultDueMessage": "Zakat due: {amount}",
+  "@zakatResultDueMessage": {
+    "description": "Shown when Zakat is due, with the computed amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "zakatResultNotDueMessage": "No Zakat due — your wealth hasn't reached Nisab",
+  "@zakatResultNotDueMessage": {
+    "description": "Shown when wealth is below Nisab"
+  },
+  "zakatResultShortfallMessage": "You need {amount} more to reach Nisab",
+  "@zakatResultShortfallMessage": {
+    "description": "Shown alongside zakatResultNotDueMessage with the exact shortfall",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "zakatResultHawlPendingMessage": "Your wealth has reached Nisab — confirm the Hawl period above to calculate what's due",
+  "@zakatResultHawlPendingMessage": {
+    "description": "Shown when wealth meets Nisab but the Hawl toggle isn't confirmed yet"
+  },
+  "zakatMissingPriceMessage": "Enter the price per gram for the selected Nisab standard to compute the threshold",
+  "@zakatMissingPriceMessage": {
+    "description": "Shown when the Nisab threshold can't be computed because no price was entered for the selected standard"
+  },
+  "homeFeatureCircles": "Accountability\nCircles",
+  "@homeFeatureCircles": {
+    "description": "Home feature-grid label for the family/community accountability circles feature"
+  },
+  "circlesAppBarTitle": "Accountability Circles",
+  "@circlesAppBarTitle": {
+    "description": "App bar title of the circles list screen"
+  },
+  "circlesEmptyTitle": "No circles yet",
+  "@circlesEmptyTitle": {
+    "description": "Empty state title when the user has no circles"
+  },
+  "circlesEmptyBody": "Create a circle for your family or friends, or join one with an invite code",
+  "@circlesEmptyBody": {
+    "description": "Empty state body explaining what circles are"
+  },
+  "circlesCreateButton": "Create a Circle",
+  "@circlesCreateButton": {
+    "description": "Button to create a new circle"
+  },
+  "circlesJoinButton": "Join with Code",
+  "@circlesJoinButton": {
+    "description": "Button to join an existing circle by invite code"
+  },
+  "circlesCreateDialogTitle": "Create a New Circle",
+  "@circlesCreateDialogTitle": {
+    "description": "Dialog title for creating a circle"
+  },
+  "circlesCreateNameLabel": "Circle Name",
+  "@circlesCreateNameLabel": {
+    "description": "Input label for the new circle's name"
+  },
+  "circlesCreateConfirm": "Create",
+  "@circlesCreateConfirm": {
+    "description": "Confirm button on the create-circle dialog"
+  },
+  "circlesJoinDialogTitle": "Join a Circle",
+  "@circlesJoinDialogTitle": {
+    "description": "Dialog title for joining a circle"
+  },
+  "circlesJoinCodeLabel": "Invite Code",
+  "@circlesJoinCodeLabel": {
+    "description": "Input label for the invite code"
+  },
+  "circlesJoinConfirm": "Join",
+  "@circlesJoinConfirm": {
+    "description": "Confirm button on the join-circle dialog"
+  },
+  "circlesMemberCount": "{count} members",
+  "@circlesMemberCount": {
+    "description": "Member count label on a circle card",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "circlesInviteCodeLabel": "Invite Code",
+  "@circlesInviteCodeLabel": {
+    "description": "Label shown above the circle's invite code on the detail screen"
+  },
+  "circlesShareInviteButton": "Share Invite Code",
+  "@circlesShareInviteButton": {
+    "description": "Button to share the invite code via the system share sheet"
+  },
+  "circlesLeaveButton": "Leave Circle",
+  "@circlesLeaveButton": {
+    "description": "Button to leave a circle"
+  },
+  "circlesLeaveConfirmTitle": "Leave this circle?",
+  "@circlesLeaveConfirmTitle": {
+    "description": "Confirmation dialog title before leaving a circle"
+  },
+  "circlesLeaveConfirmBody": "This circle's members will no longer see your progress.",
+  "@circlesLeaveConfirmBody": {
+    "description": "Confirmation dialog body before leaving a circle"
+  },
+  "circleSharingSectionTitle": "What You Share in This Circle",
+  "@circleSharingSectionTitle": {
+    "description": "Section title for the per-circle sharing toggles"
+  },
+  "circleShareStreakLabel": "Streak",
+  "@circleShareStreakLabel": {
+    "description": "Sharing toggle: current streak"
+  },
+  "circleSharePointsLabel": "Points",
+  "@circleSharePointsLabel": {
+    "description": "Sharing toggle: total points"
+  },
+  "circleShareChecklistLabel": "Today's Checklist Done",
+  "@circleShareChecklistLabel": {
+    "description": "Sharing toggle: whether today's checklist was completed"
+  },
+  "circleShareQuranLabel": "Quran Pages",
+  "@circleShareQuranLabel": {
+    "description": "Sharing toggle: Quran pages read"
+  },
+  "circleLeaderboardTitle": "Members",
+  "@circleLeaderboardTitle": {
+    "description": "Section title for the member leaderboard"
+  },
+  "circleSendReactionTooltip": "Send encouragement",
+  "@circleSendReactionTooltip": {
+    "description": "Tooltip/label on the button that opens the encouragement-phrase picker for a member"
+  },
+  "circleReactionSheetTitle": "Send Encouragement",
+  "@circleReactionSheetTitle": {
+    "description": "Bottom sheet title for picking an encouragement phrase"
+  },
+  "circleReactionSentMessage": "Sent 🤍",
+  "@circleReactionSentMessage": {
+    "description": "Confirmation after sending an encouragement reaction"
+  },
+  "circleErrorGeneric": "Something went wrong, please try again",
+  "@circleErrorGeneric": {
+    "description": "Generic error shown when a circle action fails (invalid code, network error, etc.)"
+  },
+  "reactionPhraseDuaForYou": "Made dua for you 🤲",
+  "@reactionPhraseDuaForYou": {
+    "description": "Fixed encouragement phrase"
+  },
+  "reactionPhraseKeepGoing": "Keep going! 💪",
+  "@reactionPhraseKeepGoing": {
+    "description": "Fixed encouragement phrase"
+  },
+  "reactionPhraseProudOfYou": "Proud of you 🌟",
+  "@reactionPhraseProudOfYou": {
+    "description": "Fixed encouragement phrase"
+  },
+  "reactionPhraseYouCanDoIt": "You can do it! 🔥",
+  "@reactionPhraseYouCanDoIt": {
+    "description": "Fixed encouragement phrase"
+  },
+  "reactionPhraseMashallah": "MashaAllah ✨",
+  "@reactionPhraseMashallah": {
+    "description": "Fixed encouragement phrase"
   }
 }

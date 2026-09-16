@@ -11,6 +11,7 @@ import 'package:takwa/core/database/app_database.dart';
 import 'package:takwa/app/main_shell.dart';
 import 'package:takwa/core/notifications/overlay_background_service.dart';
 import 'package:takwa/core/providers/database_providers.dart';
+import 'package:takwa/core/routes/app_routes.dart';
 import 'package:takwa/core/utils/hijri_display.dart';
 import 'package:takwa/core/utils/prayer_display.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
@@ -1429,6 +1430,12 @@ class _FeatureRow extends StatelessWidget {
     ('📊', l10n.homeFeatureStatistics, '/statistics'),
     ('🏆', l10n.homeFeatureAchievements, '/achievements'),
     ('🔔', l10n.homeFeatureReminders, '/reminders'),
+    ('💰', l10n.homeFeatureZakat, Routes.zakatCalculator),
+    ('👨‍👩‍👧‍👦', l10n.homeFeatureCircles, Routes.circles),
+    // Only surfaced during the Hijri month of Ramadan — same `hMonth == 9`
+    // check statistics_screen.dart uses for its own Ramadan-only UI.
+    if (HijriCalendar.now().hMonth == 9)
+      ('🌙', l10n.homeFeatureRamadan, Routes.ramadanTracker),
   ];
 
   @override

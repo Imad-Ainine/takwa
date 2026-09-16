@@ -292,6 +292,57 @@
     "retry": "Try again",
     "placeholderNote": "This is your personal Takwa web hub. Your synced prayers, daily checklist, and spiritual streaks will be visualized here.",
     "signOut": "Sign Out",
+    "stats": {
+      "currentStreak": "Current Streak",
+      "highestStreak": "Highest Streak",
+      "totalPoints": "Total Points",
+      "quranPagesTotal": "Quran Pages (Total)"
+    },
+    "today": {
+      "title": "Today's Summary",
+      "empty": "No data logged today yet from the app.",
+      "prayers": "Prayers",
+      "quranPages": "Quran Pages Today",
+      "morningAdhkar": "Morning Adhkar",
+      "eveningAdhkar": "Evening Adhkar",
+      "fasting": "Fasting",
+      "netPoints": "Today's Points",
+      "done": "Done",
+      "notDone": "Not done"
+    },
+    "prayerNames": {
+      "fajr": "Fajr",
+      "dhuhr": "Dhuhr",
+      "asr": "Asr",
+      "maghrib": "Maghrib",
+      "isha": "Isha"
+    },
+    "prayerStatus": {
+      "notDue": "Not due yet",
+      "pending": "Not performed yet",
+      "performed": "Performed",
+      "qadaa": "Made up (Qadaa)",
+      "missed": "Missed"
+    },
+    "fastingType": {
+      "none": "Not fasting",
+      "fard": "Obligatory",
+      "nafl": "Voluntary",
+      "makruh": "Broke fast (excused)"
+    },
+    "history": {
+      "title": "Recent History",
+      "empty": "No history yet.",
+      "dateHeader": "Date",
+      "pointsHeader": "Points",
+      "prayersHeader": "Prayers",
+      "quranHeader": "Quran"
+    },
+    "achievements": {
+      "title": "Achievements",
+      "empty": "No achievements earned yet.",
+      "pointsSuffix": "pts"
+    },
     "statsTeaserTitle": "Your Spiritual Companion",
     "statsTeaserSubtitle": "Sync your prayers and daily checklist across all your devices seamlessly.",
     "syncActive": "Cloud Sync Active",

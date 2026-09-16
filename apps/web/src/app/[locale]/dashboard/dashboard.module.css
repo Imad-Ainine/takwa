@@ -256,6 +256,133 @@
 	border: 1px solid rgba(229, 185, 88, 0.16);
 }
 
+/* ─── Stats row (streak/points pills reused on the welcome + today cards) ── */
+.statsRow {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 4px 0 20px;
+	justify-content: center;
+}
+
+/* ─── Extra sections below the top grid: today / history / achievements ── */
+.sections {
+	width: 100%;
+	max-width: 960px;
+	display: grid;
+	gap: 28px;
+	margin-top: 28px;
+}
+
+.sectionTitle {
+	font-size: 1.2rem;
+	margin: 0 0 18px;
+}
+
+/* ─── Today's prayer row ──────────────────────────────────────────── */
+.prayerRow {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 18px;
+}
+
+.prayerBadge {
+	flex: 1 1 90px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	padding: 10px 8px;
+	border-radius: var(--radius-md);
+	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid var(--border-card);
+}
+
+.prayerBadgeDone {
+	background: rgba(120, 200, 150, 0.1);
+	border-color: rgba(120, 200, 150, 0.35);
+}
+
+.prayerName {
+	font-size: 0.82rem;
+	font-weight: 700;
+	color: var(--text-primary);
+}
+
+.prayerStatusLabel {
+	font-size: 0.7rem;
+	color: var(--text-secondary);
+	text-align: center;
+}
+
+/* ─── Recent history table ────────────────────────────────────────── */
+.historyTable {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.85rem;
+}
+
+.historyTable th {
+	text-align: start;
+	color: var(--text-secondary);
+	font-weight: 600;
+	font-size: 0.72rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	padding: 8px 10px;
+	border-bottom: 1px solid var(--border-card);
+}
+
+.historyTable td {
+	padding: 10px;
+	color: var(--text-primary);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ─── Achievements ────────────────────────────────────────────────── */
+.achievementsGrid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: 14px;
+}
+
+.achievementCard {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 14px;
+	border-radius: var(--radius-md);
+	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid var(--border-card);
+}
+
+.achievementEmoji {
+	font-size: 1.8rem;
+	line-height: 1;
+	flex-shrink: 0;
+}
+
+.achievementTitle {
+	font-size: 0.92rem;
+	font-weight: 700;
+	color: var(--text-primary);
+	margin: 0 0 2px;
+}
+
+.achievementDesc {
+	font-size: 0.78rem;
+	color: var(--text-secondary);
+	margin: 0 0 6px;
+	line-height: 1.4;
+}
+
+.achievementMeta {
+	font-size: 0.7rem;
+	color: var(--gold-light);
+	margin: 0;
+}
+
 /* ─── Hash rows ───────────────────────────────────────────────────── */
 .sha1Row {
 	display: flex;

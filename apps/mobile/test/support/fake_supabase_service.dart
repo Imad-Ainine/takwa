@@ -360,4 +360,65 @@ class FakeSupabaseService implements SupabaseService {
   @override
   Future<List<Map<String, dynamic>>> getKhatmaSessions() async =>
       khatmaSessionsById.values.toList();
+
+  // ─────────────── FAMILY / COMMUNITY CIRCLES ───────────────
+  final List<Map<String, dynamic>> circles = [];
+  final List<Map<String, dynamic>> circleReactions = [];
+
+  @override
+  Future<Map<String, dynamic>> createCircle(String name) async {
+    final circle = {
+      'id': 'circle-${circles.length + 1}',
+      'name': name,
+      'invite_code': 'CODE${circles.length + 1}',
+      'owner_id': 'fake-user',
+    };
+    circles.add(circle);
+    return circle;
+  }
+
+  @override
+  Future<Map<String, dynamic>> joinCircleByCode(String inviteCode) async {
+    return circles.firstWhere(
+      (c) => c['invite_code'] == inviteCode,
+      orElse: () => throw Exception('Invalid invite code'),
+    );
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getMyCircles() async => circles;
+
+  @override
+  Future<List<Map<String, dynamic>>> getCircleLeaderboard(
+    String circleId,
+  ) async => [];
+
+  @override
+  Future<void> updateCircleSharing({
+    required String circleId,
+    required bool shareStreak,
+    required bool sharePoints,
+    required bool shareChecklistDone,
+    required bool shareQuranPages,
+  }) async {
+    callLog.add('updateCircleSharing:$circleId');
+  }
+
+  @override
+  Future<void> leaveCircle(String circleId) async {
+    circles.removeWhere((c) => c['id'] == circleId);
+  }
+
+  @override
+  Future<void> sendCircleReaction({
+    required String circleId,
+    required String toUserId,
+    required String phraseKey,
+  }) async {
+    circleReactions.add({
+      'circle_id': circleId,
+      'to_user_id': toUserId,
+      'phrase_key': phraseKey,
+    });
+  }
 }

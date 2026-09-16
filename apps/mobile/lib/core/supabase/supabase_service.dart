@@ -165,6 +165,36 @@ abstract class SupabaseService {
   Future<void> upsertKhatmaSession(Map<String, dynamic> session);
 
   Future<List<Map<String, dynamic>>> getKhatmaSessions();
+
+  // ─────────────── FAMILY / COMMUNITY CIRCLES ───────────────
+  // See docs/specs/family-community-features.md. Every one of these calls a
+  // SECURITY DEFINER RPC (migration 20260916120000_add_family_circles.sql)
+  // rather than a raw table read/write — membership, invite-code validation
+  // and the opt-in-only leaderboard fields all need server-side checks a
+  // plain RLS policy can't express (see that migration's own comments).
+  Future<Map<String, dynamic>> createCircle(String name);
+
+  Future<Map<String, dynamic>> joinCircleByCode(String inviteCode);
+
+  Future<List<Map<String, dynamic>>> getMyCircles();
+
+  Future<List<Map<String, dynamic>>> getCircleLeaderboard(String circleId);
+
+  Future<void> updateCircleSharing({
+    required String circleId,
+    required bool shareStreak,
+    required bool sharePoints,
+    required bool shareChecklistDone,
+    required bool shareQuranPages,
+  });
+
+  Future<void> leaveCircle(String circleId);
+
+  Future<void> sendCircleReaction({
+    required String circleId,
+    required String toUserId,
+    required String phraseKey,
+  });
 }
 
 /// Real implementation, talking to an injected [SupabaseClient].
@@ -975,5 +1005,88 @@ class SupabaseClientService implements SupabaseService {
       );
       return List<Map<String, dynamic>>.from(data);
     });
+  }
+
+  // ─────────────── FAMILY / COMMUNITY CIRCLES ───────────────
+  @override
+  Future<Map<String, dynamic>> createCircle(String name) async {
+    final data = await _db.rpc('create_circle', params: {'p_name': name});
+    return Map<String, dynamic>.from(data as Map);
+  }
+
+  @override
+  Future<Map<String, dynamic>> joinCircleByCode(String inviteCode) async {
+    final data = await _db.rpc(
+      'join_circle_by_code',
+      params: {'p_invite_code': inviteCode},
+    );
+    return Map<String, dynamic>.from(data as Map);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getMyCircles() async {
+    final data = await _db.rpc('my_circles');
+    return List<Map<String, dynamic>>.from(data as List);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getCircleLeaderboard(
+    String circleId,
+  ) async {
+    final data = await _db.rpc(
+      'get_circle_leaderboard',
+      params: {'p_circle_id': circleId},
+    );
+    return List<Map<String, dynamic>>.from(data as List);
+  }
+
+  @override
+  Future<void> updateCircleSharing({
+    required String circleId,
+    required bool shareStreak,
+    required bool sharePoints,
+    required bool shareChecklistDone,
+    required bool shareQuranPages,
+  }) async {
+    await _db.rpc(
+      'update_circle_sharing',
+      params: {
+        'p_circle_id': circleId,
+        'p_share_streak': shareStreak,
+        'p_share_points': sharePoints,
+        'p_share_checklist_done': shareChecklistDone,
+        'p_share_quran_pages': shareQuranPages,
+      },
+    );
+  }
+
+  @override
+  Future<void> leaveCircle(String circleId) async {
+    final userId = _uid;
+    if (userId == null) return;
+    // Direct delete, not an RPC — the "member and circle_id" primary key
+    // means there's nothing to tamper with here (see the migration's own
+    // comment on why UPDATE needed an RPC but this DELETE doesn't).
+    await _db
+        .from('circle_members')
+        .delete()
+        .eq('circle_id', circleId)
+        .eq('user_id', userId);
+  }
+
+  @override
+  Future<void> sendCircleReaction({
+    required String circleId,
+    required String toUserId,
+    required String phraseKey,
+  }) async {
+    await _db.rpc(
+      'send_circle_reaction',
+      params: {
+        'p_circle_id': circleId,
+        'p_to_user_id': toUserId,
+        'p_phrase_key': phraseKey,
+      },
+    );
   }
 }
