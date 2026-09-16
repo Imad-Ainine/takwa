@@ -20,7 +20,7 @@ dependencies:
     path: ../../packages/takwa_ui
 
   # ── State Management ──
-  flutter_riverpod: ^2.5.1
+  flutter_riverpod: ^3.4.3
 
   # ── Database (Drift/SQLite) ──
   drift: ^2.18.0
