@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "786070309719",
+    "project_id": "takwa-f86dc",
+    "storage_bucket": "takwa-f86dc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786070309719:android:8d962a599e3dd495394c12",
+        "android_client_info": {
+          "package_name": "com.takwa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKbUOSLwwfd-Ghm5svQ7ig9oPt2DSOPPM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
