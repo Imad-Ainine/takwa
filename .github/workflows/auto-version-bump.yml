@@ -65,6 +65,11 @@ jobs:
             # Manual runs (workflow_dispatch) can bump patch/minor/major via
             # the bump_type input; a plain push to main always bumps patch,
             # same as before.
+            #
+            # PATCH and MINOR are single digits (0-9): once a bump would push
+            # either past 9, it rolls over to 0 and carries into the next
+            # component instead — so versions read v1.0.1 .. v1.0.9, v1.1.0,
+            # ..., v1.9.9, v2.0.0, never v1.0.47/v1.0.48-style double digits.
             - name: Compute next version
               id: next
               if: steps.skip_check.outputs.SKIP == 'false'
@@ -73,15 +78,36 @@ jobs:
                   BUMP_TYPE="${{ github.event.inputs.bump_type || 'patch' }}"
                   IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
 
+                  bump_patch() {
+                    PATCH=$((PATCH + 1))
+                    if [ "$PATCH" -gt 9 ]; then
+                      PATCH=0
+                      MINOR=$((MINOR + 1))
+                      if [ "$MINOR" -gt 9 ]; then
+                        MINOR=0
+                        MAJOR=$((MAJOR + 1))
+                      fi
+                    fi
+                  }
+
+                  bump_minor() {
+                    MINOR=$((MINOR + 1))
+                    PATCH=0
+                    if [ "$MINOR" -gt 9 ]; then
+                      MINOR=0
+                      MAJOR=$((MAJOR + 1))
+                    fi
+                  }
+
                   case "$BUMP_TYPE" in
                     major)
                       MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
                       ;;
                     minor)
-                      MINOR=$((MINOR + 1)); PATCH=0
+                      bump_minor
                       ;;
                     patch|*)
-                      PATCH=$((PATCH + 1))
+                      bump_patch
                       ;;
                   esac
                   NEXT="${MAJOR}.${MINOR}.${PATCH}"
@@ -90,7 +116,7 @@ jobs:
                   git fetch --tags
                   while git rev-parse "v${NEXT}" >/dev/null 2>&1; do
                     echo "Tag v${NEXT} already exists, incrementing patch version..."
-                    PATCH=$((PATCH + 1))
+                    bump_patch
                     NEXT="${MAJOR}.${MINOR}.${PATCH}"
                   done
 
