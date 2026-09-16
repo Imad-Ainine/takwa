@@ -8659,6 +8659,192 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'ما شاء الله ✨'**
   String get reactionPhraseMashallah;
+
+  /// Home feature-grid label for the Qada (missed prayers) tracker
+  ///
+  /// In ar, this message translates to:
+  /// **'قضاء\nالصلوات'**
+  String get homeFeatureQada;
+
+  /// App bar title of the Qada tracker screen
+  ///
+  /// In ar, this message translates to:
+  /// **'متابعة قضاء الصلوات'**
+  String get qadaAppBarTitle;
+
+  /// Short explainer at the top of the Qada tracker
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل عدد الصلوات الفائتة التي تنوي قضاءها، وتتبّع ما أنجزته'**
+  String get qadaIntroText;
+
+  /// Label for the count of prayers still owed for a given prayer
+  ///
+  /// In ar, this message translates to:
+  /// **'المتبقي'**
+  String get qadaOwedLabel;
+
+  /// Label for the lifetime count of completed Qada prayers for a given prayer
+  ///
+  /// In ar, this message translates to:
+  /// **'تم قضاؤها'**
+  String get qadaCompletedLabel;
+
+  /// Button that decrements the owed count by one and increments completed
+  ///
+  /// In ar, this message translates to:
+  /// **'قضيت واحدة'**
+  String get qadaMarkOneDoneButton;
+
+  /// Button that opens a dialog to set/edit the owed count
+  ///
+  /// In ar, this message translates to:
+  /// **'تعديل العدد'**
+  String get qadaSetOwedButton;
+
+  /// Dialog title for setting a prayer's owed count
+  ///
+  /// In ar, this message translates to:
+  /// **'عدد الصلوات الفائتة'**
+  String get qadaSetOwedDialogTitle;
+
+  /// Confirm button on the set-owed dialog
+  ///
+  /// In ar, this message translates to:
+  /// **'حفظ'**
+  String get qadaSetOwedConfirm;
+
+  /// Optional amount field shown below the Sadaqah toggle in the daily checklist
+  ///
+  /// In ar, this message translates to:
+  /// **'المبلغ (اختياري)'**
+  String get sadaqahAmountFieldLabel;
+
+  /// Home feature-grid label for the Sadaqah tracker
+  ///
+  /// In ar, this message translates to:
+  /// **'الصدقات'**
+  String get homeFeatureSadaqah;
+
+  /// App bar title of the Sadaqah tracker screen
+  ///
+  /// In ar, this message translates to:
+  /// **'متابعة الصدقات'**
+  String get sadaqahTrackerAppBarTitle;
+
+  /// Sadaqah total label: this week
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا الأسبوع'**
+  String get sadaqahTotalsWeekLabel;
+
+  /// Sadaqah total label: this month
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا الشهر'**
+  String get sadaqahTotalsMonthLabel;
+
+  /// Sadaqah total label: all-time
+  ///
+  /// In ar, this message translates to:
+  /// **'الإجمالي'**
+  String get sadaqahTotalsAllTimeLabel;
+
+  /// Title for the Sadaqah history list
+  ///
+  /// In ar, this message translates to:
+  /// **'السجل'**
+  String get sadaqahHistoryTitle;
+
+  /// Empty state for the Sadaqah history list
+  ///
+  /// In ar, this message translates to:
+  /// **'لم تُسجَّل صدقات بعد'**
+  String get sadaqahHistoryEmpty;
+
+  /// Shown for a history entry logged without an amount, distinct from a real zero
+  ///
+  /// In ar, this message translates to:
+  /// **'صدقة (بدون مبلغ)'**
+  String get sadaqahLoggedNoAmount;
+
+  /// Home feature-grid label for the Islamic occasions screen
+  ///
+  /// In ar, this message translates to:
+  /// **'مناسبات\nإسلامية'**
+  String get homeFeatureOccasions;
+
+  /// App bar title of the Islamic occasions screen
+  ///
+  /// In ar, this message translates to:
+  /// **'مناسبات إسلامية'**
+  String get occasionsAppBarTitle;
+
+  /// Section title for this Hijri month's White Days (Ayyam al-Beed)
+  ///
+  /// In ar, this message translates to:
+  /// **'الأيام البيض'**
+  String get occasionsWhiteDaysTitle;
+
+  /// Explainer for White Days
+  ///
+  /// In ar, this message translates to:
+  /// **'أيام ١٣، ١٤، ١٥ من الشهر الهجري الحالي — يُستحب صيامها'**
+  String get occasionsWhiteDaysSubtitle;
+
+  /// Shown instead of a day count when the occasion is today
+  ///
+  /// In ar, this message translates to:
+  /// **'اليوم'**
+  String get occasionsDaysUntilToday;
+
+  /// Countdown to an occasion
+  ///
+  /// In ar, this message translates to:
+  /// **'بعد {days} يوم'**
+  String occasionsDaysUntil(int days);
+
+  /// Tooltip on the button that opens the add-reminder sheet pre-filled with this occasion
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف تذكيرًا'**
+  String get occasionsAddReminderTooltip;
+
+  /// Occasion name
+  ///
+  /// In ar, this message translates to:
+  /// **'عاشوراء'**
+  String get occasionAshura;
+
+  /// Occasion name
+  ///
+  /// In ar, this message translates to:
+  /// **'الإسراء والمعراج'**
+  String get occasionIsraMiraj;
+
+  /// Occasion name
+  ///
+  /// In ar, this message translates to:
+  /// **'بداية رمضان'**
+  String get occasionRamadanStart;
+
+  /// Occasion name
+  ///
+  /// In ar, this message translates to:
+  /// **'عيد الفطر'**
+  String get occasionEidAlFitr;
+
+  /// Occasion name
+  ///
+  /// In ar, this message translates to:
+  /// **'المولد النبوي'**
+  String get occasionMawlid;
+
+  /// Occasion name
+  ///
+  /// In ar, this message translates to:
+  /// **'عيد الأضحى'**
+  String get occasionEidAlAdha;
 }
 
 class _AppLocalizationsDelegate

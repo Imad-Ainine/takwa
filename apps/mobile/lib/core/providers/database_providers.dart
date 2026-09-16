@@ -54,6 +54,38 @@ final zakatDaoProvider = Provider<ZakatDao>((ref) {
   return ZakatDao(ref.watch(appDatabaseProvider));
 });
 
+final qadaDaoProvider = Provider<QadaDao>((ref) {
+  return QadaDao(ref.watch(appDatabaseProvider));
+});
+
+final qadaCountersProvider = StreamProvider<List<QadaCounter>>((ref) {
+  return ref.watch(qadaDaoProvider).watchAll();
+});
+
+// ── سجل الصدقات ──
+final sadaqahHistoryProvider = StreamProvider<List<DailyRecord>>((ref) {
+  return ref.watch(dailyRecordDaoProvider).watchSadaqahHistory();
+});
+
+final sadaqahTotalsProvider = FutureProvider.autoDispose<(double, double, double)>((
+  ref,
+) async {
+  final dao = ref.watch(dailyRecordDaoProvider);
+  final now = DateTime.now();
+  final weekStart = DateTime(
+    now.year,
+    now.month,
+    now.day,
+  ).subtract(Duration(days: now.weekday - 1));
+  final monthStart = DateTime(now.year, now.month, 1);
+  final today = DateTime(now.year, now.month, now.day);
+
+  final week = await dao.getSadaqahTotal(from: weekStart, to: today);
+  final month = await dao.getSadaqahTotal(from: monthStart, to: today);
+  final allTime = await dao.getSadaqahTotal();
+  return (week, month, allTime);
+});
+
 // ── سجل اليوم (Stream) ──
 final todayRecordProvider = StreamProvider<DailyRecord?>((ref) {
   return ref.watch(dailyRecordDaoProvider).watchTodayRecord();

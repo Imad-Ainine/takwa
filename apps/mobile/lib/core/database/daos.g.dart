@@ -200,3 +200,15 @@ class ZakatDaoManager {
         _db.zakatCalculations,
       );
 }
+
+mixin _$QadaDaoMixin on DatabaseAccessor<AppDatabase> {
+  $QadaCountersTable get qadaCounters => attachedDatabase.qadaCounters;
+  QadaDaoManager get managers => QadaDaoManager(this);
+}
+
+class QadaDaoManager {
+  final _$QadaDaoMixin _db;
+  QadaDaoManager(this._db);
+  $$QadaCountersTableTableManager get qadaCounters =>
+      $$QadaCountersTableTableManager(_db.attachedDatabase, _db.qadaCounters);
+}

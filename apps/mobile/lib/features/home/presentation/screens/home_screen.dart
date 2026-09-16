@@ -1432,6 +1432,9 @@ class _FeatureRow extends StatelessWidget {
     ('🔔', l10n.homeFeatureReminders, '/reminders'),
     ('💰', l10n.homeFeatureZakat, Routes.zakatCalculator),
     ('👨‍👩‍👧‍👦', l10n.homeFeatureCircles, Routes.circles),
+    ('🔁', l10n.homeFeatureQada, Routes.qadaTracker),
+    ('💧', l10n.homeFeatureSadaqah, Routes.sadaqahTracker),
+    ('📅', l10n.homeFeatureOccasions, Routes.islamicOccasions),
     // Only surfaced during the Hijri month of Ramadan — same `hMonth == 9`
     // check statistics_screen.dart uses for its own Ramadan-only UI.
     if (HijriCalendar.now().hMonth == 9)

@@ -1032,6 +1032,11 @@ class _IbadahGroup extends ConsumerWidget {
             });
           },
         ),
+        if (record?.sadaqah ?? false)
+          _SadaqahAmountField(
+            key: ValueKey('sadaqah-amount-${record!.id}'),
+            record: record!,
+          ),
         _ToggleRow(
           emoji: '👁️',
           label: l10n.ibadahGhadhBasarLabel,
@@ -1277,6 +1282,71 @@ class _ToggleRow extends StatelessWidget {
               if (value) _MiniPts(points, context.colors.success),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Sadaqah amount (optional) ──
+// See docs/specs/sadaqah-tracker.md — `sadaqahAmount` existed in the schema
+// and synced already, but nothing in the UI ever let a user enter it before
+// this. Kept as a small standalone field below the toggle rather than
+// folded into _ToggleRow's own layout, so the well-tested toggle animation
+// stays untouched.
+class _SadaqahAmountField extends ConsumerStatefulWidget {
+  final DailyRecord record;
+  const _SadaqahAmountField({super.key, required this.record});
+
+  @override
+  ConsumerState<_SadaqahAmountField> createState() =>
+      _SadaqahAmountFieldState();
+}
+
+class _SadaqahAmountFieldState extends ConsumerState<_SadaqahAmountField> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    final amount = widget.record.sadaqahAmount;
+    _controller = TextEditingController(
+      text: amount > 0 ? _trimZeros(amount) : '',
+    );
+  }
+
+  static String _trimZeros(double v) {
+    final s = v.toStringAsFixed(2);
+    return s.endsWith('.00') ? s.substring(0, s.length - 3) : s;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final amount = double.tryParse(_controller.text.trim());
+    if (amount == null) return;
+    ref
+        .read(dailyRecordDaoProvider)
+        .updateSadaqahAmount(widget.record.id, amount);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextField(
+        controller: _controller,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        onSubmitted: (_) => _save(),
+        onTapOutside: (_) => _save(),
+        decoration: InputDecoration(
+          labelText: l10n.sadaqahAmountFieldLabel,
+          isDense: true,
         ),
       ),
     );

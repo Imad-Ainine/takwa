@@ -4773,4 +4773,101 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reactionPhraseMashallah => 'ما شاء الله ✨';
+
+  @override
+  String get homeFeatureQada => 'قضاء\nالصلوات';
+
+  @override
+  String get qadaAppBarTitle => 'متابعة قضاء الصلوات';
+
+  @override
+  String get qadaIntroText =>
+      'سجّل عدد الصلوات الفائتة التي تنوي قضاءها، وتتبّع ما أنجزته';
+
+  @override
+  String get qadaOwedLabel => 'المتبقي';
+
+  @override
+  String get qadaCompletedLabel => 'تم قضاؤها';
+
+  @override
+  String get qadaMarkOneDoneButton => 'قضيت واحدة';
+
+  @override
+  String get qadaSetOwedButton => 'تعديل العدد';
+
+  @override
+  String get qadaSetOwedDialogTitle => 'عدد الصلوات الفائتة';
+
+  @override
+  String get qadaSetOwedConfirm => 'حفظ';
+
+  @override
+  String get sadaqahAmountFieldLabel => 'المبلغ (اختياري)';
+
+  @override
+  String get homeFeatureSadaqah => 'الصدقات';
+
+  @override
+  String get sadaqahTrackerAppBarTitle => 'متابعة الصدقات';
+
+  @override
+  String get sadaqahTotalsWeekLabel => 'هذا الأسبوع';
+
+  @override
+  String get sadaqahTotalsMonthLabel => 'هذا الشهر';
+
+  @override
+  String get sadaqahTotalsAllTimeLabel => 'الإجمالي';
+
+  @override
+  String get sadaqahHistoryTitle => 'السجل';
+
+  @override
+  String get sadaqahHistoryEmpty => 'لم تُسجَّل صدقات بعد';
+
+  @override
+  String get sadaqahLoggedNoAmount => 'صدقة (بدون مبلغ)';
+
+  @override
+  String get homeFeatureOccasions => 'مناسبات\nإسلامية';
+
+  @override
+  String get occasionsAppBarTitle => 'مناسبات إسلامية';
+
+  @override
+  String get occasionsWhiteDaysTitle => 'الأيام البيض';
+
+  @override
+  String get occasionsWhiteDaysSubtitle =>
+      'أيام ١٣، ١٤، ١٥ من الشهر الهجري الحالي — يُستحب صيامها';
+
+  @override
+  String get occasionsDaysUntilToday => 'اليوم';
+
+  @override
+  String occasionsDaysUntil(int days) {
+    return 'بعد $days يوم';
+  }
+
+  @override
+  String get occasionsAddReminderTooltip => 'أضف تذكيرًا';
+
+  @override
+  String get occasionAshura => 'عاشوراء';
+
+  @override
+  String get occasionIsraMiraj => 'الإسراء والمعراج';
+
+  @override
+  String get occasionRamadanStart => 'بداية رمضان';
+
+  @override
+  String get occasionEidAlFitr => 'عيد الفطر';
+
+  @override
+  String get occasionMawlid => 'المولد النبوي';
+
+  @override
+  String get occasionEidAlAdha => 'عيد الأضحى';
 }

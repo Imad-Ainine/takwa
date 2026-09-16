@@ -117,11 +117,60 @@ class DailyRecordDao extends DatabaseAccessor<AppDatabase>
       await (update(dailyRecords)..where((r) => r.id.equals(recordId))).write(
         DailyRecordsCompanion(
           sadaqah: Value(value),
+          // Turning the toggle off clears any amount that was entered —
+          // otherwise a stale amount would linger attached to a day the
+          // user just said they didn't give Sadaqah on.
+          sadaqahAmount: value ? const Value.absent() : const Value(0),
           updatedAt: Value(DateTime.now()),
         ),
       );
       await recalcPoints(recordId);
     });
+  }
+
+  /// See docs/specs/sadaqah-tracker.md — `sadaqahAmount` existed in the
+  /// schema and synced already, but nothing ever wrote to it from the UI
+  /// before this.
+  Future<void> updateSadaqahAmount(int recordId, double amount) async {
+    await (update(dailyRecords)..where((r) => r.id.equals(recordId))).write(
+      DailyRecordsCompanion(
+        sadaqahAmount: Value(amount),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Sadaqah-logged days in reverse-chronological order, for the tracker's
+  /// history list. `limit` keeps a "since forever" history bounded.
+  Future<List<DailyRecord>> getSadaqahHistory({int limit = 100}) {
+    return (select(dailyRecords)
+          ..where((r) => r.sadaqah.equals(true))
+          ..orderBy([(r) => OrderingTerm.desc(r.date)])
+          ..limit(limit))
+        .get();
+  }
+
+  Stream<List<DailyRecord>> watchSadaqahHistory({int limit = 100}) {
+    return customSelect(
+      'SELECT 1',
+      readsFrom: {dailyRecords},
+    ).watch().asyncMap((_) => getSadaqahHistory(limit: limit));
+  }
+
+  /// Sum of `sadaqahAmount` across all Sadaqah-logged days, optionally
+  /// bounded to `[from, to]` (inclusive) — backs the tracker's
+  /// week/month/all-time totals.
+  Future<double> getSadaqahTotal({DateTime? from, DateTime? to}) async {
+    final amountSum = dailyRecords.sadaqahAmount.sum();
+    final condition = (from != null && to != null)
+        ? dailyRecords.sadaqah.equals(true) &
+              dailyRecords.date.isBetweenValues(from, to)
+        : dailyRecords.sadaqah.equals(true);
+
+    final row = await (selectOnly(
+      dailyRecords,
+    )..addColumns([amountSum])..where(condition)).getSingle();
+    return row.read(amountSum) ?? 0;
   }
 
   Future<void> toggleNightPrayer(int recordId, bool value) async {
@@ -1992,5 +2041,52 @@ class ZakatDao extends DatabaseAccessor<AppDatabase> with _$ZakatDaoMixin {
 
   Future<int> save(ZakatCalculationsCompanion companion) {
     return into(zakatCalculations).insert(companion);
+  }
+}
+
+// ─────────────────────────────────────────
+//  DAO 12: QadaDao
+// ─────────────────────────────────────────
+@DriftAccessor(tables: [QadaCounters])
+class QadaDao extends DatabaseAccessor<AppDatabase> with _$QadaDaoMixin {
+  QadaDao(super.db);
+
+  static const prayerNames = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+
+  Stream<List<QadaCounter>> watchAll() {
+    return select(qadaCounters).watch();
+  }
+
+  Future<void> setOwed(String prayerName, int owed) {
+    return into(qadaCounters).insertOnConflictUpdate(
+      QadaCountersCompanion(
+        prayerName: Value(prayerName),
+        owedCount: Value(owed < 0 ? 0 : owed),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Decrements [prayerName]'s owed count by 1 (never below 0) and
+  /// increments its lifetime completed count — see the spec's R3.
+  Future<void> markOneCompleted(String prayerName) async {
+    await transaction(() async {
+      final existing =
+          await (select(qadaCounters)
+                ..where((t) => t.prayerName.equals(prayerName)))
+              .getSingleOrNull();
+      final owed = existing?.owedCount ?? 0;
+      final completed = existing?.completedCount ?? 0;
+      if (owed <= 0) return;
+
+      await into(qadaCounters).insertOnConflictUpdate(
+        QadaCountersCompanion(
+          prayerName: Value(prayerName),
+          owedCount: Value(owed - 1),
+          completedCount: Value(completed + 1),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    });
   }
 }

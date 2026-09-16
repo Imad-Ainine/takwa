@@ -342,6 +342,25 @@ class ZakatCalculations extends Table {
 }
 
 // ─────────────────────────────────────────
+//  TABLE: qada_counters
+// ─────────────────────────────────────────
+//
+// See docs/specs/qada-prayer-tracker.md. A lifetime "prayers owed" backlog
+// per prayer — unrelated to PrayerStatus.qadaa, which marks a single
+// same-day prayer as performed late. Local-only (no Supabase sync in v1,
+// per the spec).
+class QadaCounters extends Table {
+  /// One of 'fajr' | 'dhuhr' | 'asr' | 'maghrib' | 'isha'.
+  TextColumn get prayerName => text()();
+  IntColumn get owedCount => integer().withDefault(const Constant(0))();
+  IntColumn get completedCount => integer().withDefault(const Constant(0))();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {prayerName};
+}
+
+// ─────────────────────────────────────────
 //  DATABASE CLASS
 // ─────────────────────────────────────────
 @DriftDatabase(
@@ -360,6 +379,7 @@ class ZakatCalculations extends Table {
     BookReadingProgress,
     SyncOutbox,
     ZakatCalculations,
+    QadaCounters,
   ],
   daos: [
     DailyRecordDao,
@@ -374,6 +394,7 @@ class ZakatCalculations extends Table {
     BookProgressDao,
     SyncOutboxDao,
     ZakatDao,
+    QadaDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -386,7 +407,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -395,6 +416,9 @@ class AppDatabase extends _$AppDatabase {
       await _seedDefaultData();
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 11) {
+        await m.createTable(qadaCounters);
+      }
       if (from < 10) {
         await m.createTable(zakatCalculations);
       }
