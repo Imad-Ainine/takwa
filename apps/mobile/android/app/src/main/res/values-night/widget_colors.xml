@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Dark-mode palette for every home-screen widget — see the base
+  values/widget_colors.xml for how these are used and picked. Mirrors
+  AppColorsExtension.dark.
+-->
+<resources>
+    <!-- ≈ .dark.night / .card2 (the app's own dark backgroundGradient uses
+         the same two tones) -->
+    <color name="widget_bg_start">#FF0D1117</color>
+    <color name="widget_bg_end">#FF1E2D40</color>
+    <!-- ≈ .dark.border -->
+    <color name="widget_border">#FF2A3A50</color>
+    <!-- ≈ .dark.textPrimary / .textSecondary -->
+    <color name="widget_text_primary">#FFE8EDF3</color>
+    <color name="widget_text_secondary">#FF8FA3BB</color>
+    <!-- ≈ .dark.gold — usable directly as text here, unlike on light -->
+    <color name="widget_gold">#FFC8A96E</color>
+    <!-- ≈ .dark.teal -->
+    <color name="widget_teal">#FF3AAFA9</color>
+    <color name="widget_divider">#26FFFFFF</color>
+    <!-- ≈ AppColorsExtension.dark.cardGradient — see values/widget_colors.xml -->
+    <color name="widget_overlay_gold">#20C8A96E</color>
+    <color name="widget_overlay_teal">#0D3AAFA9</color>
+    <color name="widget_progress_track">#26FFFFFF</color>
+</resources>

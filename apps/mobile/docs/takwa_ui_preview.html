@@ -1,0 +1,1697 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>تقوى — UI Design System</title>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap"
+			rel="stylesheet" />
+		<style>
+			:root {
+				--night: #0d1117;
+				--deep: #111827;
+				--card: #1a2332;
+				--card2: #1e2d40;
+				--border: #2a3a50;
+				--gold: #c8a96e;
+				--gold-light: #e4c98a;
+				--gold-dim: rgba(200, 169, 110, 0.15);
+				--teal: #3aafa9;
+				--teal-dim: rgba(58, 175, 169, 0.12);
+				--green: #4caf7d;
+				--red: #e07070;
+				--text: #e8edf3;
+				--text-sec: #8fa3bb;
+				--text-dim: #4a6070;
+				--glow: 0 0 30px rgba(200, 169, 110, 0.12);
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				background: var(--night);
+				font-family: 'Noto Naskh Arabic', serif;
+				color: var(--text);
+				min-height: 100vh;
+				overflow-x: hidden;
+			}
+
+			/* ─── BACKGROUND GEOMETRIC PATTERN ─── */
+			body::before {
+				content: '';
+				position: fixed;
+				inset: 0;
+				background-image:
+					repeating-linear-gradient(
+						60deg,
+						transparent,
+						transparent 40px,
+						rgba(200, 169, 110, 0.015) 40px,
+						rgba(200, 169, 110, 0.015) 41px
+					),
+					repeating-linear-gradient(
+						-60deg,
+						transparent,
+						transparent 40px,
+						rgba(200, 169, 110, 0.015) 40px,
+						rgba(200, 169, 110, 0.015) 41px
+					),
+					repeating-linear-gradient(
+						0deg,
+						transparent,
+						transparent 40px,
+						rgba(200, 169, 110, 0.01) 40px,
+						rgba(200, 169, 110, 0.01) 41px
+					);
+				pointer-events: none;
+				z-index: 0;
+			}
+
+			.wrapper {
+				position: relative;
+				z-index: 1;
+			}
+
+			/* ─── PAGE HEADER ─── */
+			.page-header {
+				text-align: center;
+				padding: 60px 20px 40px;
+			}
+			.page-header .bismillah {
+				font-family: 'Amiri', serif;
+				font-size: 28px;
+				color: var(--gold);
+				letter-spacing: 2px;
+				margin-bottom: 16px;
+				text-shadow: 0 0 20px rgba(200, 169, 110, 0.4);
+			}
+			.page-header h1 {
+				font-family: 'Amiri', serif;
+				font-size: 42px;
+				font-weight: 700;
+				background: linear-gradient(
+					135deg,
+					var(--gold-light),
+					var(--gold),
+					var(--teal)
+				);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+				margin-bottom: 8px;
+			}
+			.page-header p {
+				color: var(--text-sec);
+				font-size: 15px;
+			}
+
+			/* ─── DESIGN TOKENS SECTION ─── */
+			.section {
+				max-width: 1100px;
+				margin: 0 auto;
+				padding: 40px 24px;
+			}
+			.section-title {
+				font-family: 'Amiri', serif;
+				font-size: 22px;
+				color: var(--gold);
+				margin-bottom: 24px;
+				padding-bottom: 10px;
+				border-bottom: 1px solid var(--border);
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+			.section-title::before {
+				content: '';
+				width: 4px;
+				height: 20px;
+				background: linear-gradient(to bottom, var(--gold), var(--teal));
+				border-radius: 2px;
+				display: inline-block;
+			}
+
+			/* ─── COLOR PALETTE ─── */
+			.palette {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 12px;
+			}
+			.color-chip {
+				width: 90px;
+				border-radius: 12px;
+				overflow: hidden;
+				box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+			}
+			.color-chip .swatch {
+				height: 60px;
+			}
+			.color-chip .label {
+				background: var(--card);
+				padding: 6px 8px;
+				font-size: 10px;
+				color: var(--text-sec);
+				text-align: center;
+			}
+
+			/* ─── PHONE FRAMES ─── */
+			.screens-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+				gap: 32px;
+				margin-top: 8px;
+			}
+
+			.phone-frame {
+				width: 260px;
+				margin: 0 auto;
+			}
+			.phone-label {
+				text-align: center;
+				color: var(--text-sec);
+				font-size: 12px;
+				margin-bottom: 10px;
+				text-transform: uppercase;
+				letter-spacing: 1px;
+			}
+			.phone-shell {
+				background: #0a0f16;
+				border-radius: 36px;
+				padding: 12px;
+				box-shadow:
+					0 0 0 1px #2a3a50,
+					0 20px 60px rgba(0, 0, 0, 0.6),
+					inset 0 1px 0 rgba(255, 255, 255, 0.05);
+				position: relative;
+			}
+			.phone-shell::before {
+				content: '';
+				position: absolute;
+				top: 20px;
+				left: 50%;
+				transform: translateX(-50%);
+				width: 60px;
+				height: 6px;
+				background: #1a2332;
+				border-radius: 3px;
+				z-index: 10;
+			}
+			.phone-screen {
+				background: var(--deep);
+				border-radius: 26px;
+				overflow: hidden;
+				height: 520px;
+				position: relative;
+			}
+
+			/* ─── STATUS BAR ─── */
+			.status-bar {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 14px 18px 4px;
+				font-size: 11px;
+				color: var(--text-sec);
+			}
+
+			/* ─── SCREEN 1: ONBOARDING ─── */
+			.screen-onboard {
+				background: linear-gradient(
+					160deg,
+					#0d1117 0%,
+					#0f1e2e 50%,
+					#0d1117 100%
+				);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				padding: 30px 20px;
+				height: 100%;
+			}
+			.onboard-ornament {
+				width: 110px;
+				height: 110px;
+				position: relative;
+				margin: 20px auto;
+			}
+			.ornament-ring {
+				position: absolute;
+				inset: 0;
+				border-radius: 50%;
+				border: 1px solid rgba(200, 169, 110, 0.3);
+				animation: pulse 3s ease-in-out infinite;
+			}
+			.ornament-ring:nth-child(2) {
+				inset: 8px;
+				animation-delay: 0.5s;
+				border-color: rgba(58, 175, 169, 0.2);
+			}
+			.ornament-ring:nth-child(3) {
+				inset: 16px;
+				animation-delay: 1s;
+			}
+			.ornament-inner {
+				position: absolute;
+				inset: 24px;
+				border-radius: 50%;
+				background: radial-gradient(
+					circle,
+					rgba(200, 169, 110, 0.2),
+					transparent
+				);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 28px;
+			}
+			@keyframes pulse {
+				0%,
+				100% {
+					transform: scale(1);
+					opacity: 0.5;
+				}
+				50% {
+					transform: scale(1.05);
+					opacity: 1;
+				}
+			}
+			.onboard-title {
+				font-family: 'Amiri', serif;
+				font-size: 26px;
+				color: var(--gold);
+				text-align: center;
+				margin-bottom: 6px;
+			}
+			.onboard-subtitle {
+				font-size: 13px;
+				color: var(--text-sec);
+				text-align: center;
+				line-height: 1.8;
+				margin-bottom: 28px;
+			}
+			.onboard-dots {
+				display: flex;
+				gap: 6px;
+				justify-content: center;
+				margin-bottom: 20px;
+			}
+			.dot {
+				width: 6px;
+				height: 6px;
+				border-radius: 3px;
+				background: var(--border);
+			}
+			.dot.active {
+				width: 20px;
+				background: var(--gold);
+			}
+			.btn-primary {
+				background: linear-gradient(135deg, var(--gold), #b8920e);
+				color: #0d1117;
+				border: none;
+				padding: 12px 36px;
+				border-radius: 30px;
+				font-family: 'Noto Naskh Arabic', serif;
+				font-size: 14px;
+				font-weight: 700;
+				cursor: pointer;
+				box-shadow: 0 4px 20px rgba(200, 169, 110, 0.3);
+				width: 100%;
+			}
+
+			/* ─── SCREEN 2: HOME DASHBOARD ─── */
+			.screen-home {
+				background: var(--deep);
+				height: 100%;
+				overflow: hidden;
+			}
+			.home-header {
+				background: linear-gradient(
+					180deg,
+					rgba(200, 169, 110, 0.08) 0%,
+					transparent 100%
+				);
+				padding: 10px 16px 14px;
+				border-bottom: 1px solid var(--border);
+			}
+			.home-date-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-start;
+				margin-bottom: 8px;
+			}
+			.hijri-date {
+				font-family: 'Amiri', serif;
+				font-size: 13px;
+				color: var(--gold);
+			}
+			.greeting {
+				font-size: 11px;
+				color: var(--text-sec);
+				text-align: left;
+			}
+			.next-prayer {
+				background: var(--card);
+				border: 1px solid var(--border);
+				border-radius: 12px;
+				padding: 10px 12px;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+			.prayer-icon {
+				width: 32px;
+				height: 32px;
+				background: var(--gold-dim);
+				border-radius: 8px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 16px;
+			}
+			.prayer-name {
+				font-size: 13px;
+				font-weight: 600;
+				color: var(--gold);
+			}
+			.prayer-time {
+				font-size: 11px;
+				color: var(--text-sec);
+			}
+			.prayer-countdown {
+				margin-right: auto;
+				background: rgba(200, 169, 110, 0.1);
+				border: 1px solid rgba(200, 169, 110, 0.2);
+				border-radius: 20px;
+				padding: 3px 10px;
+				font-size: 11px;
+				color: var(--gold-light);
+			}
+
+			/* Progress Ring */
+			.progress-section {
+				padding: 14px 16px;
+				display: flex;
+				align-items: center;
+				gap: 14px;
+			}
+			.ring-wrap {
+				position: relative;
+				width: 80px;
+				height: 80px;
+				flex-shrink: 0;
+			}
+			.ring-wrap svg {
+				transform: rotate(-90deg);
+			}
+			.ring-center {
+				position: absolute;
+				inset: 0;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+			}
+			.ring-pct {
+				font-size: 16px;
+				font-weight: 700;
+				color: var(--gold);
+			}
+			.ring-lbl {
+				font-size: 8px;
+				color: var(--text-sec);
+			}
+			.progress-info h3 {
+				font-size: 14px;
+				font-weight: 600;
+				margin-bottom: 4px;
+				color: var(--text);
+			}
+			.progress-info p {
+				font-size: 11px;
+				color: var(--text-sec);
+				line-height: 1.5;
+			}
+			.streak-badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				background: rgba(76, 175, 125, 0.15);
+				border: 1px solid rgba(76, 175, 125, 0.3);
+				color: var(--green);
+				font-size: 11px;
+				padding: 2px 8px;
+				border-radius: 20px;
+				margin-top: 4px;
+			}
+
+			/* Quick Checklist */
+			.checklist-section {
+				padding: 0 16px 8px;
+			}
+			.checklist-title {
+				font-size: 11px;
+				color: var(--text-sec);
+				margin-bottom: 8px;
+				display: flex;
+				justify-content: space-between;
+			}
+			.checklist-grid {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 6px;
+			}
+			.ibadah-chip {
+				background: var(--card);
+				border: 1px solid var(--border);
+				border-radius: 10px;
+				padding: 8px 4px;
+				text-align: center;
+				transition: all 0.2s;
+			}
+			.ibadah-chip.done {
+				background: rgba(76, 175, 125, 0.1);
+				border-color: rgba(76, 175, 125, 0.3);
+			}
+			.ibadah-chip .ic {
+				font-size: 16px;
+				display: block;
+				margin-bottom: 3px;
+			}
+			.ibadah-chip .nm {
+				font-size: 9px;
+				color: var(--text-sec);
+			}
+			.ibadah-chip.done .nm {
+				color: var(--green);
+			}
+
+			/* Quote */
+			.daily-quote {
+				margin: 8px 16px;
+				background: linear-gradient(
+					135deg,
+					rgba(200, 169, 110, 0.08),
+					rgba(58, 175, 169, 0.05)
+				);
+				border: 1px solid rgba(200, 169, 110, 0.15);
+				border-radius: 12px;
+				padding: 10px 12px;
+			}
+			.daily-quote p {
+				font-family: 'Amiri', serif;
+				font-size: 12px;
+				color: var(--gold-light);
+				line-height: 1.8;
+				text-align: center;
+			}
+
+			/* Bottom Nav */
+			.bottom-nav {
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				background: var(--card);
+				border-top: 1px solid var(--border);
+				display: flex;
+				padding: 8px 0 10px;
+			}
+			.nav-item {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 3px;
+				font-size: 8px;
+				color: var(--text-dim);
+				cursor: pointer;
+			}
+			.nav-item.active {
+				color: var(--gold);
+			}
+			.nav-item .nav-icon {
+				font-size: 18px;
+			}
+			.nav-item.active .nav-icon {
+				filter: drop-shadow(0 0 6px rgba(200, 169, 110, 0.6));
+			}
+
+			/* ─── SCREEN 3: DAILY CHECKLIST ─── */
+			.screen-checklist {
+				height: 100%;
+				overflow: hidden;
+				background: var(--deep);
+			}
+			.screen-topbar {
+				padding: 10px 16px 8px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				border-bottom: 1px solid var(--border);
+			}
+			.topbar-title {
+				font-family: 'Amiri', serif;
+				font-size: 17px;
+				color: var(--gold);
+			}
+			.topbar-date {
+				font-size: 10px;
+				color: var(--text-sec);
+			}
+
+			.ibadah-list {
+				padding: 10px 16px;
+				overflow: hidden;
+			}
+			.ibadah-group-title {
+				font-size: 10px;
+				color: var(--teal);
+				margin: 10px 0 6px;
+				display: flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.ibadah-group-title::after {
+				content: '';
+				flex: 1;
+				height: 1px;
+				background: rgba(58, 175, 169, 0.2);
+			}
+
+			.ibadah-row {
+				background: var(--card);
+				border: 1px solid var(--border);
+				border-radius: 12px;
+				padding: 10px 12px;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				margin-bottom: 6px;
+				transition: all 0.2s;
+			}
+			.ibadah-row.checked {
+				background: rgba(76, 175, 125, 0.08);
+				border-color: rgba(76, 175, 125, 0.25);
+			}
+			.ibadah-row.danger {
+				background: rgba(224, 112, 112, 0.06);
+				border-color: rgba(224, 112, 112, 0.2);
+			}
+			.check-box {
+				width: 22px;
+				height: 22px;
+				border-radius: 6px;
+				border: 2px solid var(--border);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 12px;
+				flex-shrink: 0;
+			}
+			.ibadah-row.checked .check-box {
+				background: var(--green);
+				border-color: var(--green);
+				color: white;
+			}
+			.ibadah-row.danger .check-box {
+				border-color: var(--red);
+			}
+			.ibadah-row-icon {
+				font-size: 18px;
+				flex-shrink: 0;
+			}
+			.ibadah-row-text {
+				flex: 1;
+			}
+			.ibadah-row-name {
+				font-size: 12px;
+				color: var(--text);
+			}
+			.ibadah-row-sub {
+				font-size: 10px;
+				color: var(--text-sec);
+			}
+			.ibadah-pts {
+				font-size: 10px;
+				color: var(--gold);
+				background: var(--gold-dim);
+				border-radius: 6px;
+				padding: 2px 6px;
+			}
+
+			/* ─── SCREEN 4: STATISTICS ─── */
+			.screen-stats {
+				height: 100%;
+				overflow: hidden;
+				background: var(--deep);
+			}
+			.stats-header {
+				padding: 10px 16px 10px;
+				border-bottom: 1px solid var(--border);
+			}
+			.taqwa-score-card {
+				margin: 12px 16px;
+				background: linear-gradient(
+					135deg,
+					rgba(200, 169, 110, 0.12),
+					rgba(58, 175, 169, 0.08)
+				);
+				border: 1px solid rgba(200, 169, 110, 0.2);
+				border-radius: 16px;
+				padding: 14px;
+				display: flex;
+				align-items: center;
+				gap: 14px;
+			}
+			.score-circle {
+				width: 60px;
+				height: 60px;
+				border-radius: 50%;
+				background: conic-gradient(var(--gold) 216deg, var(--border) 0deg);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				position: relative;
+			}
+			.score-circle::after {
+				content: '';
+				position: absolute;
+				inset: 6px;
+				border-radius: 50%;
+				background: var(--card2);
+			}
+			.score-val {
+				position: relative;
+				z-index: 1;
+				font-size: 14px;
+				font-weight: 700;
+				color: var(--gold);
+			}
+			.score-info h3 {
+				font-size: 16px;
+				color: var(--gold-light);
+				font-weight: 600;
+			}
+			.score-info p {
+				font-size: 11px;
+				color: var(--text-sec);
+				margin-top: 2px;
+			}
+			.level-badge {
+				margin-top: 6px;
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				background: rgba(76, 175, 125, 0.15);
+				border: 1px solid rgba(76, 175, 125, 0.3);
+				color: var(--green);
+				font-size: 11px;
+				padding: 3px 8px;
+				border-radius: 20px;
+			}
+
+			.week-chart {
+				padding: 8px 16px;
+			}
+			.chart-title {
+				font-size: 10px;
+				color: var(--text-sec);
+				margin-bottom: 8px;
+			}
+			.bar-chart {
+				display: flex;
+				align-items: flex-end;
+				gap: 6px;
+				height: 60px;
+			}
+			.bar-wrap {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 4px;
+			}
+			.bar {
+				width: 100%;
+				border-radius: 4px 4px 0 0;
+				background: var(--border);
+				transition: height 0.5s;
+				min-height: 4px;
+			}
+			.bar.active {
+				background: linear-gradient(to top, var(--gold), var(--gold-light));
+			}
+			.bar.good {
+				background: linear-gradient(
+					to top,
+					var(--teal),
+					rgba(58, 175, 169, 0.5)
+				);
+			}
+			.bar-day {
+				font-size: 8px;
+				color: var(--text-dim);
+			}
+
+			.stats-cards {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 8px;
+				padding: 8px 16px;
+			}
+			.stat-card {
+				background: var(--card);
+				border: 1px solid var(--border);
+				border-radius: 12px;
+				padding: 10px;
+				text-align: center;
+			}
+			.stat-card .val {
+				font-size: 20px;
+				font-weight: 700;
+				color: var(--gold);
+			}
+			.stat-card .lbl {
+				font-size: 9px;
+				color: var(--text-sec);
+				margin-top: 2px;
+			}
+
+			/* ─── TYPOGRAPHY SHOWCASE ─── */
+			.typo-showcase {
+				background: var(--card);
+				border: 1px solid var(--border);
+				border-radius: 16px;
+				padding: 24px;
+				margin-bottom: 16px;
+			}
+			.typo-row {
+				display: flex;
+				align-items: baseline;
+				gap: 16px;
+				padding: 12px 0;
+				border-bottom: 1px solid var(--border);
+			}
+			.typo-row:last-child {
+				border-bottom: none;
+			}
+			.typo-meta {
+				font-size: 10px;
+				color: var(--text-dim);
+				width: 80px;
+				flex-shrink: 0;
+				text-align: left;
+			}
+			.typo-sample {
+				flex: 1;
+			}
+
+			/* ─── COMPONENT LIBRARY ─── */
+			.comp-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+				gap: 16px;
+			}
+			.comp-card {
+				background: var(--card);
+				border: 1px solid var(--border);
+				border-radius: 16px;
+				padding: 20px;
+			}
+			.comp-card h4 {
+				font-size: 11px;
+				color: var(--text-sec);
+				margin-bottom: 14px;
+				text-transform: uppercase;
+				letter-spacing: 1px;
+			}
+
+			.btn-row {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+			.btn-secondary {
+				background: transparent;
+				border: 1px solid var(--gold);
+				color: var(--gold);
+				padding: 10px;
+				border-radius: 24px;
+				font-family: 'Noto Naskh Arabic', serif;
+				font-size: 13px;
+				cursor: pointer;
+				text-align: center;
+			}
+			.btn-ghost {
+				background: transparent;
+				border: 1px solid var(--border);
+				color: var(--text-sec);
+				padding: 10px;
+				border-radius: 24px;
+				font-family: 'Noto Naskh Arabic', serif;
+				font-size: 13px;
+				cursor: pointer;
+				text-align: center;
+			}
+			.btn-danger {
+				background: rgba(224, 112, 112, 0.15);
+				border: 1px solid rgba(224, 112, 112, 0.3);
+				color: var(--red);
+				padding: 10px;
+				border-radius: 24px;
+				font-family: 'Noto Naskh Arabic', serif;
+				font-size: 13px;
+				cursor: pointer;
+				text-align: center;
+			}
+
+			.badge-row {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+			}
+			.badge {
+				padding: 4px 12px;
+				border-radius: 20px;
+				font-size: 11px;
+			}
+			.badge-gold {
+				background: var(--gold-dim);
+				border: 1px solid rgba(200, 169, 110, 0.3);
+				color: var(--gold);
+			}
+			.badge-teal {
+				background: var(--teal-dim);
+				border: 1px solid rgba(58, 175, 169, 0.25);
+				color: var(--teal);
+			}
+			.badge-green {
+				background: rgba(76, 175, 125, 0.12);
+				border: 1px solid rgba(76, 175, 125, 0.25);
+				color: var(--green);
+			}
+			.badge-red {
+				background: rgba(224, 112, 112, 0.12);
+				border: 1px solid rgba(224, 112, 112, 0.25);
+				color: var(--red);
+			}
+
+			/* Input */
+			.input-demo {
+				background: var(--card2);
+				border: 1px solid var(--border);
+				border-radius: 12px;
+				padding: 12px 14px;
+				color: var(--text);
+				font-family: 'Noto Naskh Arabic', serif;
+				font-size: 13px;
+				width: 100%;
+				margin-bottom: 8px;
+				outline: none;
+				transition: border 0.2s;
+			}
+			.input-demo:focus {
+				border-color: var(--gold);
+			}
+			.input-demo::placeholder {
+				color: var(--text-dim);
+			}
+
+			/* Toggle */
+			.toggle-row {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+			}
+			.toggle-item {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				background: var(--card2);
+				border: 1px solid var(--border);
+				border-radius: 12px;
+				padding: 10px 12px;
+			}
+			.toggle-label {
+				font-size: 12px;
+				color: var(--text);
+			}
+			.toggle {
+				width: 38px;
+				height: 20px;
+				border-radius: 10px;
+				position: relative;
+				cursor: pointer;
+			}
+			.toggle.on {
+				background: var(--green);
+			}
+			.toggle.off {
+				background: var(--border);
+			}
+			.toggle::after {
+				content: '';
+				position: absolute;
+				top: 3px;
+				width: 14px;
+				height: 14px;
+				border-radius: 50%;
+				background: white;
+				transition: left 0.2s;
+			}
+			.toggle.on::after {
+				left: 21px;
+			}
+			.toggle.off::after {
+				left: 3px;
+			}
+
+			/* ─── ICON GRID ─── */
+			.icon-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+				gap: 12px;
+			}
+			.icon-item {
+				background: var(--card);
+				border: 1px solid var(--border);
+				border-radius: 14px;
+				padding: 14px 8px;
+				text-align: center;
+				font-size: 22px;
+				transition: all 0.2s;
+				cursor: pointer;
+			}
+			.icon-item:hover {
+				border-color: var(--gold);
+				background: var(--gold-dim);
+				transform: translateY(-2px);
+			}
+			.icon-item span {
+				display: block;
+				font-size: 9px;
+				color: var(--text-sec);
+				margin-top: 6px;
+			}
+
+			/* ─── FOOTER ─── */
+			.page-footer {
+				text-align: center;
+				padding: 40px 20px;
+				border-top: 1px solid var(--border);
+				color: var(--text-dim);
+				font-size: 13px;
+				line-height: 2;
+			}
+			.page-footer .verse {
+				font-family: 'Amiri', serif;
+				font-size: 18px;
+				color: var(--gold);
+				margin-bottom: 8px;
+			}
+
+			/* ─── ANIMATIONS ─── */
+			@keyframes fadeUp {
+				from {
+					opacity: 0;
+					transform: translateY(20px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+			.phone-frame {
+				animation: fadeUp 0.5s ease both;
+			}
+			.phone-frame:nth-child(1) {
+				animation-delay: 0.1s;
+			}
+			.phone-frame:nth-child(2) {
+				animation-delay: 0.2s;
+			}
+			.phone-frame:nth-child(3) {
+				animation-delay: 0.3s;
+			}
+			.phone-frame:nth-child(4) {
+				animation-delay: 0.4s;
+			}
+
+			/* Scrollbar */
+			::-webkit-scrollbar {
+				width: 4px;
+			}
+			::-webkit-scrollbar-track {
+				background: var(--night);
+			}
+			::-webkit-scrollbar-thumb {
+				background: var(--border);
+				border-radius: 2px;
+			}
+
+			.divider {
+				height: 1px;
+				background: linear-gradient(
+					to right,
+					transparent,
+					var(--border),
+					transparent
+				);
+				margin: 0 24px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wrapper">
+			<!-- PAGE HEADER -->
+			<div class="page-header">
+				<div class="bismillah">بسم الله الرحمن الرحيم</div>
+				<h1>تقوى</h1>
+				<p>نظام التصميم الكامل · Design System v1.0</p>
+			</div>
+
+			<!-- ══ SECTION: COLOR PALETTE ══ -->
+			<div class="section">
+				<div class="section-title">لوحة الألوان · Color Palette</div>
+				<div class="palette">
+					<div class="color-chip">
+						<div class="swatch" style="background: #0d1117"></div>
+						<div class="label">Night<br />#0D1117</div>
+					</div>
+					<div class="color-chip">
+						<div class="swatch" style="background: #111827"></div>
+						<div class="label">Deep<br />#111827</div>
+					</div>
+					<div class="color-chip">
+						<div class="swatch" style="background: #1a2332"></div>
+						<div class="label">Card<br />#1A2332</div>
+					</div>
+					<div class="color-chip">
+						<div class="swatch" style="background: #2a3a50"></div>
+						<div class="label">Border<br />#2A3A50</div>
+					</div>
+					<div class="color-chip">
+						<div class="swatch" style="background: #c8a96e"></div>
+						<div class="label">Gold<br />#C8A96E</div>
+					</div>
+					<div class="color-chip">
+						<div class="swatch" style="background: #e4c98a"></div>
+						<div class="label">Gold Light<br />#E4C98A</div>
+					</div>
+					<div class="color-chip">
+						<div class="swatch" style="background: #3aafa9"></div>
+						<div class="label">Teal<br />#3AAFA9</div>
+					</div>
+					<div class="color-chip">
+						<div class="swatch" style="background: #4caf7d"></div>
+						<div class="label">Green<br />#4CAF7D</div>
+					</div>
+					<div class="color-chip">
+						<div class="swatch" style="background: #e07070"></div>
+						<div class="label">Red<br />#E07070</div>
+					</div>
+					<div class="color-chip">
+						<div class="swatch" style="background: #e8edf3"></div>
+						<div class="label">Text<br />#E8EDF3</div>
+					</div>
+					<div class="color-chip">
+						<div class="swatch" style="background: #8fa3bb"></div>
+						<div class="label">Secondary<br />#8FA3BB</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="divider"></div>
+
+			<!-- ══ SECTION: SCREENS ══ -->
+			<div class="section">
+				<div class="section-title">الشاشات الرئيسية · Key Screens</div>
+				<div class="screens-grid">
+					<!-- SCREEN 1: Onboarding -->
+					<div class="phone-frame">
+						<div class="phone-label">Onboarding</div>
+						<div class="phone-shell">
+							<div class="phone-screen">
+								<div class="status-bar">
+									<span>9:41</span>
+									<span>▌▌▌ ⬡ 100%</span>
+								</div>
+								<div class="screen-onboard">
+									<div class="onboard-ornament">
+										<div class="ornament-ring"></div>
+										<div class="ornament-ring"></div>
+										<div class="ornament-ring"></div>
+										<div class="ornament-inner">🌙</div>
+									</div>
+									<div class="onboard-title">مرحباً بك</div>
+									<div class="onboard-subtitle">
+										"حَاسِبُوا أَنفُسَكُمْ قَبْلَ أَنْ تُحَاسَبُوا"<br />
+										<span style="font-size: 11px; color: var(--text-dim)"
+											>— عمر بن الخطاب رضي الله عنه</span
+										>
+									</div>
+									<div
+										style="
+											background: var(--card);
+											border: 1px solid var(--border);
+											border-radius: 12px;
+											padding: 12px;
+											margin-bottom: 20px;
+											width: 100%;
+										">
+										<div
+											style="
+												display: flex;
+												align-items: center;
+												gap: 8px;
+												margin-bottom: 8px;
+											">
+											<span style="font-size: 14px">✅</span>
+											<span style="font-size: 11px; color: var(--text-sec)"
+												>تتبع عباداتك اليومية</span
+											>
+										</div>
+										<div
+											style="
+												display: flex;
+												align-items: center;
+												gap: 8px;
+												margin-bottom: 8px;
+											">
+											<span style="font-size: 14px">📊</span>
+											<span style="font-size: 11px; color: var(--text-sec)"
+												>إحصائيات أسبوعية وشهرية</span
+											>
+										</div>
+										<div style="display: flex; align-items: center; gap: 8px">
+											<span style="font-size: 14px">🔔</span>
+											<span style="font-size: 11px; color: var(--text-sec)"
+												>تذكيرات مخصصة</span
+											>
+										</div>
+									</div>
+									<div class="onboard-dots">
+										<div class="dot active"></div>
+										<div class="dot"></div>
+										<div class="dot"></div>
+									</div>
+									<button class="btn-primary">ابدأ رحلة المحاسبة ←</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- SCREEN 2: Home -->
+					<div class="phone-frame">
+						<div class="phone-label">Home Dashboard</div>
+						<div class="phone-shell">
+							<div class="phone-screen">
+								<div class="status-bar">
+									<span>9:41</span>
+									<span>▌▌▌ ⬡ 100%</span>
+								</div>
+								<div class="screen-home">
+									<div class="home-header">
+										<div class="home-date-row">
+											<div>
+												<div class="hijri-date">٢٥ رمضان ١٤٤٦</div>
+												<div style="font-size: 10px; color: var(--text-sec)">
+													الأربعاء، ٢٦ مارس ٢٠٢٥
+												</div>
+											</div>
+											<div class="greeting">السلام عليكم 🌙</div>
+										</div>
+										<div class="next-prayer">
+											<div class="prayer-icon">🕌</div>
+											<div>
+												<div class="prayer-name">صلاة المغرب</div>
+												<div class="prayer-time">الصلاة القادمة</div>
+											</div>
+											<div class="prayer-countdown">بعد ٢٣ دقيقة</div>
+										</div>
+									</div>
+
+									<div class="progress-section">
+										<div class="ring-wrap">
+											<svg width="80" height="80" viewBox="0 0 80 80">
+												<circle
+													cx="40"
+													cy="40"
+													r="34"
+													fill="none"
+													stroke="#2A3A50"
+													stroke-width="6" />
+												<circle
+													cx="40"
+													cy="40"
+													r="34"
+													fill="none"
+													stroke="url(#grad)"
+													stroke-width="6"
+													stroke-dasharray="213"
+													stroke-dashoffset="64"
+													stroke-linecap="round" />
+												<defs>
+													<linearGradient
+														id="grad"
+														x1="0%"
+														y1="0%"
+														x2="100%"
+														y2="0%">
+														<stop offset="0%" stop-color="#C8A96E" />
+														<stop offset="100%" stop-color="#3AAFA9" />
+													</linearGradient>
+												</defs>
+											</svg>
+											<div class="ring-center">
+												<span class="ring-pct">70%</span>
+												<span class="ring-lbl">اليوم</span>
+											</div>
+										</div>
+										<div class="progress-info">
+											<h3>يوم رائع! 🌟</h3>
+											<p>أنجزت ٧ من ١٠<br />عبادات اليوم</p>
+											<div class="streak-badge">🔥 ١٨ يوم متواصل</div>
+										</div>
+									</div>
+
+									<div class="checklist-section">
+										<div class="checklist-title">
+											<span>العبادات السريعة</span>
+											<span style="color: var(--teal)">عرض الكل ←</span>
+										</div>
+										<div class="checklist-grid">
+											<div class="ibadah-chip done">
+												<span class="ic">🕌</span
+												><span class="nm">الفجر ✓</span>
+											</div>
+											<div class="ibadah-chip done">
+												<span class="ic">📖</span
+												><span class="nm">القرآن ✓</span>
+											</div>
+											<div class="ibadah-chip done">
+												<span class="ic">☀️</span
+												><span class="nm">الظهر ✓</span>
+											</div>
+											<div class="ibadah-chip done">
+												<span class="ic">🌤</span
+												><span class="nm">العصر ✓</span>
+											</div>
+											<div class="ibadah-chip">
+												<span class="ic">🌙</span><span class="nm">المغرب</span>
+											</div>
+											<div class="ibadah-chip">
+												<span class="ic">⭐</span
+												><span class="nm">الأذكار</span>
+											</div>
+										</div>
+									</div>
+
+									<div class="daily-quote">
+										<p>﴿ وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا ﴾</p>
+									</div>
+
+									<div class="bottom-nav">
+										<div class="nav-item active">
+											<span class="nav-icon">🏠</span>
+											<span>الرئيسية</span>
+										</div>
+										<div class="nav-item">
+											<span class="nav-icon">✅</span>
+											<span>اليومية</span>
+										</div>
+										<div class="nav-item">
+											<span class="nav-icon">📊</span>
+											<span>إحصائيات</span>
+										</div>
+										<div class="nav-item">
+											<span class="nav-icon">⚙️</span>
+											<span>إعدادات</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- SCREEN 3: Daily Checklist -->
+					<div class="phone-frame">
+						<div class="phone-label">Daily Checklist</div>
+						<div class="phone-shell">
+							<div class="phone-screen">
+								<div class="status-bar">
+									<span>9:41</span>
+									<span>▌▌▌ ⬡ 100%</span>
+								</div>
+								<div class="screen-checklist">
+									<div class="screen-topbar">
+										<div>
+											<div class="topbar-title">محاسبة اليوم</div>
+											<div class="topbar-date">٢٥ رمضان ١٤٤٦</div>
+										</div>
+										<div
+											style="
+												background: var(--gold-dim);
+												border: 1px solid rgba(200, 169, 110, 0.3);
+												border-radius: 20px;
+												padding: 4px 12px;
+												font-size: 11px;
+												color: var(--gold);
+											">
+											٧٠ نقطة 🌟
+										</div>
+									</div>
+									<div class="ibadah-list">
+										<div class="ibadah-group-title">🕌 الصلوات</div>
+										<div class="ibadah-row checked">
+											<div class="check-box">✓</div>
+											<span class="ibadah-row-icon">🌅</span>
+											<div class="ibadah-row-text">
+												<div class="ibadah-row-name">صلاة الفجر</div>
+												<div class="ibadah-row-sub">٤:٣٢ ص · في وقتها</div>
+											</div>
+											<span class="ibadah-pts">+١٠</span>
+										</div>
+										<div class="ibadah-row checked">
+											<div class="check-box">✓</div>
+											<span class="ibadah-row-icon">☀️</span>
+											<div class="ibadah-row-text">
+												<div class="ibadah-row-name">صلاة الظهر</div>
+												<div class="ibadah-row-sub">١٢:١٥ م · في وقتها</div>
+											</div>
+											<span class="ibadah-pts">+١٠</span>
+										</div>
+										<div class="ibadah-row">
+											<div class="check-box"></div>
+											<span class="ibadah-row-icon">🌇</span>
+											<div class="ibadah-row-text">
+												<div class="ibadah-row-name">صلاة المغرب</div>
+												<div class="ibadah-row-sub">٦:٢٦ م · لم يؤدَّ بعد</div>
+											</div>
+											<span class="ibadah-pts">+١٠</span>
+										</div>
+
+										<div class="ibadah-group-title">📖 القرآن والأذكار</div>
+										<div class="ibadah-row checked">
+											<div class="check-box">✓</div>
+											<span class="ibadah-row-icon">📖</span>
+											<div class="ibadah-row-text">
+												<div class="ibadah-row-name">تلاوة القرآن</div>
+												<div class="ibadah-row-sub">١٠ صفحات اليوم</div>
+											</div>
+											<span class="ibadah-pts">+١٠</span>
+										</div>
+
+										<div class="ibadah-group-title" style="color: var(--red)">
+											⚠️ المحظورات
+										</div>
+										<div class="ibadah-row danger">
+											<div
+												class="check-box"
+												style="border-color: var(--red)"></div>
+											<span class="ibadah-row-icon">👁️</span>
+											<div class="ibadah-row-text">
+												<div class="ibadah-row-name" style="color: var(--red)">
+													غضّ البصر
+												</div>
+												<div class="ibadah-row-sub">حافظ على بصرك</div>
+											</div>
+											<span
+												style="
+													font-size: 10px;
+													color: var(--red);
+													background: rgba(224, 112, 112, 0.1);
+													border-radius: 6px;
+													padding: 2px 6px;
+												"
+												>-١٠</span
+											>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- SCREEN 4: Statistics -->
+					<div class="phone-frame">
+						<div class="phone-label">Statistics</div>
+						<div class="phone-shell">
+							<div class="phone-screen">
+								<div class="status-bar">
+									<span>9:41</span>
+									<span>▌▌▌ ⬡ 100%</span>
+								</div>
+								<div class="screen-stats">
+									<div class="stats-header">
+										<div
+											class="topbar-title"
+											style="
+												font-family: 'Amiri', serif;
+												font-size: 17px;
+												color: var(--gold);
+											">
+											تقرير رمضان
+										</div>
+										<div
+											style="
+												font-size: 10px;
+												color: var(--text-sec);
+												margin-top: 2px;
+											">
+											الأسبوع الرابع · ٢٥ يوم
+										</div>
+									</div>
+
+									<div class="taqwa-score-card">
+										<div class="score-circle">
+											<span class="score-val"
+												>٦٠<span style="font-size: 9px">%</span></span
+											>
+										</div>
+										<div class="score-info">
+											<h3>مجاهد ⚔️</h3>
+											<p>٣٤٢ نقطة تقوى هذا الشهر</p>
+											<div class="level-badge">🔥 ١٨ يوم streak</div>
+										</div>
+									</div>
+
+									<div class="week-chart">
+										<div class="chart-title">أداء الأسبوع الأخير</div>
+										<div class="bar-chart">
+											<div class="bar-wrap">
+												<div class="bar good" style="height: 45px"></div>
+												<div class="bar-day">أح</div>
+											</div>
+											<div class="bar-wrap">
+												<div class="bar good" style="height: 35px"></div>
+												<div class="bar-day">إث</div>
+											</div>
+											<div class="bar-wrap">
+												<div class="bar active" style="height: 55px"></div>
+												<div class="bar-day">ثل</div>
+											</div>
+											<div class="bar-wrap">
+												<div class="bar" style="height: 20px"></div>
+												<div class="bar-day">أر</div>
+											</div>
+											<div class="bar-wrap">
+												<div class="bar good" style="height: 50px"></div>
+												<div class="bar-day">خم</div>
+											</div>
+											<div class="bar-wrap">
+												<div class="bar active" style="height: 48px"></div>
+												<div class="bar-day">جم</div>
+											</div>
+											<div class="bar-wrap">
+												<div class="bar active" style="height: 58px"></div>
+												<div class="bar-day">سب</div>
+											</div>
+										</div>
+									</div>
+
+									<div class="stats-cards">
+										<div class="stat-card">
+											<div class="val">١٢٥</div>
+											<div class="lbl">📖 صفحات قرآن</div>
+										</div>
+										<div class="stat-card">
+											<div class="val">٩٨%</div>
+											<div class="lbl">🕌 حضور الصلوات</div>
+										</div>
+										<div class="stat-card">
+											<div class="val">١٨</div>
+											<div class="lbl">⭐ أيام متتالية</div>
+										</div>
+										<div class="stat-card">
+											<div class="val">٣٤٢</div>
+											<div class="lbl">🌟 نقاط التقوى</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="divider"></div>
+
+			<!-- ══ SECTION: TYPOGRAPHY ══ -->
+			<div class="section">
+				<div class="section-title">الخطوط · Typography</div>
+				<div class="typo-showcase">
+					<div class="typo-row">
+						<span class="typo-meta">Display / H1<br />Amiri 32px</span>
+						<span
+							class="typo-sample"
+							style="
+								font-family: 'Amiri', serif;
+								font-size: 32px;
+								color: var(--gold);
+							"
+							>تقوى</span
+						>
+					</div>
+					<div class="typo-row">
+						<span class="typo-meta">Heading / H2<br />Amiri 22px</span>
+						<span
+							class="typo-sample"
+							style="
+								font-family: 'Amiri', serif;
+								font-size: 22px;
+								color: var(--text);
+							"
+							>تقرير اليوم الأول من رمضان</span
+						>
+					</div>
+					<div class="typo-row">
+						<span class="typo-meta">Body<br />Noto Naskh 15px</span>
+						<span
+							class="typo-sample"
+							style="font-size: 15px; color: var(--text); line-height: 1.8"
+							>أنجزت اليوم الحمد لله صلاة الفجر والظهر والعصر، وقرأت ربع جزء من
+							القرآن الكريم.</span
+						>
+					</div>
+					<div class="typo-row">
+						<span class="typo-meta">Caption<br />Noto Naskh 12px</span>
+						<span
+							class="typo-sample"
+							style="font-size: 12px; color: var(--text-sec)"
+							>آخر تحديث: اليوم الساعة ٩:٤١ م</span
+						>
+					</div>
+					<div class="typo-row">
+						<span class="typo-meta">Quote<br />Amiri 18px</span>
+						<span
+							class="typo-sample"
+							style="
+								font-family: 'Amiri', serif;
+								font-size: 18px;
+								color: var(--gold-light);
+								line-height: 1.8;
+							"
+							>﴿ يَا أَيُّهَا الَّذِينَ آمَنُوا كُتِبَ عَلَيْكُمُ الصِّيَامُ
+							﴾</span
+						>
+					</div>
+				</div>
+			</div>
+
+			<div class="divider"></div>
+
+			<!-- ══ SECTION: COMPONENTS ══ -->
+			<div class="section">
+				<div class="section-title">المكونات · Components</div>
+				<div class="comp-grid">
+					<div class="comp-card">
+						<h4>الأزرار · Buttons</h4>
+						<div class="btn-row">
+							<button class="btn-primary">زرّ رئيسي</button>
+							<button class="btn-secondary">زرّ ثانوي</button>
+							<button class="btn-ghost">زرّ شفاف</button>
+							<button class="btn-danger">تحذير / خطر</button>
+						</div>
+					</div>
+
+					<div class="comp-card">
+						<h4>الشارات · Badges</h4>
+						<div class="badge-row">
+							<span class="badge badge-gold">ذهبي 🌟</span>
+							<span class="badge badge-teal">فيروزي</span>
+							<span class="badge badge-green">نجاح ✅</span>
+							<span class="badge badge-red">تحذير ⚠️</span>
+							<span class="badge badge-gold">رمضان 🌙</span>
+							<span class="badge badge-green">١٨ يوم 🔥</span>
+						</div>
+					</div>
+
+					<div class="comp-card">
+						<h4>الحقول · Inputs</h4>
+						<input class="input-demo" placeholder="أدخل عدد الصفحات..." />
+						<input class="input-demo" placeholder="ملاحظاتك اليوم..." />
+					</div>
+
+					<div class="comp-card">
+						<h4>التبديل · Toggles</h4>
+						<div class="toggle-row">
+							<div class="toggle-item">
+								<span class="toggle-label">تذكيرات الصلاة</span>
+								<div class="toggle on"></div>
+							</div>
+							<div class="toggle-item">
+								<span class="toggle-label">وضع رمضان</span>
+								<div class="toggle on"></div>
+							</div>
+							<div class="toggle-item">
+								<span class="toggle-label">الوضع الليلي</span>
+								<div class="toggle off"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="divider"></div>
+
+			<!-- ══ SECTION: ICONS ══ -->
+			<div class="section">
+				<div class="section-title">أيقونات التطبيق · App Icons</div>
+				<div class="icon-grid">
+					<div class="icon-item">🕌<span>صلاة</span></div>
+					<div class="icon-item">📖<span>قرآن</span></div>
+					<div class="icon-item">🌙<span>رمضان</span></div>
+					<div class="icon-item">⭐<span>أذكار</span></div>
+					<div class="icon-item">🔥<span>سلسلة</span></div>
+					<div class="icon-item">🌟<span>تقوى</span></div>
+					<div class="icon-item">🤲<span>دعاء</span></div>
+					<div class="icon-item">💧<span>صدقة</span></div>
+					<div class="icon-item">🌅<span>فجر</span></div>
+					<div class="icon-item">☀️<span>ظهر</span></div>
+					<div class="icon-item">🌇<span>عصر</span></div>
+					<div class="icon-item">🌆<span>مغرب</span></div>
+					<div class="icon-item">🌃<span>عشاء</span></div>
+					<div class="icon-item">🌌<span>قيام</span></div>
+					<div class="icon-item">📊<span>تقرير</span></div>
+					<div class="icon-item">⚙️<span>إعدادات</span></div>
+				</div>
+			</div>
+
+			<!-- ══ FOOTER ══ -->
+			<div class="page-footer">
+				<div class="verse">
+					﴿ وَالَّذِينَ جَاهَدُوا فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا ﴾
+				</div>
+				تقوى · Design System v1.0<br />
+				Flutter · Dart · الأزرق الليلي × الذهبي
+			</div>
+		</div>
+	</body>
+</html>

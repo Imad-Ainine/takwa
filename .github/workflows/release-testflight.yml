@@ -1,0 +1,176 @@
+name: Release iOS to TestFlight
+
+# Builds a signed .ipa and uploads it to TestFlight so invited testers (or,
+# once you turn on Public Link in App Store Connect, anyone with the link)
+# can install Takwa on a real iPhone — the closest iOS equivalent to
+# downloading the Android APK straight from a GitHub Release.
+#
+# iOS has no unsigned "sideload" path like Android's APK: every build must
+# be signed with an Apple Distribution certificate tied to a paid Apple
+# Developer Program account ($99/yr), so this workflow can only run once
+# that account exists and its secrets are configured below. Until then it
+# will detect the missing secrets and skip the build step with a clear
+# message instead of failing your release — see docs/ios-testflight-setup.md
+# for the full one-time setup (Apple Developer account, certificate,
+# provisioning profile, App Store Connect API key, and which GitHub
+# secrets to add).
+on:
+  push:
+    tags:
+      - "v*.*.*" # Same tags as release-apk.yml, so Android + iOS ship together
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version (e.g., 1.0.1)"
+        required: true
+        default: "1.0.0"
+
+jobs:
+  check-secrets:
+    runs-on: ubuntu-latest
+    outputs:
+      configured: ${{ steps.check.outputs.configured }}
+    steps:
+      - name: Check Apple signing secrets are present
+        id: check
+        run: |
+          missing=()
+          for name in APPLE_TEAM_ID APPLE_DIST_CERTIFICATE_BASE64 APPLE_DIST_CERTIFICATE_PASSWORD \
+                      APPLE_PROVISIONING_PROFILE_BASE64 APPLE_PROVISIONING_PROFILE_NAME \
+                      APP_STORE_CONNECT_API_KEY_ID APP_STORE_CONNECT_API_ISSUER_ID APP_STORE_CONNECT_API_KEY_P8; do
+            if [ -z "${!name}" ]; then
+              missing+=("$name")
+            fi
+          done
+
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Skipping TestFlight build — missing secrets: ${missing[*]}. See docs/ios-testflight-setup.md to set up Apple signing, then add these repo secrets."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_DIST_CERTIFICATE_BASE64: ${{ secrets.APPLE_DIST_CERTIFICATE_BASE64 }}
+          APPLE_DIST_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DIST_CERTIFICATE_PASSWORD }}
+          APPLE_PROVISIONING_PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+          APPLE_PROVISIONING_PROFILE_NAME: ${{ secrets.APPLE_PROVISIONING_PROFILE_NAME }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+
+  build-and-upload:
+    needs: check-secrets
+    if: needs.check-secrets.outputs.configured == 'true'
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # ── Resolve version ─────────────────────────────────────────────
+      - name: Extract Version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          flutter-version: "3.47.2"
+          cache: true
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      # ── Environment ───────────────────────────────────────────────────
+      - name: Create .env for Flutter build
+        run: |
+          if [ -z "${{ secrets.SUPABASE_URL }}" ] || [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
+            echo "::error::Secrets SUPABASE_URL or SUPABASE_ANON_KEY are missing in GitHub Actions Secrets! Email and Google Auth will not work without them."
+            exit 1
+          fi
+          cat > .env <<EOF
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_WEB_CLIENT_ID=${{ secrets.SUPABASE_WEB_CLIENT_ID }}
+          SUPABASE_IOS_CLIENT_ID=${{ secrets.SUPABASE_IOS_CLIENT_ID }}
+          EOF
+
+      # ── Code signing ──────────────────────────────────────────────────
+      # Imports the Apple Distribution certificate (.p12) into a temporary
+      # keychain scoped to this job — nothing persists past the runner.
+      - name: Import Apple Distribution certificate
+        uses: apple-actions/import-codesign-certs@v7
+        with:
+          p12-file-base64: ${{ secrets.APPLE_DIST_CERTIFICATE_BASE64 }}
+          p12-password: ${{ secrets.APPLE_DIST_CERTIFICATE_PASSWORD }}
+
+      - name: Install provisioning profile
+        run: |
+          PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILE_DIR"
+          echo "${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}" | base64 --decode > "$PROFILE_DIR/takwa-appstore.mobileprovision"
+
+      - name: Generate ExportOptions.plist
+        run: |
+          cat > ios/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>teamID</key>
+            <string>${{ secrets.APPLE_TEAM_ID }}</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.takwa</key>
+              <string>${{ secrets.APPLE_PROVISIONING_PROFILE_NAME }}</string>
+            </dict>
+          </dict>
+          </plist>
+          EOF
+
+      # ── Build ─────────────────────────────────────────────────────────
+      - name: Build iOS IPA
+        run: |
+          flutter build ipa --release \
+            --build-name=${{ steps.get_version.outputs.VERSION }} \
+            --build-number=${GITHUB_RUN_NUMBER:-1} \
+            --export-options-plist=ios/ExportOptions.plist
+
+      # `flutter build ipa` names the file after the Xcode scheme
+      # (Runner.ipa by default), not the app's display name — resolve it
+      # from disk instead of hardcoding a name that will silently go stale
+      # if the Xcode target is ever renamed.
+      - name: Locate built IPA
+        id: locate_ipa
+        run: |
+          IPA_PATH=$(find build/ios/ipa -maxdepth 1 -name '*.ipa' | head -n 1)
+          if [ -z "$IPA_PATH" ]; then
+            echo "::error::No .ipa found in build/ios/ipa"
+            exit 1
+          fi
+          echo "IPA_PATH=$IPA_PATH" >> "$GITHUB_OUTPUT"
+
+      # ── Upload to TestFlight ────────────────────────────────────────────
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight-build@v3
+        with:
+          app-path: apps/mobile/${{ steps.locate_ipa.outputs.IPA_PATH }}
+          issuer-id: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          api-key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          # Raw contents of the AuthKey_<key_id>.p8 file — not base64-encoded.
+          api-private-key: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}

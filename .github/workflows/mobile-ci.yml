@@ -1,0 +1,107 @@
+name: Mobile CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.47.2'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Install sqlite3 (needed by Drift's native tests)
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-0
+
+      # .env is gitignored (it holds real secrets) but is also declared as a
+      # Flutter asset in pubspec.yaml, so `flutter analyze` fails with
+      # asset_does_not_exist unless some .env file is present on disk.
+      # Dummy placeholder values are enough for analyze/test — nothing in
+      # this job talks to a real Supabase backend.
+      - name: Create placeholder .env for analyze/test
+        run: |
+          cat > .env <<'EOF'
+          SUPABASE_URL=https://placeholder.supabase.co
+          SUPABASE_ANON_KEY=placeholder-anon-key
+          SUPABASE_IOS_CLIENT_ID=placeholder-ios-client-id
+          SUPABASE_WEB_CLIENT_ID=placeholder-web-client-id
+          EOF
+
+      - name: Analyze
+        run: flutter analyze --fatal-infos
+
+      - name: Run tests
+        # --reporter expanded prints one line per test unconditionally.
+        # The default "compact" reporter redraws its progress line with
+        # carriage returns, which is fine in an interactive terminal but
+        # silently drops individual test lines when captured by a
+        # non-interactive log collector (verified locally: two whole test
+        # files' output vanished from a piped `flutter test` run even
+        # though every test in them genuinely ran and passed). Expanded
+        # output costs nothing here and means a CI log is never missing
+        # data a human might need to debug a failure.
+        run: flutter test --reporter expanded
+
+  # Builds the iOS app on every push/PR that touches mobile code, the same
+  # way analyze-and-test guards Android. This is deliberately unsigned
+  # (--no-codesign): it only proves the Dart/Swift/CocoaPods side compiles
+  # for iOS, so a plugin or native-code change that breaks iOS is caught
+  # here instead of surfacing only when someone tries to cut a TestFlight
+  # build. Real device installs need code signing — see release-testflight.yml
+  # and docs/ios-testflight-setup.md.
+  ios-build:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.47.2'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Same rationale as analyze-and-test's placeholder .env: it's a
+      # declared Flutter asset, so the build fails with asset_does_not_exist
+      # without some file on disk. Placeholder values are fine — this job
+      # never talks to a real Supabase backend.
+      - name: Create placeholder .env for build
+        run: |
+          cat > .env <<'EOF'
+          SUPABASE_URL=https://placeholder.supabase.co
+          SUPABASE_ANON_KEY=placeholder-anon-key
+          SUPABASE_IOS_CLIENT_ID=placeholder-ios-client-id
+          SUPABASE_WEB_CLIENT_ID=placeholder-web-client-id
+          EOF
+
+      - name: Build iOS (unsigned)
+        run: flutter build ios --release --no-codesign

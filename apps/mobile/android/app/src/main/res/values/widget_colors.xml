@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Light-mode palette for every home-screen widget (prayer times, dua of the
+  day, dhikr of the day). Mirrors the app's own light design-system tokens —
+  packages/takwa_ui/lib/src/theme/app_colors.dart's `AppColorsExtension
+  .light` — so the widgets look like Takwa, not a generic green card.
+
+  A `values-night/widget_colors.xml` overrides every one of these with the
+  `.dark` tokens; Android resolves whichever matches the system's current
+  light/dark setting automatically, with no code on our side needed to pick
+  between them.
+-->
+<resources>
+    <!-- card gradient (top-left → bottom-right), ≈ AppColorsExtension.light.card/card2 -->
+    <color name="widget_bg_start">#FFFFFFFF</color>
+    <color name="widget_bg_end">#FFF3F4F6</color>
+    <!-- ≈ .light.border -->
+    <color name="widget_border">#FFE2E8F0</color>
+    <!-- ≈ .light.textPrimary / .textSecondary -->
+    <color name="widget_text_primary">#FF111827</color>
+    <color name="widget_text_secondary">#FF4B5563</color>
+    <!-- ≈ .light.goldText — the AA-contrast-safe gold for light surfaces,
+         not the raw brand .gold (that fails contrast on white) -->
+    <color name="widget_gold">#FF6B5320</color>
+    <!-- ≈ .light.tealText, same reasoning -->
+    <color name="widget_teal">#FF0F5C57</color>
+    <!-- hairline divider between the date header and the prayer row -->
+    <color name="widget_divider">#1A111827</color>
+    <!-- Brand gold→teal sheen laid over the card gradient — exact same ARGB
+         as AppColorsExtension.light.cardGradient, so the widget's "Islamic"
+         warmth is the app's own accent wash, not an invented tint. Low
+         enough alpha that widget_text_*/widget_gold contrast on top is
+         unaffected. -->
+    <color name="widget_overlay_gold">#10C8A96E</color>
+    <color name="widget_overlay_teal">#0A3AAFA9</color>
+    <!-- Progress track for the large prayer widget's countdown bar. -->
+    <color name="widget_progress_track">#1A111827</color>
+</resources>

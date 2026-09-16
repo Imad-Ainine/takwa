@@ -1,0 +1,2042 @@
+{
+  "@@locale": "en",
+  "achievementStreak3Title": "A Good Start",
+  "@achievementStreak3Title": {
+    "description": "Achievement title: 3-day accountability streak"
+  },
+  "achievementStreak3Desc": "You've kept up your accountability for three days straight",
+  "@achievementStreak3Desc": {
+    "description": "Achievement description: 3-day accountability streak"
+  },
+  "achievementStreak7Title": "The Perfect Week",
+  "@achievementStreak7Title": {
+    "description": "Achievement title: 7-day accountability streak"
+  },
+  "achievementStreak7Desc": "Seven days of commitment and accountability",
+  "@achievementStreak7Desc": {
+    "description": "Achievement description: 7-day accountability streak"
+  },
+  "achievementStreak30Title": "The Steadfast Strider",
+  "@achievementStreak30Title": {
+    "description": "Achievement title: 30-day accountability streak"
+  },
+  "achievementStreak30Desc": "Thirty days of self-watchfulness and taqwa",
+  "@achievementStreak30Desc": {
+    "description": "Achievement description: 30-day accountability streak"
+  },
+  "achievementQuranJuzTitle": "People of the Quran",
+  "@achievementQuranJuzTitle": {
+    "description": "Achievement title: read a full juz of Quran in a month"
+  },
+  "achievementQuranJuzDesc": "You completed a full juz of the Book of Allah",
+  "@achievementQuranJuzDesc": {
+    "description": "Achievement description: read a full juz of Quran in a month"
+  },
+  "achievementDailyMuhasabaTitle": "The Diligent Reckoner",
+  "@achievementDailyMuhasabaTitle": {
+    "description": "Achievement title: completed today's self-accountability"
+  },
+  "achievementDailyMuhasabaDesc": "You completed today's self-accountability",
+  "@achievementDailyMuhasabaDesc": {
+    "description": "Achievement description: completed today's self-accountability"
+  },
+  "achievementMorningAdhkarTitle": "Morning Light",
+  "@achievementMorningAdhkarTitle": {
+    "description": "Achievement title: completed morning adhkar"
+  },
+  "achievementMorningAdhkarDesc": "You completed your morning adhkar in full",
+  "@achievementMorningAdhkarDesc": {
+    "description": "Achievement description: completed morning adhkar"
+  },
+  "achievementEveningAdhkarTitle": "Evening Fortification",
+  "@achievementEveningAdhkarTitle": {
+    "description": "Achievement title: completed evening adhkar"
+  },
+  "achievementEveningAdhkarDesc": "You completed your evening adhkar in full",
+  "@achievementEveningAdhkarDesc": {
+    "description": "Achievement description: completed evening adhkar"
+  },
+  "achievementFirstSadaqahTitle": "The Giving Hand",
+  "@achievementFirstSadaqahTitle": {
+    "description": "Achievement title: first sadaqah logged through the app"
+  },
+  "achievementFirstSadaqahDesc": "You gave your first sadaqah through the app",
+  "@achievementFirstSadaqahDesc": {
+    "description": "Achievement description: first sadaqah logged through the app"
+  },
+  "achievementTasbeeh100Title": "The Grateful Rememberer",
+  "@achievementTasbeeh100Title": {
+    "description": "Achievement title: 100 tasbeeh in one day"
+  },
+  "achievementTasbeeh100Desc": "You glorified Allah 100 times in a single day",
+  "@achievementTasbeeh100Desc": {
+    "description": "Achievement description: 100 tasbeeh in one day"
+  },
+  "achievementFajrOnTimeTitle": "In Allah's Care",
+  "@achievementFajrOnTimeTitle": {
+    "description": "Achievement title: Fajr on time for 3 consecutive days"
+  },
+  "achievementFajrOnTimeDesc": "You prayed Fajr on time for three consecutive days",
+  "@achievementFajrOnTimeDesc": {
+    "description": "Achievement description: Fajr on time for 3 consecutive days"
+  },
+  "achievementConstantReaderTitle": "The Steady Reader",
+  "@achievementConstantReaderTitle": {
+    "description": "Achievement title: read Quran 3 consecutive days"
+  },
+  "achievementConstantReaderDesc": "You read Quran for three consecutive days",
+  "@achievementConstantReaderDesc": {
+    "description": "Achievement description: read Quran 3 consecutive days"
+  },
+  "achievementPerfectWeekPrayerTitle": "Prayer Is Light",
+  "@achievementPerfectWeekPrayerTitle": {
+    "description": "Achievement title: all 5 prayers on time for 7 days"
+  },
+  "achievementPerfectWeekPrayerDesc": "You prayed all five prayers on time for seven days",
+  "@achievementPerfectWeekPrayerDesc": {
+    "description": "Achievement description: all 5 prayers on time for 7 days"
+  },
+  "achievementFastingNaflTitle": "The Gate of Ar-Rayyan",
+  "@achievementFastingNaflTitle": {
+    "description": "Achievement title: first voluntary (nafl) fast"
+  },
+  "achievementFastingNaflDesc": "You completed your first voluntary fast",
+  "@achievementFastingNaflDesc": {
+    "description": "Achievement description: first voluntary (nafl) fast"
+  },
+  "achievementRamadanKnightTitle": "Knight of Ramadan",
+  "@achievementRamadanKnightTitle": {
+    "description": "Achievement title: 10 days of Ramadan fasting logged"
+  },
+  "achievementRamadanKnightDesc": "You logged 10 days of Ramadan accountability",
+  "@achievementRamadanKnightDesc": {
+    "description": "Achievement description: 10 days of Ramadan fasting logged"
+  },
+  "achievementPoints100Title": "A Hundred Steps",
+  "@achievementPoints100Title": {
+    "description": "Achievement title: reached 100 lifetime Taqwa points"
+  },
+  "achievementPoints100Desc": "You earned your first 100 Taqwa points",
+  "@achievementPoints100Desc": {
+    "description": "Achievement description: reached 100 lifetime Taqwa points"
+  },
+  "achievementPoints1000Title": "Knight of Taqwa",
+  "@achievementPoints1000Title": {
+    "description": "Achievement title: reached 1000 lifetime Taqwa points"
+  },
+  "achievementPoints1000Desc": "You reached 1000 points on your journey",
+  "@achievementPoints1000Desc": {
+    "description": "Achievement description: reached 1000 lifetime Taqwa points"
+  },
+  "prayerFajr": "Fajr",
+  "prayerDhuhr": "Dhuhr",
+  "prayerAsr": "Asr",
+  "prayerMaghrib": "Maghrib",
+  "prayerIsha": "Isha",
+  "prayerStatusOnTimeShort": "On time ✓",
+  "@prayerStatusOnTimeShort": {
+    "description": "Short chip label: prayer performed on time"
+  },
+  "prayerStatusQadaaShort": "Made up",
+  "@prayerStatusQadaaShort": {
+    "description": "Short chip label: prayer made up late"
+  },
+  "prayerStatusMissedShort": "Missed",
+  "@prayerStatusMissedShort": {
+    "description": "Short chip label: prayer missed"
+  },
+  "prayerStatusPendingShort": "Not marked yet",
+  "@prayerStatusPendingShort": {
+    "description": "Short chip label: prayer time has come but not yet marked"
+  },
+  "prayerStatusNotDueShort": "Not due yet",
+  "@prayerStatusNotDueShort": {
+    "description": "Short chip label: prayer time hasn't come yet"
+  },
+  "prayerStatusPerformedFull": "Performed on time",
+  "@prayerStatusPerformedFull": {
+    "description": "Status picker option: prayer performed on time"
+  },
+  "prayerStatusQadaaFull": "Made up late",
+  "@prayerStatusQadaaFull": {
+    "description": "Status picker option: prayer made up late"
+  },
+  "prayerStatusMissedFull": "Missed (seek forgiveness)",
+  "@prayerStatusMissedFull": {
+    "description": "Status picker option: prayer missed"
+  },
+  "ibadahMorningAdhkarLabel": "Morning Adhkar",
+  "ibadahMorningAdhkarSublabel": "After Fajr prayer",
+  "ibadahEveningAdhkarLabel": "Evening Adhkar",
+  "ibadahEveningAdhkarSublabel": "After Asr prayer",
+  "ibadahQiyamLabel": "Night Prayer",
+  "ibadahQiyamSublabel": "The last third of the night",
+  "ibadahSadaqahLabel": "Charity",
+  "ibadahSadaqahSublabel": "Even with a kind word",
+  "ibadahGhadhBasarLabel": "Lowering the Gaze",
+  "ibadahGhadhBasarSublabel": "Guarding your eyes from what's forbidden",
+  "prohibitionGheebaName": "Backbiting",
+  "prohibitionGheebaDesc": "Speaking of others in a way they'd dislike",
+  "prohibitionNameemaName": "Gossip",
+  "prohibitionNameemaDesc": "Spreading talk to cause discord",
+  "prohibitionKadhbName": "Lying",
+  "prohibitionKadhbDesc": "Saying what isn't true",
+  "prohibitionGhadabName": "Anger",
+  "prohibitionGhadabDesc": "If you get angry, stay silent",
+  "prohibitionIdaatWaqtName": "Wasting Time",
+  "prohibitionIdaatWaqtDesc": "Falling short in how you spend your time",
+  "hijriMuharram": "Muharram",
+  "hijriSafar": "Safar",
+  "hijriRabiAlAwwal": "Rabi al-Awwal",
+  "hijriRabiAlThani": "Rabi al-Thani",
+  "hijriJumadaAlAwwal": "Jumada al-Awwal",
+  "hijriJumadaAlThani": "Jumada al-Thani",
+  "hijriRajab": "Rajab",
+  "hijriShaban": "Sha'ban",
+  "hijriRamadan": "Ramadan",
+  "hijriShawwal": "Shawwal",
+  "hijriDhulQadah": "Dhul Qa'dah",
+  "hijriDhulHijjah": "Dhul Hijjah",
+  "checklistTitle": "Today's Accountability",
+  "checklistTodayProgress": "Today's Progress",
+  "checklistFivePrayersTitle": "The Five Prayers",
+  "checklistQuranAdhkarTitle": "Quran & Adhkar",
+  "checklistProhibitionsTitle": "Sins & Destructive Deeds",
+  "checklistProhibitionsSubtitle": "Be honest with yourself about today",
+  "checklistMotivationComplete": "A complete day, alhamdulillah ✨",
+  "checklistMotivationGreat": "Great, you're on the right path 💪",
+  "checklistMotivationKeepGoing": "Keep going, don't stop 🌿",
+  "checklistMotivationStart": "Just getting started 🤲",
+  "checklistQuranInputLabel": "Reciting the Noble Quran",
+  "checklistQuranPagesHint": "Enter the number of pages you read",
+  "checklistNoteTitle": "Today's Note",
+  "checklistNoteHint": "Write your note or dua for today...",
+  "checklistNoteSaveButton": "Save Note",
+  "checklistNoteSaved": "Saved ✓",
+  "checklistErrorPrefix": "Error: {error}",
+  "@checklistErrorPrefix": {
+    "description": "Error message prefix, followed by the raw error text",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "checklistIncrementSemanticLabel": "Increase {name} count, currently {count} times",
+  "@checklistIncrementSemanticLabel": {
+    "description": "Screen-reader label for the prohibition '+1 count' button",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "checklistPrayerSheetTitle": "{prayerName} prayer",
+  "@checklistPrayerSheetTitle": {
+    "description": "Status picker sheet title, e.g. 'Fajr prayer'",
+    "placeholders": {
+      "prayerName": {
+        "type": "String"
+      }
+    }
+  },
+  "checklistNetPointsLabel": "Net",
+  "checklistPointsSuffix": " points",
+  "checklistFastingLabel": "Fasting",
+  "fastingTypeFard": "Obligatory",
+  "fastingTypeNafl": "Voluntary",
+  "fastingTypeNone": "Not fasting",
+  "checklistQuranPageSuffix": "/page",
+  "semanticsSeparator": ", ",
+  "@semanticsSeparator": {
+    "description": "Separator joining two clauses in a screen-reader label, e.g. 'name, status'"
+  },
+  "appTitle": "Taqwa",
+  "settingsLanguageLabel": "Language",
+  "languageArabic": "العربية",
+  "languageEnglish": "English",
+  "@languageArabic": {
+    "description": "Language name shown in its own native form, regardless of the app's current UI language"
+  },
+  "@languageEnglish": {
+    "description": "Language name shown in its own native form, regardless of the app's current UI language"
+  },
+  "settingsScreenTitle": "Settings",
+  "settingsAdhanSectionTitle": "Adhan & Notification Settings",
+  "settingsAdhanNotificationsLabel": "Adhan & Notifications",
+  "settingsAdhanNotificationsSublabel": "Customize the adhan, silent mode, and notifications",
+  "settingsWakeBeforeFajrLabel": "Wake up before Fajr",
+  "settingsWakeBeforeFajrSublabel": "Alert with the adhan sound at the set time",
+  "settingsWakeTimeLabel": "Wake-up time",
+  "settingsMorningAdhkarLabel": "Morning Adhkar",
+  "settingsMorningAdhkarSublabel": "Daily reminder at 6:30 AM",
+  "settingsEveningAdhkarLabel": "Evening Adhkar",
+  "settingsEveningAdhkarSublabel": "Daily reminder at 5:00 PM",
+  "settingsMuhasabaLabel": "Evening self-accountability",
+  "settingsMuhasabaSublabel": "Daily reminder for self-accountability",
+  "settingsDailyDuasLabel": "Daily Duas",
+  "settingsDailyDuasSublabel": "Gentle reminders from the Prophetic duas",
+  "settingsFridaySunnahLabel": "Friday Sunnahs",
+  "settingsFridaySunnahSublabel": "Reminder for Surah al-Kahf and Friday",
+  "settingsFastingRemindersLabel": "Fasting reminders",
+  "settingsFastingRemindersSublabel": "Mondays, Thursdays, and the White Days",
+  "settingsMuhasabaTimeLabel": "Accountability time",
+  "settingsAppearanceSectionTitle": "Appearance",
+  "settingsThemeModeLabel": "Theme mode",
+  "themeModeSystem": "Automatic (system)",
+  "themeModeLight": "Light mode",
+  "themeModeDark": "Dark mode",
+  "settingsRamadanSectionTitle": "Ramadan Mode",
+  "settingsRamadanModeSublabel": "Enable Ramadan features",
+  "settingsAppSectionTitle": "App",
+  "settingsTestNotifLabel": "Test notifications & overlay",
+  "settingsTestNotifSublabel": "Make sure notifications and floating windows work",
+  "settingsSubscriptionLabel": "Subscription",
+  "settingsSubscriptionSublabel": "Support the project and keep it going",
+  "settingsAboutDevLabel": "About the developer",
+  "settingsAboutDevSublabel": "Learn about the app's developer",
+  "settingsTermsLabel": "Terms & Privacy",
+  "settingsTermsSublabel": "Terms of use and privacy",
+  "settingsLogoutLabel": "Sign out",
+  "settingsLogoutSublabel": "Sign out of your account or guest mode",
+  "settingsBismillah": "In the name of Allah, the Most Gracious, the Most Merciful",
+  "settingsAppVersionLabel": "Taqwa — v1.0.5",
+  "settingsTestNotifSheetTitle": "Test notifications",
+  "settingsTestNotifPlainLabel": "Regular notification",
+  "settingsTestNotifPlainSublabel": "The standard system notification",
+  "settingsTestAdhanLabel": "Prayer adhan",
+  "settingsTestAdhanSublabel": "The full adhan screen with sound",
+  "settingsResetTitle": "Reset",
+  "settingsResetConfirm": "Do you want to delete all settings?",
+  "settingsLogoutConfirm": "Are you sure you want to sign out?",
+  "settingsLogoutConfirmButton": "Sign out",
+  "commonCancel": "Cancel",
+  "commonDelete": "Delete",
+  "settingsTestNotifTitle": "Test notification",
+  "settingsTestNotifBody": "Notifications are working correctly",
+  "prayerSunrise": "Sunrise",
+  "labelQuran": "Quran",
+  "labelAdhkar": "Adhkar",
+  "labelPoints": "points",
+  "homeGreetingMorning": "Good morning 🌅",
+  "homeGreetingAfternoon": "Good afternoon 🌤",
+  "homeGreetingEvening": "Good evening 🌙",
+  "homeRamadanBannerTitle": "Ramadan Kareem",
+  "homeRamadanBannerSubtitle": "Day {day} of the blessed month of Ramadan",
+  "@homeRamadanBannerSubtitle": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "homeRamadanDaysRemaining": "days\nleft",
+  "homeCountdownNow": "It's time now",
+  "homeCountdownHoursMinutes": "in {hours}h {minutes}m",
+  "@homeCountdownHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "homeCountdownMinutesOnly": "in {minutes} min",
+  "@homeCountdownMinutesOnly": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "homeNextPrayerLabel": "Next prayer",
+  "homePrayerTimesTitle": "Prayer Times",
+  "homeTodayIbadahTitle": "Today's Acts of Worship",
+  "homeViewAllLabel": "View all →",
+  "homeIbadahProgressLabel": "{count} of 10 acts of worship",
+  "@homeIbadahProgressLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeStreakDaysLabel": "{n}-day streak",
+  "@homeStreakDaysLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeLevelMubtadi": "Beginner 🌱",
+  "homeLevelSalik": "Seeker 🌿",
+  "homeLevelMujahid": "Striver ⚔️",
+  "homeLevelMutaqi": "God-conscious ✨",
+  "homeProgressMsgComplete": "Mashallah! 🌟",
+  "homeProgressMsgGreat": "Great, keep going 💪",
+  "homeProgressMsgGood": "A good start 🌿",
+  "homeProgressMsgStart": "In the name of Allah 🤲",
+  "homeRingTodayLabel": "Today",
+  "homeFeaturesTitle": "Features",
+  "homeFeaturePrayerTimes": "Prayer\nTimes",
+  "homeFeatureQibla": "Qibla",
+  "homeFeatureDuas": "Duas",
+  "homeFeatureMisbaha": "Tasbeeh",
+  "homeFeatureMosques": "Mosques",
+  "homeFeatureStatistics": "Statistics",
+  "homeFeatureAchievements": "Achievements",
+  "homeFeatureReminders": "Reminders",
+  "homeVerseOfDayLabel": "Verse of the day - {reference}",
+  "@homeVerseOfDayLabel": {
+    "description": "Prefix label before a Quranic verse reference; the reference itself stays untranslated Arabic content",
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRamadanTimesTitle": "Ramadan Timings",
+  "homeIftarLabel": "Iftar",
+  "homeSuhoorLabel": "Suhoor",
+  "homeCountdownPassed": "Passed ✓",
+  "homeDailyDhikrLabel": "Dhikr of the day",
+  "homeBooksLibraryTitle": "Islamic Library",
+  "homeMinutesLabel": "{minutes} min",
+  "@homeMinutesLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingGpsDisabledMessage": "GPS is off — please enable it to continue.",
+  "onboardingSettingsAction": "Settings",
+  "onboardingLocationPermissionDeniedMessage": "Please enable location permission from Settings.",
+  "onboardingEditLaterHint": "You can change this later",
+  "onboardingContinueButton": "Continue",
+  "onboardingIntro1Title": "Welcome to Taqwa",
+  "onboardingIntro1Subtitle": "Your companion on the journey of self-purification and closeness to Allah, through smart, thoughtful tools.",
+  "onboardingIntro2Title": "A Precise Accountability System",
+  "onboardingIntro2Subtitle": "Log your prayers, adhkar, and acts of worship daily to see your progress and strengthen your resolve.",
+  "onboardingIntro3Title": "Statistics & Progress",
+  "onboardingIntro3Subtitle": "Track your accountability results through charts and detailed reports that help you stay consistent.",
+  "onboardingLocationTitle": "Set Your Location",
+  "onboardingLocationSubtitle": "We need your location to give you precise prayer times and Qibla direction",
+  "onboardingLocationHint": "Your location data stays on your device — we never see it",
+  "onboardingLocationAllowButton": "Enable Location 📍",
+  "onboardingSkipButton": "Skip",
+  "onboardingNotificationsTitle": "Allow Notifications",
+  "onboardingNotificationsSubtitle": "Lets us remind you about prayer, adhkar, evening accountability, and more",
+  "onboardingNotificationsHint": "You can change this later from Settings",
+  "onboardingNotificationsAllowButton": "Allow Notifications 🔔",
+  "onboardingGenderTitle": "Select Gender",
+  "onboardingGenderMale": "Male",
+  "onboardingGenderFemale": "Female",
+  "onboardingGenderInfoHint": "A tailored experience, with separate general khatmas for men and women",
+  "onboardingNextButton": "Next",
+  "onboardingOverlayTitle": "Adhkar Overlay 🪟",
+  "onboardingOverlaySubtitle": "Lets adhkar and reminders show over other apps for a constant reminder",
+  "onboardingOverlayHint": "Requires the \"display over other apps\" permission on Android",
+  "onboardingOverlayAllowButton": "Enable Overlay",
+  "onboardingBackgroundTitle": "Run in the Background",
+  "onboardingBackgroundSubtitle": "Ensures adhan and adhkar notifications arrive precisely on time without the app being stopped",
+  "onboardingBackgroundHint": "The system will ask to exclude the app from battery optimization",
+  "onboardingBackgroundAllowButton": "Allow Background Running 🔋",
+  "statsPeriodLast7Days": "Last 7 days",
+  "statsPeriodThisMonth": "This month",
+  "statsPeriodRamadan": "Ramadan",
+  "statsPeriodThisWeek": "This week",
+  "statsPeriodRamadanEmoji": "Ramadan 🌙",
+  "statsRamadanReportTitle": "Ramadan Report 🌙",
+  "statsScreenTitle": "Statistics",
+  "statsRamadanDayOf30": "Day {day} of 30",
+  "@statsRamadanDayOf30": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "statsPointsThisMonth": "{points} points this month",
+  "@statsPointsThisMonth": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "statsNextLevelLabel": "Next level",
+  "statsPointsRemaining": "{remaining} points to go",
+  "@statsPointsRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "statsMaxLevelReached": "Max level ✨",
+  "statsPerformanceTitle": "Period Performance",
+  "statsPreviousDaysLabel": "Previous days",
+  "statsQuranPagesLabel": "Quran Pages",
+  "statsPrayerAttendanceLabel": "Prayer Attendance",
+  "statsLongestStreakLabel": "Longest Streak",
+  "statsDaysUnit": "{count} days",
+  "@statsDaysUnit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsTaqwaPointsLabel": "Taqwa Points",
+  "statsAchievementsSectionTitle": "Achievements & Badges",
+  "statsAchievementsCount": "{count} achievements",
+  "@statsAchievementsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsPointsRewardShort": "+{points} points",
+  "@statsPointsRewardShort": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "statsNoAchievementsYet": "No achievements yet",
+  "statsNoAchievementsHint": "Keep up your acts of worship to earn your first achievement",
+  "statsComingSoonLabel": "Coming soon 🔒",
+  "statsLockedStreak30Title": "The Striver's Month",
+  "statsLockedStreak30Desc": "30 days straight",
+  "statsLockedKhatmaTitle": "A Full Khatma",
+  "statsLockedKhatmaDesc": "Complete the Quran",
+  "statsLockedFullWeekTitle": "A Perfect Week",
+  "statsLockedFullWeekDesc": "7 complete days",
+  "statsThanksButtonLabel": "Thanks be to Allah 🤲",
+  "statsPointsRewardFull": "+{points} bonus points 🌟",
+  "@statsPointsRewardFull": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "statsNewAchievementLabel": "New achievement! 🎉",
+  "drawerLevelLabel": "Level: {level}",
+  "@drawerLevelLabel": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "drawerDefaultUsername": "Taqwa User",
+  "@drawerDefaultUsername": {
+    "description": "Fallback username shown in the drawer when the user has no username set"
+  },
+  "drawerGenderMale": "Male",
+  "@drawerGenderMale": {
+    "description": "Gender badge label for male users in the drawer header"
+  },
+  "drawerGenderFemale": "Female",
+  "@drawerGenderFemale": {
+    "description": "Gender badge label for female users in the drawer header"
+  },
+  "drawerViewProfile": "View profile",
+  "@drawerViewProfile": {
+    "description": "Subtitle link in the drawer header that navigates to the profile screen"
+  },
+  "drawerNavHome": "Home",
+  "@drawerNavHome": {
+    "description": "Drawer navigation item: Home"
+  },
+  "drawerNavChecklist": "Daily Accountability",
+  "@drawerNavChecklist": {
+    "description": "Drawer navigation item: Daily accountability checklist"
+  },
+  "drawerNavPrayer": "Prayer Times",
+  "@drawerNavPrayer": {
+    "description": "Drawer navigation item: Prayer times"
+  },
+  "drawerNavBooks": "Islamic Library",
+  "@drawerNavBooks": {
+    "description": "Drawer navigation item: Islamic library"
+  },
+  "drawerNavStatistics": "Statistics",
+  "@drawerNavStatistics": {
+    "description": "Drawer navigation item: Statistics"
+  },
+  "drawerNavAsma": "Names of Allah",
+  "@drawerNavAsma": {
+    "description": "Drawer navigation item: The 99 Names of Allah"
+  },
+  "drawerNavAchievements": "Achievements",
+  "@drawerNavAchievements": {
+    "description": "Drawer navigation item: Achievements"
+  },
+  "drawerNavProfile": "Profile",
+  "@drawerNavProfile": {
+    "description": "Drawer navigation item: User profile"
+  },
+  "drawerNavSettings": "Settings",
+  "@drawerNavSettings": {
+    "description": "Drawer navigation item: Settings"
+  },
+  "drawerStatTaqwaPoints": "Taqwa Points",
+  "@drawerStatTaqwaPoints": {
+    "description": "Label under the Taqwa points mini-stat card in the drawer"
+  },
+  "drawerStatStreakDays": "day streak",
+  "@drawerStatStreakDays": {
+    "description": "Label under the consecutive-days streak mini-stat card in the drawer"
+  },
+  "drawerLogoutButton": "Sign out",
+  "@drawerLogoutButton": {
+    "description": "Label on the logout button at the bottom of the drawer"
+  },
+  "drawerLogoutDialogTitle": "Sign out",
+  "@drawerLogoutDialogTitle": {
+    "description": "Title of the logout confirmation dialog"
+  },
+  "drawerLogoutDialogBody": "Are you sure you want to sign out?",
+  "@drawerLogoutDialogBody": {
+    "description": "Body text of the logout confirmation dialog"
+  },
+  "drawerLogoutDialogCancel": "Cancel",
+  "@drawerLogoutDialogCancel": {
+    "description": "Cancel button in the logout confirmation dialog"
+  },
+  "drawerLogoutDialogConfirm": "Sign out",
+  "@drawerLogoutDialogConfirm": {
+    "description": "Confirm button in the logout confirmation dialog"
+  },
+  "drawerFooterQuote": "\"Take account of yourselves before you are taken to account\"",
+  "@drawerFooterQuote": {
+    "description": "Islamic quote shown in the drawer footer"
+  },
+  "drawerFooterVersion": " v1.0.5",
+  "@drawerFooterVersion": {
+    "description": "App version label shown in the drawer footer"
+  },
+  "commonSave": "Save",
+  "duaCategoryMorning": "Morning",
+  "duaCategoryEvening": "Evening",
+  "duaCategorySleep": "Sleep",
+  "duaCategoryWakingUp": "Waking Up",
+  "duaCategoryDistress": "Distress",
+  "duaCategoryGuidance": "Guidance",
+  "duaCategoryForgiveness": "Forgiveness",
+  "duaCategoryRizq": "Provision",
+  "duaCategoryHealth": "Health",
+  "duaCategoryParents": "Parents",
+  "duaCategoryTravel": "Travel",
+  "duaCategoryRain": "Rain",
+  "duaCategoryIstikhara": "Istikhara",
+  "duaCategoryMosque": "Mosque",
+  "duaCategoryKnowledge": "Seeking Knowledge",
+  "duaCategoryAfterPrayer": "After Prayer",
+  "duaCategoryGeneral": "General",
+  "duaCategoryOther": "Other",
+  "duaCategoryAllFilter": "🤲 All",
+  "duasScreenTitle": "Traditional Duas",
+  "duasScreenSubtitle": "From the Quran and Sunnah",
+  "duasSearchHint": "Search the duas...",
+  "duasTabTraditional": "Traditional",
+  "duasTabMine": "Mine",
+  "duasTabCommunity": "Community",
+  "duasNoResults": "No results found",
+  "duasCopiedLabel": "Copied ✓",
+  "duasCopyTooltip": "Copy",
+  "duasFetchErrorMessage": "Something went wrong fetching your duas",
+  "duasNoUserDuasYet": "You haven't added any duas yet",
+  "duasShareWithCommunityLabel": "Share with the community",
+  "duasDeleteDialogTitle": "Delete Dua",
+  "duasDeleteConfirmMessage": "Do you want to delete this dua?",
+  "duasSharedSuccessLabel": "✅ Shared!",
+  "duasShareSheetTitle": "🌍 Share with the community",
+  "duasShareThanksMessage": "Thanks for sharing with the Taqwa community 🤍",
+  "duasCommunityLoadError": "Couldn't load community duas",
+  "duasCommunityEmptyTitle": "No shared duas yet",
+  "duasPullToRefreshHint": "Pull down to refresh",
+  "duasAddSheetTitle": "Add a Dua",
+  "duasAddTitleFieldLabel": "Dua title",
+  "duasAddTextFieldLabel": "Dua text (Arabic)",
+  "duasAddOccasionFieldLabel": "Occasion (optional)",
+  "duasAddShareToggleLabel": "Share with the Taqwa community (so others can benefit)",
+  "adhanSoundMakkah": "Adhan of Makkah",
+  "adhanSoundMadinah": "Adhan of Madinah",
+  "adhanSoundAlaqsa": "Adhan of Al-Aqsa Mosque",
+  "adhanSoundEgypt": "Egyptian Adhan",
+  "adhanSoundAbdulBasit": "Abdul Basit Abdul Samad",
+  "adhanSoundMinshawi": "Muhammad Siddiq Al-Minshawi",
+  "adhanSoundNaghshbandi": "Sayyid An-Naqshbandi",
+  "adhanSoundSaber": "Jami' Saber",
+  "adhanSoundAlHussaini": "Al-Hussaini",
+  "adhanSoundBakirBash": "Bakir Bash",
+  "adhanSoundHafez": "Hafez",
+  "adhanSoundHafizMurad": "Hafiz Murad",
+  "adhanSoundSharifDoman": "Sharif Doman",
+  "adhanSoundYusufIslam": "Yusuf Islam",
+  "notifPermissionWarningTitle": "Adhan notifications and times may not fire on time",
+  "notifPermissionWarningBody": "Grant the notifications and exact-alarm permissions so the adhan reminder and screen fire exactly when they should.",
+  "adhanSettingsAccountSectionTitle": "Account Settings",
+  "adhanMadhabLabel": "Madhab",
+  "madhabShafi": "Shafi'i, Maliki, Hanbali",
+  "madhabHanafi": "Hanafi",
+  "adhanCalcMethodLabel": "Calculation Method",
+  "adhanLocationLabel": "Location",
+  "adhanLocationSublabel": "Tap to auto-detect or choose manually",
+  "calcMethodAlgeria": "Algeria (Ministry of Religious Affairs)",
+  "calcMethodMWL": "Muslim World League",
+  "calcMethodEgypt": "Egyptian General Authority",
+  "calcMethodKarachi": "University of Karachi",
+  "calcMethodUmmAlQura": "Umm Al-Qura (Makkah)",
+  "calcMethodISNA": "North America (ISNA)",
+  "highLatitudeRuleLabel": "High Latitude Rule",
+  "highLatitudeRuleMiddleOfNight": "Middle of the Night",
+  "highLatitudeRuleSeventhOfNight": "Seventh of the Night",
+  "highLatitudeRuleTwilightAngle": "Twilight Angle",
+  "settingsAdjustmentsSectionTitle": "Manual Prayer Time Adjustments",
+  "settingsAdjustmentsSectionSublabel": "If your mosque's adhan time differs from the calculated time, fine-tune each prayer by minutes",
+  "settingsOffsetMinutesShort": "{value} min",
+  "adhanSoundSectionTitle": "Adhan Sound",
+  "adhanModeLabel": "Adhan Mode",
+  "adhanModeSound": "Sound",
+  "adhanModeVibrate": "Vibrate",
+  "adhanModeSilent": "Silent",
+  "adhanVolumeLabel": "Volume Level",
+  "adhanVibrateTypeLabel": "Vibration",
+  "adhanVibrateTypeSublabel": "Vibrate along with the adhan",
+  "adhanAdvancedSectionTitle": "Advanced Settings",
+  "adhanAutoSilentLabel": "Switch to Silent",
+  "adhanAutoSilentSublabel": "Enable silent mode after the adhan",
+  "adhanSilentModeSettingsLabel": "Silent Mode Settings",
+  "adhanSilentModeSettingsSublabel": "Manage silent mode options",
+  "adhanEnableInSilentLabel": "Play Adhan in Silent Mode",
+  "adhanEnableInSilentSublabel": "Play the adhan even when the device is on silent",
+  "adhanEnableNotifInSilentLabel": "Enable Notifications in Silent Mode",
+  "adhanEnableNotifInSilentSublabel": "Play notification sounds even when the device is on silent",
+  "adhanNotifSilentSheetTitle": "Notifications Enabled in Silent Mode",
+  "adhanSystemNotifSectionTitle": "System Notifications",
+  "adhanWakeScreenLabel": "Wake Screen During Adhan",
+  "adhanWakeScreenSublabel": "Keep the screen on while the adhan plays",
+  "adhanFlipToSilenceLabel": "Silence by Flipping the Device",
+  "adhanFlipToSilenceSublabel": "Flip your phone face-down to silence the adhan",
+  "adhanAlarmNotifLabel": "Alarm-style Adhan Notification",
+  "adhanAlarmNotifSublabel": "Notify even in silent mode",
+  "adhanOngoingNotifLabel": "Ongoing Prayer Times Notification",
+  "adhanOngoingNotifSublabel": "Show a persistent notification with time remaining until prayer",
+  "aboutScreenTitle": "About the Developer",
+  "aboutSectionDeveloper": "About Developer",
+  "aboutSectionSkills": "Technical Skills",
+  "aboutSectionConnect": "Connect With Me",
+  "aboutDevNameArabic": "عماد الدين عينين",
+  "aboutDevNameLatin": "Imadeddine Ainine",
+  "aboutDevBadge": "Fullstack Developer",
+  "aboutBio": "A passionate software developer who loves building mobile apps and websites using the latest technologies. I care deeply about code quality and user experience, and I always strive to deliver innovative technical solutions that serve the Muslim community.",
+  "aboutFooterDuaRequest": "Remember me in your sincere duas",
+  "aboutFooterMadeWithLove": "Made with love for the Muslim Ummah",
+  "aboutFooterCopyright": "© 2026 - Imadeddine Ainine",
+  "khatmaScreenTitle": "Khatma Progress",
+  "khatmaProgressPercent": "{percent}% complete",
+  "khatmaStatCompletedLabel": "Completed Khatmas",
+  "khatmaStatStreakLabel": "Consecutive Days",
+  "khatmaStatPagesPerDayLabel": "Pages/Day",
+  "khatmaWeeklyChartTitle": "Weekly Reading",
+  "khatmaDaySun": "Sunday",
+  "khatmaDayMon": "Monday",
+  "khatmaDayTue": "Tuesday",
+  "khatmaDayWed": "Wednesday",
+  "khatmaDayThu": "Thursday",
+  "khatmaDayFri": "Friday",
+  "khatmaDaySat": "Saturday",
+  "weekdayFullSunday": "Sunday",
+  "weekdayShortSunday": "Su",
+  "weekdayInitialSunday": "S",
+  "weekdayFullMonday": "Monday",
+  "weekdayShortMonday": "Mo",
+  "weekdayInitialMonday": "M",
+  "weekdayFullTuesday": "Tuesday",
+  "weekdayShortTuesday": "Tu",
+  "weekdayInitialTuesday": "T",
+  "weekdayFullWednesday": "Wednesday",
+  "weekdayShortWednesday": "We",
+  "weekdayInitialWednesday": "W",
+  "weekdayFullThursday": "Thursday",
+  "weekdayShortThursday": "Th",
+  "weekdayInitialThursday": "T",
+  "weekdayFullFriday": "Friday",
+  "weekdayShortFriday": "Fr",
+  "weekdayInitialFriday": "F",
+  "weekdayFullSaturday": "Saturday",
+  "weekdayShortSaturday": "Sa",
+  "weekdayInitialSaturday": "S",
+  "appName": "Takwa",
+  "onboardingSignInSubtitle": "Sign in to save and sync your data",
+  "onboardingBenefitSaveProgress": "Save your data and progress",
+  "onboardingBenefitCompete": "Compete with Muslims around the world",
+  "onboardingBenefitStats": "Detailed, advanced statistics",
+  "onboardingBenefitSync": "Automatic sync across your devices",
+  "onboardingContinueWithoutAccount": "Continue without an account",
+  "onboardingChoosePlanTitle": "Choose your plan",
+  "onboardingChoosePlanSubtitle": "Join the Takwa family",
+  "onboardingPremiumTitle": "Takwa ⭐ Premium",
+  "onboardingPremiumDesc": "No ads + advanced stats + cloud sync + priority support",
+  "onboardingPremiumBadge": "Best value",
+  "onboardingPremiumPrice": "99 DZD / month",
+  "onboardingPremiumFeature1": "Completely ad-free",
+  "onboardingPremiumFeature2": "Advanced statistics and charts",
+  "onboardingPremiumFeature3": "Automatic cloud sync",
+  "onboardingPremiumFeature4": "Unlimited custom reminders",
+  "onboardingPremiumFeature5": "Priority technical support",
+  "onboardingFreeTitle": "Takwa 🌙 Free",
+  "onboardingFreeDesc": "All core features with light ads to keep the service running",
+  "onboardingFreeFeature1": "All accountability features",
+  "onboardingFreeFeature2": "Prayer times and Qibla",
+  "onboardingFreeFeature3": "Adhkar and duas",
+  "onboardingFreeFeature4": "Light ads",
+  "onboardingStartPremiumCta": "Start Premium 🌟",
+  "onboardingStartFreeCta": "Start free 🤲",
+  "onboardingDemoTasbeehText": "SubhanAllah",
+  "notifChannelPrayerSoundName": "Prayer Adhan (Sound)",
+  "notifChannelPrayerSoundDesc": "Adhan-time notification with adhan sound",
+  "notifChannelPrayerVibrateName": "Prayer Adhan (Vibrate)",
+  "notifChannelPrayerVibrateDesc": "Adhan-time notification, vibration only",
+  "notifChannelPrayerSilentName": "Prayer Adhan (Silent)",
+  "notifChannelPrayerSilentDesc": "Silent adhan-time notification",
+  "notifChannelAlertName": "Prayer Alerts",
+  "notifChannelAlertDesc": "Alerts before adhan and after iqama",
+  "notifChannelMuhasabaName": "Self-Accountability",
+  "notifChannelMuhasabaDesc": "Evening self-accountability reminder",
+  "notifChannelAdhkarName": "Daily Adhkar",
+  "notifChannelAdhkarDesc": "Morning, evening and post-prayer adhkar",
+  "notifChannelDuasName": "Duas",
+  "notifChannelDuasDesc": "Selected prophetic and Quranic duas",
+  "notifChannelAchievementName": "Achievements",
+  "notifChannelAchievementDesc": "New achievement notifications",
+  "notifChannelRemindersName": "Faith Reminders",
+  "notifChannelRemindersDesc": "Reminders for Friday sunnah, fasting and White Days",
+  "notifChannelRamadanName": "Blessed Ramadan",
+  "notifChannelRamadanDesc": "Suhoor and iftar alerts",
+  "notifChannelWakeUpAlarmName": "Wake-up Alarm",
+  "notifChannelWakeUpAlarmDesc": "Custom alarm to wake up for Fajr prayer",
+  "overlayServiceChannelDesc": "Keeps the adhan and adhkar service active",
+  "overlayServiceLoadingPrayerTimes": "Loading prayer times...",
+  "overlayServiceOpenAppButton": "Open Takwa",
+  "overlayServiceUpdateLocationButton": "Update location",
+  "overlayServiceUpdatingLocation": "🔄 Updating location...",
+  "overlayServiceDefaultCity": "Algeria",
+  "overlayServiceUnknownCity": "Unknown",
+  "overlayServicePrayerTimeOverlayTitle": "Prayer Time",
+  "overlayServicePrayerTimeOverlayContent": "It's now time for the {prayer} adhan",
+  "overlayServiceDuaOverlayTitle": "Dua from Takwa",
+  "overlayServiceAdhkarOverlayTitle": "Takwa Adhkar",
+  "overlayServiceDuaOverlayContent": "Dua",
+  "overlayServiceAdhkarOverlayContent": "Dhikr",
+  "prayerScreenTitle": "Prayer Times",
+  "prayerScreenIqamaTimeFor": "Iqama time — {prayer}",
+  "prayerScreenPrayerFor": "{prayer} prayer",
+  "prayerScreenEstablishPrayer": "Establish the prayer",
+  "prayerScreenNextPrayerLabel": "Next prayer",
+  "prayerScreenIqamaCountdownLabel": "Iqama in",
+  "prayerScreenAdhanCountdownLabel": "Adhan in",
+  "prayerScreenGetReady": "Get ready",
+  "prayerScreenAdhanTimeLabel": "Adhan Time",
+  "prayerScreenSalvationSlogan": "Your prayer is your salvation",
+  "prayerScreenIqamaTimeLabel": "Iqama Time",
+  "prayerScreenIqamaOffsetShort": "+{minutes}m",
+  "prayerScreenIqamaAfterMinutes": "{count, plural, one{in 1 minute} other{in {count} minutes}}",
+  "prayerScreenTodaysPrayers": "Today's Prayers",
+  "prayerScreenAdhanNowBadge": "Adhan now",
+  "prayerScreenSunriseBadge": "Sunrise",
+  "prayerScreenAdhanBadge": "Adhan",
+  "prayerScreenIqamaBadge": "Iqama",
+  "prayerScreenLocationErrorTitle": "Couldn't determine location",
+  "prayerScreenLocationErrorSubtitle": "Make sure GPS is enabled",
+  "prayerScreenRetryButton": "Retry",
+  "quranReaderFallbackName": "Quran",
+  "quranReaderMeccan": "Meccan",
+  "quranReaderMedinan": "Medinan",
+  "quranReaderSurahHeaderTitle": "Surah {name}",
+  "quranReaderAyahCountBadge": "{count, plural, one{1 verse} other{{count} verses}}",
+  "quranReaderSurahLabel": "Surah {name}",
+  "quranReaderAyahRefLabel": "Verse {ayah} — Surah {surah}",
+  "quranReaderJuzChip": "Juz: {juz}",
+  "quranReaderPageOfTotalChip": "Page: {current} of {total}",
+  "quranReaderReadCountChip": "Read {read} of {total} pages",
+  "quranReaderGuideTitle": "Reading Guide",
+  "quranReaderGuideTapToggle": "Tap once to show or hide the toolbar",
+  "quranReaderGuideDoubleTapZoom": "Double-tap to zoom in and out",
+  "quranReaderGuideSwipeNavigate": "Swipe left or right to move between pages",
+  "quranReaderGuideLongPress": "Long-press any verse to:",
+  "quranReaderGuideSaveAyah": "⭐ Save the verse as a bookmark",
+  "quranReaderGuideShareAyah": "📤 Share the verse (text, image, or video)",
+  "quranReaderGuideTafsir": "📖 Simplified Tafsir",
+  "quranReaderGuideTranslation": "🌐 Translation",
+  "quranReaderGuideListen": "🔊 Listen to the verse, page, or surah",
+  "quranReaderGuideAudioButton": "The speaker button at the top plays the whole page",
+  "quranReaderGuideNightModeButton": "The night-mode button switches the appearance",
+  "quranReaderGuideGotIt": "Got it ✓",
+  "quranReaderPageJumpError": "Please enter a valid number between 1 and {max}",
+  "quranReaderGoToPageTitle": "Go to Page",
+  "quranReaderCurrentPageLabel": "You are currently on page {page}",
+  "quranReaderPageInputLabel": "Enter the page number ({range})",
+  "quranReaderPageRangeHint": "1-{max}",
+  "quranReaderCancelButton": "Cancel",
+  "quranReaderGoButton": "Go",
+  "quranReaderSaveAyahOption": "Save verse as bookmark",
+  "quranReaderShareAyahOption": "Share verse",
+  "quranReaderTafsirOption": "Simplified Tafsir",
+  "quranReaderTranslationOption": "Translation",
+  "quranReaderListenAyahOption": "Listen to verse",
+  "quranReaderComingSoon": "This feature is coming soon",
+  "quranReaderAudioError": "Could not play the audio, check your connection",
+  "quranReaderSettingsTitle": "Reading Settings",
+  "quranReaderFontSizeLabel": "Font Size",
+  "quranReaderBackgroundStyleLabel": "Background Style",
+  "quranReaderThemeNight": "Night",
+  "quranReaderThemeSepia": "Sepia",
+  "quranReaderThemeWhite": "Light",
+  "createKhatmaDefaultNamePrefix": "Khatma {monthYear}",
+  "createKhatmaTitle": "Create New Khatma",
+  "createKhatmaNameLabel": "Khatma Name",
+  "createKhatmaTypeLabel": "Khatma Type",
+  "createKhatmaTypeSubtitle": "Choose the type of khatma you want to create",
+  "createKhatmaTypeMuyassaraTitle": "Flexible Khatma",
+  "createKhatmaTypeMuyassaraDesc": "Read the whole Quran in order, with no fixed daily portion or completion date",
+  "createKhatmaTypeMultazimaTitle": "Committed Khatma",
+  "createKhatmaTypeMultazimaDesc": "A khatma with a fixed daily portion and a set completion date",
+  "createKhatmaStartDateLabel": "Start Date",
+  "createKhatmaStartPageLabel": "Start Page",
+  "createKhatmaPageOption": "Page {n}",
+  "createKhatmaEnableNotifications": "Enable Notifications",
+  "createKhatmaNotificationsDisabledWarning": "Notifications are off — no reminders will be sent",
+  "createKhatmaSummaryTitle": "Khatma Summary",
+  "createKhatmaTypeFieldLabel": "Khatma Type:",
+  "createKhatmaNameFieldLabel": "Khatma Name:",
+  "createKhatmaStartDateFieldLabel": "Start Date:",
+  "createKhatmaFirstPageFieldLabel": "First Page:",
+  "createKhatmaNotificationsFieldLabel": "Notifications:",
+  "createKhatmaNotificationsEnabledValue": "Enabled",
+  "createKhatmaNotificationsDisabledValue": "Disabled",
+  "createKhatmaStartReadingHint": "You can start reading right away once the khatma is created",
+  "createKhatmaPreviousButton": "Previous",
+  "createKhatmaNextButton": "Next",
+  "createKhatmaCreateButton": "Create Khatma",
+  "createKhatmaDefaultLabelFallback": "New Khatma",
+  "createKhatmaSuccessMessage": "Khatma created successfully",
+  "userAdhkarAddButton": "Add Dhikr",
+  "userAdhkarEmptyTitle": "My Own Adhkar",
+  "userAdhkarEmptyBody": "You haven't added any adhkar yet.\nTap the button to add your first one.",
+  "adhkarGenericError": "An error occurred: {error}",
+  "adhkarCopyTooltip": "Copy",
+  "adhkarCopiedSnackbar": "Copied",
+  "adhkarShareWithCommunity": "Share with community",
+  "adhkarDeleteTooltip": "Delete",
+  "adhkarDeleteConfirmTitle": "Delete this dhikr?",
+  "adhkarDeleteConfirmBody": "Do you want to permanently delete this dhikr?",
+  "adhkarCancelButton": "Cancel",
+  "adhkarShareToCommunityTitle": "Share with Community",
+  "adhkarShareToCommunityDesc": "It will be added for review, then appear in the Community tab",
+  "adhkarCountTimesLabel": "{count, plural, one{1 time} other{{count} times}}",
+  "adhkarSharedSuccessMessage": "Shared successfully!",
+  "communityAdhkarEmptyTitle": "Adhkar Community",
+  "communityAdhkarEmptyBody": "No community shares yet.\nShare your adhkar from the \"My Adhkar\" tab.",
+  "communityAdhkarRetryButton": "Retry",
+  "addAdhkarSheetTitle": "Add New Dhikr",
+  "addAdhkarTextHint": "Type the dhikr here in clear Arabic letters...",
+  "addAdhkarRepeatCountLabel": "Repeat count:",
+  "addAdhkarShareToggleDesc": "It will be added for review, then shown to everyone",
+  "addAdhkarAndShareButton": "Add & Share with Community",
+  "addAdhkarButton": "Add Dhikr",
+  "locationResultSuccess": "Location updated successfully ✓",
+  "locationResultServiceDisabled": "GPS is off — please enable it",
+  "locationResultPermissionDenied": "Location permission denied",
+  "locationResultPermissionDeniedForever": "Please enable location permission from Settings",
+  "locationResultError": "Error determining location",
+  "locationResultCachedLocation": "GPS unavailable — using saved location",
+  "locationEnableAction": "Enable",
+  "locationUpdateTileLabel": "Update Location & Prayer Times",
+  "timezoneAlgiers": "Algiers (UTC+1)",
+  "timezoneTunis": "Tunis (UTC+1)",
+  "timezoneEgypt": "Egypt (UTC+2)",
+  "timezoneRiyadh": "Riyadh (UTC+3)",
+  "timezoneDubai": "Dubai (UTC+4)",
+  "timezoneKuwait": "Kuwait (UTC+3)",
+  "timezoneBeirut": "Beirut (UTC+3)",
+  "timezoneJerusalem": "Jerusalem (UTC+3)",
+  "locationPickerLocationSetTo": "Location set to {city} ✓",
+  "locationPickerTitle": "Update Geographic Location",
+  "locationPickerSubtitle": "Pinpoint your location to calculate prayer times",
+  "locationPickerOrChooseCity": "Or choose a major city",
+  "locationPickerAutoDetectTitle": "Detect Location Automatically",
+  "locationPickerAutoDetectSubtitle": "Using GPS",
+  "locationPickerSelectButton": "Select",
+  "manageIbadahTitle": "Manage Habits",
+  "manageIbadahPositiveTab": "Positive",
+  "manageIbadahNegativeTab": "Negative (Prohibitions)",
+  "manageIbadahEmpty": "No habits added yet",
+  "manageIbadahLoadError": "An error occurred while loading data",
+  "manageIbadahPointsEarned": "Points: {points}",
+  "manageIbadahPointsDeducted": "Points deducted: {points}",
+  "manageIbadahDeleteConfirmTitle": "Confirm Deletion",
+  "manageIbadahDeleteConfirmBody": "Are you sure you want to delete \"{name}\"?",
+  "manageIbadahCancelButton": "Cancel",
+  "manageIbadahDeleteButton": "Delete",
+  "manageIbadahDeletedSuccess": "Deleted successfully",
+  "manageIbadahDeleteFailed": "Failed to delete: {error}",
+  "manageIbadahEditHabitTitle": "Edit Habit",
+  "manageIbadahEditProhibitionTitle": "Edit Prohibition",
+  "manageIbadahAddPositiveTitle": "Add Positive Habit",
+  "manageIbadahAddNegativeTitle": "Add Negative Habit (Prohibition)",
+  "manageIbadahNameFieldLabel": "Habit Name",
+  "manageIbadahRequiredValidation": "Required",
+  "manageIbadahPointsEarnedFieldLabel": "Points you'll earn",
+  "manageIbadahPointsDeductedFieldLabel": "Points that will be deducted",
+  "manageIbadahInvalidNumberValidation": "Invalid number",
+  "manageIbadahSaveButton": "Save",
+  "manageIbadahAddButton": "Add",
+  "manageIbadahUpdatedSuccess": "Updated successfully",
+  "manageIbadahAddedSuccess": "Added successfully",
+  "adhanOverlayPrayerTimeTitle": "It's time for {prayer}",
+  "adhanOverlayCloseButton": "Close",
+  "adhanOverlayGoToPrayerButton": "Go to Prayer",
+  "adhanOverlayDuaSectionLabel": "Dua after the Adhan",
+  "hijriEraSuffix": "AH",
+  "authEnterEmailPassword": "Enter your email and password",
+  "authUnexpectedError": "An unexpected error occurred",
+  "authEnterUsername": "Enter a username",
+  "authGoogleConfigIncomplete": "Google sign-in isn't fully configured: make sure the SHA-1 fingerprint and web client ID are added in Google Cloud Console.",
+  "authGoogleNetworkError": "Couldn't reach Google's servers — check your internet connection",
+  "authGoogleGenericError": "Couldn't sign in with Google, please try again later",
+  "authErrorInvalidCredentials": "Incorrect email or password",
+  "authErrorEmailNotConfirmed": "Please confirm your email using the link sent to you first",
+  "authErrorEmailAlreadyRegistered": "This email is already registered — please sign in",
+  "authErrorUsernameTaken": "This username is already taken, choose another one",
+  "authErrorPasswordTooShort": "Password must be at least 6 characters",
+  "authErrorRateLimit": "Too many attempts — please wait a moment",
+  "authErrorNetwork": "Connection failed — check your internet connection",
+  "authErrorGeneric": "An error occurred during sign-up, please try again later",
+  "authContinueAsGuest": "Continue as guest — explore the app ➜",
+  "authSignInTab": "Sign In",
+  "authSignUpTab": "New Account",
+  "authUsernameHint": "Username",
+  "authEmailHint": "Email",
+  "authPasswordHint": "Password",
+  "authShowPasswordTooltip": "Show password",
+  "authHidePasswordTooltip": "Hide password",
+  "authForgotPassword": "Forgot password?",
+  "authSecureSignInButton": "Secure Sign In",
+  "authCreateAccountButton": "Create Account",
+  "authOrSeparator": "or",
+  "authGoogleSignInButton": "Sign in with Google",
+  "authTagline": "Your companion for self-accountability and worship",
+  "bottomNavHome": "Home",
+  "bottomNavQiyam": "Qiyam",
+  "bottomNavMuhasaba": "Accountability",
+  "bottomNavStatistics": "Stats",
+  "bottomNavAsma": "Names of Allah",
+  "bottomNavSettings": "Settings",
+  "settingEnabled": "Enabled",
+  "settingDisabled": "Disabled",
+  "syncStatusSyncing": "Syncing...",
+  "syncStatusSuccess": "Synced successfully",
+  "syncStatusError": "Last sync failed, will retry automatically",
+  "syncStatusPending": "{count, plural, one{1 item pending sync} other{{count} items pending sync}}",
+  "overlaySettingsSectionTitle": "On-Screen Alerts",
+  "overlaySettingAdhanScreenLabel": "Automatic Adhan Screen",
+  "overlaySettingAdhanScreenSublabel": "Show adhan screen when prayer time starts",
+  "overlaySettingAdhanSoundLabel": "Adhan Audio",
+  "overlaySettingAdhanSoundSublabel": "Play adhan audio automatically at prayer time",
+  "overlaySettingPopupsLabel": "Adhkar & Duas Popups",
+  "overlaySettingPopupsSublabel": "Show popup reminders for adhkar and duas",
+  "overlaySettingIntervalHeader": "Adhkar Frequency",
+  "overlaySettingInterval15Min": "Every 15 min (~96/day)",
+  "overlaySettingInterval20Min": "Every 20 min (~72/day)",
+  "overlaySettingInterval24Min": "Every 24 min (~60/day)",
+  "overlaySettingInterval30Min": "Every 30 min (~48/day)",
+  "overlaySettingInterval1Hour": "Every hour (~24/day)",
+  "overlaySettingInterval2Hours": "Every 2 hours (~12/day)",
+  "overlaySettingDailyCount": "Popups will appear ~{count} times daily",
+  "overlayPermissionWarningTitle": "The Adhan screen and popups won't work once the app is closed",
+  "overlayPermissionWarningBody": "Grant the \"display over other apps\" permission so this keeps working even when the app is closed.",
+  "overlayPermissionGrantButton": "Grant permission",
+  "adhkarTabMorning": "Morning",
+  "adhkarTabEvening": "Evening",
+  "adhkarTabAfterPrayer": "After Prayer",
+  "adhkarTabSleep": "Sleep",
+  "adhkarTabWakingUp": "Waking Up",
+  "adhkarTabFood": "Food",
+  "adhkarTabMisc": "Misc",
+  "adhkarTabMine": "My Adhkar",
+  "adhkarTabCommunity": "Community",
+  "adhkarScreenTitle": "Adhkar & Duas",
+  "adhkarScreenSubtitle": "Fortress of the Muslim",
+  "adhkarProgressComplete": "✅ Completed, alhamdulillah!",
+  "adhkarProgressCount": "{done} / {total} dhikr",
+  "adhkarResetButton": "Reset",
+  "adhkarRemainingCount": "{remaining} remaining",
+  "adhkarCompletedCount": "Completed {count}×",
+  "adhkarHideFadl": "Hide",
+  "adhkarShowFadl": "Virtue",
+  "adhkarNotifSettingsTitle": "Adhkar Notifications",
+  "adhkarNotifDisabled": "Notifications are off",
+  "adhkarNotifMorningLabel": "Morning Adhkar",
+  "adhkarNotifEveningLabel": "Evening Adhkar",
+  "adhkarNotifSleepLabel": "Sleep Adhkar",
+  "adhkarNotifAfterFajrLabel": "After Fajr Prayer",
+  "adhkarNotifAfterAsrLabel": "After Asr Prayer",
+  "qiblaScreenTitle": "Qibla Direction",
+  "qiblaScreenSubtitle": "Towards the Holy Kaaba 🕋",
+  "qiblaCompassLabelAligned": "Qibla compass, you are now facing the Qibla",
+  "qiblaCompassLabelUnaligned": "Qibla compass, turn your device {deg} degrees to the {dir} to face the Qibla",
+  "qiblaDirRight": "right",
+  "qiblaDirLeft": "left",
+  "qiblaTurnRightShort": "right",
+  "qiblaTurnLeftShort": "left",
+  "qiblaCurrentDirectionLabel": "Your Current Direction",
+  "qiblaAlignedLabel": "Aligned ✓",
+  "qiblaTurnLabel": "Turn {dir}",
+  "qiblaCorrectValue": "Correct",
+  "qiblaFacingNowHint": "You are facing the Qibla now",
+  "qiblaHoldPhoneHint": "Hold your phone flat and stay away from metal",
+  "qiblaLocationRequiredTitle": "Location Access Required",
+  "qiblaLocationRequiredSubtitle": "To calculate the Qibla direction",
+  "qiblaCompassUnavailableTitle": "Compass Unavailable",
+  "qiblaCompassUnavailableSubtitle": "Make sure your device supports a compass",
+  "qiblaCompassNorth": "N",
+  "qiblaCompassEast": "E",
+  "qiblaCompassSouth": "S",
+  "qiblaCompassWest": "W",
+  "khatmaProgressScreenTitle": "Khatma Progress",
+  "khatmaProgressPercentComplete": "{percent}% complete",
+  "khatmaStatDaysLabel": "Days",
+  "khatmaStatPagesReadLabel": "Pages Read",
+  "khatmaWeeklyReadingTitle": "Weekly Reading",
+  "khatmaReadingAppearanceLabel": "Reading Appearance",
+  "khatmaSettingsSectionTitle": "Khatma Settings",
+  "khatmaReciterLabel": "Reciter",
+  "khatmaReciterDefaultValue": "Sheikh Al-Minshawi",
+  "khatmaDailyReminderLabel": "Daily Reminder",
+  "overlayAdhkarMorning": "Morning Adhkar",
+  "overlayAdhkarEvening": "Evening Adhkar",
+  "overlayAdhkarAfterPrayer": "After-Prayer Adhkar",
+  "overlayAdhkarSleep": "Sleep Adhkar",
+  "overlayAdhkarMisc": "Miscellaneous Adhkar",
+  "overlayAdhkarWakingUp": "Waking Up",
+  "overlayAdhkarFood": "Food Adhkar",
+  "overlayDuaMorning": "Morning Dua",
+  "overlayDuaDistress": "Dua for Distress",
+  "overlayDuaGuidance": "Dua for Guidance",
+  "overlayDuaForgiveness": "Dua for Forgiveness",
+  "overlayDuaRizq": "Dua for Provision",
+  "overlayDuaHealth": "Dua for Health",
+  "overlayDuaParents": "Dua for Parents",
+  "overlayDuaTravel": "Dua for Travel",
+  "overlayDuaRain": "Dua for Rain",
+  "overlayDuaGeneral": "General Dua",
+  "overlayTypeDua": "Dua",
+  "overlayTypeDhikr": "Dhikr",
+  "overlayTypePrayer": "Adhan",
+  "overlayPrayerAnnouncementTimeLabel": "At {time}",
+  "overlayTapOutsideToClose": "Tap outside to close",
+  "forgotPasswordEnterEmail": "Please enter your email",
+  "forgotPasswordInvalidEmailFormat": "Invalid email format",
+  "forgotPasswordCodeSentMessage": "A verification code and reset link have been sent to your email.",
+  "forgotPasswordSendCodeFailed": "Couldn't send the code — check your internet connection.",
+  "forgotPasswordEnterOtp": "Please enter the 6-digit verification code",
+  "forgotPasswordInvalidOtp": "The verification code is invalid or expired",
+  "forgotPasswordVerifyFailed": "Couldn't verify the code, please try again",
+  "forgotPasswordRateLimited": "You've exceeded the allowed attempts — please wait a moment",
+  "forgotPasswordTokenInvalidOrExpired": "The verification code is invalid or has expired",
+  "forgotPasswordNoAccountFound": "No account is associated with this email",
+  "forgotPasswordGenericError": "An error occurred while processing, please try again later",
+  "forgotPasswordEnterCodeTitle": "Enter Verification Code",
+  "forgotPasswordRecoverTitle": "Recover Password",
+  "forgotPasswordEnterCodeSubtitle": "Enter the 6-digit code sent to your email, or tap the link in the message",
+  "forgotPasswordRecoverSubtitle": "Enter your registered email and we'll send you a password reset code",
+  "forgotPasswordOtpHint": "Verification code (6 digits)",
+  "forgotPasswordProcessing": "Processing...",
+  "forgotPasswordVerifyAndContinue": "Verify & Continue",
+  "forgotPasswordSendCode": "Send Code",
+  "forgotPasswordResendCountdown": "Resend in {seconds} seconds",
+  "forgotPasswordResendCode": "Resend Code",
+  "timePeriodAm": "AM",
+  "timePeriodPm": "PM",
+  "wakeUpOverlayTitle": "It's time to wake up",
+  "wakeUpSnoozeButton": "Snooze 10m",
+  "wakeUpStopAlarmButton": "Stop Alarm",
+  "booksLibraryTitle": "Islamic Library",
+  "booksListViewTooltip": "List View",
+  "booksGridViewTooltip": "Grid View",
+  "booksNoResultsFound": "No books found",
+  "booksServerConnectionError": "Couldn't connect to the server",
+  "booksConnectionErrorHint": "Please check your internet connection and try again\nor pull down to refresh",
+  "booksSearchHint": "Search for a book or author...",
+  "booksCategoryAll": "All",
+  "booksCategoryHadith": "Hadith",
+  "booksCategoryFiqh": "Fiqh",
+  "booksCategorySeerah": "Seerah",
+  "booksCategoryAqeedah": "Aqeedah",
+  "booksCategoryAdab": "Adab",
+  "booksCategoryTazkiyah": "Tazkiyah",
+  "booksCategoryQuranicSciences": "Quranic Sciences",
+  "booksVolumeLabel": "Volume",
+  "booksBookletLabel": "Booklet",
+  "booksLoadingMessage": "Loading books...",
+  "khatmaDailyGoalLabel": "Daily Goal",
+  "khatmaDailyGoalPages": "{n} pages",
+  "khatmaAppInfoSectionTitle": "App Info",
+  "khatmaVersionLabel": "Version",
+  "khatmaRateAppLabel": "Rate the App",
+  "khatmaHistoryTitle": "Khatma History",
+  "khatmaHistoryCompletedTab": "Completed ({count})",
+  "khatmaHistoryCancelledTab": "Cancelled ({count})",
+  "khatmaHistoryError": "Error",
+  "khatmaHistoryEmptyCompletedTitle": "No completed or finished khatmas",
+  "khatmaHistoryEmptyCompletedSubtitle": "Start a new khatma to see it here once completed or finished",
+  "khatmaHistoryEmptyCancelledTitle": "No cancelled khatmas",
+  "khatmaHistoryEmptyCancelledSubtitle": "Cancelled khatmas will appear here",
+  "khatmaHistoryDeleteTitle": "Delete Khatma",
+  "khatmaHistoryDeleteConfirm": "Do you want to permanently delete this khatma?",
+  "khatmaHistoryDeletedToast": "Khatma deleted successfully",
+  "khatmaHistoryStatusCompleted": "Completed",
+  "khatmaHistoryStatusCancelled": "Cancelled",
+  "khatmaHistoryDaysLabel": "{n} days",
+  "khatmaHistoryPagesProgress": "{read} / {total} pages",
+  "qiyamWirdTitle": "Qiyam Wird",
+  "qiyamWirdBeforeQiyamHeader": "Adhkar Before Qiyam",
+  "qiyamWirdIstighfarTitle": "Istighfar",
+  "qiyamWirdTasbihTitle": "Tasbih",
+  "qiyamWirdLastThirdHeader": "Duas from the Last Third of the Night",
+  "qiyamWirdProphetDuaTitle": "Dua of the Prophet ﷺ",
+  "qiyamWirdSayyidIstighfarTitle": "Sayyid al-Istighfar",
+  "qiyamWirdMulkHeader": "Surah Al-Mulk (The Protector)",
+  "qiyamWirdReadMulkTitle": "Read Surah Al-Mulk",
+  "qiyamWirdMulkSubtitle": "Intercedes for its reader and saves from the punishment of the grave",
+  "qiyamWirdCompletedButton": "Wird completed successfully",
+  "qiyamWirdTapToCountButton": "Tap to count",
+  "qiyamDashboardTitle": "Qiyam Al-Layl",
+  "qiyamDashboardStageProgress": "Stage {current} of {total}",
+  "qiyamDashboardChooseStageDuration": "Choose stage duration",
+  "qiyamDashboardMinutesLabel": "{mins, plural, one{1 minute} other{{mins} minutes}}",
+  "qiyamDashboardTimeRemainingLabel": "Time Remaining",
+  "qiyamDashboardStoriesTitle": "Wonders and Stories of Qiyam",
+  "qiyamDashboardStoriesSubtitle": "Inspiring true stories about the impact of night prayer",
+  "qiyamDashboardToolsSectionTitle": "Tools & Faith Guide",
+  "qiyamDashboardVirtuesTool": "Virtues of Qiyam",
+  "qiyamDashboardSleepCalcTool": "Sleep Calculator",
+  "qiyamDashboardSunnahTool": "The Prophetic Sunnah",
+  "qiyamDashboardBeginnerGuideTool": "Beginner's Guide",
+  "qiyamDashboardHourCalcTool": "Hour Calculator",
+  "qiyamDashboardBannerLabel": "Notice",
+  "qiyamDashboardBannerDesc": "A complete program for night prayer... a step closer to Allah.",
+  "qiyamGuideIntroTitle": "Your First Step into Qiyam Al-Layl",
+  "qiyamGuideIntroSubtitle": "Don't worry if you're just starting — everyone who prays qiyam began with a simple step. Here's your roadmap.",
+  "qiyamGuideTip1Title": "Start Small",
+  "qiyamGuideTip1Content": "Don't overburden yourself at first — start with just two rak'ahs after Isha prayer, then gradually increase.",
+  "qiyamGuideTip2Title": "Sleep Early",
+  "qiyamGuideTip2Content": "Sleeping early is the golden key to waking up energized in the last third of the night.",
+  "qiyamGuideTip3Title": "Wudu and Bismillah",
+  "qiyamGuideTip3Content": "Perform wudu before sleeping and recite the adhkar — this helps the soul rise for qiyam.",
+  "qiyamGuideTip4Title": "Make It a Habit",
+  "qiyamGuideTip4Content": "Consistency matters more than quantity — \"The most beloved deeds to Allah are the most consistent, even if small.\"",
+  "qiyamGuideFaqTitle": "Frequently Asked Questions",
+  "qiyamGuideFaqQ1": "Is it required to sleep before Qiyam?",
+  "qiyamGuideFaqA1": "It is not required, but prayer performed after sleeping is called \"Tahajjud\".",
+  "qiyamGuideFaqQ2": "What is the minimum number of rak'ahs?",
+  "qiyamGuideFaqA2": "One rak'ah (Witr), though eleven rak'ahs is best.",
+  "qiyamGuideFaqQ3": "When does the time for Qiyam begin?",
+  "qiyamGuideFaqA3": "From after Isha prayer until the Fajr adhan.",
+  "mosquesCannotOpenMaps": "Couldn't open Maps",
+  "mosquesCannotMakeCall": "Couldn't make the call",
+  "mosquesNearbyTitle": "Nearby Mosques",
+  "mosquesCurrentLocationLabel": "Current location: {city}",
+  "mosquesViewOnMapButton": "View on Map",
+  "mosquesDistanceMeters": "{n} m",
+  "mosquesDistanceKm": "{n} km",
+  "mosquesNextPrayerLabel": "Next prayer: {time}",
+  "mosquesDirectionsButton": "Directions",
+  "mosquesCallButton": "Call",
+  "mosquesHadithSectionTitle": "The Virtue of Going to the Mosque",
+  "mosquesEmptyState": "No nearby mosques found within a 5 km radius",
+  "quranScreenKhatmaLabel": "Khatma",
+  "quranScreenTitle": "The Noble Quran",
+  "quranScreenAyahLabel": "Verse {n}",
+  "quranScreenContinueKhatma": "Continue Khatma",
+  "quranScreenStartNewKhatma": "Start New Khatma",
+  "quranScreenContinueFromPage": "Continue reading from page {page}",
+  "quranScreenChooseKhatmaOptions": "Choose the khatma options that suit you",
+  "quranScreenFreeReadingTitle": "Free Reading",
+  "quranScreenFreeReadingSubtitle": "Read the Noble Quran freely",
+  "quranScreenHistoryGridSubtitle": "Completed Khatmas",
+  "quranScreenProgressGridSubtitle": "Reading Statistics",
+  "quranScreenSettingsGridSubtitle": "Customize the App",
+  "quranScreenAiMemorizeTitle": "Smart Memorization",
+  "quranScreenAiMemorizeSubtitle": "Memorize the Quran with AI",
+  "remindersAdviceTitle": "Advice",
+  "remindersAdviceDesc": "Maintaining daily adhkar brings peace and tranquility to the heart. Make sure to enable reminders to stay in constant connection with Allah.",
+  "remindersScreenTitle": "Reminders",
+  "remindersAddButtonTitle": "Add New Reminder",
+  "remindersAddButtonSubtitle": "Tap here to create a custom reminder",
+  "remindersEmptyTitle": "No reminders yet",
+  "remindersEmptySubtitle": "Add your first reminder by tapping the button above",
+  "remindersMyRemindersTitle": "My Reminders",
+  "remindersCountBadge": "{count, plural, one{1 reminder} other{{count} reminders}}",
+  "remindersDeleteDialogTitle": "Delete Reminder",
+  "remindersDeleteDialogConfirm": "Do you want to delete \"{title}\"?",
+  "profileScreenTitle": "Profile",
+  "profileLoadError": "Error loading data",
+  "profileDefaultUsername": "Takwa User",
+  "profileGenderMale": "Male",
+  "profileGenderFemale": "Female",
+  "profileMemberBadge": "Dedicated Member",
+  "profileTaqwaPointsLabel": "Taqwa Points",
+  "profileStreakDaysLabel": "Consecutive Days",
+  "profileAchievementsMenuTitle": "Achievements",
+  "profileAccountingLogMenuTitle": "Accountability Log",
+  "profileAccountSettingsMenuTitle": "Account Settings",
+  "profileLogoutDialogTitle": "Log Out",
+  "profileLogoutDialogConfirm": "Are you sure you want to log out?",
+  "profileLogoutConfirmButton": "Exit",
+  "updatePasswordEnterNew": "Enter your new password",
+  "updatePasswordMismatch": "Passwords don't match",
+  "updatePasswordSuccessMessage": "New password set successfully ✓",
+  "updatePasswordUnexpectedError": "An unexpected error occurred, please try again later",
+  "updatePasswordSameAsOld": "The new password matches your current password",
+  "updatePasswordMinLength": "Password must be at least 6 characters",
+  "updatePasswordSessionExpired": "Your session has expired, please request a new recovery code",
+  "updatePasswordGenericFailure": "Couldn't update the password, please try again",
+  "updatePasswordTitle": "Set New Password",
+  "updatePasswordSubtitle": "Enter your account's new password to sign in securely",
+  "updatePasswordNewHint": "New Password",
+  "updatePasswordConfirmHint": "Confirm New Password",
+  "updatePasswordSavingButton": "Saving...",
+  "updatePasswordSaveAndSignInButton": "Save Password & Sign In",
+  "qiyamSunnahGuideTitle": "The Method of Qiyam and Tahajjud",
+  "qiyamSunnahGuideHeaderTitle": "The Prophet's ﷺ Guidance on Night Prayer",
+  "qiyamSunnahGuideHeaderSubtitle": "A comprehensive guide to learning how to pray Tahajjud as reported from the Messenger ﷺ and his noble companions.",
+  "qiyamSunnahStep1Title": "Intention and Sincerity",
+  "qiyamSunnahStep1Content": "The worshiper intends to pray qiyam al-layl to draw closer to Allah, and it is preferred to sleep in a state of purity.",
+  "qiyamSunnahStep2Title": "Opening with Two Light Rak'ahs",
+  "qiyamSunnahStep2Content": "When the Prophet ﷺ rose at night, he would open his prayer with two light rak'ahs to energize the body.",
+  "qiyamSunnahStep3Title": "How to Pray (Two by Two)",
+  "qiyamSunnahStep3Content": "Night prayer is performed two by two — giving the taslim after every two rak'ahs — prolonging the bowing and prostration as one is able.",
+  "qiyamSunnahStep4Title": "Reciting with Reflection",
+  "qiyamSunnahStep4Content": "It is recommended to recite slowly and reflectively — asking Allah when passing a verse of mercy, and seeking refuge when passing a verse of punishment.",
+  "qiyamSunnahStep5Title": "Ending Qiyam with Witr",
+  "qiyamSunnahStep5Content": "The worshiper concludes their qiyam with a single rak'ah that makes their prayer odd-numbered (Witr), following his ﷺ saying: \"Make the last of your night prayer Witr.\"",
+  "qiyamVirtuesScreenTitle": "Virtues of Night Prayer",
+  "qiyamVirtuesFromQuran": "From the Noble Quran",
+  "qiyamVirtuesFromSunnah": "From the Prophetic Sunnah",
+  "qiyamVirtuesFromSalaf": "From the Sayings of the Salaf",
+  "qiyamStoriesScreenTitle": "Stories and Wonders of Qiyam",
+  "qiyamStoryTitle1": "The Believer's Honor",
+  "qiyamStoryTitle2": "The Master of the Tabi'un and Qiyam",
+  "qiyamStoryTitle3": "The Arrows of the Night Never Miss",
+  "qiyamStoryTitle4": "The Radiance of the Face from Qiyam",
+  "accountSettingsSavedSuccess": "Changes saved successfully",
+  "accountSettingsSaveError": "An error occurred while saving changes",
+  "accountSettingsPersonalInfoSection": "Personal Information",
+  "accountSettingsNameLabel": "Name",
+  "accountSettingsNameHint": "Enter your name",
+  "accountSettingsNameRequired": "Please enter your name",
+  "accountSettingsEmailImmutableNote": "Email cannot be changed at this time",
+  "accountSettingsSaveButton": "Save Changes",
+  "accountSettingsSecuritySection": "Security",
+  "accountSettingsChangePasswordTile": "Change Password",
+  "bookReaderCustomizeTitle": "Customize Reading",
+  "bookReaderThemeDay": "Day",
+  "bookReaderThemeSepia": "Paper",
+  "bookReaderFontSizeSampleLetter": "A",
+  "bookReaderNextButton": "Next",
+  "bookReaderPrevButton": "Previous",
+  "bookReaderPageProgress": "{done} of {total}",
+  "bookReaderPageLabel": "Page",
+  "favoriteAdhkarScreenTitle": "My Favorite Adhkar",
+  "favoriteAdhkarCountLabel": "{count, plural, one{1 saved dhikr} other{{count} saved adhkar}}",
+  "@favoriteAdhkarCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "favoriteAdhkarEmptyTitle": "No favorite adhkar yet",
+  "favoriteAdhkarEmptySubtitle": "Tap ❤️ on any dhikr to save it here",
+  "favoriteAdhkarCopiedToast": "Copied ✓",
+  "qiyamSleepCalcTitle": "Smart Sleep Calculator",
+  "qiyamSleepCalcHeaderTitle": "Wake up energized for Qiyam",
+  "qiyamSleepCalcHeaderSubtitle": "The calculator uses sleep cycles (90 minutes) to find the best time to sleep so you wake up at your most refreshed.",
+  "qiyamSleepCalcWakeupQuestion": "When do you want to wake up?",
+  "qiyamSleepCalcBestTimesLabel": "Best times to sleep:",
+  "qiyamSleepCycle9h": "9 hours (ideal)",
+  "qiyamSleepCycle75h": "7.5 hours (excellent)",
+  "qiyamSleepCycle6h": "6 hours (good)",
+  "qiyamSleepCycle45h": "4.5 hours (sufficient)",
+  "qiyamSleepCycle15h": "1.5 hours (nap)",
+  "qiyamSleepCalcSleepAtLabel": "You should sleep at",
+  "bookPdfNoUrlError": "Sorry, no PDF link was found for this book.",
+  "bookPdfDownloadingLabel": "Downloading...",
+  "bookPdfDownloadingPercentLabel": "Downloading... {pct}%",
+  "@bookPdfDownloadingPercentLabel": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "bookPdfLoadFailedTitle": "Failed to load file",
+  "bookPdfShareAction": "Share",
+  "bookPdfCopiedToast": "Copied",
+  "bookPdfHighlightAction": "Highlight",
+  "bookPdfHighlightedToast": "Text highlighted",
+  "notifPreAdhanTitle": "⏳ {prayerName} time is approaching",
+  "@notifPreAdhanTitle": {
+    "placeholders": {
+      "prayerName": {
+        "type": "String"
+      }
+    }
+  },
+  "notifPreAdhanBody": "15 minutes until {prayerName} adhan — prepare for prayer",
+  "@notifPreAdhanBody": {
+    "placeholders": {
+      "prayerName": {
+        "type": "String"
+      }
+    }
+  },
+  "notifAdhanTitle": "It's time for {prayerName}",
+  "@notifAdhanTitle": {
+    "placeholders": {
+      "prayerName": {
+        "type": "String"
+      }
+    }
+  },
+  "notifAdhanBody": "Allahu Akbar, Allahu Akbar — Hayya 'ala-s-Salah, Hayya 'ala-l-Falah",
+  "notifIqamaTitle": "Iqama time — {prayerName}",
+  "@notifIqamaTitle": {
+    "placeholders": {
+      "prayerName": {
+        "type": "String"
+      }
+    }
+  },
+  "notifIqamaBody": "It's time for Iqama of {prayerName} prayer, Allahu Akbar Allahu Akbar",
+  "@notifIqamaBody": {
+    "placeholders": {
+      "prayerName": {
+        "type": "String"
+      }
+    }
+  },
+  "notifMuhasabaTitle": "Time for self-accountability",
+  "notifMuhasabaMsg1": "How was your day with Allah? Take yourself to account before you sleep 🌙",
+  "notifMuhasabaMsg2": "\"Hold yourselves accountable before you are held accountable\" — Umar ibn al-Khattab",
+  "notifMuhasabaMsg3": "What have you offered today? Log your worship now 📝",
+  "notifMuhasabaMsg4": "The night calls out: O believer, what did you do today? 🌟",
+  "notifMuhasabaMsg5": "Don't sleep before holding yourself accountable for your day 💫",
+  "notifMuhasabaMsg6": "Three minutes of self-accountability are better than hours of regret 🤲",
+  "notifMuhasabaMsg7": "Did you accomplish something good today? Write it down and thank Allah 🙏",
+  "notifDuaMorningTitle": "Morning Dua",
+  "notifDuaEveningTitle": "Evening Dua",
+  "notifDuaTodayTitle": "Today's Dua",
+  "notifFridayKahfTitle": "Surah Al-Kahf",
+  "notifFridayKahfBody": "Don't forget to read Surah Al-Kahf today — a light between the two Fridays",
+  "notifFridaySalawatTitle": "Salawat upon the Prophet ﷺ",
+  "notifFridaySalawatBody": "O Allah, send blessings and peace upon our master Muhammad — increase your salawat on Friday",
+  "notifFastingMondayTitle": "Monday Fasting Reminder",
+  "notifFastingMondayBody": "Tomorrow is Monday — deeds are presented on this day, may yours find you fasting",
+  "notifFastingThursdayTitle": "Thursday Fasting Reminder",
+  "notifFastingThursdayBody": "Tomorrow is Thursday — deeds are raised on this day, blessed is the one who fasts",
+  "notifWhiteDaysTitle": "Tomorrow is a White Day",
+  "notifWhiteDaysBody": "Tomorrow is day {day} of {month} in the Hijri calendar — fasting the White Days is a confirmed Sunnah",
+  "@notifWhiteDaysBody": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "notifSuhoorTitle": "Suhoor Reminder",
+  "notifSuhoorBody": "30 minutes left until Imsak — wake up for suhoor, may Allah bless you",
+  "notifIftarTitle": "It's Time for Iftar",
+  "notifIftarBody": "O Allah, I have fasted for You and with Your provision I break my fast — blessed Ramadan",
+  "notifWakeUpTitle": "Time to Wake Up",
+  "notifWakeUpBody": "Prayer is better than sleep — wake up for Fajr prayer",
+  "notifWakeUpSnoozeTitle": "Time to Wake Up (Snooze)",
+  "notifAchievementNewPrefix": "New achievement: {title}",
+  "@notifAchievementNewPrefix": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "notifAchievementPointsSuffix": "+{points} Taqwa points 🌟",
+  "@notifAchievementPointsSuffix": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "notifAchievementPointsShort": "+{points} Taqwa points",
+  "@notifAchievementPointsShort": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "notifAdhkarMorningTitle": "Time for Morning Adhkar",
+  "notifAdhkarEveningTitle": "Time for Evening Adhkar",
+  "notifAdhkarSleepTitle": "Time for Sleep Adhkar",
+  "notifAdhkarMorningChannelName": "Morning Adhkar",
+  "notifAdhkarEveningChannelName": "Evening Adhkar",
+  "notifAdhkarSleepChannelName": "Sleep Adhkar",
+  "notifAdhkarChannelDesc": "Adhkar and duas from Hisn al-Muslim",
+  "notifAdhkarActionRead": "I've read it ✓",
+  "notifAdhkarActionOpen": "Open Adhkar",
+  "silentModeSettingsTitle": "Silent Mode Settings",
+  "silentModeEnableLabel": "Enable silent mode",
+  "silentModeEnableSublabel": "We recommend enabling this if the adhan doesn’t play reliably on your phone",
+  "silentModeVibrationLabel": "Vibration",
+  "silentModeVibrationSublabel": "Enable vibration while in silent mode",
+  "silentModeAlertStyleLabel": "Alert on switch",
+  "silentModeAlertNone": "No alert",
+  "silentModeAlertVibrateOnly": "Vibrate only",
+  "silentModeAlertToneOnly": "Tone without vibration",
+  "silentModeAlertToneVibrate": "Tone with vibration",
+  "silentModeDurationLabel": "Silence duration after Adhan",
+  "silentModeDurationSublabel": "How long the phone stays silenced automatically after each prayer time starts",
+  "silentModeDurationMinutes": "{mins, plural, one{1 minute} other{{mins} minutes}}",
+  "booksChapterAboutTitle": "About the Book",
+  "booksChapterTocTitle": "Table of Contents",
+  "booksChapterPagesCount": "{count, plural, one{1 page} other{{count} pages}}",
+  "@booksChapterPagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "booksChapterChaptersCount": "{count, plural, one{1 chapter} other{{count} chapters}}",
+  "@booksChapterChaptersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "booksChapterMinutesAbbrev": "~{minutes} min",
+  "@booksChapterMinutesAbbrev": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "booksChapterReadPdfButton": "Read PDF Version",
+  "booksChapterStartReadingButton": "Start Reading",
+  "booksChapterContinueReadingButton": "Continue Reading",
+  "booksChapterReadingProgressLabel": "Reading Progress",
+  "asmaScreenTitle": "The 99 Names of Allah",
+  "asmaScreenSubtitle": "99 Blessed Names",
+  "asmaSearchHint": "Search the names...",
+  "asmaNoResultsLabel": "No results found",
+  "asmaDuaLabel": "Dua",
+  "asmaDetailExplanationTitle": "Explanation",
+  "asmaDetailQuranTitle": "From the Noble Quran",
+  "asmaDetailDuaTitle": "Supplication with this Name",
+  "achievementsScreenTitle": "My Achievements",
+  "achievementsProgressLabel": "Progress",
+  "achievementsCategoryDaily": "Daily Achievements",
+  "achievementsCategoryMilestone": "Milestones",
+  "achievementsCategoryIbadah": "Worship & Dhikr",
+  "achievementsCategorySpecial": "Special Achievements",
+  "achievementsAchievedOnLabel": "Achieved on {date}",
+  "@achievementsAchievedOnLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "achievementsEncourageMessage": "Keep going to double your efforts and earn this achievement! ✨",
+  "achievementsGotItButton": "Got it",
+  "prayerJumuah": "Jumu'ah",
+  "prayerSelectionSunriseAlertsLabel": "Sunrise alerts",
+  "prayerSelectionAdhanLabel": "{name} Adhan",
+  "@prayerSelectionAdhanLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "termsPrivacyScreenTitle": "Terms & Privacy",
+  "termsPrivacyAppName": "Takwa App",
+  "termsPrivacySubtitle": "Terms & Privacy Policy",
+  "termsPrivacyTermsSectionTitle": "Terms of Service",
+  "termsPrivacyPolicySectionTitle": "Privacy Policy",
+  "termsPrivacyTermsBody": "Welcome to the \"Takwa\" app. By using this app, you agree to the terms and conditions of use outlined here. Through this app, we aim to provide Islamic services — adhkar, prayer times, and Islamic values — that benefit our Muslim community. Please use the app for its intended purpose and refrain from misusing its services or content.",
+  "termsPrivacyPolicyBody": "We respect your privacy and are committed to protecting your personal data. The app may need access to your location solely to determine accurate prayer times. We do not share or sell your personal data to any third party. Your data is used locally on your device to provide a better user experience.",
+  "termsPrivacyFooterThanks": "Thank you for trusting the Takwa app",
+  "termsPrivacyFooterDua": "We ask Allah to benefit us all with what is good",
+  "addReminderTitle": "Add New Reminder",
+  "addReminderTitleLabel": "Reminder Title",
+  "addReminderTitleRequired": "Please enter a title for the reminder",
+  "addReminderTitleHint": "e.g. Duha prayer, daily wird reading...",
+  "addReminderTimeLabel": "Reminder Time",
+  "addReminderIconLabel": "Reminder Icon",
+  "addReminderSaveError": "An error occurred while saving: {error}",
+  "@addReminderSaveError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "addReminderAddButton": "Add",
+  "freeReadingScreenTitle": "Free Reading",
+  "freeReadingTabSurah": "Surah",
+  "freeReadingTabReview": "Review",
+  "freeReadingTabIndex": "Index",
+  "freeReadingTabJuz": "Juz",
+  "freeReadingTabRub": "Rub",
+  "freeReadingSearchHintSurah": "Search a surah, ayah, or page",
+  "freeReadingSearchHintOther": "Search surahs",
+  "freeReadingLastReadLabel": "Last read: {surah} - page {page}",
+  "@freeReadingLastReadLabel": {
+    "placeholders": {
+      "surah": {
+        "type": "String"
+      },
+      "page": {
+        "type": "String"
+      }
+    }
+  },
+  "freeReadingLastReadNone": "Last read: none",
+  "freeReadingHizbLabel": "Hizb {number}",
+  "@freeReadingHizbLabel": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "misbahaScreenTitle": "Digital Tasbih",
+  "misbahaSelectedDhikrLabel": "Selected Dhikr",
+  "misbahaChooseDhikrPrompt": "Choose a dhikr to count",
+  "misbahaTapToChooseHint": "Tap here to choose a dhikr from the list to focus your worship",
+  "misbahaListeningLabel": "Listening...",
+  "misbahaTapOrHoldHint": "Tap or press and hold",
+  "misbahaResetButton": "Reset",
+  "misbahaSoundButton": "Sound",
+  "misbahaChooseDhikrTitle": "Choose a Dhikr",
+  "misbahaCounterSemanticLabel": "Dhikr counter, {count} times",
+  "@misbahaCounterSemanticLabel": {
+    "description": "Screen-reader label for the main tasbih bead when no target count is set",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "misbahaCounterWithTargetSemanticLabel": "Dhikr counter, {count} of {target} times",
+  "@misbahaCounterWithTargetSemanticLabel": {
+    "description": "Screen-reader label for the main tasbih bead when a dhikr with a target count is selected",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "misbahaDhikrItemSemanticLabel": "{arabic}, {count} times",
+  "@misbahaDhikrItemSemanticLabel": {
+    "description": "Screen-reader label for a dhikr row in the picker list",
+    "placeholders": {
+      "arabic": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qiyamCalcLoadError": "Error loading prayer times: {error}",
+  "@qiyamCalcLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "qiyamCalcScreenTitle": "Night Calculator",
+  "qiyamCalcMidnightTitle": "Islamic Midnight",
+  "qiyamCalcMidnightSubtitle": "The optional Isha window ends here",
+  "qiyamCalcLastThirdTitle": "Start of the Last Third",
+  "qiyamCalcLastThirdSubtitle": "The best time for Qiyam and Witr prayer",
+  "qiyamStageIstighfarTitle": "Istighfar",
+  "qiyamStageIstighfarSubtitle": "Purifying the heart and soul",
+  "qiyamStageDuaTitle": "Dua",
+  "qiyamStageDuaSubtitle": "Intimate supplication in the last part of the night",
+  "qiyamStageSalahTitle": "Qiyam Prayer",
+  "qiyamStageSalahSubtitle": "Lengthening the qunut and ruku",
+  "qiyamStageWitrTitle": "Witr",
+  "qiyamStageWitrSubtitle": "The closing prayer of the night",
+  "paymentMethodsScreenTitle": "Payment Method",
+  "paymentMethodEdahabiaTitle": "Edahabia / CIB",
+  "paymentMethodVisaTitle": "Visa / Mastercard",
+  "paymentSupportTitle": "Ongoing Charity",
+  "paymentSupportMessage": "With your small contribution, you help make \"Takwa\" available to millions of Muslims as an ongoing charity (sadaqah jariyah) on your behalf and your parents'. 100 DZD or €10 a month ensures this work continues and keeps improving.",
+  "paymentContinueButton": "Continue to Payment",
+  "paymentComingSoonMessage": "Payment will be enabled soon, insha'Allah",
+  "qiyamOnboardingTitle": "Welcome to Qiyam al-Layl",
+  "qiyamOnboardingDescription": "A calm spiritual journey in the depth of the night — beginning with dhikr, passing through the Quran, and completed with prayer and istighfar.",
+  "qiyamOnboardingStep1": "Prepare with dhikr and praise",
+  "qiyamOnboardingStep2": "Recite the verses of Allah with reflection",
+  "qiyamOnboardingStep3": "Converse with your Lord through prayer and dua",
+  "qiyamOnboardingStep4": "Conclude with istighfar in the last hours of the night",
+  "qiyamOnboardingStartButton": "Begin the Journey Now",
+  "subscriptionScreenTitle": "Subscription",
+  "subscriptionIntroText": "Subscriptions help keep the project going.",
+  "subscriptionFreeAccessNote": "Anyone who can't afford the subscription is welcome to use the app for free.",
+  "subscriptionHonorSystemNote": "Unless stated otherwise, we don't verify that a user has paid the subscription fee — this is intentionally left to the user's discretion.",
+  "subscriptionPayMonthlyButton": "I can pay monthly",
+  "subscriptionUseFreeButton": "I want to use the app for free",
+  "aiMemorizeScreenTitle": "Smart Memorization",
+  "aiMemorizeTabPages": "Pages",
+  "aiMemorizeTabSurahs": "Surahs",
+  "aiMemorizePageSearchHint": "Enter a page number (1-604)",
+  "aiMemorizeSurahSearchHint": "Search surahs",
+  "khatmaRingOfPagesLabel": "of {total} pages",
+  "@khatmaRingOfPagesLabel": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "quranJuzLabel": "Juz {name}",
+  "@quranJuzLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "quranJuzPercentComplete": "{percent}% complete",
+  "@quranJuzPercentComplete": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "favoriteDuasScreenTitle": "My Favorite Duas",
+  "favoriteDuasCountLabel": "{count, plural, one{1 saved dua} other{{count} saved duas}}",
+  "@favoriteDuasCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "favoriteDuasEmptyTitle": "No favorite duas yet",
+  "favoriteDuasEmptySubtitle": "Tap ❤️ on any dua to save it here",
+  "quranReaderMushafModeTitle": "Mushaf",
+  "quranReaderMushafModeTooltip": "Mushaf Mode",
+  "customIbadahGroupTitle": "My Habits & Additions",
+  "customIbadahAddButton": "Add and customize your habits",
+  "customIbadahPositiveHeader": "Positive Habits",
+  "customIbadahNegativeHeader": "Negative Habits (custom prohibitions)",
+  "authChoiceAppName": "Takwa",
+  "authChoiceTagline": "Your companion toward a life full of faith",
+  "authChoiceSignInButton": "Sign In",
+  "authChoiceGuestButton": "Continue as Guest",
+  "authChoiceSyncNote": "Signing in ensures your data is saved across all your devices",
+  "authPasswordStrengthWeak": "Weak",
+  "authPasswordStrengthMedium": "Medium",
+  "authPasswordStrengthGood": "Good",
+  "authPasswordStrengthStrong": "Strong ✓",
+  "authPasswordStrengthLabel": "Password strength: {strength}",
+  "@authPasswordStrengthLabel": {
+    "placeholders": {
+      "strength": {
+        "type": "String"
+      }
+    }
+  },
+  "mosqueErrorLocationPermission": "Please enable location permission to see nearby mosques",
+  "mosqueErrorLocationPermissionForever": "You must enable location permissions from device settings",
+  "mosqueFetchError": "Could not load mosques (server is busy). Please try again later",
+  "mosqueDefaultName": "Nearby Mosque",
+  "mosqueDefaultAddress": "No specific address",
+  "emailConfirmationTitle": "Confirm Your Email",
+  "emailConfirmationLinkSentLabel": "A confirmation link was sent to:\n{email}",
+  "@emailConfirmationLinkSentLabel": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "emailConfirmationInstructions": "Please check your email and tap the link to activate your account and begin your journey with Takwa.",
+  "emailConfirmationBackToSignInButton": "Back to Sign In",
+  "guestGuardTitle": "Cloud Feature",
+  "guestGuardMessage": "This feature (checklist and statistics) requires cloud sync to save your progress. Please sign in to enable it.",
+  "guestGuardSignInButton": "Sign In / Create Account",
+  "guestGuardBackButton": "Back",
+  "customTimePickerTitle": "Select Time",
+  "customTimePickerConfirmButton": "Confirm",
+  "quranReaderBookmarkSaved": "Bookmark saved",
+  "achievementPointsRewardLabel": "+{points} pts",
+  "@achievementPointsRewardLabel": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "achievementPendingLabel": "Pending",
+  "khatmaMenuMarkFinished": "Mark as Finished",
+  "khatmaMenuCancelKhatma": "Cancel Khatma",
+  "khatmaMarkFinishedDialogTitle": "Mark as Finished",
+  "khatmaMarkFinishedDialogBody": "Are you sure you want to mark this Khatma as finished?",
+  "khatmaMarkFinishedDialogNote": "This is appropriate if you finished reading the Quran from another source.",
+  "khatmaMarkFinishedConfirm": "Confirm",
+  "khatmaCancelDialogTitle": "Cancel Khatma",
+  "khatmaCancelDialogBody": "Are you sure you want to cancel this Khatma?",
+  "khatmaCancelDialogWarning": "Warning: your progress will be saved in history, but you won't be able to restore a cancelled Khatma again.",
+  "khatmaCancelConfirmFinal": "Cancel Khatma Permanently",
+  "khatmaDialogGoBack": "Go Back",
+  "khatmaInfoSectionTitle": "Khatma Information",
+  "khatmaInfoNameLabel": "Khatma Name",
+  "khatmaInfoTypeLabel": "Khatma Type",
+  "khatmaInfoStartDateLabel": "Start Date",
+  "khatmaInfoCompletedDaysLabel": "Completed Days",
+  "khatmaInfoCompletedDaysValue": "{n} days",
+  "@khatmaInfoCompletedDaysValue": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaInfoEndTypeLabel": "Khatma Duration",
+  "khatmaInfoEndTypeNoLimit": "No set end time",
+  "khatmaInfoEndTypeTarget": "Until {date}",
+  "@khatmaInfoEndTypeTarget": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaTypeMuyassaraLabel": "Easy Khatma",
+  "khatmaTypeMultazimaLabel": "Committed Khatma",
+  "khatmaOverallProgressTitle": "Overall Progress",
+  "khatmaReachedPageLabel": "Reached Page",
+  "khatmaReachedPageValue": "{current} of {total}",
+  "@khatmaReachedPageValue": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaCurrentPageLabel": "Current Page",
+  "khatmaCurrentPageValue": "Page {n}",
+  "@khatmaCurrentPageValue": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaRemainingPagesLabel": "Remaining Pages",
+  "khatmaRemainingPagesValue": "{n} pages",
+  "@khatmaRemainingPagesValue": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaEstimatedHasanatLabel": "Estimated Rewards",
+  "khatmaEstimatedHasanatValue": "{n} hasanat",
+  "@khatmaEstimatedHasanatValue": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaStatusMuyassaraBadge": "Easy Khatma - No time pressure",
+  "khatmaStatusMultazimaBadge": "Committed Khatma - {n} pages/day",
+  "@khatmaStatusMultazimaBadge": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaAvgPagesPerDayLabel": "Average Pages/Day",
+  "khatmaTypeDescriptionLabel": "Khatma Type",
+  "khatmaTypeDescriptionFree": "No time pressure or set daily portion",
+  "khatmaTypeDescriptionTarget": "Set daily portion: {n} pages",
+  "@khatmaTypeDescriptionTarget": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaExtraStatsTitle": "Additional Statistics",
+  "khatmaTotalReadingTimeLabel": "Total Reading Time",
+  "khatmaAvgReadingTimeLabel": "Average Reading Time",
+  "khatmaCurrentStreakLabel": "Current Streak",
+  "khatmaLongestStreakLabel": "Longest Streak",
+  "khatmaLastReadLabel": "Last Read",
+  "khatmaStreakDaysValue": "{n} days",
+  "@khatmaStreakDaysValue": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaNoDataValue": "—",
+  "khatmaReadingDaysTitle": "Reading Days",
+  "khatmaReadingDaysSubtitle": "Days you read the Holy Quran",
+  "khatmaLegendFuture": "Upcoming",
+  "khatmaLegendMissed": "Missed",
+  "khatmaLegendPartial": "Partial",
+  "khatmaLegendComplete": "Complete",
+  "khatmaDurationHoursMinutes": "{hours}h {minutes}m",
+  "@khatmaDurationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaDurationMinutesSeconds": "{minutes}m {seconds}s",
+  "@khatmaDurationMinutesSeconds": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      },
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaDurationSecondsOnly": "{seconds}s",
+  "@khatmaDurationSecondsOnly": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaHistorySortMenuTooltip": "Sort & View",
+  "khatmaHistorySortByDate": "Sort by Date",
+  "khatmaHistorySortByName": "Sort by Name",
+  "khatmaHistorySortByDuration": "Sort by Duration",
+  "khatmaHistorySortByProgress": "Sort by Progress",
+  "khatmaHistoryShowStats": "Show Statistics",
+  "khatmaHistoryViewDetails": "View Details",
+  "khatmaHistoryDetailsTitle": "Khatma Details",
+  "khatmaHistoryStatsTitle": "Khatma Statistics",
+  "khatmaHistoryStatsTotal": "Total Khatmas",
+  "khatmaHistoryStatsCompleted": "Completed Khatmas",
+  "khatmaHistoryStatsCancelled": "Cancelled Khatmas",
+  "khatmaHistoryStatsTotalPages": "Total Pages Read",
+  "khatmaHistoryCloseButton": "Close",
+  "khatmaProgressEmptyTitle": "No active Khatma right now",
+  "khatmaProgressEmptySubtitle": "Start a new Khatma to track your progress here",
+  "routeNotFoundTitle": "Page not available",
+  "routeNotFoundMessage": "Couldn’t open “{route}”.",
+  "@routeNotFoundMessage": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "routeNotFoundGoHome": "Back to home",
+  "routeNotFoundGoBack": "Go back",
+  "prayerGenericLabel": "Prayer",
+  "guestGuardTitle": "Cloud feature",
+  "guestGuardMessage": "Muhasaba and Statistics need cloud sync to save your progress. Sign in to enable them.",
+  "guestGuardSignIn": "Sign in / Create account",
+  "guestGuardBack": "Back",
+  "splashQuote": "“Take account of yourselves before you are brought to account”",
+  "genericErrorMessage": "An unexpected error occurred. Please try again.",
+  "@genericErrorMessage": {
+    "description": "Generic fallback error message when a section fails to load"
+  },
+  "retryButtonLabel": "Retry",
+  "@retryButtonLabel": {
+    "description": "Generic retry action button label"
+  },
+  "inlineErrorRetryLabel": "Couldn't load — tap to retry",
+  "@inlineErrorRetryLabel": {
+    "description": "Semantic label for a compact inline retry affordance (a small area that failed to load, e.g. a stat tile)"
+  },
+  "statsChartBarSemanticLabel": "{day}: {points} points",
+  "@statsChartBarSemanticLabel": {
+    "description": "Screen-reader label for one bar in the weekly/period performance chart",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "drawerSyncOffline": "Offline",
+  "@drawerSyncOffline": {
+    "description": "Compact connectivity/sync status label shown in the drawer: no network"
+  },
+  "drawerSyncSynced": "Synced",
+  "@drawerSyncSynced": {
+    "description": "Compact connectivity/sync status label shown in the drawer: idle, up to date"
+  },
+  "checklistSaveError": "Couldn't save, try again",
+  "@checklistSaveError": {
+    "description": "Shown when a prayer/ibadah status write to the local database fails"
+  },
+  "checklistSyncError": "Saved locally — will sync to the cloud when you're back online",
+  "@checklistSyncError": {
+    "description": "Shown when the local save succeeded but pushing it to the cloud failed"
+  }
+}

@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Taqwa — Logo Templates</title>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@700;900&family=Noto+Naskh+Arabic:wght@400;700&display=swap"
+			rel="stylesheet" />
+		<style>
+			:root {
+				--bg: #0d1117;
+				--card: #1a2332;
+				--gold: #c8a96e;
+				--gold2: #e8c87e;
+				--teal: #3aafa9;
+				--success: #4caf7d;
+				--danger: #e07070;
+				--text: #f0e6d3;
+				--muted: #8899aa;
+			}
+
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+
+			body {
+				background: var(--bg);
+				color: var(--text);
+				font-family: 'Cinzel', serif;
+				min-height: 100vh;
+				padding: 40px 20px;
+			}
+
+			h1.page-title {
+				text-align: center;
+				color: var(--gold);
+				font-size: 1.6rem;
+				letter-spacing: 4px;
+				text-transform: uppercase;
+				margin-bottom: 6px;
+			}
+
+			p.subtitle {
+				text-align: center;
+				color: var(--muted);
+				font-family: 'Amiri', serif;
+				font-size: 1.1rem;
+				margin-bottom: 50px;
+			}
+
+			.section-title {
+				text-align: center;
+				color: var(--teal);
+				font-size: 0.75rem;
+				letter-spacing: 3px;
+				text-transform: uppercase;
+				margin-bottom: 30px;
+				margin-top: 60px;
+			}
+
+			.grid {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 40px;
+				max-width: 1100px;
+				margin: 0 auto;
+			}
+
+			.logo-card {
+				background: var(--card);
+				border: 1px solid rgba(200, 169, 110, 0.15);
+				border-radius: 24px;
+				padding: 40px 30px;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 18px;
+				width: 280px;
+				transition:
+					transform 0.3s,
+					border-color 0.3s;
+			}
+
+			.logo-card:hover {
+				transform: translateY(-6px);
+				border-color: var(--gold);
+			}
+
+			.logo-card .label {
+				font-size: 0.65rem;
+				letter-spacing: 3px;
+				color: var(--muted);
+				text-transform: uppercase;
+			}
+
+			.logo-card .name-en {
+				font-size: 0.75rem;
+				color: var(--teal);
+				letter-spacing: 2px;
+			}
+
+			/* ══════════════════════════════════════════
+       VARIANT 1 — Crescent Shield
+    ══════════════════════════════════════════ */
+			.v1-container {
+				position: relative;
+				width: 130px;
+				height: 130px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.v1-shield {
+				width: 110px;
+				height: 120px;
+				background: linear-gradient(160deg, #1f3248 0%, #0d1a26 100%);
+				border: 2px solid var(--gold);
+				border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				position: relative;
+				box-shadow:
+					0 0 30px rgba(200, 169, 110, 0.25),
+					inset 0 0 20px rgba(200, 169, 110, 0.05);
+			}
+
+			.v1-crescent {
+				font-size: 2.6rem;
+				line-height: 1;
+				filter: drop-shadow(0 0 8px rgba(200, 169, 110, 0.6));
+			}
+
+			.v1-star {
+				position: absolute;
+				top: 18px;
+				right: 22px;
+				font-size: 0.8rem;
+				opacity: 0.8;
+			}
+
+			.v1-text {
+				font-family: 'Cinzel', serif;
+				font-size: 1.6rem;
+				font-weight: 900;
+				color: var(--gold);
+				letter-spacing: 6px;
+				text-transform: uppercase;
+				text-shadow: 0 0 20px rgba(200, 169, 110, 0.4);
+			}
+
+			.v1-arabic {
+				font-family: 'Noto Naskh Arabic', serif;
+				font-size: 1rem;
+				color: var(--text);
+				letter-spacing: 1px;
+				opacity: 0.8;
+			}
+
+			/* ══════════════════════════════════════════
+       VARIANT 2 — Taqwa Ring
+    ══════════════════════════════════════════ */
+			.v2-ring-wrap {
+				width: 130px;
+				height: 130px;
+				position: relative;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.v2-ring-wrap svg {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				transform: rotate(-90deg);
+			}
+
+			.v2-inner {
+				position: relative;
+				z-index: 2;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.v2-arabic-big {
+				font-family: 'Noto Naskh Arabic', serif;
+				font-size: 1.5rem;
+				font-weight: 700;
+				color: var(--gold);
+				line-height: 1;
+			}
+
+			.v2-star-row {
+				display: flex;
+				gap: 3px;
+				font-size: 0.55rem;
+				margin-top: 3px;
+			}
+
+			.v2-text {
+				font-family: 'Cinzel', serif;
+				font-size: 1.5rem;
+				font-weight: 900;
+				color: var(--text);
+				letter-spacing: 5px;
+			}
+
+			.v2-tagline {
+				font-family: 'Amiri', serif;
+				font-size: 0.72rem;
+				color: var(--teal);
+				letter-spacing: 1px;
+			}
+
+			/* ══════════════════════════════════════════
+       VARIANT 3 — Minimal Wordmark
+    ══════════════════════════════════════════ */
+			.v3-wrap {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 6px;
+			}
+
+			.v3-icon {
+				width: 80px;
+				height: 80px;
+				border-radius: 20px;
+				background: linear-gradient(135deg, #1f3248 0%, #0d1a26 100%);
+				border: 1.5px solid var(--gold);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 2.2rem;
+				box-shadow: 0 4px 24px rgba(200, 169, 110, 0.2);
+			}
+
+			.v3-wordmark {
+				display: flex;
+				align-items: baseline;
+				gap: 0;
+			}
+
+			.v3-T {
+				font-family: 'Cinzel', serif;
+				font-size: 2.2rem;
+				font-weight: 900;
+				color: var(--gold);
+			}
+			.v3-rest {
+				font-family: 'Cinzel', serif;
+				font-size: 1.5rem;
+				font-weight: 700;
+				color: var(--text);
+				letter-spacing: 4px;
+			}
+
+			.v3-line {
+				width: 100%;
+				height: 1px;
+				background: linear-gradient(
+					90deg,
+					transparent,
+					var(--gold),
+					transparent
+				);
+			}
+
+			.v3-sub {
+				font-family: 'Noto Naskh Arabic', serif;
+				font-size: 0.85rem;
+				color: var(--muted);
+				letter-spacing: 2px;
+			}
+
+			/* ══════════════════════════════════════════
+       VARIANT 4 — Geometric Star
+    ══════════════════════════════════════════ */
+			.v4-star-wrap {
+				width: 130px;
+				height: 130px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				position: relative;
+			}
+
+			.v4-hex {
+				width: 110px;
+				height: 110px;
+				background: linear-gradient(135deg, #1a2e44 0%, #0d1a26 100%);
+				border: 2px solid var(--gold);
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				box-shadow:
+					0 0 0 6px rgba(200, 169, 110, 0.08),
+					0 0 30px rgba(200, 169, 110, 0.2);
+			}
+
+			.v4-inner-text {
+				font-family: 'Noto Naskh Arabic', serif;
+				font-size: 2rem;
+				font-weight: 700;
+				background: linear-gradient(180deg, var(--gold2), var(--gold));
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+
+			.v4-glow-ring {
+				position: absolute;
+				width: 126px;
+				height: 126px;
+				border-radius: 50%;
+				border: 1px dashed rgba(200, 169, 110, 0.3);
+				animation: spin 20s linear infinite;
+			}
+
+			@keyframes spin {
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
+			.v4-name {
+				font-family: 'Cinzel', serif;
+				font-size: 1.7rem;
+				font-weight: 900;
+				background: linear-gradient(90deg, var(--gold2), var(--teal));
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+				letter-spacing: 4px;
+			}
+
+			.v4-dot {
+				width: 5px;
+				height: 5px;
+				border-radius: 50%;
+				background: var(--teal);
+				margin: 0 auto;
+			}
+
+			/* ══════════════════════════════════════════
+       COLOR PALETTE SECTION
+    ══════════════════════════════════════════ */
+			.palette-row {
+				display: flex;
+				justify-content: center;
+				gap: 16px;
+				flex-wrap: wrap;
+				max-width: 700px;
+				margin: 0 auto 20px;
+			}
+
+			.swatch {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 8px;
+			}
+
+			.swatch-block {
+				width: 60px;
+				height: 60px;
+				border-radius: 12px;
+				border: 1px solid rgba(255, 255, 255, 0.1);
+			}
+
+			.swatch-label {
+				font-size: 0.6rem;
+				color: var(--muted);
+				letter-spacing: 1px;
+				text-align: center;
+			}
+
+			.swatch-hex {
+				font-size: 0.65rem;
+				color: var(--text);
+				opacity: 0.7;
+			}
+
+			/* ══════════════════════════════════════════
+       TYPOGRAPHY SHOWCASE
+    ══════════════════════════════════════════ */
+			.typo-card {
+				background: var(--card);
+				border: 1px solid rgba(200, 169, 110, 0.15);
+				border-radius: 20px;
+				padding: 30px;
+				width: 100%;
+				max-width: 700px;
+				margin: 0 auto;
+			}
+
+			.typo-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 14px 0;
+				border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+			}
+
+			.typo-row:last-child {
+				border-bottom: none;
+			}
+
+			.typo-meta {
+				color: var(--muted);
+				font-size: 0.65rem;
+				letter-spacing: 2px;
+			}
+
+			/* ══════════════════════════════════════════
+       RECOMMENDATION BANNER
+    ══════════════════════════════════════════ */
+			.recommend-banner {
+				max-width: 700px;
+				margin: 50px auto 0;
+				background: linear-gradient(
+					135deg,
+					rgba(200, 169, 110, 0.12),
+					rgba(58, 175, 169, 0.08)
+				);
+				border: 1px solid var(--gold);
+				border-radius: 20px;
+				padding: 30px;
+				text-align: center;
+			}
+
+			.recommend-banner .crown {
+				font-size: 2rem;
+				margin-bottom: 10px;
+			}
+			.recommend-banner h2 {
+				color: var(--gold);
+				font-size: 1.2rem;
+				letter-spacing: 3px;
+				margin-bottom: 8px;
+			}
+			.recommend-banner p {
+				color: var(--text);
+				font-family: 'Amiri', serif;
+				font-size: 1rem;
+				line-height: 1.7;
+				opacity: 0.9;
+			}
+			.recommend-banner .tip {
+				color: var(--teal);
+				font-size: 0.75rem;
+				letter-spacing: 2px;
+				margin-top: 14px;
+			}
+
+			footer {
+				text-align: center;
+				margin-top: 70px;
+				color: var(--muted);
+				font-family: 'Amiri', serif;
+				font-size: 1rem;
+				line-height: 2;
+			}
+		</style>
+	</head>
+	<body>
+		<h1 class="page-title">Taqwa · تقوى</h1>
+		<p class="subtitle">
+			Logo Design Templates — Islamic Self-Accountability App
+		</p>
+
+		<!-- ══ LOGO VARIANTS ══ -->
+		<p class="section-title">▸ Logo Variants — Choose Your Style</p>
+
+		<div class="grid">
+			<!-- Variant 1: Crescent Shield -->
+			<div class="logo-card">
+				<span class="label">Variant 01 — Shield</span>
+				<div class="v1-container">
+					<div class="v1-shield">
+						<span class="v1-crescent">🌙</span>
+						<span class="v1-star">✦</span>
+					</div>
+				</div>
+				<div class="v1-text">TAQWA</div>
+				<div class="v1-arabic">تَقْوى</div>
+				<span class="name-en">Classic · Powerful · Spiritual</span>
+			</div>
+		</div>
+
+		<!-- ══ COLOR PALETTE ══ -->
+		<p class="section-title">▸ Official Brand Color Palette</p>
+
+		<div class="palette-row">
+			<div class="swatch">
+				<div class="swatch-block" style="background: #0d1117"></div>
+				<div class="swatch-label">NIGHT BG</div>
+				<div class="swatch-hex">#0D1117</div>
+			</div>
+			<div class="swatch">
+				<div class="swatch-block" style="background: #1a2332"></div>
+				<div class="swatch-label">CARD</div>
+				<div class="swatch-hex">#1A2332</div>
+			</div>
+			<div class="swatch">
+				<div
+					class="swatch-block"
+					style="
+						background: #c8a96e;
+						border-color: rgba(255, 255, 255, 0.2);
+					"></div>
+				<div class="swatch-label">GOLD</div>
+				<div class="swatch-hex">#C8A96E</div>
+			</div>
+			<div class="swatch">
+				<div
+					class="swatch-block"
+					style="
+						background: #3aafa9;
+						border-color: rgba(255, 255, 255, 0.2);
+					"></div>
+				<div class="swatch-label">TEAL</div>
+				<div class="swatch-hex">#3AAFA9</div>
+			</div>
+			<div class="swatch">
+				<div
+					class="swatch-block"
+					style="
+						background: #4caf7d;
+						border-color: rgba(255, 255, 255, 0.2);
+					"></div>
+				<div class="swatch-label">SUCCESS</div>
+				<div class="swatch-hex">#4CAF7D</div>
+			</div>
+			<div class="swatch">
+				<div
+					class="swatch-block"
+					style="
+						background: #f0e6d3;
+						border-color: rgba(255, 255, 255, 0.2);
+					"></div>
+				<div class="swatch-label">TEXT</div>
+				<div class="swatch-hex">#F0E6D3</div>
+			</div>
+		</div>
+
+		<!-- ══ TYPOGRAPHY ══ -->
+		<p class="section-title">▸ Brand Typography</p>
+
+		<div class="typo-card" style="max-width: 700px; margin: 0 auto">
+			<div class="typo-row">
+				<span
+					style="
+						font-family: 'Cinzel', serif;
+						font-size: 2rem;
+						font-weight: 900;
+						color: var(--gold);
+					"
+					>TAQWA</span
+				>
+				<span class="typo-meta">CINZEL · LOGO / HEADINGS</span>
+			</div>
+			<div class="typo-row">
+				<span
+					style="
+						font-family: 'Noto Naskh Arabic', serif;
+						font-size: 1.8rem;
+						color: var(--gold);
+					"
+					>تَقْوى</span
+				>
+				<span class="typo-meta">NOTO NASKH ARABIC · ARABIC TEXT</span>
+			</div>
+			<div class="typo-row">
+				<span
+					style="
+						font-family: 'Amiri', serif;
+						font-size: 1.2rem;
+						color: var(--text);
+					"
+					>حاسبوا أنفسكم قبل أن تُحاسبوا</span
+				>
+				<span class="typo-meta">AMIRI · QUOTES / BODY</span>
+			</div>
+			<div class="typo-row">
+				<span
+					style="
+						font-family: 'Cinzel', serif;
+						font-size: 0.8rem;
+						letter-spacing: 3px;
+						color: var(--teal);
+					"
+					>DAILY ISLAMIC TRACKER</span
+				>
+				<span class="typo-meta">CINZEL · TAGLINE / CAPS</span>
+			</div>
+		</div>
+
+		<!-- ══ RECOMMENDATION ══ -->
+		<div class="recommend-banner">
+			<div class="crown">👑</div>
+			<h2>MY RECOMMENDATION</h2>
+			<p>
+				Go with
+				<strong style="color: var(--gold)">Variant 02 — The Ring Logo</strong>
+				combined with the name
+				<strong style="color: var(--gold)">TAQWA · تقوى</strong>.<br /><br />
+				The ring directly mirrors your app's <em>Taqwa Ring</em> progress
+				indicator, making the logo and UI feel like one cohesive brand. The
+				gradient from
+				<strong style="color: var(--gold)">Gold → Teal</strong> signals both
+				spiritual richness and modern design.
+			</p>
+			<p class="tip">
+				▸ USE FIGMA · CANVA · ADOBE ILLUSTRATOR TO RECREATE THESE TEMPLATES
+			</p>
+		</div>
+
+		<footer>
+			<div style="color: var(--gold); font-size: 1.3rem; margin-bottom: 6px">
+				✦ &nbsp; تَقْوى &nbsp; ✦
+			</div>
+			"حاسبوا أنفسكم قبل أن تُحاسبوا" — عمر بن الخطاب رضي الله عنه<br />
+			<span
+				style="
+					font-family: 'Cinzel', serif;
+					font-size: 0.7rem;
+					letter-spacing: 3px;
+					color: var(--muted);
+				"
+				>TAQWA APP · BRAND IDENTITY GUIDE</span
+			>
+		</footer>
+	</body>
+</html>

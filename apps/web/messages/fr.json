@@ -1,0 +1,396 @@
+{
+  "HomePage": {
+    "title": "Élevez Votre Voyage Spirituel",
+    "description": "Takwa est votre compagnon complet pour une vie islamique éclairée, conçu avec élégance et précision pour vous garder profondément connecté à votre foi.",
+    "download": "Télécharger",
+    "learnMore": "En Savoir Plus",
+    "heroBadge": "Excellence Spirituelle • 100% Gratuit & Sans Pub • Confidentialité Totale",
+    "heroCtaDownload": "Télécharger l'APK Directement",
+    "heroCtaExplore": "Découvrir les Fonctionnalités",
+    "heroIosNote": "Également disponible sur iPhone via TestFlight",
+    "heroCtaScan": "Scanner le QR Code",
+    "chipPrayer": "5 Adhans Quotidiens par GPS",
+    "chipHisab": "Checklist Quotidienne du Hisab",
+    "chipQuran": "Saint Coran & Récitations Hors-Ligne",
+    "chipPrivacy": "100% Privé • Zéro Publicité",
+    "ticker": {
+      "bismillah": "بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
+      "fajr": "Fajr",
+      "dhuhr": "Dhuhr",
+      "asr": "Asr",
+      "maghrib": "Maghrib",
+      "isha": "Isha",
+      "nextPrayer": "Prochaine Prière",
+      "startsIn": "dans"
+    },
+    "featuresTitle": "Conçu pour la Dévotion, Pensé pour la Sérénité",
+    "featuresSubtitle": "Une interface haut de gamme qui allie harmonieusement l'art islamique traditionnel à la technologie mobile de pointe.",
+    "featuresTag": "Fonctionnalités Bénies",
+    "features": {
+      "prayerTimes": {
+        "title": "Horaires de Prière & Adhan Précis",
+        "description": "Calculs astronomiques précis selon votre position exacte avec compte à rebours et alertes d'Adhan personnalisables."
+      },
+      "quran": {
+        "title": "Le Saint Coran & Récitations",
+        "description": "Plongez dans la Parole divine avec une calligraphie Othmani limpide, des traductions, du tafsir et des récitations authentiques."
+      },
+      "qibla": {
+        "title": "Boussole Qibla Précise",
+        "description": "Trouvez la direction exacte vers la Sainte Kaaba instantanément grâce à la boussole stabilisée par gyroscope."
+      },
+      "checklist": {
+        "title": "Hisab & Muhasaba Quotidienne",
+        "description": "Suivez vos cinq prières, sunnahs, jeûnes et bonnes actions grâce à une liste d'auto-évaluation dédiée."
+      },
+      "azkar": {
+        "title": "Adhkar Authentiques & Tasbih",
+        "description": "Invocations du matin et du soir tirées de la Citadelle du Musulman accompagnées d'un chapelet numérique haptique."
+      },
+      "asma": {
+        "title": "Les 99 Noms d'Allah (Asmaul Husna)",
+        "description": "Découvrez chaque nom divin avec ses significations linguistiques approfondies, ses vertus spirituelles et sa prononciation audio."
+      },
+      "ramadan": {
+        "title": "Compagnon du Qiyam & du Jeûne",
+        "description": "Alarmes dédiées à la prière de nuit (Tahajjud), au jeûne des Jours Blancs et au calendrier du Ramadan."
+      },
+      "notifications": {
+        "title": "Zéro Traçage & Synchronisation Privée",
+        "description": "Stockage local prioritaire avec synchronisation cloud privée facultative via Supabase. Aucune donnée vendue, zéro publicité."
+      }
+    },
+    "showcase": {
+      "tag": "Galerie Visuelle",
+      "title": "Pensé pour la Sérénité et la Clarté",
+      "subtitle": "Immergez-vous dans un compagnon islamique sans distraction, conçu avec l'élégance du mode sombre, des reflets dorés et des transitions fluides.",
+      "tabs": {
+        "all": "Tous les Écrans",
+        "worship": "Prière & Qibla",
+        "quran": "Saint Coran",
+        "habits": "Hisab & Habitudes",
+        "adhkar": "Adhkar & Noms"
+      },
+      "items": {
+        "0": {
+          "title": "Accueil & Compte à Rebours",
+          "desc": "Décompte en direct vers la prochaine prière, toutes les heures du jour et votre carte de progression spirituelle."
+        },
+        "1": {
+          "title": "Stats d'Habitudes & Séries",
+          "desc": "Graphiques hebdomadaires de vos pratiques, points Taqwa et séries d'assiduité pour rester constant."
+        },
+        "2": {
+          "title": "Lecteur Coran – Mode Mushaf",
+          "desc": "Lecture recueillie du Mushaf noble en mode sombre premium avec récitation fluide intégrée."
+        },
+        "3": {
+          "title": "Commencer une Nouvelle Khatma",
+          "desc": "Lancez un nouveau cycle de lecture complet du Coran ou continuez une lecture libre avec mémorisation IA."
+        },
+        "4": {
+          "title": "Index des Sourates & Recherche",
+          "desc": "Naviguez par Sourate, Juz, page ou verset. Recherche instantanée dans tout le Coran."
+        },
+        "5": {
+          "title": "Hub de Navigation de l'App",
+          "desc": "Accès rapide à toutes les fonctionnalités : Prière, Coran, Hisab, Noms d'Allah, et plus encore."
+        },
+        "6": {
+          "title": "Qiyam – Prière de Nuit",
+          "desc": "Une session de Qiyam paisible avec dhikr, récitation coranique et rappels du dernier tiers de la nuit."
+        },
+        "7": {
+          "title": "Vue d'Ensemble du Tableau de Bord",
+          "desc": "Votre maison spirituelle : compte à rebours prière, carte d'adoration et actes du jour réunis."
+        },
+        "8": {
+          "title": "Statistiques de Présence aux Prières",
+          "desc": "Taux de présence aux prières, pages de Coran lues et analyses de dévotion quotidienne."
+        },
+        "9": {
+          "title": "Adhan & Notifications",
+          "desc": "Personnalisez l'adhan, le mode silencieux, le réveil Fajr, les rappels adhkar matin/soir et plus encore."
+        }
+      },
+      "list": [
+        "Expérience Premium en Mode Sombre",
+        "Motifs Géométriques Islamiques Authentiques",
+        "Interactions Fluides et Réactives",
+        "Design Adaptatif Pour Tous les Appareils"
+      ]
+    },
+    "quote": {
+      "arabic": "أَلَا بِذِكْرِ ٱللَّهِ تَطْمَئِنُّ ٱلْقُلُوبُ",
+      "surah": "Sourate Ar-Ra'd • Verset 28",
+      "translation": "Ceux qui ont cru, et dont les cœurs s'apaisent à l'évocation d'Allah. N'est-ce point par l'évocation d'Allah que les cœurs s'apaisent ?"
+    },
+    "downloadHub": {
+      "tag": "Commencez en Quelques Secondes",
+      "title": "Téléchargez Takwa",
+      "subtitle": "Accédez directement à notre version en avant-première sécurisée — Android dès maintenant, iOS via TestFlight. Gratuit, sécurisé et respectueux de votre vie privée.",
+      "qrTitle": "Scannez avec Votre Appareil Photo",
+      "qrSubtitle": "Pointez l'appareil photo de votre mobile pour télécharger directement le fichier APK.",
+      "qrTitleIos": "Scannez avec l'Appareil Photo de Votre iPhone",
+      "qrSubtitleIos": "Pointez l'appareil photo de votre iPhone pour ouvrir le lien d'installation TestFlight.",
+      "qrTitleIosInterim": "Scannez pour Ouvrir sur iPhone",
+      "qrSubtitleIosInterim": "Ouvrez l'appareil photo de votre iPhone pour lancer le Compagnon Web dans Safari.",
+      "ctaButton": "Télécharger l'APK (v{version})",
+      "iosCtaButton": "Rejoindre la Bêta iOS (TestFlight)",
+      "iosInterimCtaButton": "Ouvrir le Compagnon Web",
+      "iosInterimNote": "L'application iOS native termine sa configuration TestFlight — connectez-vous dès maintenant au Compagnon Web, ou ajoutez-le à votre écran d'accueil pour un raccourci façon application.",
+      "badgeAndroid": "Android 8.0+ (ARM64 & Universel)",
+      "badgeIos": "iOS 13+ • via TestFlight",
+      "badgeIosInterim": "iOS 13+ • Compagnon Web disponible maintenant",
+      "badgeSize": "Taille : {size}",
+      "shaTitle": "Empreinte SHA-256 Vérifiée",
+      "sha1Title": "Empreinte SHA-1 Vérifiée",
+      "copied": "Empreinte copiée dans le presse-papier !",
+      "copy": "Copier l'Empreinte",
+      "comingSoonBadge": "Bientôt Disponible — Accès Anticipé",
+      "securityTrust": "Fichier Vérifié & Certifié • Zéro Logiciel Malveillant • Architecture Transparente",
+      "platformTabs": {
+        "ariaLabel": "Choisissez une plateforme",
+        "android": "Android",
+        "ios": "iOS"
+      },
+      "platforms": {
+        "android": {
+          "name": "Android APK",
+          "status": "Disponible Dès Maintenant (Direct)",
+          "active": true
+        },
+        "play": {
+          "name": "Google Play Store",
+          "status": "Publication en Cours d'Examen",
+          "active": false
+        },
+        "ios": {
+          "name": "iOS App Store",
+          "status": "En Cours de Développement",
+          "statusActive": "Disponible Dès Maintenant (Bêta TestFlight)",
+          "active": false
+        },
+        "web": {
+          "name": "Compagnon Web",
+          "status": "Accès Anticipé Actif",
+          "active": true
+        }
+      },
+      "installGuide": {
+        "title": "Installation Facile en 3 Étapes",
+        "step1": {
+          "title": "1. Télécharger l'APK",
+          "desc": "Appuyez sur le bouton ci-dessus ou scannez le QR code avec votre téléphone Android."
+        },
+        "step2": {
+          "title": "2. Autoriser la Source",
+          "desc": "Dans la fenêtre qui apparaît, appuyez sur Paramètres et activez \"Autoriser cette source\"."
+        },
+        "step3": {
+          "title": "3. Installer et Ouvrir",
+          "desc": "Appuyez sur Installer, lancez Takwa et autorisez la localisation pour régler les heures de prière."
+        }
+      },
+      "installGuideIos": {
+        "title": "Installation Facile en 3 Étapes sur iOS",
+        "step1": {
+          "title": "1. Installer TestFlight",
+          "desc": "Installez l'application gratuite TestFlight depuis l'App Store si ce n'est pas déjà fait."
+        },
+        "step2": {
+          "title": "2. Ouvrir le Lien Bêta",
+          "desc": "Appuyez sur le bouton ci-dessus ou scannez le QR code avec votre iPhone pour ouvrir la bêta Takwa dans TestFlight."
+        },
+        "step3": {
+          "title": "3. Installer et Ouvrir",
+          "desc": "Appuyez sur Installer, lancez Takwa et autorisez la localisation pour régler les heures de prière."
+        }
+      },
+      "installGuideIosInterim": {
+        "title": "Utilisez Takwa sur iPhone Dès Aujourd'hui",
+        "step1": {
+          "title": "1. Ouvrir le Compagnon Web",
+          "desc": "Appuyez sur le bouton ci-dessus ou scannez le QR code pour vous connecter avec votre compte Takwa dans Safari."
+        },
+        "step2": {
+          "title": "2. Appuyez sur Partager puis Sur l'Écran d'Accueil",
+          "desc": "Dans le menu Partager de Safari, choisissez \"Sur l'écran d'accueil\" pour l'installer comme une application."
+        },
+        "step3": {
+          "title": "3. Lancez-le Comme une Application",
+          "desc": "Ouvrez Takwa depuis votre écran d'accueil à tout moment — l'application iOS native arrive bientôt via TestFlight."
+        }
+      },
+      "sideTitle": "Disponibilité des Plateformes",
+      "privacyTitle": "Zéro Publicité & Zéro Pistage",
+      "privacyBody": "Takwa est conçu avec une architecture locale d'abord et synchronisation cloud chiffrée optionnelle. Vos données spirituelles vous appartiennent — jamais vendues, jamais analysées à des fins lucratives."
+    }
+  },
+  "Metadata": {
+    "title": "Takwa - Votre Compagnon Islamique Ultime Pour une Vie Consciente",
+    "description": "Découvrez la beauté de l'Islam avec Takwa. Horaires de prière précis, Saint Coran, boussole Qibla et Azkar quotidiens dans un environnement premium."
+  },
+  "Navigation": {
+    "home": "Accueil",
+    "features": "Fonctionnalités",
+    "screenshots": "Écrans",
+    "download": "Télécharger",
+    "dashboard": "Tableau de Bord",
+    "support": "Support",
+    "legal": "Mentions Légales",
+    "privacy": "Politique de Confidentialité",
+    "terms": "Conditions d'Utilisation"
+  },
+  "Privacy": {
+    "title": "Politique de Confidentialité",
+    "lastUpdated": "Dernière mise à jour : 24 avril 2026",
+    "sections": {
+      "intro": {
+        "title": "1. Introduction",
+        "content": "Bienvenue sur Takwa. Nous accordons une importance primordiale à la protection de votre vie privée et de vos données spirituelles. Cette politique détaille avec quel soin et quelle rigueur nous traitons vos informations."
+      },
+      "collect": {
+        "title": "2. Quelles Informations Nous Collectons",
+        "content": "Nous traitons un minimum de données strictement nécessaires à votre expérience spirituelle.",
+        "items": [
+          "Données personnelles : inscription sécurisée via Supabase ou l'authentification Google.",
+          "Données de localisation : nécessaires pour calculer avec précision les horaires de prière et la direction de la Qibla.",
+          "Données d'utilisation : informations techniques anonymisées pour améliorer les performances de l'application."
+        ]
+      },
+      "use": {
+        "title": "3. Comment Nous Utilisons Vos Informations",
+        "content": "Vos données sont utilisées exclusivement pour faciliter vos pratiques spirituelles et améliorer nos offres.",
+        "items": [
+          "Fournir et améliorer nos services principaux.",
+          "Garantir la plus grande précision des horaires de prière.",
+          "Envoyer des notifications spirituelles en temps voulu.",
+          "Améliorer l'expérience utilisateur globale."
+        ]
+      },
+      "thirdParty": {
+        "title": "4. Services Tiers",
+        "content": "Nous collaborons avec des services de premier plan tels que Supabase et Google pour garantir une sécurité et une fiabilité robustes. Ces partenaires appliquent leurs propres normes strictes de confidentialité."
+      },
+      "security": {
+        "title": "5. Sécurité des Données",
+        "content": "Nous mettons en œuvre des mesures de sécurité à la pointe de la technologie, honorant la confiance que vous nous accordez pour préserver la confidentialité de votre parcours spirituel."
+      },
+      "contact": {
+        "title": "6. Nous Contacter",
+        "content": "Pour toute question relative à la confidentialité, veuillez contacter notre équipe de support dédiée à :"
+      }
+    }
+  },
+  "Terms": {
+    "title": "Conditions d'Utilisation",
+    "lastUpdated": "Dernière mise à jour : 24 avril 2026",
+    "sections": {
+      "agree": {
+        "title": "1. Acceptation des Conditions",
+        "content": "En intégrant l'écosystème Takwa, vous acceptez d'être lié par ces Conditions d'Utilisation. Merci de les consulter attentivement pour une expérience harmonieuse."
+      },
+      "use": {
+        "title": "2. Utilisation des Services",
+        "content": "Vous vous engagez à utiliser Takwa à des fins licites et spirituelles, dans le respect de la communauté et du caractère sacré des services proposés."
+      },
+      "ip": {
+        "title": "3. Propriété Intellectuelle",
+        "content": "Tous les designs, contenus et fonctionnalités sont la propriété exclusive de Takwa et sont protégés par les normes internationales de propriété intellectuelle."
+      },
+      "disclaimer": {
+        "title": "4. Avertissement",
+        "content": "Bien que nous visions une précision absolue dans les calculs de prière et les textes coraniques, nous encourageons les utilisateurs à tenir compte des variations locales."
+      },
+      "liability": {
+        "title": "5. Limitation de Responsabilité",
+        "content": "Takwa ne saurait être tenu responsable de toute expérience indirecte résultant de l'utilisation de nos plateformes numériques."
+      },
+      "changes": {
+        "title": "6. Modifications",
+        "content": "Nous nous réservons le droit de faire évoluer ces conditions à mesure que nos services se développent. Toute utilisation continue implique votre acceptation de ces évolutions."
+      },
+      "contact": {
+        "title": "7. Coordonnées",
+        "content": "Pour toute question d'ordre légal ou officiel, veuillez nous contacter à :"
+      }
+    }
+  },
+  "Support": {
+    "title": "Comment Pouvons-Nous Vous Aider ?",
+    "subtitle": "L'équipe Takwa est présente pour vous accompagner à chaque étape de votre parcours spirituel.",
+    "cards": {
+      "email": {
+        "title": "Assistance par E-mail",
+        "content": "Contactez-nous par e-mail pour une assistance personnalisée."
+      },
+      "social": {
+        "title": "Communauté",
+        "content": "Rejoignez-nous sur nos réseaux sociaux pour des conseils et des actualités."
+      },
+      "faq": {
+        "title": "Base de Connaissances",
+        "content": "Consultez notre FAQ détaillée pour des réponses immédiates aux questions courantes.",
+        "button": "Voir la FAQ"
+      }
+    },
+    "form": {
+      "title": "Contactez Notre Équipe",
+      "name": "Nom Complet",
+      "email": "Adresse E-mail",
+      "message": "Votre Message",
+      "placeholderName": "Comment devons-nous vous appeler ?",
+      "placeholderEmail": "Où pouvons-nous vous joindre ?",
+      "placeholderMessage": "Dites-nous comment nous pouvons vous aider...",
+      "submit": "Envoyer le Message"
+    }
+  },
+  "Auth": {
+    "title": "Connexion",
+    "subtitle": "Utilisez le même compte que celui créé dans l'application Takwa.",
+    "email": "E-mail",
+    "emailPlaceholder": "vous@exemple.com",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Votre mot de passe",
+    "submit": "Se connecter",
+    "signingIn": "Connexion en cours…",
+    "errorInvalidCredentials": "E-mail ou mot de passe incorrect. Veuillez réessayer.",
+    "mobileAccountNote": "Ceci vous connecte au même compte que l'application mobile Takwa."
+  },
+  "Dashboard": {
+    "title": "Votre Tableau de Bord",
+    "welcome": "Connecté en tant que {email}.",
+    "errorTitle": "Une erreur est survenue",
+    "errorMessage": "Impossible de charger votre tableau de bord. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "placeholderNote": "Voici votre espace web Takwa. Vos prières synchronisées, votre checklist quotidienne et vos séries spirituelles s'afficheront ici.",
+    "signOut": "Se Déconnecter",
+    "statsTeaserTitle": "Votre Compagnon Spirituel",
+    "statsTeaserSubtitle": "Synchronisez vos prières et votre liste de dévotion quotidienne en toute fluidité sur tous vos appareils.",
+    "syncActive": "Synchronisation Cloud Active",
+    "lastSync": "Connecté au Cloud Takwa",
+    "earlyBadge": "Version Avant-Première",
+    "verifiedSafe": "100% Vérifié & Sécurisé • Distribution Directe via Supabase Storage",
+    "systemRequirements": "Prérequis : Android 8.0 (Oreo) ou ultérieur",
+    "copySha": "Copier l'Empreinte",
+    "copiedSha": "Empreinte copiée dans le presse-papier !",
+    "installGuideTitle": "Comment installer ce fichier APK sur votre appareil",
+    "step1": "Téléchargez directement le fichier APK via le bouton ci-dessus.",
+    "step2": "Ouvrez le fichier téléchargé et activez \"Autoriser cette source\" si votre téléphone vous le demande.",
+    "step3": "Appuyez sur Installer, puis ouvrez Takwa et configurez votre localisation.",
+    "download": {
+      "title": "Télécharger l'Application Takwa",
+      "subtitle": "Avant le lancement sur Google Play — obtenez l'APK sécurisé directement",
+      "version": "Version {version}",
+      "size": "Taille : {size}",
+      "platform": "Android — ARM64 & Universel",
+      "badge": "Avant-Première",
+      "button": "Télécharger l'APK",
+      "instructions": "Remarque : Activez \"Autoriser les sources inconnues\" dans les paramètres de votre téléphone avant l'installation.",
+      "sha1Label": "SHA-1 :",
+      "sha256Label": "SHA-256 :",
+      "unavailable": "Le lien de téléchargement n'est pas encore disponible. Veuillez revenir bientôt."
+    }
+  }
+}

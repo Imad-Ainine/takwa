@@ -1,0 +1,64 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code related
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+**/build/
+**/coverage/
+**/.dart_tool/
+**/.packages
+**/.pub/
+**/.pub-cache/
+
+# Android Studio artifacts
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+
+# Next.js / Node related
+**/node_modules/
+**/.next/
+**/dist/
+**/out/
+.npm
+**/.eslintcache
+
+# Environment variables
+.env
+*.env
+**/.env
+**/*.env
+
+# Keystore and signing
+*.jks
+*.keystore
+key.properties
+**/key.properties
+
+# Melos
+.melos/

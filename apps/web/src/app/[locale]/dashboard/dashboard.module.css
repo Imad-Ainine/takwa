@@ -1,0 +1,287 @@
+/* ─── Page layout ─────────────────────────────────────────────────── */
+.page {
+	min-height: calc(100vh - 140px);
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	padding: 56px 20px 80px;
+	background: radial-gradient(circle at 50% 10%, rgba(200, 169, 110, 0.05) 0%, transparent 60%);
+}
+
+.grid {
+	width: 100%;
+	max-width: 960px;
+	display: grid;
+	grid-template-columns: 1fr 1.15fr;
+	gap: 28px;
+	align-items: start;
+}
+
+@media (max-width: 768px) {
+	.grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ─── Shared card shell ───────────────────────────────────────────── */
+.card {
+	background: var(--card);
+	border: 1px solid var(--card-border);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-card);
+	padding: 34px 30px;
+	position: relative;
+	overflow: hidden;
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+}
+
+/* ─── Loading skeleton ────────────────────────────────────────────── */
+.skeleton {
+	min-height: 260px;
+	background: linear-gradient(
+		100deg,
+		var(--card) 30%,
+		rgba(200, 169, 110, 0.12) 50%,
+		var(--card) 70%
+	);
+	background-size: 200% 100%;
+	animation: skeletonShimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes skeletonShimmer {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.skeleton {
+		animation: none;
+	}
+}
+
+/* ─── Welcome card ────────────────────────────────────────────────── */
+.welcomeCard {
+	text-align: center;
+}
+
+.avatarRing {
+	width: 76px;
+	height: 76px;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(229, 185, 88, 0.22) 0%, transparent 70%);
+	border: 2px solid rgba(229, 185, 88, 0.4);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0 auto 20px;
+	box-shadow: 0 0 24px rgba(229, 185, 88, 0.18);
+}
+
+.avatarEmoji {
+	font-size: 2.2rem;
+	line-height: 1;
+}
+
+.greeting {
+	font-size: 1.65rem;
+	margin-bottom: 8px;
+}
+
+.welcome {
+	color: var(--text-primary);
+	font-size: 0.92rem;
+	font-weight: 500;
+	margin-bottom: 8px;
+	word-break: break-all;
+}
+
+.placeholderNote {
+	color: var(--text-secondary);
+	font-size: 0.82rem;
+	margin-bottom: 28px;
+	line-height: 1.6;
+}
+
+.signOutBtn {
+	width: 100%;
+	padding: 12px;
+	font-weight: 600;
+}
+
+/* ─── Download card ───────────────────────────────────────────────── */
+.downloadCard {
+	display: flex;
+	flex-direction: column;
+	gap: 22px;
+}
+
+.downloadGlow {
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(ellipse at 50% -10%, rgba(229, 185, 88, 0.12) 0%, transparent 65%);
+	pointer-events: none;
+}
+
+.downloadHeader {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	position: relative;
+}
+
+.androidIcon {
+	font-size: 2.6rem;
+	line-height: 1;
+	flex-shrink: 0;
+	margin-top: 2px;
+}
+
+.earlyBadge {
+	display: inline-block;
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	padding: 3px 12px;
+	border-radius: var(--radius-pill);
+	background: var(--gold-gradient);
+	color: #04011e;
+	margin-bottom: 8px;
+}
+
+.downloadTitle {
+	font-size: 1.35rem;
+	margin: 0 0 4px;
+	color: var(--text-primary);
+}
+
+.downloadSubtitle {
+	font-size: 0.82rem;
+	color: var(--text-secondary);
+	margin: 0;
+	line-height: 1.5;
+}
+
+/* ─── Meta pills ──────────────────────────────────────────────────── */
+.downloadMeta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	position: relative;
+}
+
+.metaPill {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.78rem;
+	padding: 6px 14px;
+	border-radius: var(--radius-pill);
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid var(--border-card);
+	color: var(--text-secondary);
+}
+
+.metaIcon {
+	font-size: 0.9rem;
+	line-height: 1;
+}
+
+/* ─── Download button ─────────────────────────────────────────────── */
+.downloadBtn {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 14px 24px;
+	border-radius: var(--radius-md);
+	font-size: 1rem;
+	font-weight: 700;
+	text-decoration: none;
+	color: #04011e;
+	background: var(--gold-gradient);
+	background-size: 200% 100%;
+	border: none;
+	cursor: pointer;
+	transition: background-position 0.4s ease, transform 0.2s ease, box-shadow 0.2s ease;
+	box-shadow: 0 4px 20px rgba(229, 185, 88, 0.35);
+}
+
+.downloadBtn:hover {
+	background-position: 100% 0;
+	transform: translateY(-2px);
+	box-shadow: 0 8px 28px rgba(229, 185, 88, 0.5);
+}
+
+.downloadBtn:active {
+	transform: translateY(0);
+}
+
+.downloadBtnDisabled {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	width: 100%;
+	padding: 14px 24px;
+	border-radius: var(--radius-md);
+	font-family: inherit;
+	font-size: 0.9rem;
+	color: var(--text-muted);
+	background: rgba(255, 255, 255, 0.03);
+	border: 1px dashed var(--border-card);
+	cursor: not-allowed;
+}
+
+.downloadBtnIcon {
+	font-size: 1.1rem;
+	line-height: 1;
+}
+
+/* ─── Instructions note ───────────────────────────────────────────── */
+.instructions {
+	font-size: 0.76rem;
+	color: var(--text-secondary);
+	line-height: 1.6;
+	padding: 12px 16px;
+	border-radius: var(--radius-sm);
+	margin: 0;
+	background: rgba(229, 185, 88, 0.06);
+	border: 1px solid rgba(229, 185, 88, 0.16);
+}
+
+/* ─── Hash rows ───────────────────────────────────────────────────── */
+.sha1Row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	padding-top: 6px;
+	border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sha1Label {
+	font-size: 0.7rem;
+	font-weight: 700;
+	color: var(--text-secondary);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	flex-shrink: 0;
+}
+
+.sha1Hash {
+	font-size: 0.68rem;
+	font-family: 'Courier New', monospace;
+	color: var(--gold-light);
+	word-break: break-all;
+	background: rgba(0, 0, 0, 0.25);
+	padding: 4px 8px;
+	border-radius: 4px;
+	border: 1px solid rgba(255, 255, 255, 0.06);
+}

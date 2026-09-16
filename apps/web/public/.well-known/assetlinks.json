@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.takwa",
+      "sha256_cert_fingerprints": ["8F:7E:08:74:F8:D4:47:77:E1:82:8C:25:B4:09:0D:47:86:D2:93:01"]
+    }
+  }
+]

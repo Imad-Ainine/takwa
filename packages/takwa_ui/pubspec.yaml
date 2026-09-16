@@ -1,0 +1,23 @@
+name: takwa_ui
+description: >
+  Takwa's design system — color/typography/decoration/shadow theme tokens,
+  spacing/radius scales, ThemeData construction (including the Ramadan
+  theme), and a handful of shared presentational widgets. Pure Flutter UI,
+  no app-specific state or business logic — see the audit's "Architecture
+  & Code Quality" section for why this is split out from apps/mobile.
+version: 0.1.0
+publish_to: 'none'
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:

@@ -1,0 +1,28 @@
+{
+	"name": "takwa-monorepo",
+	"private": true,
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
+	"scripts": {
+		"web:dev": "npm run dev --workspace=@takwa/web",
+		"web:build": "npm run build --workspace=@takwa/web",
+		"mobile:bootstrap": "dart run melos bootstrap",
+		"mobile:clean": "dart run melos clean",
+		"test": "dart run melos run test",
+		"flutter_build_abi": "cd apps/mobile && flutter build apk --release --split-per-abi",
+		"flutter_build_appbundle": "cd apps/mobile && flutter build appbundle --release"
+	},
+	"optionalDependencies": {
+		"@next/swc-linux-x64-gnu": "16.2.4",
+		"@next/swc-linux-x64-musl": "16.2.4",
+		"@parcel/watcher-linux-x64-glibc": "2.5.6",
+		"@parcel/watcher-linux-x64-musl": "2.5.6",
+		"@swc/core-linux-x64-gnu": "1.15.30",
+		"@swc/core-linux-x64-musl": "1.15.30"
+	},
+	"dependencies": {
+		"@tailwindcss/postcss": "^4.2.4"
+	}
+}

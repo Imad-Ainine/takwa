@@ -1,0 +1,10 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # Matches apps/mobile's analysis_options.yaml — this package's theme
+    # code was moved from there verbatim; revisit both together if/when
+    # migrating off withOpacity().
+    deprecated_member_use: ignore
+  exclude:
+    - build/**

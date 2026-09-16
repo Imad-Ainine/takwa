@@ -1,0 +1,218 @@
+name: Build & Release APK
+
+on:
+    push:
+        tags:
+            - "v*.*.*" # Triggers on git tags like v1.0.1
+    workflow_dispatch:
+        inputs:
+            version:
+                description: "Version (e.g., 1.0.1)"
+                required: true
+                default: "1.0.0"
+
+jobs:
+    build-and-release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write # needed to create GitHub Releases
+        defaults:
+            run:
+                working-directory: apps/mobile
+
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v4
+
+            # ── Resolve version ─────────────────────────────────────────────
+            - name: Extract Version
+              id: get_version
+              run: |
+                  if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+                    echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+                  else
+                    VERSION=${GITHUB_REF#refs/tags/v}
+                    echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+                  fi
+
+            # ── Flutter setup ────────────────────────────────────────────────
+            - name: Set up Java
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "zulu"
+                  java-version: "17"
+
+            - name: Set up Flutter
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: "3.47.2"
+                  cache: true
+
+            - name: Install Flutter dependencies
+              run: flutter pub get
+
+            # ── Environment ───────────────────────────────────────────────────
+            - name: Create .env for Flutter build
+              run: |
+                  if [ -z "${{ secrets.SUPABASE_URL }}" ] || [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
+                    echo "::error::Secrets SUPABASE_URL or SUPABASE_ANON_KEY are missing in GitHub Actions Secrets! Email and Google Auth will not work without them."
+                    exit 1
+                  fi
+                  cat > .env <<'EOF'
+                  SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+                  SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+                  SUPABASE_WEB_CLIENT_ID=${{ secrets.SUPABASE_WEB_CLIENT_ID }}
+                  SUPABASE_IOS_CLIENT_ID=${{ secrets.SUPABASE_IOS_CLIENT_ID }}
+                  EOF
+
+            # ── Signing keystore ──────────────────────────────────────────────
+            - name: Set up release signing keystore
+              working-directory: apps/mobile/android
+              run: |
+                  if [ -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+                    echo "::error::Secret KEYSTORE_BASE64 is empty or missing!"
+                    exit 1
+                  fi
+
+                  # Decode the base64 keystore stored in GitHub Secrets
+                  echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/takwa-release-key.jks
+
+                  if [ ! -s app/takwa-release-key.jks ]; then
+                    echo "::error::app/takwa-release-key.jks is empty or failed to decode!"
+                    exit 1
+                  fi
+
+                  # Write key.properties so Gradle can find it
+                  cat > key.properties <<EOF
+                  storePassword=${{ secrets.KEY_STORE_PASSWORD }}
+                  keyPassword=${{ secrets.KEY_PASSWORD }}
+                  keyAlias=${{ secrets.KEY_ALIAS }}
+                  storeFile=takwa-release-key.jks
+                  EOF
+
+            # ── Build ─────────────────────────────────────────────────────────
+            - name: Build Android APK (universal)
+              run: |
+                  flutter build apk --release \
+                    --build-name=${{ steps.get_version.outputs.VERSION }} \
+                    --build-number=${GITHUB_RUN_NUMBER:-1}
+
+            # ── Checksums & rename ────────────────────────────────────────────
+            - name: Compute checksums & rename APK
+              id: checksums
+              working-directory: apps/mobile
+              run: |
+                  VERSION="${{ steps.get_version.outputs.VERSION }}"
+                  APK_SRC="build/app/outputs/flutter-apk/app-release.apk"
+                  TARGET_FILE="takwa-v${VERSION}.apk"
+
+                  cp "$APK_SRC" "$TARGET_FILE"
+
+                  SIZE_BYTES=$(stat -c%s "$TARGET_FILE")
+                  SIZE_MB=$(awk "BEGIN {printf \"%.2f\", ${SIZE_BYTES}/1048576}")
+
+                  SHA256=$(sha256sum "$TARGET_FILE" | awk '{print $1}')
+                  SHA1=$(sha1sum   "$TARGET_FILE" | awk '{print $1}')
+
+                  echo "TARGET_FILE=$TARGET_FILE"   >> $GITHUB_OUTPUT
+                  echo "SIZE_BYTES=$SIZE_BYTES"     >> $GITHUB_OUTPUT
+                  echo "SIZE_MB=$SIZE_MB"           >> $GITHUB_OUTPUT
+                  echo "SHA256=$SHA256"             >> $GITHUB_OUTPUT
+                  echo "SHA1=$SHA1"                 >> $GITHUB_OUTPUT
+
+                  echo "=== Release summary ==="
+                  echo "  File : $TARGET_FILE"
+                  echo "  Size : ${SIZE_MB} MB"
+                  echo "  SHA256: $SHA256"
+                  echo "  SHA1  : $SHA1"
+
+            # ── GitHub Release (hosts the APK — no file-size limit) ───────────
+            - name: Create GitHub Release & upload APK
+              id: gh_release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: v${{ steps.get_version.outputs.VERSION }}
+                  name: "Takwa v${{ steps.get_version.outputs.VERSION }}"
+                  body: |
+                      ## 🕌 Takwa v${{ steps.get_version.outputs.VERSION }}
+
+                      ### Download
+                      Download the APK directly from the Assets section below or from the [Takwa website](https://takwa-app.vercel.app/#download).
+
+                      ### Verification
+                      | Algorithm | Hash |
+                      |-----------|------|
+                      | SHA-256 | `${{ steps.checksums.outputs.SHA256 }}` |
+                      | SHA-1   | `${{ steps.checksums.outputs.SHA1 }}` |
+
+                      ### Installation
+                      1. Download `takwa-v${{ steps.get_version.outputs.VERSION }}.apk`
+                      2. Enable *Install from unknown sources* in Android settings
+                      3. Open the APK file to install
+                  files: apps/mobile/${{ steps.checksums.outputs.TARGET_FILE }}
+                  generate_release_notes: true
+                  make_latest: true
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            # ── Publish manifest.json to Supabase (metadata only, <1 KB) ─────
+            #    The landing page & dashboard read this file at request time,
+            #    so no Vercel redeploy is needed after each release.
+            - name: Publish release manifest to Supabase
+              run: |
+                  VERSION="${{ steps.get_version.outputs.VERSION }}"
+                  SHA256="${{ steps.checksums.outputs.SHA256 }}"
+                  SHA1="${{ steps.checksums.outputs.SHA1 }}"
+                  SIZE_MB="${{ steps.checksums.outputs.SIZE_MB }}"
+                  SIZE_BYTES="${{ steps.checksums.outputs.SIZE_BYTES }}"
+                  RELEASED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+                  # Prefer the GitHub Release asset URL so the file is served
+                  # from GitHub's CDN (no size limits, no bandwidth costs).
+                  GH_APK_URL="${{ steps.gh_release.outputs.url }}"
+                  # Fallback: direct asset download URL from GitHub Releases
+                  REPO="${{ github.repository }}"
+                  DIRECT_URL="https://github.com/${REPO}/releases/download/v${VERSION}/takwa-v${VERSION}.apk"
+
+                  MANIFEST=$(cat <<EOF
+                  {
+                    "version": "${VERSION}",
+                    "apkUrl": "${DIRECT_URL}",
+                    "size": "${SIZE_MB} MB",
+                    "sizeBytes": ${SIZE_BYTES},
+                    "sha256": "${SHA256}",
+                    "sha1": "${SHA1}",
+                    "releasedAt": "${RELEASED_AT}",
+                    "githubRelease": "${GH_APK_URL}"
+                  }
+                  EOF
+                  )
+
+                  SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
+                  SERVICE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}"
+                  BUCKET="apk-releases"
+
+                  if [ -z "$SERVICE_KEY" ] || [ -z "$SUPABASE_URL" ]; then
+                    echo "⚠️ SUPABASE_SERVICE_ROLE_KEY or SUPABASE_URL secret is not configured. Skipping Supabase manifest upload."
+                    exit 0
+                  fi
+
+                  echo "Publishing manifest.json to Supabase (${BUCKET})..."
+                  echo "$MANIFEST"
+
+                  HTTP_CODE=$(echo "$MANIFEST" | curl -s -o response.json -w "%{http_code}" \
+                    -X POST "${SUPABASE_URL}/storage/v1/object/${BUCKET}/manifest.json" \
+                    -H "Authorization: Bearer ${SERVICE_KEY}" \
+                    -H "Content-Type: application/json" \
+                    -H "x-upsert: true" \
+                    --data-binary @-)
+
+                  if [ "$HTTP_CODE" -ne 200 ] && [ "$HTTP_CODE" -ne 201 ]; then
+                    echo "⚠️ Supabase manifest upload failed (HTTP $HTTP_CODE):"
+                    cat response.json
+                  else
+                    echo "✅ manifest.json published successfully!"
+                    echo "   Public URL: ${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/manifest.json"
+                  fi
+              working-directory: apps/mobile

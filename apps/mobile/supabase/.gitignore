@@ -1,0 +1,4 @@
+# Local-only Supabase CLI state (created by `supabase link` / `supabase db pull`).
+# migrations/ and audit/ are the tracked, reviewable parts of this folder.
+.branches/
+.temp/

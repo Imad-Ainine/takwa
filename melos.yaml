@@ -1,0 +1,9 @@
+name: takwa
+packages:
+  - apps/mobile
+  - apps/web
+  - packages/*
+
+command:
+  bootstrap:
+    usePubspecOverrides: true

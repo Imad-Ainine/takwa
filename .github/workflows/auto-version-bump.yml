@@ -1,0 +1,141 @@
+name: Auto Version Bump
+
+# Triggers on every push to main that touches mobile code (always a patch
+# bump), or manually via workflow_dispatch (choose patch/minor/major).
+# Reads the current version from pubspec.yaml, bumps it, commits the change
+# back to main, then creates a git tag — which in turn triggers the
+# release-apk.yml pipeline.
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - "apps/mobile/**"
+            - "packages/**"
+            - "!apps/mobile/build/**" # ignore build output
+    workflow_dispatch:
+        inputs:
+            bump_type:
+                description: "Which part of X.Y.Z to bump (push-triggered runs always use patch)"
+                required: true
+                default: "patch"
+                type: choice
+                options:
+                    - patch
+                    - minor
+                    - major
+
+jobs:
+    bump-version:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write # required to push the version commit + tag
+
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  # RELEASE_TOKEN is a PAT — GITHUB_TOKEN cannot trigger
+                  # other workflows (release-apk.yml), but a PAT can.
+                  token: ${{ secrets.RELEASE_TOKEN }}
+
+            # ── Read current version from pubspec.yaml ──────────────────────
+            - name: Read current version
+              id: current
+              run: |
+                  VERSION=$(grep '^version:' apps/mobile/pubspec.yaml | sed 's/version: //;s/+.*//' | tr -d '[:space:]')
+                  echo "Current version: $VERSION"
+                  echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+            # ── Skip if this commit was itself a version-bump commit ─────────
+            - name: Check if already a version-bump commit
+              id: skip_check
+              run: |
+                  LAST_MSG=$(git log -1 --pretty=%s)
+                  echo "Last commit: $LAST_MSG"
+                  if echo "$LAST_MSG" | grep -qE '^\[release\] bump version'; then
+                    echo "SKIP=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "SKIP=false" >> $GITHUB_OUTPUT
+                  fi
+
+            # ── Compute next version ──────────────────────────────────────────
+            # Manual runs (workflow_dispatch) can bump patch/minor/major via
+            # the bump_type input; a plain push to main always bumps patch,
+            # same as before.
+            - name: Compute next version
+              id: next
+              if: steps.skip_check.outputs.SKIP == 'false'
+              run: |
+                  CURRENT="${{ steps.current.outputs.VERSION }}"
+                  BUMP_TYPE="${{ github.event.inputs.bump_type || 'patch' }}"
+                  IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+                  case "$BUMP_TYPE" in
+                    major)
+                      MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+                      ;;
+                    minor)
+                      MINOR=$((MINOR + 1)); PATCH=0
+                      ;;
+                    patch|*)
+                      PATCH=$((PATCH + 1))
+                      ;;
+                  esac
+                  NEXT="${MAJOR}.${MINOR}.${PATCH}"
+
+                  # Ensure tag does not already exist
+                  git fetch --tags
+                  while git rev-parse "v${NEXT}" >/dev/null 2>&1; do
+                    echo "Tag v${NEXT} already exists, incrementing patch version..."
+                    PATCH=$((PATCH + 1))
+                    NEXT="${MAJOR}.${MINOR}.${PATCH}"
+                  done
+
+                  echo "Bump type: $BUMP_TYPE"
+                  echo "New version: $NEXT"
+                  echo "VERSION=$NEXT" >> $GITHUB_OUTPUT
+                  # Also compute build number from run number to avoid duplicate versionCodes
+                  echo "BUILD=${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+            # ── Update pubspec.yaml ──────────────────────────────────────────
+            - name: Update pubspec.yaml
+              if: steps.skip_check.outputs.SKIP == 'false'
+              run: |
+                  NEXT="${{ steps.next.outputs.VERSION }}"
+                  BUILD="${{ steps.next.outputs.BUILD }}"
+                  # Update the version line, preserving the +buildNumber
+                  sed -i "s/^version: .*/version: ${NEXT}+${BUILD}/" apps/mobile/pubspec.yaml
+                  echo "Updated pubspec.yaml to version: ${NEXT}+${BUILD}"
+                  grep '^version:' apps/mobile/pubspec.yaml
+
+            # ── Commit & tag ─────────────────────────────────────────────────
+            - name: Commit, tag & push
+              if: steps.skip_check.outputs.SKIP == 'false'
+              run: |
+                  NEXT="${{ steps.next.outputs.VERSION }}"
+
+                  # Attributed to your own GitHub account (via its noreply
+                  # address, so the real email never lands in git history)
+                  # instead of github-actions[bot], so automated release
+                  # commits don't add a separate bot entry to the repo's
+                  # Contributors list.
+                  git config user.name  "Imad Ainine"
+                  git config user.email "81334818+Imad-Ainine@users.noreply.github.com"
+
+                  git add apps/mobile/pubspec.yaml
+                  git commit -m "[release] bump version to v${NEXT}"
+
+                  # Create annotated tag — this triggers release-apk.yml
+                  git tag -a "v${NEXT}" -m "Release v${NEXT}"
+
+                  # Pull any commits that landed on remote since we checked out,
+                  # then push. --rebase keeps the version-bump commit on top.
+                  git pull --rebase https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}.git main
+
+                  # Push the commit and the tag.
+                  # Using RELEASE_TOKEN so the tag push event can trigger
+                  # release-apk.yml (GITHUB_TOKEN is blocked from doing this).
+                  git push https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}.git main --follow-tags
