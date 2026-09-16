@@ -107,6 +107,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'You logged 10 days of Ramadan accountability';
 
   @override
+  String get achievementRamadanCompleteTitle => 'A Full Month';
+
+  @override
+  String get achievementRamadanCompleteDesc =>
+      'You fasted the entire month of Ramadan this year';
+
+  @override
+  String get achievementCircleJoinedTitle => 'Family Circle';
+
+  @override
+  String get achievementCircleJoinedDesc =>
+      'You joined your first accountability circle';
+
+  @override
   String get achievementPoints100Title => 'A Hundred Steps';
 
   @override
@@ -4574,6 +4588,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ramadanNotRamadanMessage => 'It\'s not Ramadan right now';
 
   @override
+  String get ramadanPrayerTimesUnavailable =>
+      'Couldn\'t resolve prayer times — check your location permission';
+
+  @override
   String get ramadanSuhoorEndsIn => 'Suhoor ends in';
 
   @override
@@ -4710,6 +4728,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter the price per gram for the selected Nisab standard to compute the threshold';
 
   @override
+  String get zakatSetReminderButton => 'Set an Annual Zakat Reminder';
+
+  @override
+  String get zakatReminderDefaultTitle => 'Zakat Due Date';
+
+  @override
   String get homeFeatureCircles => 'Accountability\nCircles';
 
   @override
@@ -4811,6 +4835,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reactionPhraseMashallah => 'MashaAllah ✨';
+
+  @override
+  String get circleSortByPoints => 'Points';
+
+  @override
+  String get circleSortByStreak => 'Streak';
+
+  @override
+  String get circleReactionsReceivedTitle => 'Encouragement for You 💌';
 
   @override
   String get homeFeatureQada => 'Qada\nPrayers';

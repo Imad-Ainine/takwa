@@ -166,6 +166,30 @@ class AchievementDefinition {
         pointsReward: 40,
         category: AchievementCategory.special,
       ),
+      // See docs/specs/ramadan-fasting-tracker.md R6 — distinct from
+      // 'ramadan_knight' above, which is a lifetime 10-fard-fasting-days
+      // milestone unrelated to any single Ramadan. This one specifically
+      // rewards fasting every day of the *current* Ramadan.
+      AchievementDefinition(
+        id: 'ramadan_complete',
+        titleAr: l10n.achievementRamadanCompleteTitle,
+        descAr: l10n.achievementRamadanCompleteDesc,
+        emoji: '🌙',
+        pointsReward: 300,
+        category: AchievementCategory.special,
+      ),
+      // See docs/specs/family-community-features.md's data-model section —
+      // granted once, the first time a user creates or joins any circle
+      // (MyCirclesNotifier.create()/join() in circles_providers.dart), not
+      // part of the daily_records-driven checkAndGrantAchievements() sweep.
+      AchievementDefinition(
+        id: 'circle_joined',
+        titleAr: l10n.achievementCircleJoinedTitle,
+        descAr: l10n.achievementCircleJoinedDesc,
+        emoji: '👨‍👩‍👧‍👦',
+        pointsReward: 30,
+        category: AchievementCategory.special,
+      ),
     ];
   }
 }
