@@ -24,6 +24,28 @@ jobs:
             - name: Checkout Code
               uses: actions/checkout@v4
 
+            # ── Free disk space ───────────────────────────────────────────────
+            # GitHub-hosted runners ship with ~14 GB used by pre-installed tools
+            # (Android SDK NDK, .NET, Haskell GHC, etc.) that Flutter APK builds
+            # never need. Removing them reclaims ~10 GB and prevents the
+            # "no space left on device" R8/Gradle failure.
+            - name: Free disk space
+              run: |
+                  echo "Disk space before cleanup:"
+                  df -h
+
+                  sudo rm -rf /usr/local/lib/android/sdk/ndk
+                  sudo rm -rf /usr/share/dotnet
+                  sudo rm -rf /opt/ghc
+                  sudo rm -rf /usr/local/.ghcup
+                  sudo rm -rf /usr/share/swift
+                  sudo rm -rf /usr/local/share/boost
+                  sudo rm -rf "$AGENT_TOOLSDIRECTORY"/go
+                  sudo rm -rf "$AGENT_TOOLSDIRECTORY"/CodeQL
+
+                  echo "Disk space after cleanup:"
+                  df -h
+
             # ── Resolve version ─────────────────────────────────────────────
             - name: Extract Version
               id: get_version
