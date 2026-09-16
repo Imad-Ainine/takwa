@@ -49,7 +49,7 @@ dependencies:
   flutter_compass: ^0.8.0
 
   # ── Permissions ──
-  permission_handler: ^12.0.1
+  permission_handler: ^13.0.2
 
   # ── Utils ──
   collection: ^1.19.0
