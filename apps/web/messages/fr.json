@@ -430,18 +430,13 @@
     "step1": "Téléchargez directement le fichier APK via le bouton ci-dessus.",
     "step2": "Ouvrez le fichier téléchargé et activez \"Autoriser cette source\" si votre téléphone vous le demande.",
     "step3": "Appuyez sur Installer, puis ouvrez Takwa et configurez votre localisation.",
-    "download": {
-      "title": "Télécharger l'Application Takwa",
-      "subtitle": "Avant le lancement sur Google Play — obtenez l'APK sécurisé directement",
-      "version": "Version {version}",
-      "size": "Taille : {size}",
-      "platform": "Android — ARM64 & Universel",
+    "getApp": {
       "badge": "Avant-Première",
-      "button": "Télécharger l'APK",
-      "instructions": "Remarque : Activez \"Autoriser les sources inconnues\" dans les paramètres de votre téléphone avant l'installation.",
-      "sha1Label": "SHA-1 :",
-      "sha256Label": "SHA-256 :",
-      "unavailable": "Le lien de téléchargement n'est pas encore disponible. Veuillez revenir bientôt."
+      "title": "Obtenez l'Application Takwa",
+      "subtitle": "Emportez vos prières, le Coran et vos séries partout avec vous.",
+      "android": "Android — téléchargement direct de l'APK",
+      "ios": "iOS — via TestFlight",
+      "cta": "Voir les Téléchargements"
     }
   }
 }

@@ -356,18 +356,13 @@
     "step1": "Download the APK file directly using the button above.",
     "step2": "Tap the downloaded file and choose \"Allow from this source\" when prompted.",
     "step3": "Tap Install and launch Takwa to begin your journey.",
-    "download": {
-      "title": "Download Takwa App",
-      "subtitle": "Before Google Play launch — get the safe APK directly",
-      "version": "Version {version}",
-      "size": "Size: {size}",
-      "platform": "Android — ARM64 & Universal",
+    "getApp": {
       "badge": "Early Access",
-      "button": "Download APK",
-      "instructions": "Note: Enable \"Install from Unknown Sources\" in your phone settings before installing.",
-      "sha1Label": "SHA-1:",
-      "sha256Label": "SHA-256:",
-      "unavailable": "Download link is not available yet. Please check back later."
+      "title": "Get the Takwa App",
+      "subtitle": "Take your prayers, Quran, and streaks with you on the go.",
+      "android": "Android — APK direct download",
+      "ios": "iOS — via TestFlight",
+      "cta": "Go to Downloads"
     }
   }
 }
