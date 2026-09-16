@@ -1,7 +1,7 @@
 name: takwa
 description: "تطبيق تقوى - تطبيق إسلامي يومي للمحاسبة والمتابعة"
 publish_to: "none"
-version: 1.5.1+11
+version: 1.5.2+13
 
 environment:
   sdk: ^3.11.4
@@ -33,6 +33,13 @@ dependencies:
 
   # ── Home Screen Widgets (Android AppWidget / iOS WidgetKit) ──
   home_widget: ^0.9.4
+
+  # ── Push Notifications (new-release broadcast) ──
+  # Safe to keep even before a Firebase project is configured —
+  # PushNotificationService.initialize() catches the missing-config
+  # failure and no-ops. See docs/specs/release-push-notifications.md.
+  firebase_core: ^3.8.0
+  firebase_messaging: ^15.1.6
 
   flutter_localizations:
     sdk: flutter

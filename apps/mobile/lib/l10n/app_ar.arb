@@ -981,6 +981,21 @@
   "notifChannelRamadanDesc": "تنبيهات السحور والإفطار",
   "notifChannelWakeUpAlarmName": "منبه الاستيقاظ",
   "notifChannelWakeUpAlarmDesc": "منبه مخصص للاستيقاظ لصلاة الفجر",
+  "notifChannelAppUpdatesName": "تحديثات التطبيق",
+  "notifChannelAppUpdatesDesc": "إشعار عند توفر إصدار جديد من التطبيق",
+  "updateAvailableNotifTitle": "تحديث جديد لتطبيق تقوى 🌙",
+  "@updateAvailableNotifTitle": {
+    "description": "Local notification title shown when a newer app version is detected"
+  },
+  "updateAvailableNotifBody": "الإصدار {version} متوفر الآن — اضغط للتحميل",
+  "@updateAvailableNotifBody": {
+    "description": "Local notification body shown when a newer app version is detected",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "overlayServiceChannelDesc": "يُبقي خدمة الأذان والأذكار نشطة",
   "overlayServiceLoadingPrayerTimes": "جاري تحميل أوقات الصلاة...",
   "overlayServiceOpenAppButton": "افتح تقوى",

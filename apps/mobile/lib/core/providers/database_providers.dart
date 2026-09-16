@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:takwa/core/database/app_database.dart';
 import 'package:takwa/core/database/daos.dart';
+import 'package:takwa/core/updates/update_check_service.dart';
 
 // ── Singleton database ──
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
@@ -60,6 +61,10 @@ final qadaDaoProvider = Provider<QadaDao>((ref) {
 
 final qadaCountersProvider = StreamProvider<List<QadaCounter>>((ref) {
   return ref.watch(qadaDaoProvider).watchAll();
+});
+
+final updateCheckServiceProvider = Provider<UpdateCheckService>((ref) {
+  return UpdateCheckService(ref.watch(settingsDaoProvider));
 });
 
 // ── سجل الصدقات ──
