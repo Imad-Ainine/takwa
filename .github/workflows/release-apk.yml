@@ -238,3 +238,68 @@ jobs:
                     echo "   Public URL: ${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/manifest.json"
                   fi
               working-directory: apps/mobile
+
+            # ── Push notification: new release available ──────────────────────
+            # See docs/specs/release-push-notifications.md. No-op until the
+            # FCM_SERVICE_ACCOUNT_JSON secret is configured (requires a real
+            # Firebase project — the doc has the one-time setup steps); every
+            # device that has launched the app with Firebase configured is
+            # already subscribed to the "new_release" topic
+            # (PushNotificationService.initialize() in
+            # apps/mobile/lib/core/notifications/push_notification_service.dart),
+            # so this single topic broadcast reaches all of them at once.
+            #
+            # Placed after the manifest publish above so the notification's
+            # deep link is only ever sent once the release is actually live.
+            - name: Check for FCM secret
+              id: fcm_check
+              run: echo "has_secret=${{ secrets.FCM_SERVICE_ACCOUNT_JSON != '' }}" >> "$GITHUB_OUTPUT"
+
+            - name: Authenticate to Google Cloud (Firebase)
+              id: gcp_auth
+              if: steps.fcm_check.outputs.has_secret == 'true'
+              uses: google-github-actions/auth@v2
+              with:
+                  credentials_json: ${{ secrets.FCM_SERVICE_ACCOUNT_JSON }}
+
+            - name: Send release push notification
+              if: steps.fcm_check.outputs.has_secret == 'true'
+              run: |
+                  VERSION="${{ steps.get_version.outputs.VERSION }}"
+                  PROJECT_ID="${{ steps.gcp_auth.outputs.project_id }}"
+                  ACCESS_TOKEN=$(gcloud auth print-access-token)
+                  # Keep in sync with kReleaseDownloadUrl in
+                  # apps/mobile/lib/core/updates/update_check_service.dart —
+                  # both notification paths (this CI push and the in-app
+                  # update check) must send the user to the same place.
+                  DOWNLOAD_URL="https://takwa-app.com/#download"
+
+                  HTTP_CODE=$(curl -s -o response.json -w "%{http_code}" \
+                    -X POST "https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send" \
+                    -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+                    -H "Content-Type: application/json" \
+                    -d "{
+                      \"message\": {
+                        \"topic\": \"new_release\",
+                        \"notification\": {
+                          \"title\": \"تحديث جديد لتطبيق تقوى 🌙\",
+                          \"body\": \"الإصدار ${VERSION} متوفر الآن — اضغط للتحميل\"
+                        },
+                        \"data\": {
+                          \"type\": \"release_update\",
+                          \"version\": \"${VERSION}\",
+                          \"url\": \"${DOWNLOAD_URL}\"
+                        }
+                      }
+                    }")
+
+                  if [ "$HTTP_CODE" -ne 200 ]; then
+                    echo "⚠️ FCM push failed (HTTP $HTTP_CODE):"
+                    cat response.json
+                  else
+                    echo "✅ Push notification sent to the 'new_release' topic"
+                  fi
+
+            - name: Skip push notification (FCM not configured)
+              if: steps.fcm_check.outputs.has_secret != 'true'
+              run: echo "ℹ️ FCM_SERVICE_ACCOUNT_JSON secret not set — skipping release push notification. See docs/specs/release-push-notifications.md to enable it."

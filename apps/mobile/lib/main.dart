@@ -14,6 +14,7 @@ import 'package:takwa/core/utils/app_logger.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 import 'package:takwa/core/notifications/notifications_service.dart';
+import 'package:takwa/core/notifications/push_notification_service.dart';
 import 'package:takwa/core/notifications/adhan_foreground_service.dart';
 import 'package:takwa/core/notifications/adhan_auto_trigger.dart';
 import 'package:takwa/core/theme/app_theme.dart';
@@ -140,6 +141,14 @@ Future<void> _runApp() async {
   }
 
   try {
+    // Safe no-op until a Firebase project is configured — see
+    // docs/specs/release-push-notifications.md.
+    await PushNotificationService.initialize();
+  } catch (e, st) {
+    AppLogger.warning('PushNotificationService initialize error', e, st);
+  }
+
+  try {
     await QuranLibrary.init();
   } catch (e, st) {
     AppLogger.error('QuranLibrary init error', e, st);
@@ -194,7 +203,16 @@ class _TakwaAppState extends ConsumerState<TakwaApp> {
       DailyQuoteWidgetService.updateAll(locale: ref.read(localeProvider));
       _setupAuthListener();
       _checkNotificationLaunch();
+      _checkForAppUpdate();
     });
+  }
+
+  /// See docs/specs/release-push-notifications.md — the "works today, no
+  /// Firebase project needed" half of the release-notification feature.
+  /// Fire-and-forget: never blocks startup, and any failure (offline,
+  /// endpoint down) is swallowed inside the service itself.
+  void _checkForAppUpdate() {
+    ref.read(updateCheckServiceProvider).checkForUpdate();
   }
 
   Future<void> _checkNotificationLaunch() async {

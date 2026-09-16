@@ -3110,6 +3110,30 @@ abstract class AppLocalizations {
   /// **'منبه مخصص للاستيقاظ لصلاة الفجر'**
   String get notifChannelWakeUpAlarmDesc;
 
+  /// No description provided for @notifChannelAppUpdatesName.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحديثات التطبيق'**
+  String get notifChannelAppUpdatesName;
+
+  /// No description provided for @notifChannelAppUpdatesDesc.
+  ///
+  /// In ar, this message translates to:
+  /// **'إشعار عند توفر إصدار جديد من التطبيق'**
+  String get notifChannelAppUpdatesDesc;
+
+  /// Local notification title shown when a newer app version is detected
+  ///
+  /// In ar, this message translates to:
+  /// **'تحديث جديد لتطبيق تقوى 🌙'**
+  String get updateAvailableNotifTitle;
+
+  /// Local notification body shown when a newer app version is detected
+  ///
+  /// In ar, this message translates to:
+  /// **'الإصدار {version} متوفر الآن — اضغط للتحميل'**
+  String updateAvailableNotifBody(String version);
+
   /// No description provided for @overlayServiceChannelDesc.
   ///
   /// In ar, this message translates to:
