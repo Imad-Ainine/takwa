@@ -10,6 +10,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:hijri/hijri_calendar.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:takwa/features/duas/data/duas_data.dart';
 import 'package:takwa/core/providers/database_providers.dart';
@@ -79,6 +80,9 @@ class NotifIds {
 
   // تنبيهات الاستيقاظ
   static const wakeUpAlarm = 800;
+
+  // تحديثات التطبيق
+  static const appUpdate = 900;
 }
 
 // ─────────────────────────────────────────
@@ -209,6 +213,18 @@ class NotifChannels {
     enableVibration: true,
   );
 
+  /// قناة تحديثات التطبيق — إشعار عند توفر إصدار جديد. See
+  /// docs/specs/release-push-notifications.md.
+  static final AndroidNotificationChannel appUpdates =
+      AndroidNotificationChannel(
+        'app_updates_channel',
+        _l10n.notifChannelAppUpdatesName,
+        description: _l10n.notifChannelAppUpdatesDesc,
+        importance: Importance.defaultImportance,
+        playSound: true,
+        enableVibration: false,
+      );
+
   /// قناة منبه الاستيقاظ
   static final AndroidNotificationChannel wakeUpAlarm =
       AndroidNotificationChannel(
@@ -234,6 +250,7 @@ class NotifChannels {
     achievement,
     reminders,
     ramadan,
+    appUpdates,
     wakeUpAlarm,
   ];
 }
@@ -1393,6 +1410,17 @@ class NotificationRouter {
         break;
       case 'ramadan':
         Navigator.pushNamed(ctx, Routes.prayer);
+        break;
+      case 'release_update':
+        // The URL itself contains colons (scheme + query), so it can't use
+        // the shared `param` above (a naive split(':') on
+        // "https://example.com/#x" fragments the URL) — reconstruct
+        // everything after the first colon instead. See
+        // docs/specs/release-push-notifications.md.
+        final url = payload.substring(payload.indexOf(':') + 1);
+        if (url.isNotEmpty) {
+          launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+        }
         break;
     }
   }

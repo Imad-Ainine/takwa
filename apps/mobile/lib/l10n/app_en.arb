@@ -845,6 +845,21 @@
   "notifChannelRamadanDesc": "Suhoor and iftar alerts",
   "notifChannelWakeUpAlarmName": "Wake-up Alarm",
   "notifChannelWakeUpAlarmDesc": "Custom alarm to wake up for Fajr prayer",
+  "notifChannelAppUpdatesName": "App Updates",
+  "notifChannelAppUpdatesDesc": "Notified when a new app version is available",
+  "updateAvailableNotifTitle": "New Takwa Update Available 🌙",
+  "@updateAvailableNotifTitle": {
+    "description": "Local notification title shown when a newer app version is detected"
+  },
+  "updateAvailableNotifBody": "Version {version} is ready — tap to download",
+  "@updateAvailableNotifBody": {
+    "description": "Local notification body shown when a newer app version is detected",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "overlayServiceChannelDesc": "Keeps the adhan and adhkar service active",
   "overlayServiceLoadingPrayerTimes": "Loading prayer times...",
   "overlayServiceOpenAppButton": "Open Takwa",

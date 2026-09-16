@@ -1625,6 +1625,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Custom alarm to wake up for Fajr prayer';
 
   @override
+  String get notifChannelAppUpdatesName => 'App Updates';
+
+  @override
+  String get notifChannelAppUpdatesDesc =>
+      'Notified when a new app version is available';
+
+  @override
+  String get updateAvailableNotifTitle => 'New Takwa Update Available 🌙';
+
+  @override
+  String updateAvailableNotifBody(String version) {
+    return 'Version $version is ready — tap to download';
+  }
+
+  @override
   String get overlayServiceChannelDesc =>
       'Keeps the adhan and adhkar service active';
 

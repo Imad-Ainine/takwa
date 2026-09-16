@@ -1590,6 +1590,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notifChannelWakeUpAlarmDesc => 'منبه مخصص للاستيقاظ لصلاة الفجر';
 
   @override
+  String get notifChannelAppUpdatesName => 'تحديثات التطبيق';
+
+  @override
+  String get notifChannelAppUpdatesDesc =>
+      'إشعار عند توفر إصدار جديد من التطبيق';
+
+  @override
+  String get updateAvailableNotifTitle => 'تحديث جديد لتطبيق تقوى 🌙';
+
+  @override
+  String updateAvailableNotifBody(String version) {
+    return 'الإصدار $version متوفر الآن — اضغط للتحميل';
+  }
+
+  @override
   String get overlayServiceChannelDesc => 'يُبقي خدمة الأذان والأذكار نشطة';
 
   @override
