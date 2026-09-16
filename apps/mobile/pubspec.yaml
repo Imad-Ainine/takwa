@@ -76,7 +76,7 @@ dependencies:
 
   # ── PDF and Images ──
   syncfusion_flutter_pdfviewer: ^34.2.6 # upgraded to resolve win32 ^6.x conflict
-  cached_network_image: ^3.4.1
+  cached_network_image: ^4.0.0
 
   # ── Adhan Background & UI ──
   # Bumped to 11.0.1 for built-in Kotlin (KGP) support — has breaking API changes,
