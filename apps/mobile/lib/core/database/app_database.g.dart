@@ -6880,6 +6880,833 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxData> {
   }
 }
 
+class $ZakatCalculationsTable extends ZakatCalculations
+    with TableInfo<$ZakatCalculationsTable, ZakatCalculation> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ZakatCalculationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _computedAtMeta = const VerificationMeta(
+    'computedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> computedAt = GeneratedColumn<DateTime>(
+    'computed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _cashAmountMeta = const VerificationMeta(
+    'cashAmount',
+  );
+  @override
+  late final GeneratedColumn<double> cashAmount = GeneratedColumn<double>(
+    'cash_amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _bankAmountMeta = const VerificationMeta(
+    'bankAmount',
+  );
+  @override
+  late final GeneratedColumn<double> bankAmount = GeneratedColumn<double>(
+    'bank_amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _goldGramsMeta = const VerificationMeta(
+    'goldGrams',
+  );
+  @override
+  late final GeneratedColumn<double> goldGrams = GeneratedColumn<double>(
+    'gold_grams',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _goldPricePerGramMeta = const VerificationMeta(
+    'goldPricePerGram',
+  );
+  @override
+  late final GeneratedColumn<double> goldPricePerGram = GeneratedColumn<double>(
+    'gold_price_per_gram',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _silverGramsMeta = const VerificationMeta(
+    'silverGrams',
+  );
+  @override
+  late final GeneratedColumn<double> silverGrams = GeneratedColumn<double>(
+    'silver_grams',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _silverPricePerGramMeta =
+      const VerificationMeta('silverPricePerGram');
+  @override
+  late final GeneratedColumn<double> silverPricePerGram =
+      GeneratedColumn<double>(
+        'silver_price_per_gram',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0.0),
+      );
+  static const VerificationMeta _tradeGoodsValueMeta = const VerificationMeta(
+    'tradeGoodsValue',
+  );
+  @override
+  late final GeneratedColumn<double> tradeGoodsValue = GeneratedColumn<double>(
+    'trade_goods_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _debtAmountMeta = const VerificationMeta(
+    'debtAmount',
+  );
+  @override
+  late final GeneratedColumn<double> debtAmount = GeneratedColumn<double>(
+    'debt_amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<NisabStandard, int>
+  nisabStandard =
+      GeneratedColumn<int>(
+        'nisab_standard',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(1),
+      ).withConverter<NisabStandard>(
+        $ZakatCalculationsTable.$converternisabStandard,
+      );
+  static const VerificationMeta _currencyLabelMeta = const VerificationMeta(
+    'currencyLabel',
+  );
+  @override
+  late final GeneratedColumn<String> currencyLabel = GeneratedColumn<String>(
+    'currency_label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _hawlConfirmedMeta = const VerificationMeta(
+    'hawlConfirmed',
+  );
+  @override
+  late final GeneratedColumn<bool> hawlConfirmed = GeneratedColumn<bool>(
+    'hawl_confirmed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("hawl_confirmed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _resultDueMeta = const VerificationMeta(
+    'resultDue',
+  );
+  @override
+  late final GeneratedColumn<double> resultDue = GeneratedColumn<double>(
+    'result_due',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    computedAt,
+    cashAmount,
+    bankAmount,
+    goldGrams,
+    goldPricePerGram,
+    silverGrams,
+    silverPricePerGram,
+    tradeGoodsValue,
+    debtAmount,
+    nisabStandard,
+    currencyLabel,
+    hawlConfirmed,
+    resultDue,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'zakat_calculations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ZakatCalculation> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('computed_at')) {
+      context.handle(
+        _computedAtMeta,
+        computedAt.isAcceptableOrUnknown(data['computed_at']!, _computedAtMeta),
+      );
+    }
+    if (data.containsKey('cash_amount')) {
+      context.handle(
+        _cashAmountMeta,
+        cashAmount.isAcceptableOrUnknown(data['cash_amount']!, _cashAmountMeta),
+      );
+    }
+    if (data.containsKey('bank_amount')) {
+      context.handle(
+        _bankAmountMeta,
+        bankAmount.isAcceptableOrUnknown(data['bank_amount']!, _bankAmountMeta),
+      );
+    }
+    if (data.containsKey('gold_grams')) {
+      context.handle(
+        _goldGramsMeta,
+        goldGrams.isAcceptableOrUnknown(data['gold_grams']!, _goldGramsMeta),
+      );
+    }
+    if (data.containsKey('gold_price_per_gram')) {
+      context.handle(
+        _goldPricePerGramMeta,
+        goldPricePerGram.isAcceptableOrUnknown(
+          data['gold_price_per_gram']!,
+          _goldPricePerGramMeta,
+        ),
+      );
+    }
+    if (data.containsKey('silver_grams')) {
+      context.handle(
+        _silverGramsMeta,
+        silverGrams.isAcceptableOrUnknown(
+          data['silver_grams']!,
+          _silverGramsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('silver_price_per_gram')) {
+      context.handle(
+        _silverPricePerGramMeta,
+        silverPricePerGram.isAcceptableOrUnknown(
+          data['silver_price_per_gram']!,
+          _silverPricePerGramMeta,
+        ),
+      );
+    }
+    if (data.containsKey('trade_goods_value')) {
+      context.handle(
+        _tradeGoodsValueMeta,
+        tradeGoodsValue.isAcceptableOrUnknown(
+          data['trade_goods_value']!,
+          _tradeGoodsValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('debt_amount')) {
+      context.handle(
+        _debtAmountMeta,
+        debtAmount.isAcceptableOrUnknown(data['debt_amount']!, _debtAmountMeta),
+      );
+    }
+    if (data.containsKey('currency_label')) {
+      context.handle(
+        _currencyLabelMeta,
+        currencyLabel.isAcceptableOrUnknown(
+          data['currency_label']!,
+          _currencyLabelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('hawl_confirmed')) {
+      context.handle(
+        _hawlConfirmedMeta,
+        hawlConfirmed.isAcceptableOrUnknown(
+          data['hawl_confirmed']!,
+          _hawlConfirmedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('result_due')) {
+      context.handle(
+        _resultDueMeta,
+        resultDue.isAcceptableOrUnknown(data['result_due']!, _resultDueMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ZakatCalculation map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ZakatCalculation(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      computedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}computed_at'],
+      )!,
+      cashAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}cash_amount'],
+      )!,
+      bankAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}bank_amount'],
+      )!,
+      goldGrams: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gold_grams'],
+      )!,
+      goldPricePerGram: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gold_price_per_gram'],
+      )!,
+      silverGrams: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}silver_grams'],
+      )!,
+      silverPricePerGram: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}silver_price_per_gram'],
+      )!,
+      tradeGoodsValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}trade_goods_value'],
+      )!,
+      debtAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}debt_amount'],
+      )!,
+      nisabStandard: $ZakatCalculationsTable.$converternisabStandard.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}nisab_standard'],
+        )!,
+      ),
+      currencyLabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency_label'],
+      )!,
+      hawlConfirmed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}hawl_confirmed'],
+      )!,
+      resultDue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}result_due'],
+      )!,
+    );
+  }
+
+  @override
+  $ZakatCalculationsTable createAlias(String alias) {
+    return $ZakatCalculationsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<NisabStandard, int, int> $converternisabStandard =
+      const EnumIndexConverter<NisabStandard>(NisabStandard.values);
+}
+
+class ZakatCalculation extends DataClass
+    implements Insertable<ZakatCalculation> {
+  final int id;
+  final DateTime computedAt;
+  final double cashAmount;
+  final double bankAmount;
+  final double goldGrams;
+  final double goldPricePerGram;
+  final double silverGrams;
+  final double silverPricePerGram;
+  final double tradeGoodsValue;
+  final double debtAmount;
+  final NisabStandard nisabStandard;
+  final String currencyLabel;
+  final bool hawlConfirmed;
+
+  /// Denormalized copy of the computed result at save time, so history
+  /// doesn't need to re-run the calculation against since-changed prices.
+  final double resultDue;
+  const ZakatCalculation({
+    required this.id,
+    required this.computedAt,
+    required this.cashAmount,
+    required this.bankAmount,
+    required this.goldGrams,
+    required this.goldPricePerGram,
+    required this.silverGrams,
+    required this.silverPricePerGram,
+    required this.tradeGoodsValue,
+    required this.debtAmount,
+    required this.nisabStandard,
+    required this.currencyLabel,
+    required this.hawlConfirmed,
+    required this.resultDue,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['computed_at'] = Variable<DateTime>(computedAt);
+    map['cash_amount'] = Variable<double>(cashAmount);
+    map['bank_amount'] = Variable<double>(bankAmount);
+    map['gold_grams'] = Variable<double>(goldGrams);
+    map['gold_price_per_gram'] = Variable<double>(goldPricePerGram);
+    map['silver_grams'] = Variable<double>(silverGrams);
+    map['silver_price_per_gram'] = Variable<double>(silverPricePerGram);
+    map['trade_goods_value'] = Variable<double>(tradeGoodsValue);
+    map['debt_amount'] = Variable<double>(debtAmount);
+    {
+      map['nisab_standard'] = Variable<int>(
+        $ZakatCalculationsTable.$converternisabStandard.toSql(nisabStandard),
+      );
+    }
+    map['currency_label'] = Variable<String>(currencyLabel);
+    map['hawl_confirmed'] = Variable<bool>(hawlConfirmed);
+    map['result_due'] = Variable<double>(resultDue);
+    return map;
+  }
+
+  ZakatCalculationsCompanion toCompanion(bool nullToAbsent) {
+    return ZakatCalculationsCompanion(
+      id: Value(id),
+      computedAt: Value(computedAt),
+      cashAmount: Value(cashAmount),
+      bankAmount: Value(bankAmount),
+      goldGrams: Value(goldGrams),
+      goldPricePerGram: Value(goldPricePerGram),
+      silverGrams: Value(silverGrams),
+      silverPricePerGram: Value(silverPricePerGram),
+      tradeGoodsValue: Value(tradeGoodsValue),
+      debtAmount: Value(debtAmount),
+      nisabStandard: Value(nisabStandard),
+      currencyLabel: Value(currencyLabel),
+      hawlConfirmed: Value(hawlConfirmed),
+      resultDue: Value(resultDue),
+    );
+  }
+
+  factory ZakatCalculation.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ZakatCalculation(
+      id: serializer.fromJson<int>(json['id']),
+      computedAt: serializer.fromJson<DateTime>(json['computedAt']),
+      cashAmount: serializer.fromJson<double>(json['cashAmount']),
+      bankAmount: serializer.fromJson<double>(json['bankAmount']),
+      goldGrams: serializer.fromJson<double>(json['goldGrams']),
+      goldPricePerGram: serializer.fromJson<double>(json['goldPricePerGram']),
+      silverGrams: serializer.fromJson<double>(json['silverGrams']),
+      silverPricePerGram: serializer.fromJson<double>(
+        json['silverPricePerGram'],
+      ),
+      tradeGoodsValue: serializer.fromJson<double>(json['tradeGoodsValue']),
+      debtAmount: serializer.fromJson<double>(json['debtAmount']),
+      nisabStandard: $ZakatCalculationsTable.$converternisabStandard.fromJson(
+        serializer.fromJson<int>(json['nisabStandard']),
+      ),
+      currencyLabel: serializer.fromJson<String>(json['currencyLabel']),
+      hawlConfirmed: serializer.fromJson<bool>(json['hawlConfirmed']),
+      resultDue: serializer.fromJson<double>(json['resultDue']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'computedAt': serializer.toJson<DateTime>(computedAt),
+      'cashAmount': serializer.toJson<double>(cashAmount),
+      'bankAmount': serializer.toJson<double>(bankAmount),
+      'goldGrams': serializer.toJson<double>(goldGrams),
+      'goldPricePerGram': serializer.toJson<double>(goldPricePerGram),
+      'silverGrams': serializer.toJson<double>(silverGrams),
+      'silverPricePerGram': serializer.toJson<double>(silverPricePerGram),
+      'tradeGoodsValue': serializer.toJson<double>(tradeGoodsValue),
+      'debtAmount': serializer.toJson<double>(debtAmount),
+      'nisabStandard': serializer.toJson<int>(
+        $ZakatCalculationsTable.$converternisabStandard.toJson(nisabStandard),
+      ),
+      'currencyLabel': serializer.toJson<String>(currencyLabel),
+      'hawlConfirmed': serializer.toJson<bool>(hawlConfirmed),
+      'resultDue': serializer.toJson<double>(resultDue),
+    };
+  }
+
+  ZakatCalculation copyWith({
+    int? id,
+    DateTime? computedAt,
+    double? cashAmount,
+    double? bankAmount,
+    double? goldGrams,
+    double? goldPricePerGram,
+    double? silverGrams,
+    double? silverPricePerGram,
+    double? tradeGoodsValue,
+    double? debtAmount,
+    NisabStandard? nisabStandard,
+    String? currencyLabel,
+    bool? hawlConfirmed,
+    double? resultDue,
+  }) => ZakatCalculation(
+    id: id ?? this.id,
+    computedAt: computedAt ?? this.computedAt,
+    cashAmount: cashAmount ?? this.cashAmount,
+    bankAmount: bankAmount ?? this.bankAmount,
+    goldGrams: goldGrams ?? this.goldGrams,
+    goldPricePerGram: goldPricePerGram ?? this.goldPricePerGram,
+    silverGrams: silverGrams ?? this.silverGrams,
+    silverPricePerGram: silverPricePerGram ?? this.silverPricePerGram,
+    tradeGoodsValue: tradeGoodsValue ?? this.tradeGoodsValue,
+    debtAmount: debtAmount ?? this.debtAmount,
+    nisabStandard: nisabStandard ?? this.nisabStandard,
+    currencyLabel: currencyLabel ?? this.currencyLabel,
+    hawlConfirmed: hawlConfirmed ?? this.hawlConfirmed,
+    resultDue: resultDue ?? this.resultDue,
+  );
+  ZakatCalculation copyWithCompanion(ZakatCalculationsCompanion data) {
+    return ZakatCalculation(
+      id: data.id.present ? data.id.value : this.id,
+      computedAt: data.computedAt.present
+          ? data.computedAt.value
+          : this.computedAt,
+      cashAmount: data.cashAmount.present
+          ? data.cashAmount.value
+          : this.cashAmount,
+      bankAmount: data.bankAmount.present
+          ? data.bankAmount.value
+          : this.bankAmount,
+      goldGrams: data.goldGrams.present ? data.goldGrams.value : this.goldGrams,
+      goldPricePerGram: data.goldPricePerGram.present
+          ? data.goldPricePerGram.value
+          : this.goldPricePerGram,
+      silverGrams: data.silverGrams.present
+          ? data.silverGrams.value
+          : this.silverGrams,
+      silverPricePerGram: data.silverPricePerGram.present
+          ? data.silverPricePerGram.value
+          : this.silverPricePerGram,
+      tradeGoodsValue: data.tradeGoodsValue.present
+          ? data.tradeGoodsValue.value
+          : this.tradeGoodsValue,
+      debtAmount: data.debtAmount.present
+          ? data.debtAmount.value
+          : this.debtAmount,
+      nisabStandard: data.nisabStandard.present
+          ? data.nisabStandard.value
+          : this.nisabStandard,
+      currencyLabel: data.currencyLabel.present
+          ? data.currencyLabel.value
+          : this.currencyLabel,
+      hawlConfirmed: data.hawlConfirmed.present
+          ? data.hawlConfirmed.value
+          : this.hawlConfirmed,
+      resultDue: data.resultDue.present ? data.resultDue.value : this.resultDue,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ZakatCalculation(')
+          ..write('id: $id, ')
+          ..write('computedAt: $computedAt, ')
+          ..write('cashAmount: $cashAmount, ')
+          ..write('bankAmount: $bankAmount, ')
+          ..write('goldGrams: $goldGrams, ')
+          ..write('goldPricePerGram: $goldPricePerGram, ')
+          ..write('silverGrams: $silverGrams, ')
+          ..write('silverPricePerGram: $silverPricePerGram, ')
+          ..write('tradeGoodsValue: $tradeGoodsValue, ')
+          ..write('debtAmount: $debtAmount, ')
+          ..write('nisabStandard: $nisabStandard, ')
+          ..write('currencyLabel: $currencyLabel, ')
+          ..write('hawlConfirmed: $hawlConfirmed, ')
+          ..write('resultDue: $resultDue')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    computedAt,
+    cashAmount,
+    bankAmount,
+    goldGrams,
+    goldPricePerGram,
+    silverGrams,
+    silverPricePerGram,
+    tradeGoodsValue,
+    debtAmount,
+    nisabStandard,
+    currencyLabel,
+    hawlConfirmed,
+    resultDue,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ZakatCalculation &&
+          other.id == this.id &&
+          other.computedAt == this.computedAt &&
+          other.cashAmount == this.cashAmount &&
+          other.bankAmount == this.bankAmount &&
+          other.goldGrams == this.goldGrams &&
+          other.goldPricePerGram == this.goldPricePerGram &&
+          other.silverGrams == this.silverGrams &&
+          other.silverPricePerGram == this.silverPricePerGram &&
+          other.tradeGoodsValue == this.tradeGoodsValue &&
+          other.debtAmount == this.debtAmount &&
+          other.nisabStandard == this.nisabStandard &&
+          other.currencyLabel == this.currencyLabel &&
+          other.hawlConfirmed == this.hawlConfirmed &&
+          other.resultDue == this.resultDue);
+}
+
+class ZakatCalculationsCompanion extends UpdateCompanion<ZakatCalculation> {
+  final Value<int> id;
+  final Value<DateTime> computedAt;
+  final Value<double> cashAmount;
+  final Value<double> bankAmount;
+  final Value<double> goldGrams;
+  final Value<double> goldPricePerGram;
+  final Value<double> silverGrams;
+  final Value<double> silverPricePerGram;
+  final Value<double> tradeGoodsValue;
+  final Value<double> debtAmount;
+  final Value<NisabStandard> nisabStandard;
+  final Value<String> currencyLabel;
+  final Value<bool> hawlConfirmed;
+  final Value<double> resultDue;
+  const ZakatCalculationsCompanion({
+    this.id = const Value.absent(),
+    this.computedAt = const Value.absent(),
+    this.cashAmount = const Value.absent(),
+    this.bankAmount = const Value.absent(),
+    this.goldGrams = const Value.absent(),
+    this.goldPricePerGram = const Value.absent(),
+    this.silverGrams = const Value.absent(),
+    this.silverPricePerGram = const Value.absent(),
+    this.tradeGoodsValue = const Value.absent(),
+    this.debtAmount = const Value.absent(),
+    this.nisabStandard = const Value.absent(),
+    this.currencyLabel = const Value.absent(),
+    this.hawlConfirmed = const Value.absent(),
+    this.resultDue = const Value.absent(),
+  });
+  ZakatCalculationsCompanion.insert({
+    this.id = const Value.absent(),
+    this.computedAt = const Value.absent(),
+    this.cashAmount = const Value.absent(),
+    this.bankAmount = const Value.absent(),
+    this.goldGrams = const Value.absent(),
+    this.goldPricePerGram = const Value.absent(),
+    this.silverGrams = const Value.absent(),
+    this.silverPricePerGram = const Value.absent(),
+    this.tradeGoodsValue = const Value.absent(),
+    this.debtAmount = const Value.absent(),
+    this.nisabStandard = const Value.absent(),
+    this.currencyLabel = const Value.absent(),
+    this.hawlConfirmed = const Value.absent(),
+    this.resultDue = const Value.absent(),
+  });
+  static Insertable<ZakatCalculation> custom({
+    Expression<int>? id,
+    Expression<DateTime>? computedAt,
+    Expression<double>? cashAmount,
+    Expression<double>? bankAmount,
+    Expression<double>? goldGrams,
+    Expression<double>? goldPricePerGram,
+    Expression<double>? silverGrams,
+    Expression<double>? silverPricePerGram,
+    Expression<double>? tradeGoodsValue,
+    Expression<double>? debtAmount,
+    Expression<int>? nisabStandard,
+    Expression<String>? currencyLabel,
+    Expression<bool>? hawlConfirmed,
+    Expression<double>? resultDue,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (computedAt != null) 'computed_at': computedAt,
+      if (cashAmount != null) 'cash_amount': cashAmount,
+      if (bankAmount != null) 'bank_amount': bankAmount,
+      if (goldGrams != null) 'gold_grams': goldGrams,
+      if (goldPricePerGram != null) 'gold_price_per_gram': goldPricePerGram,
+      if (silverGrams != null) 'silver_grams': silverGrams,
+      if (silverPricePerGram != null)
+        'silver_price_per_gram': silverPricePerGram,
+      if (tradeGoodsValue != null) 'trade_goods_value': tradeGoodsValue,
+      if (debtAmount != null) 'debt_amount': debtAmount,
+      if (nisabStandard != null) 'nisab_standard': nisabStandard,
+      if (currencyLabel != null) 'currency_label': currencyLabel,
+      if (hawlConfirmed != null) 'hawl_confirmed': hawlConfirmed,
+      if (resultDue != null) 'result_due': resultDue,
+    });
+  }
+
+  ZakatCalculationsCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? computedAt,
+    Value<double>? cashAmount,
+    Value<double>? bankAmount,
+    Value<double>? goldGrams,
+    Value<double>? goldPricePerGram,
+    Value<double>? silverGrams,
+    Value<double>? silverPricePerGram,
+    Value<double>? tradeGoodsValue,
+    Value<double>? debtAmount,
+    Value<NisabStandard>? nisabStandard,
+    Value<String>? currencyLabel,
+    Value<bool>? hawlConfirmed,
+    Value<double>? resultDue,
+  }) {
+    return ZakatCalculationsCompanion(
+      id: id ?? this.id,
+      computedAt: computedAt ?? this.computedAt,
+      cashAmount: cashAmount ?? this.cashAmount,
+      bankAmount: bankAmount ?? this.bankAmount,
+      goldGrams: goldGrams ?? this.goldGrams,
+      goldPricePerGram: goldPricePerGram ?? this.goldPricePerGram,
+      silverGrams: silverGrams ?? this.silverGrams,
+      silverPricePerGram: silverPricePerGram ?? this.silverPricePerGram,
+      tradeGoodsValue: tradeGoodsValue ?? this.tradeGoodsValue,
+      debtAmount: debtAmount ?? this.debtAmount,
+      nisabStandard: nisabStandard ?? this.nisabStandard,
+      currencyLabel: currencyLabel ?? this.currencyLabel,
+      hawlConfirmed: hawlConfirmed ?? this.hawlConfirmed,
+      resultDue: resultDue ?? this.resultDue,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (computedAt.present) {
+      map['computed_at'] = Variable<DateTime>(computedAt.value);
+    }
+    if (cashAmount.present) {
+      map['cash_amount'] = Variable<double>(cashAmount.value);
+    }
+    if (bankAmount.present) {
+      map['bank_amount'] = Variable<double>(bankAmount.value);
+    }
+    if (goldGrams.present) {
+      map['gold_grams'] = Variable<double>(goldGrams.value);
+    }
+    if (goldPricePerGram.present) {
+      map['gold_price_per_gram'] = Variable<double>(goldPricePerGram.value);
+    }
+    if (silverGrams.present) {
+      map['silver_grams'] = Variable<double>(silverGrams.value);
+    }
+    if (silverPricePerGram.present) {
+      map['silver_price_per_gram'] = Variable<double>(silverPricePerGram.value);
+    }
+    if (tradeGoodsValue.present) {
+      map['trade_goods_value'] = Variable<double>(tradeGoodsValue.value);
+    }
+    if (debtAmount.present) {
+      map['debt_amount'] = Variable<double>(debtAmount.value);
+    }
+    if (nisabStandard.present) {
+      map['nisab_standard'] = Variable<int>(
+        $ZakatCalculationsTable.$converternisabStandard.toSql(
+          nisabStandard.value,
+        ),
+      );
+    }
+    if (currencyLabel.present) {
+      map['currency_label'] = Variable<String>(currencyLabel.value);
+    }
+    if (hawlConfirmed.present) {
+      map['hawl_confirmed'] = Variable<bool>(hawlConfirmed.value);
+    }
+    if (resultDue.present) {
+      map['result_due'] = Variable<double>(resultDue.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ZakatCalculationsCompanion(')
+          ..write('id: $id, ')
+          ..write('computedAt: $computedAt, ')
+          ..write('cashAmount: $cashAmount, ')
+          ..write('bankAmount: $bankAmount, ')
+          ..write('goldGrams: $goldGrams, ')
+          ..write('goldPricePerGram: $goldPricePerGram, ')
+          ..write('silverGrams: $silverGrams, ')
+          ..write('silverPricePerGram: $silverPricePerGram, ')
+          ..write('tradeGoodsValue: $tradeGoodsValue, ')
+          ..write('debtAmount: $debtAmount, ')
+          ..write('nisabStandard: $nisabStandard, ')
+          ..write('currencyLabel: $currencyLabel, ')
+          ..write('hawlConfirmed: $hawlConfirmed, ')
+          ..write('resultDue: $resultDue')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6905,6 +7732,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $BookReadingProgressTable bookReadingProgress =
       $BookReadingProgressTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
+  late final $ZakatCalculationsTable zakatCalculations =
+      $ZakatCalculationsTable(this);
   late final Index idxProhibitionsLogRecord = Index(
     'idx_prohibitions_log_record',
     'CREATE INDEX idx_prohibitions_log_record ON prohibitions_log (record_id)',
@@ -6942,6 +7771,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this as AppDatabase,
   );
   late final SyncOutboxDao syncOutboxDao = SyncOutboxDao(this as AppDatabase);
+  late final ZakatDao zakatDao = ZakatDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6960,6 +7790,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     userDuas,
     bookReadingProgress,
     syncOutbox,
+    zakatCalculations,
     idxProhibitionsLogRecord,
     idxCustomIbadahLogRecordIbadah,
     idxRamadanProgressRecord,
@@ -11417,6 +12248,417 @@ typedef $$SyncOutboxTableProcessedTableManager =
       SyncOutboxData,
       PrefetchHooks Function()
     >;
+typedef $$ZakatCalculationsTableCreateCompanionBuilder =
+    ZakatCalculationsCompanion Function({
+      Value<int> id,
+      Value<DateTime> computedAt,
+      Value<double> cashAmount,
+      Value<double> bankAmount,
+      Value<double> goldGrams,
+      Value<double> goldPricePerGram,
+      Value<double> silverGrams,
+      Value<double> silverPricePerGram,
+      Value<double> tradeGoodsValue,
+      Value<double> debtAmount,
+      Value<NisabStandard> nisabStandard,
+      Value<String> currencyLabel,
+      Value<bool> hawlConfirmed,
+      Value<double> resultDue,
+    });
+typedef $$ZakatCalculationsTableUpdateCompanionBuilder =
+    ZakatCalculationsCompanion Function({
+      Value<int> id,
+      Value<DateTime> computedAt,
+      Value<double> cashAmount,
+      Value<double> bankAmount,
+      Value<double> goldGrams,
+      Value<double> goldPricePerGram,
+      Value<double> silverGrams,
+      Value<double> silverPricePerGram,
+      Value<double> tradeGoodsValue,
+      Value<double> debtAmount,
+      Value<NisabStandard> nisabStandard,
+      Value<String> currencyLabel,
+      Value<bool> hawlConfirmed,
+      Value<double> resultDue,
+    });
+
+class $$ZakatCalculationsTableFilterComposer
+    extends Composer<_$AppDatabase, $ZakatCalculationsTable> {
+  $$ZakatCalculationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get computedAt => $composableBuilder(
+    column: $table.computedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get cashAmount => $composableBuilder(
+    column: $table.cashAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get bankAmount => $composableBuilder(
+    column: $table.bankAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get goldGrams => $composableBuilder(
+    column: $table.goldGrams,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get goldPricePerGram => $composableBuilder(
+    column: $table.goldPricePerGram,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get silverGrams => $composableBuilder(
+    column: $table.silverGrams,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get silverPricePerGram => $composableBuilder(
+    column: $table.silverPricePerGram,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get tradeGoodsValue => $composableBuilder(
+    column: $table.tradeGoodsValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get debtAmount => $composableBuilder(
+    column: $table.debtAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<NisabStandard, NisabStandard, int>
+  get nisabStandard => $composableBuilder(
+    column: $table.nisabStandard,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get currencyLabel => $composableBuilder(
+    column: $table.currencyLabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get hawlConfirmed => $composableBuilder(
+    column: $table.hawlConfirmed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get resultDue => $composableBuilder(
+    column: $table.resultDue,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ZakatCalculationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ZakatCalculationsTable> {
+  $$ZakatCalculationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get computedAt => $composableBuilder(
+    column: $table.computedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get cashAmount => $composableBuilder(
+    column: $table.cashAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get bankAmount => $composableBuilder(
+    column: $table.bankAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get goldGrams => $composableBuilder(
+    column: $table.goldGrams,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get goldPricePerGram => $composableBuilder(
+    column: $table.goldPricePerGram,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get silverGrams => $composableBuilder(
+    column: $table.silverGrams,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get silverPricePerGram => $composableBuilder(
+    column: $table.silverPricePerGram,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get tradeGoodsValue => $composableBuilder(
+    column: $table.tradeGoodsValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get debtAmount => $composableBuilder(
+    column: $table.debtAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get nisabStandard => $composableBuilder(
+    column: $table.nisabStandard,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currencyLabel => $composableBuilder(
+    column: $table.currencyLabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get hawlConfirmed => $composableBuilder(
+    column: $table.hawlConfirmed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get resultDue => $composableBuilder(
+    column: $table.resultDue,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ZakatCalculationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ZakatCalculationsTable> {
+  $$ZakatCalculationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get computedAt => $composableBuilder(
+    column: $table.computedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get cashAmount => $composableBuilder(
+    column: $table.cashAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get bankAmount => $composableBuilder(
+    column: $table.bankAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get goldGrams =>
+      $composableBuilder(column: $table.goldGrams, builder: (column) => column);
+
+  GeneratedColumn<double> get goldPricePerGram => $composableBuilder(
+    column: $table.goldPricePerGram,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get silverGrams => $composableBuilder(
+    column: $table.silverGrams,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get silverPricePerGram => $composableBuilder(
+    column: $table.silverPricePerGram,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get tradeGoodsValue => $composableBuilder(
+    column: $table.tradeGoodsValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get debtAmount => $composableBuilder(
+    column: $table.debtAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<NisabStandard, int> get nisabStandard =>
+      $composableBuilder(
+        column: $table.nisabStandard,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<String> get currencyLabel => $composableBuilder(
+    column: $table.currencyLabel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get hawlConfirmed => $composableBuilder(
+    column: $table.hawlConfirmed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get resultDue =>
+      $composableBuilder(column: $table.resultDue, builder: (column) => column);
+}
+
+class $$ZakatCalculationsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ZakatCalculationsTable,
+          ZakatCalculation,
+          $$ZakatCalculationsTableFilterComposer,
+          $$ZakatCalculationsTableOrderingComposer,
+          $$ZakatCalculationsTableAnnotationComposer,
+          $$ZakatCalculationsTableCreateCompanionBuilder,
+          $$ZakatCalculationsTableUpdateCompanionBuilder,
+          (
+            ZakatCalculation,
+            BaseReferences<
+              _$AppDatabase,
+              $ZakatCalculationsTable,
+              ZakatCalculation
+            >,
+          ),
+          ZakatCalculation,
+          PrefetchHooks Function()
+        > {
+  $$ZakatCalculationsTableTableManager(
+    _$AppDatabase db,
+    $ZakatCalculationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ZakatCalculationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ZakatCalculationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ZakatCalculationsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> computedAt = const Value.absent(),
+                Value<double> cashAmount = const Value.absent(),
+                Value<double> bankAmount = const Value.absent(),
+                Value<double> goldGrams = const Value.absent(),
+                Value<double> goldPricePerGram = const Value.absent(),
+                Value<double> silverGrams = const Value.absent(),
+                Value<double> silverPricePerGram = const Value.absent(),
+                Value<double> tradeGoodsValue = const Value.absent(),
+                Value<double> debtAmount = const Value.absent(),
+                Value<NisabStandard> nisabStandard = const Value.absent(),
+                Value<String> currencyLabel = const Value.absent(),
+                Value<bool> hawlConfirmed = const Value.absent(),
+                Value<double> resultDue = const Value.absent(),
+              }) => ZakatCalculationsCompanion(
+                id: id,
+                computedAt: computedAt,
+                cashAmount: cashAmount,
+                bankAmount: bankAmount,
+                goldGrams: goldGrams,
+                goldPricePerGram: goldPricePerGram,
+                silverGrams: silverGrams,
+                silverPricePerGram: silverPricePerGram,
+                tradeGoodsValue: tradeGoodsValue,
+                debtAmount: debtAmount,
+                nisabStandard: nisabStandard,
+                currencyLabel: currencyLabel,
+                hawlConfirmed: hawlConfirmed,
+                resultDue: resultDue,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> computedAt = const Value.absent(),
+                Value<double> cashAmount = const Value.absent(),
+                Value<double> bankAmount = const Value.absent(),
+                Value<double> goldGrams = const Value.absent(),
+                Value<double> goldPricePerGram = const Value.absent(),
+                Value<double> silverGrams = const Value.absent(),
+                Value<double> silverPricePerGram = const Value.absent(),
+                Value<double> tradeGoodsValue = const Value.absent(),
+                Value<double> debtAmount = const Value.absent(),
+                Value<NisabStandard> nisabStandard = const Value.absent(),
+                Value<String> currencyLabel = const Value.absent(),
+                Value<bool> hawlConfirmed = const Value.absent(),
+                Value<double> resultDue = const Value.absent(),
+              }) => ZakatCalculationsCompanion.insert(
+                id: id,
+                computedAt: computedAt,
+                cashAmount: cashAmount,
+                bankAmount: bankAmount,
+                goldGrams: goldGrams,
+                goldPricePerGram: goldPricePerGram,
+                silverGrams: silverGrams,
+                silverPricePerGram: silverPricePerGram,
+                tradeGoodsValue: tradeGoodsValue,
+                debtAmount: debtAmount,
+                nisabStandard: nisabStandard,
+                currencyLabel: currencyLabel,
+                hawlConfirmed: hawlConfirmed,
+                resultDue: resultDue,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ZakatCalculationsTable, ZakatCalculation>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ZakatCalculationsTable,
+                    ZakatCalculation
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ZakatCalculationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ZakatCalculationsTable,
+      ZakatCalculation,
+      $$ZakatCalculationsTableFilterComposer,
+      $$ZakatCalculationsTableOrderingComposer,
+      $$ZakatCalculationsTableAnnotationComposer,
+      $$ZakatCalculationsTableCreateCompanionBuilder,
+      $$ZakatCalculationsTableUpdateCompanionBuilder,
+      (
+        ZakatCalculation,
+        BaseReferences<
+          _$AppDatabase,
+          $ZakatCalculationsTable,
+          ZakatCalculation
+        >,
+      ),
+      ZakatCalculation,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -11447,4 +12689,6 @@ class $AppDatabaseManager {
       $$BookReadingProgressTableTableManager(_db, _db.bookReadingProgress);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
+  $$ZakatCalculationsTableTableManager get zakatCalculations =>
+      $$ZakatCalculationsTableTableManager(_db, _db.zakatCalculations);
 }

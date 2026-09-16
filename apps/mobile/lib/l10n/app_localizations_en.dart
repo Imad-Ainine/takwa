@@ -4563,4 +4563,252 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get checklistSyncError =>
       'Saved locally — will sync to the cloud when you\'re back online';
+
+  @override
+  String get homeFeatureRamadan => 'Ramadan';
+
+  @override
+  String get ramadanTrackerAppBarTitle => 'Ramadan Tracker';
+
+  @override
+  String get ramadanNotRamadanMessage => 'It\'s not Ramadan right now';
+
+  @override
+  String get ramadanSuhoorEndsIn => 'Suhoor ends in';
+
+  @override
+  String get ramadanIftarIn => 'Iftar in';
+
+  @override
+  String get ramadanIftarTimeReached => 'It\'s iftar time! 🌙';
+
+  @override
+  String get ramadanDuaOfDayTitle => 'Dua of the Day';
+
+  @override
+  String get ramadanIhyaLaylLabel => 'Night Prayer (Qiyam)';
+
+  @override
+  String get ramadanIhyaLaylSublabel => 'Did you perform night prayer tonight?';
+
+  @override
+  String get ramadanFastingStatusTitle => 'Today\'s Fast';
+
+  @override
+  String get ramadanFastingDoneFard => 'You fasted today (obligatory) ✅';
+
+  @override
+  String get ramadanFastingDoneNafl => 'You fasted today (voluntary) ✅';
+
+  @override
+  String get ramadanFastingNotLogged => 'You haven\'t logged today\'s fast yet';
+
+  @override
+  String get ramadanLogFastingButton => 'Log your fast';
+
+  @override
+  String get ramadanProgressStripTitle => 'Ramadan Days Progress';
+
+  @override
+  String get homeFeatureZakat => 'Zakat';
+
+  @override
+  String get zakatCalculatorAppBarTitle => 'Zakat Calculator';
+
+  @override
+  String get zakatDisclaimer =>
+      'This is a simplified Zakat calculator. For your specific situation, it\'s best to consult a qualified scholar.';
+
+  @override
+  String get zakatAssetsSectionTitle => 'Zakatable Assets';
+
+  @override
+  String get zakatCashLabel => 'Cash on Hand';
+
+  @override
+  String get zakatBankLabel => 'Bank Savings';
+
+  @override
+  String get zakatGoldGramsLabel => 'Gold Weight (grams)';
+
+  @override
+  String get zakatGoldPriceLabel => 'Today\'s Gold Price per Gram';
+
+  @override
+  String get zakatSilverGramsLabel => 'Silver Weight (grams)';
+
+  @override
+  String get zakatSilverPriceLabel => 'Today\'s Silver Price per Gram';
+
+  @override
+  String get zakatPriceHelperText =>
+      'Enter today\'s price — check your bank or a local market';
+
+  @override
+  String get zakatTradeGoodsLabel => 'Trade Goods Value';
+
+  @override
+  String get zakatDebtLabel => 'Deductible Short-Term Debt';
+
+  @override
+  String get zakatCurrencyLabel => 'Currency (e.g. USD, MAD, €)';
+
+  @override
+  String get zakatNisabSectionTitle => 'Nisab Standard';
+
+  @override
+  String get zakatNisabGoldOption => 'Gold (85g)';
+
+  @override
+  String get zakatNisabSilverOption => 'Silver (595g)';
+
+  @override
+  String get zakatHawlLabel => 'Hawl (Full Lunar Year)';
+
+  @override
+  String get zakatHawlSublabel =>
+      'Has this wealth stayed in your possession for a full Hijri year?';
+
+  @override
+  String get zakatCalculateButton => 'Calculate Zakat';
+
+  @override
+  String get zakatSaveButton => 'Save This Calculation';
+
+  @override
+  String get zakatSavedMessage => 'Calculation saved';
+
+  @override
+  String get zakatResultTitle => 'Result';
+
+  @override
+  String get zakatResultWealthLabel => 'Net Zakatable Wealth';
+
+  @override
+  String get zakatResultNisabLabel => 'Nisab Threshold';
+
+  @override
+  String zakatResultDueMessage(String amount) {
+    return 'Zakat due: $amount';
+  }
+
+  @override
+  String get zakatResultNotDueMessage =>
+      'No Zakat due — your wealth hasn\'t reached Nisab';
+
+  @override
+  String zakatResultShortfallMessage(String amount) {
+    return 'You need $amount more to reach Nisab';
+  }
+
+  @override
+  String get zakatResultHawlPendingMessage =>
+      'Your wealth has reached Nisab — confirm the Hawl period above to calculate what\'s due';
+
+  @override
+  String get zakatMissingPriceMessage =>
+      'Enter the price per gram for the selected Nisab standard to compute the threshold';
+
+  @override
+  String get homeFeatureCircles => 'Accountability\nCircles';
+
+  @override
+  String get circlesAppBarTitle => 'Accountability Circles';
+
+  @override
+  String get circlesEmptyTitle => 'No circles yet';
+
+  @override
+  String get circlesEmptyBody =>
+      'Create a circle for your family or friends, or join one with an invite code';
+
+  @override
+  String get circlesCreateButton => 'Create a Circle';
+
+  @override
+  String get circlesJoinButton => 'Join with Code';
+
+  @override
+  String get circlesCreateDialogTitle => 'Create a New Circle';
+
+  @override
+  String get circlesCreateNameLabel => 'Circle Name';
+
+  @override
+  String get circlesCreateConfirm => 'Create';
+
+  @override
+  String get circlesJoinDialogTitle => 'Join a Circle';
+
+  @override
+  String get circlesJoinCodeLabel => 'Invite Code';
+
+  @override
+  String get circlesJoinConfirm => 'Join';
+
+  @override
+  String circlesMemberCount(int count) {
+    return '$count members';
+  }
+
+  @override
+  String get circlesInviteCodeLabel => 'Invite Code';
+
+  @override
+  String get circlesShareInviteButton => 'Share Invite Code';
+
+  @override
+  String get circlesLeaveButton => 'Leave Circle';
+
+  @override
+  String get circlesLeaveConfirmTitle => 'Leave this circle?';
+
+  @override
+  String get circlesLeaveConfirmBody =>
+      'This circle\'s members will no longer see your progress.';
+
+  @override
+  String get circleSharingSectionTitle => 'What You Share in This Circle';
+
+  @override
+  String get circleShareStreakLabel => 'Streak';
+
+  @override
+  String get circleSharePointsLabel => 'Points';
+
+  @override
+  String get circleShareChecklistLabel => 'Today\'s Checklist Done';
+
+  @override
+  String get circleShareQuranLabel => 'Quran Pages';
+
+  @override
+  String get circleLeaderboardTitle => 'Members';
+
+  @override
+  String get circleSendReactionTooltip => 'Send encouragement';
+
+  @override
+  String get circleReactionSheetTitle => 'Send Encouragement';
+
+  @override
+  String get circleReactionSentMessage => 'Sent 🤍';
+
+  @override
+  String get circleErrorGeneric => 'Something went wrong, please try again';
+
+  @override
+  String get reactionPhraseDuaForYou => 'Made dua for you 🤲';
+
+  @override
+  String get reactionPhraseKeepGoing => 'Keep going! 💪';
+
+  @override
+  String get reactionPhraseProudOfYou => 'Proud of you 🌟';
+
+  @override
+  String get reactionPhraseYouCanDoIt => 'You can do it! 🔥';
+
+  @override
+  String get reactionPhraseMashallah => 'MashaAllah ✨';
 }

@@ -8191,6 +8191,474 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تم الحفظ محليًا، وستتم المزامنة مع السحابة عند عودة الاتصال'**
   String get checklistSyncError;
+
+  /// Home feature-grid label for the Ramadan tracker, only shown during the Hijri month of Ramadan
+  ///
+  /// In ar, this message translates to:
+  /// **'رمضان'**
+  String get homeFeatureRamadan;
+
+  /// App bar title of the Ramadan tracker screen
+  ///
+  /// In ar, this message translates to:
+  /// **'متابعة رمضان'**
+  String get ramadanTrackerAppBarTitle;
+
+  /// Defensive empty state if the Ramadan tracker screen is somehow opened outside Ramadan
+  ///
+  /// In ar, this message translates to:
+  /// **'لسنا في شهر رمضان الآن'**
+  String get ramadanNotRamadanMessage;
+
+  /// Label before a countdown to Fajr (end of Suhoor) on the Ramadan tracker
+  ///
+  /// In ar, this message translates to:
+  /// **'الإمساك بعد'**
+  String get ramadanSuhoorEndsIn;
+
+  /// Label before a countdown to Maghrib (Iftar) on the Ramadan tracker
+  ///
+  /// In ar, this message translates to:
+  /// **'الإفطار بعد'**
+  String get ramadanIftarIn;
+
+  /// Shown on the Ramadan tracker once Maghrib has passed for today
+  ///
+  /// In ar, this message translates to:
+  /// **'حان وقت الإفطار! 🌙'**
+  String get ramadanIftarTimeReached;
+
+  /// Section title for the curated daily Ramadan dua
+  ///
+  /// In ar, this message translates to:
+  /// **'دعاء اليوم'**
+  String get ramadanDuaOfDayTitle;
+
+  /// Toggle label: whether the user performed night prayer (Qiyam) this Ramadan night
+  ///
+  /// In ar, this message translates to:
+  /// **'قيام الليل'**
+  String get ramadanIhyaLaylLabel;
+
+  /// Sublabel/explainer for the Qiyam toggle on the Ramadan tracker
+  ///
+  /// In ar, this message translates to:
+  /// **'هل أحييت هذه الليلة بالقيام؟'**
+  String get ramadanIhyaLaylSublabel;
+
+  /// Section title for today's fasting status on the Ramadan tracker
+  ///
+  /// In ar, this message translates to:
+  /// **'صيام اليوم'**
+  String get ramadanFastingStatusTitle;
+
+  /// Shown when today's fasting type is logged as obligatory (fard)
+  ///
+  /// In ar, this message translates to:
+  /// **'صمت اليوم (فرض) ✅'**
+  String get ramadanFastingDoneFard;
+
+  /// Shown when today's fasting type is logged as voluntary (nafl)
+  ///
+  /// In ar, this message translates to:
+  /// **'صمت اليوم (نافلة) ✅'**
+  String get ramadanFastingDoneNafl;
+
+  /// Shown when today has no fasting type logged yet
+  ///
+  /// In ar, this message translates to:
+  /// **'لم تسجل صيامك اليوم بعد'**
+  String get ramadanFastingNotLogged;
+
+  /// Button on the Ramadan tracker that opens the daily checklist to log today's fast
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل صيامك'**
+  String get ramadanLogFastingButton;
+
+  /// Section title for the 30-day Ramadan fasting progress strip
+  ///
+  /// In ar, this message translates to:
+  /// **'متابعة أيام رمضان'**
+  String get ramadanProgressStripTitle;
+
+  /// Home feature-grid label for the Zakat calculator
+  ///
+  /// In ar, this message translates to:
+  /// **'الزكاة'**
+  String get homeFeatureZakat;
+
+  /// App bar title of the Zakat calculator screen
+  ///
+  /// In ar, this message translates to:
+  /// **'حاسبة الزكاة'**
+  String get zakatCalculatorAppBarTitle;
+
+  /// Disclaimer shown on the Zakat calculator: it's a simplified tool, not a fatwa
+  ///
+  /// In ar, this message translates to:
+  /// **'هذه حاسبة مبسطة للزكاة. لحالتك الخاصة، يُستحسن استشارة عالم شرعي.'**
+  String get zakatDisclaimer;
+
+  /// Section title for the assets input fields
+  ///
+  /// In ar, this message translates to:
+  /// **'الأصول الزكوية'**
+  String get zakatAssetsSectionTitle;
+
+  /// Input label: cash on hand
+  ///
+  /// In ar, this message translates to:
+  /// **'النقد المتوفر'**
+  String get zakatCashLabel;
+
+  /// Input label: bank savings
+  ///
+  /// In ar, this message translates to:
+  /// **'الرصيد البنكي'**
+  String get zakatBankLabel;
+
+  /// Input label: gold weight in grams
+  ///
+  /// In ar, this message translates to:
+  /// **'وزن الذهب (جرام)'**
+  String get zakatGoldGramsLabel;
+
+  /// Input label: user-supplied current gold price per gram
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر جرام الذهب اليوم'**
+  String get zakatGoldPriceLabel;
+
+  /// Input label: silver weight in grams
+  ///
+  /// In ar, this message translates to:
+  /// **'وزن الفضة (جرام)'**
+  String get zakatSilverGramsLabel;
+
+  /// Input label: user-supplied current silver price per gram
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر جرام الفضة اليوم'**
+  String get zakatSilverPriceLabel;
+
+  /// Helper text explaining the user must supply today's price themselves
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل السعر الحالي — تحقق من بنكك أو السوق المحلي'**
+  String get zakatPriceHelperText;
+
+  /// Input label: trade goods value
+  ///
+  /// In ar, this message translates to:
+  /// **'قيمة عروض التجارة'**
+  String get zakatTradeGoodsLabel;
+
+  /// Input label: deductible short-term debt
+  ///
+  /// In ar, this message translates to:
+  /// **'الديون قصيرة الأجل المستحقة'**
+  String get zakatDebtLabel;
+
+  /// Input label: free-text currency symbol/code for display only
+  ///
+  /// In ar, this message translates to:
+  /// **'العملة (مثال: MAD، \$، €)'**
+  String get zakatCurrencyLabel;
+
+  /// Section title for choosing the Nisab standard
+  ///
+  /// In ar, this message translates to:
+  /// **'معيار النصاب'**
+  String get zakatNisabSectionTitle;
+
+  /// Nisab standard option: gold (85g)
+  ///
+  /// In ar, this message translates to:
+  /// **'الذهب (٨٥ جم)'**
+  String get zakatNisabGoldOption;
+
+  /// Nisab standard option: silver (595g)
+  ///
+  /// In ar, this message translates to:
+  /// **'الفضة (٥٩٥ جم)'**
+  String get zakatNisabSilverOption;
+
+  /// Toggle label: whether the wealth has been held for a full Hijri year
+  ///
+  /// In ar, this message translates to:
+  /// **'مرور الحول'**
+  String get zakatHawlLabel;
+
+  /// Explainer for the Hawl toggle
+  ///
+  /// In ar, this message translates to:
+  /// **'هل بقي هذا المال في حوزتك لمدة سنة هجرية كاملة؟'**
+  String get zakatHawlSublabel;
+
+  /// Button that runs the Zakat calculation
+  ///
+  /// In ar, this message translates to:
+  /// **'احسب الزكاة'**
+  String get zakatCalculateButton;
+
+  /// Button that persists the current calculation locally
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظ هذا الحساب'**
+  String get zakatSaveButton;
+
+  /// Confirmation snackbar after saving a calculation
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حفظ الحساب'**
+  String get zakatSavedMessage;
+
+  /// Result card title
+  ///
+  /// In ar, this message translates to:
+  /// **'النتيجة'**
+  String get zakatResultTitle;
+
+  /// Result row label: net zakatable wealth
+  ///
+  /// In ar, this message translates to:
+  /// **'صافي المال الزكوي'**
+  String get zakatResultWealthLabel;
+
+  /// Result row label: the Nisab threshold in the chosen currency
+  ///
+  /// In ar, this message translates to:
+  /// **'حد النصاب'**
+  String get zakatResultNisabLabel;
+
+  /// Shown when Zakat is due, with the computed amount
+  ///
+  /// In ar, this message translates to:
+  /// **'الزكاة المستحقة: {amount}'**
+  String zakatResultDueMessage(String amount);
+
+  /// Shown when wealth is below Nisab
+  ///
+  /// In ar, this message translates to:
+  /// **'لا زكاة مستحقة — لم يبلغ مالك النصاب'**
+  String get zakatResultNotDueMessage;
+
+  /// Shown alongside zakatResultNotDueMessage with the exact shortfall
+  ///
+  /// In ar, this message translates to:
+  /// **'تحتاج {amount} إضافية لبلوغ النصاب'**
+  String zakatResultShortfallMessage(String amount);
+
+  /// Shown when wealth meets Nisab but the Hawl toggle isn't confirmed yet
+  ///
+  /// In ar, this message translates to:
+  /// **'بلغ مالك النصاب — أكّد مرور الحول أعلاه لحساب المستحق'**
+  String get zakatResultHawlPendingMessage;
+
+  /// Shown when the Nisab threshold can't be computed because no price was entered for the selected standard
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل سعر الجرام لمعيار النصاب المختار لحساب الحد'**
+  String get zakatMissingPriceMessage;
+
+  /// Home feature-grid label for the family/community accountability circles feature
+  ///
+  /// In ar, this message translates to:
+  /// **'دوائر\nالمحاسبة'**
+  String get homeFeatureCircles;
+
+  /// App bar title of the circles list screen
+  ///
+  /// In ar, this message translates to:
+  /// **'دوائر المحاسبة'**
+  String get circlesAppBarTitle;
+
+  /// Empty state title when the user has no circles
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد دوائر بعد'**
+  String get circlesEmptyTitle;
+
+  /// Empty state body explaining what circles are
+  ///
+  /// In ar, this message translates to:
+  /// **'أنشئ دائرة لعائلتك أو أصدقائك، أو انضم إلى دائرة موجودة برمز الدعوة'**
+  String get circlesEmptyBody;
+
+  /// Button to create a new circle
+  ///
+  /// In ar, this message translates to:
+  /// **'إنشاء دائرة'**
+  String get circlesCreateButton;
+
+  /// Button to join an existing circle by invite code
+  ///
+  /// In ar, this message translates to:
+  /// **'الانضمام برمز'**
+  String get circlesJoinButton;
+
+  /// Dialog title for creating a circle
+  ///
+  /// In ar, this message translates to:
+  /// **'إنشاء دائرة جديدة'**
+  String get circlesCreateDialogTitle;
+
+  /// Input label for the new circle's name
+  ///
+  /// In ar, this message translates to:
+  /// **'اسم الدائرة'**
+  String get circlesCreateNameLabel;
+
+  /// Confirm button on the create-circle dialog
+  ///
+  /// In ar, this message translates to:
+  /// **'إنشاء'**
+  String get circlesCreateConfirm;
+
+  /// Dialog title for joining a circle
+  ///
+  /// In ar, this message translates to:
+  /// **'الانضمام إلى دائرة'**
+  String get circlesJoinDialogTitle;
+
+  /// Input label for the invite code
+  ///
+  /// In ar, this message translates to:
+  /// **'رمز الدعوة'**
+  String get circlesJoinCodeLabel;
+
+  /// Confirm button on the join-circle dialog
+  ///
+  /// In ar, this message translates to:
+  /// **'انضمام'**
+  String get circlesJoinConfirm;
+
+  /// Member count label on a circle card
+  ///
+  /// In ar, this message translates to:
+  /// **'{count} أعضاء'**
+  String circlesMemberCount(int count);
+
+  /// Label shown above the circle's invite code on the detail screen
+  ///
+  /// In ar, this message translates to:
+  /// **'رمز الدعوة'**
+  String get circlesInviteCodeLabel;
+
+  /// Button to share the invite code via the system share sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'مشاركة رمز الدعوة'**
+  String get circlesShareInviteButton;
+
+  /// Button to leave a circle
+  ///
+  /// In ar, this message translates to:
+  /// **'مغادرة الدائرة'**
+  String get circlesLeaveButton;
+
+  /// Confirmation dialog title before leaving a circle
+  ///
+  /// In ar, this message translates to:
+  /// **'مغادرة الدائرة؟'**
+  String get circlesLeaveConfirmTitle;
+
+  /// Confirmation dialog body before leaving a circle
+  ///
+  /// In ar, this message translates to:
+  /// **'لن يرى أعضاء هذه الدائرة تقدمك بعد الآن.'**
+  String get circlesLeaveConfirmBody;
+
+  /// Section title for the per-circle sharing toggles
+  ///
+  /// In ar, this message translates to:
+  /// **'ما الذي تشاركه في هذه الدائرة'**
+  String get circleSharingSectionTitle;
+
+  /// Sharing toggle: current streak
+  ///
+  /// In ar, this message translates to:
+  /// **'سلسلة الأيام'**
+  String get circleShareStreakLabel;
+
+  /// Sharing toggle: total points
+  ///
+  /// In ar, this message translates to:
+  /// **'النقاط'**
+  String get circleSharePointsLabel;
+
+  /// Sharing toggle: whether today's checklist was completed
+  ///
+  /// In ar, this message translates to:
+  /// **'إنجاز اليوم'**
+  String get circleShareChecklistLabel;
+
+  /// Sharing toggle: Quran pages read
+  ///
+  /// In ar, this message translates to:
+  /// **'صفحات القرآن'**
+  String get circleShareQuranLabel;
+
+  /// Section title for the member leaderboard
+  ///
+  /// In ar, this message translates to:
+  /// **'الأعضاء'**
+  String get circleLeaderboardTitle;
+
+  /// Tooltip/label on the button that opens the encouragement-phrase picker for a member
+  ///
+  /// In ar, this message translates to:
+  /// **'أرسل تشجيعًا'**
+  String get circleSendReactionTooltip;
+
+  /// Bottom sheet title for picking an encouragement phrase
+  ///
+  /// In ar, this message translates to:
+  /// **'أرسل تشجيعًا'**
+  String get circleReactionSheetTitle;
+
+  /// Confirmation after sending an encouragement reaction
+  ///
+  /// In ar, this message translates to:
+  /// **'تم الإرسال 🤍'**
+  String get circleReactionSentMessage;
+
+  /// Generic error shown when a circle action fails (invalid code, network error, etc.)
+  ///
+  /// In ar, this message translates to:
+  /// **'حدث خطأ، حاول مرة أخرى'**
+  String get circleErrorGeneric;
+
+  /// Fixed encouragement phrase
+  ///
+  /// In ar, this message translates to:
+  /// **'دعوت لك 🤲'**
+  String get reactionPhraseDuaForYou;
+
+  /// Fixed encouragement phrase
+  ///
+  /// In ar, this message translates to:
+  /// **'واصل! 💪'**
+  String get reactionPhraseKeepGoing;
+
+  /// Fixed encouragement phrase
+  ///
+  /// In ar, this message translates to:
+  /// **'فخور بك 🌟'**
+  String get reactionPhraseProudOfYou;
+
+  /// Fixed encouragement phrase
+  ///
+  /// In ar, this message translates to:
+  /// **'أنت قادر! 🔥'**
+  String get reactionPhraseYouCanDoIt;
+
+  /// Fixed encouragement phrase
+  ///
+  /// In ar, this message translates to:
+  /// **'ما شاء الله ✨'**
+  String get reactionPhraseMashallah;
 }
 
 class _AppLocalizationsDelegate

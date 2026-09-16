@@ -4526,4 +4526,251 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get checklistSyncError =>
       'تم الحفظ محليًا، وستتم المزامنة مع السحابة عند عودة الاتصال';
+
+  @override
+  String get homeFeatureRamadan => 'رمضان';
+
+  @override
+  String get ramadanTrackerAppBarTitle => 'متابعة رمضان';
+
+  @override
+  String get ramadanNotRamadanMessage => 'لسنا في شهر رمضان الآن';
+
+  @override
+  String get ramadanSuhoorEndsIn => 'الإمساك بعد';
+
+  @override
+  String get ramadanIftarIn => 'الإفطار بعد';
+
+  @override
+  String get ramadanIftarTimeReached => 'حان وقت الإفطار! 🌙';
+
+  @override
+  String get ramadanDuaOfDayTitle => 'دعاء اليوم';
+
+  @override
+  String get ramadanIhyaLaylLabel => 'قيام الليل';
+
+  @override
+  String get ramadanIhyaLaylSublabel => 'هل أحييت هذه الليلة بالقيام؟';
+
+  @override
+  String get ramadanFastingStatusTitle => 'صيام اليوم';
+
+  @override
+  String get ramadanFastingDoneFard => 'صمت اليوم (فرض) ✅';
+
+  @override
+  String get ramadanFastingDoneNafl => 'صمت اليوم (نافلة) ✅';
+
+  @override
+  String get ramadanFastingNotLogged => 'لم تسجل صيامك اليوم بعد';
+
+  @override
+  String get ramadanLogFastingButton => 'سجّل صيامك';
+
+  @override
+  String get ramadanProgressStripTitle => 'متابعة أيام رمضان';
+
+  @override
+  String get homeFeatureZakat => 'الزكاة';
+
+  @override
+  String get zakatCalculatorAppBarTitle => 'حاسبة الزكاة';
+
+  @override
+  String get zakatDisclaimer =>
+      'هذه حاسبة مبسطة للزكاة. لحالتك الخاصة، يُستحسن استشارة عالم شرعي.';
+
+  @override
+  String get zakatAssetsSectionTitle => 'الأصول الزكوية';
+
+  @override
+  String get zakatCashLabel => 'النقد المتوفر';
+
+  @override
+  String get zakatBankLabel => 'الرصيد البنكي';
+
+  @override
+  String get zakatGoldGramsLabel => 'وزن الذهب (جرام)';
+
+  @override
+  String get zakatGoldPriceLabel => 'سعر جرام الذهب اليوم';
+
+  @override
+  String get zakatSilverGramsLabel => 'وزن الفضة (جرام)';
+
+  @override
+  String get zakatSilverPriceLabel => 'سعر جرام الفضة اليوم';
+
+  @override
+  String get zakatPriceHelperText =>
+      'أدخل السعر الحالي — تحقق من بنكك أو السوق المحلي';
+
+  @override
+  String get zakatTradeGoodsLabel => 'قيمة عروض التجارة';
+
+  @override
+  String get zakatDebtLabel => 'الديون قصيرة الأجل المستحقة';
+
+  @override
+  String get zakatCurrencyLabel => 'العملة (مثال: MAD، \$، €)';
+
+  @override
+  String get zakatNisabSectionTitle => 'معيار النصاب';
+
+  @override
+  String get zakatNisabGoldOption => 'الذهب (٨٥ جم)';
+
+  @override
+  String get zakatNisabSilverOption => 'الفضة (٥٩٥ جم)';
+
+  @override
+  String get zakatHawlLabel => 'مرور الحول';
+
+  @override
+  String get zakatHawlSublabel =>
+      'هل بقي هذا المال في حوزتك لمدة سنة هجرية كاملة؟';
+
+  @override
+  String get zakatCalculateButton => 'احسب الزكاة';
+
+  @override
+  String get zakatSaveButton => 'احفظ هذا الحساب';
+
+  @override
+  String get zakatSavedMessage => 'تم حفظ الحساب';
+
+  @override
+  String get zakatResultTitle => 'النتيجة';
+
+  @override
+  String get zakatResultWealthLabel => 'صافي المال الزكوي';
+
+  @override
+  String get zakatResultNisabLabel => 'حد النصاب';
+
+  @override
+  String zakatResultDueMessage(String amount) {
+    return 'الزكاة المستحقة: $amount';
+  }
+
+  @override
+  String get zakatResultNotDueMessage => 'لا زكاة مستحقة — لم يبلغ مالك النصاب';
+
+  @override
+  String zakatResultShortfallMessage(String amount) {
+    return 'تحتاج $amount إضافية لبلوغ النصاب';
+  }
+
+  @override
+  String get zakatResultHawlPendingMessage =>
+      'بلغ مالك النصاب — أكّد مرور الحول أعلاه لحساب المستحق';
+
+  @override
+  String get zakatMissingPriceMessage =>
+      'أدخل سعر الجرام لمعيار النصاب المختار لحساب الحد';
+
+  @override
+  String get homeFeatureCircles => 'دوائر\nالمحاسبة';
+
+  @override
+  String get circlesAppBarTitle => 'دوائر المحاسبة';
+
+  @override
+  String get circlesEmptyTitle => 'لا توجد دوائر بعد';
+
+  @override
+  String get circlesEmptyBody =>
+      'أنشئ دائرة لعائلتك أو أصدقائك، أو انضم إلى دائرة موجودة برمز الدعوة';
+
+  @override
+  String get circlesCreateButton => 'إنشاء دائرة';
+
+  @override
+  String get circlesJoinButton => 'الانضمام برمز';
+
+  @override
+  String get circlesCreateDialogTitle => 'إنشاء دائرة جديدة';
+
+  @override
+  String get circlesCreateNameLabel => 'اسم الدائرة';
+
+  @override
+  String get circlesCreateConfirm => 'إنشاء';
+
+  @override
+  String get circlesJoinDialogTitle => 'الانضمام إلى دائرة';
+
+  @override
+  String get circlesJoinCodeLabel => 'رمز الدعوة';
+
+  @override
+  String get circlesJoinConfirm => 'انضمام';
+
+  @override
+  String circlesMemberCount(int count) {
+    return '$count أعضاء';
+  }
+
+  @override
+  String get circlesInviteCodeLabel => 'رمز الدعوة';
+
+  @override
+  String get circlesShareInviteButton => 'مشاركة رمز الدعوة';
+
+  @override
+  String get circlesLeaveButton => 'مغادرة الدائرة';
+
+  @override
+  String get circlesLeaveConfirmTitle => 'مغادرة الدائرة؟';
+
+  @override
+  String get circlesLeaveConfirmBody =>
+      'لن يرى أعضاء هذه الدائرة تقدمك بعد الآن.';
+
+  @override
+  String get circleSharingSectionTitle => 'ما الذي تشاركه في هذه الدائرة';
+
+  @override
+  String get circleShareStreakLabel => 'سلسلة الأيام';
+
+  @override
+  String get circleSharePointsLabel => 'النقاط';
+
+  @override
+  String get circleShareChecklistLabel => 'إنجاز اليوم';
+
+  @override
+  String get circleShareQuranLabel => 'صفحات القرآن';
+
+  @override
+  String get circleLeaderboardTitle => 'الأعضاء';
+
+  @override
+  String get circleSendReactionTooltip => 'أرسل تشجيعًا';
+
+  @override
+  String get circleReactionSheetTitle => 'أرسل تشجيعًا';
+
+  @override
+  String get circleReactionSentMessage => 'تم الإرسال 🤍';
+
+  @override
+  String get circleErrorGeneric => 'حدث خطأ، حاول مرة أخرى';
+
+  @override
+  String get reactionPhraseDuaForYou => 'دعوت لك 🤲';
+
+  @override
+  String get reactionPhraseKeepGoing => 'واصل! 💪';
+
+  @override
+  String get reactionPhraseProudOfYou => 'فخور بك 🌟';
+
+  @override
+  String get reactionPhraseYouCanDoIt => 'أنت قادر! 🔥';
+
+  @override
+  String get reactionPhraseMashallah => 'ما شاء الله ✨';
 }

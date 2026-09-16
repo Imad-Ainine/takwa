@@ -184,3 +184,19 @@ class BookProgressDaoManager {
         _db.bookReadingProgress,
       );
 }
+
+mixin _$ZakatDaoMixin on DatabaseAccessor<AppDatabase> {
+  $ZakatCalculationsTable get zakatCalculations =>
+      attachedDatabase.zakatCalculations;
+  ZakatDaoManager get managers => ZakatDaoManager(this);
+}
+
+class ZakatDaoManager {
+  final _$ZakatDaoMixin _db;
+  ZakatDaoManager(this._db);
+  $$ZakatCalculationsTableTableManager get zakatCalculations =>
+      $$ZakatCalculationsTableTableManager(
+        _db.attachedDatabase,
+        _db.zakatCalculations,
+      );
+}

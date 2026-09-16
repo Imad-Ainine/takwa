@@ -292,6 +292,57 @@
     "retry": "أعد المحاولة",
     "placeholderNote": "هذه هي مساحتك الخاصة على الويب لتطبيق تقوى. ستتم مزامنة أورادك وصلواتك وإحصائيات التزامك اليومية هنا.",
     "signOut": "تسجيل الخروج",
+    "stats": {
+      "currentStreak": "سلسلة الأيام الحالية",
+      "highestStreak": "أطول سلسلة",
+      "totalPoints": "مجموع النقاط",
+      "quranPagesTotal": "صفحات القرآن (إجمالي)"
+    },
+    "today": {
+      "title": "ملخص اليوم",
+      "empty": "لم تُسجَّل بيانات اليوم بعد من التطبيق.",
+      "prayers": "الصلوات",
+      "quranPages": "صفحات القرآن اليوم",
+      "morningAdhkar": "أذكار الصباح",
+      "eveningAdhkar": "أذكار المساء",
+      "fasting": "الصيام",
+      "netPoints": "نقاط اليوم",
+      "done": "تم",
+      "notDone": "لم يتم"
+    },
+    "prayerNames": {
+      "fajr": "الفجر",
+      "dhuhr": "الظهر",
+      "asr": "العصر",
+      "maghrib": "المغرب",
+      "isha": "العشاء"
+    },
+    "prayerStatus": {
+      "notDue": "لم يحن وقتها",
+      "pending": "لم تُؤدَّ بعد",
+      "performed": "أُديت",
+      "qadaa": "قضاء",
+      "missed": "فاتت"
+    },
+    "fastingType": {
+      "none": "لم يصم",
+      "fard": "فرض",
+      "nafl": "نافلة",
+      "makruh": "أفطر بعذر"
+    },
+    "history": {
+      "title": "السجل الأخير",
+      "empty": "لا يوجد سجل بعد.",
+      "dateHeader": "التاريخ",
+      "pointsHeader": "النقاط",
+      "prayersHeader": "الصلوات",
+      "quranHeader": "القرآن"
+    },
+    "achievements": {
+      "title": "الإنجازات",
+      "empty": "لم تُحقَّق إنجازات بعد.",
+      "pointsSuffix": "نقطة"
+    },
     "statsTeaserTitle": "رفيقك الإيماني المتزامن",
     "statsTeaserSubtitle": "مزامنة صلواتك وقائمة محاسبتك اليومية عبر جميع أجهزتك بسلاسة تامة.",
     "syncActive": "المزامنة السحابية نشطة",

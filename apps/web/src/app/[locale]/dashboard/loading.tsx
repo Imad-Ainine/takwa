@@ -7,6 +7,11 @@ export default function DashboardLoading() {
 				<div className={`${styles.card} ${styles.welcomeCard} ${styles.skeleton}`} aria-hidden="true" />
 				<div className={`${styles.card} ${styles.downloadCard} ${styles.skeleton}`} aria-hidden="true" />
 			</div>
+			<div className={styles.sections}>
+				<div className={`${styles.card} ${styles.skeleton}`} aria-hidden="true" />
+				<div className={`${styles.card} ${styles.skeleton}`} aria-hidden="true" />
+				<div className={`${styles.card} ${styles.skeleton}`} aria-hidden="true" />
+			</div>
 		</div>
 	);
 }

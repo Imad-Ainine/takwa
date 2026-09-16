@@ -2590,5 +2590,332 @@
   "checklistSyncError": "تم الحفظ محليًا، وستتم المزامنة مع السحابة عند عودة الاتصال",
   "@checklistSyncError": {
     "description": "Shown when the local save succeeded but pushing it to the cloud failed"
+  },
+  "homeFeatureRamadan": "رمضان",
+  "@homeFeatureRamadan": {
+    "description": "Home feature-grid label for the Ramadan tracker, only shown during the Hijri month of Ramadan"
+  },
+  "ramadanTrackerAppBarTitle": "متابعة رمضان",
+  "@ramadanTrackerAppBarTitle": {
+    "description": "App bar title of the Ramadan tracker screen"
+  },
+  "ramadanNotRamadanMessage": "لسنا في شهر رمضان الآن",
+  "@ramadanNotRamadanMessage": {
+    "description": "Defensive empty state if the Ramadan tracker screen is somehow opened outside Ramadan"
+  },
+  "ramadanSuhoorEndsIn": "الإمساك بعد",
+  "@ramadanSuhoorEndsIn": {
+    "description": "Label before a countdown to Fajr (end of Suhoor) on the Ramadan tracker"
+  },
+  "ramadanIftarIn": "الإفطار بعد",
+  "@ramadanIftarIn": {
+    "description": "Label before a countdown to Maghrib (Iftar) on the Ramadan tracker"
+  },
+  "ramadanIftarTimeReached": "حان وقت الإفطار! 🌙",
+  "@ramadanIftarTimeReached": {
+    "description": "Shown on the Ramadan tracker once Maghrib has passed for today"
+  },
+  "ramadanDuaOfDayTitle": "دعاء اليوم",
+  "@ramadanDuaOfDayTitle": {
+    "description": "Section title for the curated daily Ramadan dua"
+  },
+  "ramadanIhyaLaylLabel": "قيام الليل",
+  "@ramadanIhyaLaylLabel": {
+    "description": "Toggle label: whether the user performed night prayer (Qiyam) this Ramadan night"
+  },
+  "ramadanIhyaLaylSublabel": "هل أحييت هذه الليلة بالقيام؟",
+  "@ramadanIhyaLaylSublabel": {
+    "description": "Sublabel/explainer for the Qiyam toggle on the Ramadan tracker"
+  },
+  "ramadanFastingStatusTitle": "صيام اليوم",
+  "@ramadanFastingStatusTitle": {
+    "description": "Section title for today's fasting status on the Ramadan tracker"
+  },
+  "ramadanFastingDoneFard": "صمت اليوم (فرض) ✅",
+  "@ramadanFastingDoneFard": {
+    "description": "Shown when today's fasting type is logged as obligatory (fard)"
+  },
+  "ramadanFastingDoneNafl": "صمت اليوم (نافلة) ✅",
+  "@ramadanFastingDoneNafl": {
+    "description": "Shown when today's fasting type is logged as voluntary (nafl)"
+  },
+  "ramadanFastingNotLogged": "لم تسجل صيامك اليوم بعد",
+  "@ramadanFastingNotLogged": {
+    "description": "Shown when today has no fasting type logged yet"
+  },
+  "ramadanLogFastingButton": "سجّل صيامك",
+  "@ramadanLogFastingButton": {
+    "description": "Button on the Ramadan tracker that opens the daily checklist to log today's fast"
+  },
+  "ramadanProgressStripTitle": "متابعة أيام رمضان",
+  "@ramadanProgressStripTitle": {
+    "description": "Section title for the 30-day Ramadan fasting progress strip"
+  },
+  "homeFeatureZakat": "الزكاة",
+  "@homeFeatureZakat": {
+    "description": "Home feature-grid label for the Zakat calculator"
+  },
+  "zakatCalculatorAppBarTitle": "حاسبة الزكاة",
+  "@zakatCalculatorAppBarTitle": {
+    "description": "App bar title of the Zakat calculator screen"
+  },
+  "zakatDisclaimer": "هذه حاسبة مبسطة للزكاة. لحالتك الخاصة، يُستحسن استشارة عالم شرعي.",
+  "@zakatDisclaimer": {
+    "description": "Disclaimer shown on the Zakat calculator: it's a simplified tool, not a fatwa"
+  },
+  "zakatAssetsSectionTitle": "الأصول الزكوية",
+  "@zakatAssetsSectionTitle": {
+    "description": "Section title for the assets input fields"
+  },
+  "zakatCashLabel": "النقد المتوفر",
+  "@zakatCashLabel": {
+    "description": "Input label: cash on hand"
+  },
+  "zakatBankLabel": "الرصيد البنكي",
+  "@zakatBankLabel": {
+    "description": "Input label: bank savings"
+  },
+  "zakatGoldGramsLabel": "وزن الذهب (جرام)",
+  "@zakatGoldGramsLabel": {
+    "description": "Input label: gold weight in grams"
+  },
+  "zakatGoldPriceLabel": "سعر جرام الذهب اليوم",
+  "@zakatGoldPriceLabel": {
+    "description": "Input label: user-supplied current gold price per gram"
+  },
+  "zakatSilverGramsLabel": "وزن الفضة (جرام)",
+  "@zakatSilverGramsLabel": {
+    "description": "Input label: silver weight in grams"
+  },
+  "zakatSilverPriceLabel": "سعر جرام الفضة اليوم",
+  "@zakatSilverPriceLabel": {
+    "description": "Input label: user-supplied current silver price per gram"
+  },
+  "zakatPriceHelperText": "أدخل السعر الحالي — تحقق من بنكك أو السوق المحلي",
+  "@zakatPriceHelperText": {
+    "description": "Helper text explaining the user must supply today's price themselves"
+  },
+  "zakatTradeGoodsLabel": "قيمة عروض التجارة",
+  "@zakatTradeGoodsLabel": {
+    "description": "Input label: trade goods value"
+  },
+  "zakatDebtLabel": "الديون قصيرة الأجل المستحقة",
+  "@zakatDebtLabel": {
+    "description": "Input label: deductible short-term debt"
+  },
+  "zakatCurrencyLabel": "العملة (مثال: MAD، $، €)",
+  "@zakatCurrencyLabel": {
+    "description": "Input label: free-text currency symbol/code for display only"
+  },
+  "zakatNisabSectionTitle": "معيار النصاب",
+  "@zakatNisabSectionTitle": {
+    "description": "Section title for choosing the Nisab standard"
+  },
+  "zakatNisabGoldOption": "الذهب (٨٥ جم)",
+  "@zakatNisabGoldOption": {
+    "description": "Nisab standard option: gold (85g)"
+  },
+  "zakatNisabSilverOption": "الفضة (٥٩٥ جم)",
+  "@zakatNisabSilverOption": {
+    "description": "Nisab standard option: silver (595g)"
+  },
+  "zakatHawlLabel": "مرور الحول",
+  "@zakatHawlLabel": {
+    "description": "Toggle label: whether the wealth has been held for a full Hijri year"
+  },
+  "zakatHawlSublabel": "هل بقي هذا المال في حوزتك لمدة سنة هجرية كاملة؟",
+  "@zakatHawlSublabel": {
+    "description": "Explainer for the Hawl toggle"
+  },
+  "zakatCalculateButton": "احسب الزكاة",
+  "@zakatCalculateButton": {
+    "description": "Button that runs the Zakat calculation"
+  },
+  "zakatSaveButton": "احفظ هذا الحساب",
+  "@zakatSaveButton": {
+    "description": "Button that persists the current calculation locally"
+  },
+  "zakatSavedMessage": "تم حفظ الحساب",
+  "@zakatSavedMessage": {
+    "description": "Confirmation snackbar after saving a calculation"
+  },
+  "zakatResultTitle": "النتيجة",
+  "@zakatResultTitle": {
+    "description": "Result card title"
+  },
+  "zakatResultWealthLabel": "صافي المال الزكوي",
+  "@zakatResultWealthLabel": {
+    "description": "Result row label: net zakatable wealth"
+  },
+  "zakatResultNisabLabel": "حد النصاب",
+  "@zakatResultNisabLabel": {
+    "description": "Result row label: the Nisab threshold in the chosen currency"
+  },
+  "zakatResultDueMessage": "الزكاة المستحقة: {amount}",
+  "@zakatResultDueMessage": {
+    "description": "Shown when Zakat is due, with the computed amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "zakatResultNotDueMessage": "لا زكاة مستحقة — لم يبلغ مالك النصاب",
+  "@zakatResultNotDueMessage": {
+    "description": "Shown when wealth is below Nisab"
+  },
+  "zakatResultShortfallMessage": "تحتاج {amount} إضافية لبلوغ النصاب",
+  "@zakatResultShortfallMessage": {
+    "description": "Shown alongside zakatResultNotDueMessage with the exact shortfall",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "zakatResultHawlPendingMessage": "بلغ مالك النصاب — أكّد مرور الحول أعلاه لحساب المستحق",
+  "@zakatResultHawlPendingMessage": {
+    "description": "Shown when wealth meets Nisab but the Hawl toggle isn't confirmed yet"
+  },
+  "zakatMissingPriceMessage": "أدخل سعر الجرام لمعيار النصاب المختار لحساب الحد",
+  "@zakatMissingPriceMessage": {
+    "description": "Shown when the Nisab threshold can't be computed because no price was entered for the selected standard"
+  },
+  "homeFeatureCircles": "دوائر\nالمحاسبة",
+  "@homeFeatureCircles": {
+    "description": "Home feature-grid label for the family/community accountability circles feature"
+  },
+  "circlesAppBarTitle": "دوائر المحاسبة",
+  "@circlesAppBarTitle": {
+    "description": "App bar title of the circles list screen"
+  },
+  "circlesEmptyTitle": "لا توجد دوائر بعد",
+  "@circlesEmptyTitle": {
+    "description": "Empty state title when the user has no circles"
+  },
+  "circlesEmptyBody": "أنشئ دائرة لعائلتك أو أصدقائك، أو انضم إلى دائرة موجودة برمز الدعوة",
+  "@circlesEmptyBody": {
+    "description": "Empty state body explaining what circles are"
+  },
+  "circlesCreateButton": "إنشاء دائرة",
+  "@circlesCreateButton": {
+    "description": "Button to create a new circle"
+  },
+  "circlesJoinButton": "الانضمام برمز",
+  "@circlesJoinButton": {
+    "description": "Button to join an existing circle by invite code"
+  },
+  "circlesCreateDialogTitle": "إنشاء دائرة جديدة",
+  "@circlesCreateDialogTitle": {
+    "description": "Dialog title for creating a circle"
+  },
+  "circlesCreateNameLabel": "اسم الدائرة",
+  "@circlesCreateNameLabel": {
+    "description": "Input label for the new circle's name"
+  },
+  "circlesCreateConfirm": "إنشاء",
+  "@circlesCreateConfirm": {
+    "description": "Confirm button on the create-circle dialog"
+  },
+  "circlesJoinDialogTitle": "الانضمام إلى دائرة",
+  "@circlesJoinDialogTitle": {
+    "description": "Dialog title for joining a circle"
+  },
+  "circlesJoinCodeLabel": "رمز الدعوة",
+  "@circlesJoinCodeLabel": {
+    "description": "Input label for the invite code"
+  },
+  "circlesJoinConfirm": "انضمام",
+  "@circlesJoinConfirm": {
+    "description": "Confirm button on the join-circle dialog"
+  },
+  "circlesMemberCount": "{count} أعضاء",
+  "@circlesMemberCount": {
+    "description": "Member count label on a circle card",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "circlesInviteCodeLabel": "رمز الدعوة",
+  "@circlesInviteCodeLabel": {
+    "description": "Label shown above the circle's invite code on the detail screen"
+  },
+  "circlesShareInviteButton": "مشاركة رمز الدعوة",
+  "@circlesShareInviteButton": {
+    "description": "Button to share the invite code via the system share sheet"
+  },
+  "circlesLeaveButton": "مغادرة الدائرة",
+  "@circlesLeaveButton": {
+    "description": "Button to leave a circle"
+  },
+  "circlesLeaveConfirmTitle": "مغادرة الدائرة؟",
+  "@circlesLeaveConfirmTitle": {
+    "description": "Confirmation dialog title before leaving a circle"
+  },
+  "circlesLeaveConfirmBody": "لن يرى أعضاء هذه الدائرة تقدمك بعد الآن.",
+  "@circlesLeaveConfirmBody": {
+    "description": "Confirmation dialog body before leaving a circle"
+  },
+  "circleSharingSectionTitle": "ما الذي تشاركه في هذه الدائرة",
+  "@circleSharingSectionTitle": {
+    "description": "Section title for the per-circle sharing toggles"
+  },
+  "circleShareStreakLabel": "سلسلة الأيام",
+  "@circleShareStreakLabel": {
+    "description": "Sharing toggle: current streak"
+  },
+  "circleSharePointsLabel": "النقاط",
+  "@circleSharePointsLabel": {
+    "description": "Sharing toggle: total points"
+  },
+  "circleShareChecklistLabel": "إنجاز اليوم",
+  "@circleShareChecklistLabel": {
+    "description": "Sharing toggle: whether today's checklist was completed"
+  },
+  "circleShareQuranLabel": "صفحات القرآن",
+  "@circleShareQuranLabel": {
+    "description": "Sharing toggle: Quran pages read"
+  },
+  "circleLeaderboardTitle": "الأعضاء",
+  "@circleLeaderboardTitle": {
+    "description": "Section title for the member leaderboard"
+  },
+  "circleSendReactionTooltip": "أرسل تشجيعًا",
+  "@circleSendReactionTooltip": {
+    "description": "Tooltip/label on the button that opens the encouragement-phrase picker for a member"
+  },
+  "circleReactionSheetTitle": "أرسل تشجيعًا",
+  "@circleReactionSheetTitle": {
+    "description": "Bottom sheet title for picking an encouragement phrase"
+  },
+  "circleReactionSentMessage": "تم الإرسال 🤍",
+  "@circleReactionSentMessage": {
+    "description": "Confirmation after sending an encouragement reaction"
+  },
+  "circleErrorGeneric": "حدث خطأ، حاول مرة أخرى",
+  "@circleErrorGeneric": {
+    "description": "Generic error shown when a circle action fails (invalid code, network error, etc.)"
+  },
+  "reactionPhraseDuaForYou": "دعوت لك 🤲",
+  "@reactionPhraseDuaForYou": {
+    "description": "Fixed encouragement phrase"
+  },
+  "reactionPhraseKeepGoing": "واصل! 💪",
+  "@reactionPhraseKeepGoing": {
+    "description": "Fixed encouragement phrase"
+  },
+  "reactionPhraseProudOfYou": "فخور بك 🌟",
+  "@reactionPhraseProudOfYou": {
+    "description": "Fixed encouragement phrase"
+  },
+  "reactionPhraseYouCanDoIt": "أنت قادر! 🔥",
+  "@reactionPhraseYouCanDoIt": {
+    "description": "Fixed encouragement phrase"
+  },
+  "reactionPhraseMashallah": "ما شاء الله ✨",
+  "@reactionPhraseMashallah": {
+    "description": "Fixed encouragement phrase"
   }
 }

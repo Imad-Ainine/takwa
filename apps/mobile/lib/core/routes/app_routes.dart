@@ -53,6 +53,9 @@ import 'package:takwa/features/qiyam/presentation/screens/qiyam_sunnah_guide_scr
 import 'package:takwa/features/auth/presentation/screens/email_confirmation_screen.dart';
 import 'package:takwa/features/auth/presentation/screens/update_password_screen.dart';
 import 'package:takwa/features/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:takwa/features/ramadan/presentation/screens/ramadan_tracker_screen.dart';
+import 'package:takwa/features/zakat/presentation/screens/zakat_calculator_screen.dart';
+import 'package:takwa/features/circles/presentation/screens/circles_list_screen.dart';
 
 /// Defines all the route names used in the application.
 class Routes {
@@ -110,6 +113,9 @@ class Routes {
   static const String books = '/books';
   static const String booksChapter = '/books/chapter';
   static const String booksPdf = '/books/pdf';
+  static const String ramadanTracker = '/ramadan-tracker';
+  static const String zakatCalculator = '/zakat-calculator';
+  static const String circles = '/circles';
 }
 
 /// Centralized route generation and management.
@@ -308,6 +314,12 @@ class AppRoutes {
           settings: settings,
           builder: (_) => BookPdfReaderScreen(book: pdfArgs),
         );
+      case Routes.ramadanTracker:
+        return MaterialPageRoute(settings: settings, builder: (_) => const RamadanTrackerScreen());
+      case Routes.zakatCalculator:
+        return MaterialPageRoute(settings: settings, builder: (_) => const ZakatCalculatorScreen());
+      case Routes.circles:
+        return MaterialPageRoute(settings: settings, builder: (_) => const CirclesListScreen());
       default:
         return MaterialPageRoute(
           settings: settings,

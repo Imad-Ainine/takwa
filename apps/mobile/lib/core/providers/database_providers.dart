@@ -50,6 +50,10 @@ final syncOutboxDaoProvider = Provider<SyncOutboxDao>((ref) {
   return SyncOutboxDao(ref.watch(appDatabaseProvider));
 });
 
+final zakatDaoProvider = Provider<ZakatDao>((ref) {
+  return ZakatDao(ref.watch(appDatabaseProvider));
+});
+
 // ── سجل اليوم (Stream) ──
 final todayRecordProvider = StreamProvider<DailyRecord?>((ref) {
   return ref.watch(dailyRecordDaoProvider).watchTodayRecord();

@@ -289,6 +289,59 @@ class SyncOutbox extends Table {
 }
 
 // ─────────────────────────────────────────
+//  ENUM: NisabStandard
+// ─────────────────────────────────────────
+//
+// Which threshold the user compares their zakatable wealth against — gold
+// (~85g) or silver (~595g). Kept local to this file rather than in
+// takwa_core since, unlike PrayerStatus/FastingType, nothing outside the
+// Zakat feature needs it.
+enum NisabStandard { gold, silver }
+
+// ─────────────────────────────────────────
+//  TABLE: zakat_calculations
+// ─────────────────────────────────────────
+//
+// See docs/specs/zakat-calculator.md. Deliberately stores a user-supplied
+// price-per-gram for gold/silver rather than a bundled or fetched "current"
+// price — the app has no reliable live price source, and shipping a static
+// number that goes stale between releases would misinform a real financial/
+// religious calculation. The user looks up today's price themselves (bank,
+// jeweler, local market) the same way they would for a paper calculation.
+//
+// Every save inserts a new row (history) rather than upserting a single
+// row — `getLatest()` is what the calculator screen actually reads to
+// restore the last entry, so this costs nothing today but leaves a natural
+// path to a "past calculations" list later without a schema change.
+class ZakatCalculations extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get computedAt =>
+      dateTime().withDefault(currentDateAndTime)();
+
+  RealColumn get cashAmount => real().withDefault(const Constant(0.0))();
+  RealColumn get bankAmount => real().withDefault(const Constant(0.0))();
+  RealColumn get goldGrams => real().withDefault(const Constant(0.0))();
+  RealColumn get goldPricePerGram =>
+      real().withDefault(const Constant(0.0))();
+  RealColumn get silverGrams => real().withDefault(const Constant(0.0))();
+  RealColumn get silverPricePerGram =>
+      real().withDefault(const Constant(0.0))();
+  RealColumn get tradeGoodsValue =>
+      real().withDefault(const Constant(0.0))();
+  RealColumn get debtAmount => real().withDefault(const Constant(0.0))();
+
+  IntColumn get nisabStandard =>
+      intEnum<NisabStandard>().withDefault(const Constant(1))(); // silver
+  TextColumn get currencyLabel => text().withDefault(const Constant(''))();
+  BoolColumn get hawlConfirmed =>
+      boolean().withDefault(const Constant(false))();
+
+  /// Denormalized copy of the computed result at save time, so history
+  /// doesn't need to re-run the calculation against since-changed prices.
+  RealColumn get resultDue => real().withDefault(const Constant(0.0))();
+}
+
+// ─────────────────────────────────────────
 //  DATABASE CLASS
 // ─────────────────────────────────────────
 @DriftDatabase(
@@ -306,6 +359,7 @@ class SyncOutbox extends Table {
     UserDuas,
     BookReadingProgress,
     SyncOutbox,
+    ZakatCalculations,
   ],
   daos: [
     DailyRecordDao,
@@ -319,6 +373,7 @@ class SyncOutbox extends Table {
     UserDuasDao,
     BookProgressDao,
     SyncOutboxDao,
+    ZakatDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -331,7 +386,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -340,6 +395,9 @@ class AppDatabase extends _$AppDatabase {
       await _seedDefaultData();
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 10) {
+        await m.createTable(zakatCalculations);
+      }
       if (from < 9) {
         await m.createTable(syncOutbox);
         await m.createIndex(idxSyncOutboxTableKey);

@@ -1730,8 +1730,34 @@ class RamadanProgressDao extends DatabaseAccessor<AppDatabase>
         .getSingleOrNull();
   }
 
+  /// Live version of [getProgress], for the tracker screen's iHyaLayl toggle
+  /// to reflect writes immediately without a manual refetch.
+  Stream<RamadanProgressData?> watchProgress(int year, int day) {
+    return (select(ramadanProgress)
+          ..where((t) => t.year.equals(year) & t.dayNumber.equals(day)))
+        .watchSingleOrNull();
+  }
+
   Future<void> updateProgress(RamadanProgressCompanion companion) {
     return into(ramadanProgress).insertOnConflictUpdate(companion);
+  }
+
+  /// [DailyRecords] rows within [from, to] (inclusive), ordered by date —
+  /// backs the tracker screen's 30-day strip. Kept here rather than on
+  /// [DailyRecordDao]/[StatsDao] since this accessor already has
+  /// [DailyRecords] in scope and the query is Ramadan-tracker-specific.
+  Future<List<DailyRecord>> getRecordsForRange(DateTime from, DateTime to) {
+    return (select(dailyRecords)
+          ..where((r) => r.date.isBetweenValues(from, to))
+          ..orderBy([(r) => OrderingTerm.asc(r.date)]))
+        .get();
+  }
+
+  Stream<List<DailyRecord>> watchRecordsForRange(DateTime from, DateTime to) {
+    return customSelect(
+      'SELECT 1',
+      readsFrom: {dailyRecords},
+    ).watch().asyncMap((_) => getRecordsForRange(from, to));
   }
 
   Future<void> upsertFromRemote(Map<String, dynamic> data) async {
@@ -1938,5 +1964,33 @@ class BookProgressDao extends DatabaseAccessor<AppDatabase>
     return (delete(
       bookReadingProgress,
     )..where((t) => t.bookId.equals(bookId))).go();
+  }
+}
+
+// ─────────────────────────────────────────
+//  DAO 11: ZakatDao
+// ─────────────────────────────────────────
+@DriftAccessor(tables: [ZakatCalculations])
+class ZakatDao extends DatabaseAccessor<AppDatabase> with _$ZakatDaoMixin {
+  ZakatDao(super.db);
+
+  /// The most recently saved calculation, if any — the calculator screen
+  /// restores its fields from this rather than always starting blank.
+  Future<ZakatCalculation?> getLatest() {
+    return (select(zakatCalculations)
+          ..orderBy([(t) => OrderingTerm.desc(t.computedAt)])
+          ..limit(1))
+        .getSingleOrNull();
+  }
+
+  Stream<ZakatCalculation?> watchLatest() {
+    return (select(zakatCalculations)
+          ..orderBy([(t) => OrderingTerm.desc(t.computedAt)])
+          ..limit(1))
+        .watchSingleOrNull();
+  }
+
+  Future<int> save(ZakatCalculationsCompanion companion) {
+    return into(zakatCalculations).insert(companion);
   }
 }
