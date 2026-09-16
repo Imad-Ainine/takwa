@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+
 /// A fixed, pre-approved encouragement phrase — no free text, so there is
 /// nothing here that ever needs moderation. Keys must match the CHECK
 /// constraint on `circle_reactions.phrase_key` in
@@ -12,6 +14,9 @@ enum ReactionPhrase {
   final String key;
   final String emoji;
   const ReactionPhrase(this.key, this.emoji);
+
+  static ReactionPhrase? fromKey(String key) =>
+      ReactionPhrase.values.where((p) => p.key == key).firstOrNull;
 }
 
 class CircleSummary {
@@ -36,6 +41,29 @@ class CircleSummary {
     ownerId: map['owner_id'] as String,
     memberCount: (map['member_count'] as num?)?.toInt() ?? 1,
   );
+}
+
+/// A reaction this user has received in a circle — the read side of R6.
+class CircleReactionReceived {
+  final String id;
+  final String fromUserId;
+  final String phraseKey;
+  final DateTime createdAt;
+
+  const CircleReactionReceived({
+    required this.id,
+    required this.fromUserId,
+    required this.phraseKey,
+    required this.createdAt,
+  });
+
+  factory CircleReactionReceived.fromMap(Map<String, dynamic> map) =>
+      CircleReactionReceived(
+        id: map['id'] as String,
+        fromUserId: map['from_user_id'] as String,
+        phraseKey: map['phrase_key'] as String,
+        createdAt: DateTime.parse(map['created_at'] as String),
+      );
 }
 
 /// One row of a circle's leaderboard. Any signal the member hasn't opted

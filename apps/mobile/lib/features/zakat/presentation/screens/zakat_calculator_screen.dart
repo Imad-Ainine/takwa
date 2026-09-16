@@ -8,6 +8,7 @@ import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/primary_switch.dart';
+import 'package:takwa/features/reminders/presentation/widgets/add_reminder_bottom_sheet.dart';
 import 'package:takwa/features/zakat/domain/zakat_calculator.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
@@ -228,6 +229,18 @@ class _ZakatCalculatorScreenState
                             label: l10n.zakatSaveButton,
                             isOutline: true,
                             onTap: _save,
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          TextButton.icon(
+                            onPressed: () => showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (_) => AddReminderBottomSheet(
+                                initialTitle: l10n.zakatReminderDefaultTitle,
+                              ),
+                            ),
+                            icon: const Icon(Icons.notifications_active_outlined),
+                            label: Text(l10n.zakatSetReminderButton),
                           ),
                         ],
                         const SizedBox(height: AppSpacing.xxl),

@@ -421,4 +421,14 @@ class FakeSupabaseService implements SupabaseService {
       'phrase_key': phraseKey,
     });
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> getCircleReactionsReceived(
+    String circleId,
+    String userId,
+  ) async {
+    return circleReactions
+        .where((r) => r['circle_id'] == circleId && r['to_user_id'] == userId)
+        .toList();
+  }
 }

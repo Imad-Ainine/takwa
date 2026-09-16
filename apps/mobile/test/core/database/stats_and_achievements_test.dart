@@ -9,7 +9,9 @@
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hijri/hijri_calendar.dart';
 import 'package:takwa/core/database/app_database.dart';
+import 'package:takwa/core/utils/ramadan_info.dart';
 
 void main() {
   late AppDatabase db;
@@ -128,6 +130,68 @@ void main() {
       granted = await db.statsDao.checkAndGrantAchievements();
       expect(granted.map((a) => a.type), contains('ramadan_knight'));
     });
+
+    test(
+      'ramadan_complete requires every day of the current Ramadan to be fasted',
+      () async {
+        final ramadanFirst = HijriCalendar()
+          ..hYear = 1447
+          ..hMonth = 9
+          ..hDay = 1;
+        final info = computeRamadanInfo(ramadanFirst);
+
+        // Fast every day except the last one.
+        for (var i = 0; i < info.totalDays - 1; i++) {
+          await seedDay(
+            info.gregorianStart.add(Duration(days: i)),
+            netPoints: 20,
+            fastingType: FastingType.fard,
+          );
+        }
+        var granted = await db.statsDao.checkAndGrantAchievements(
+          asOfHijri: ramadanFirst,
+        );
+        expect(granted.map((a) => a.type), isNot(contains('ramadan_complete')));
+
+        // Fasting the final day completes the month.
+        await seedDay(
+          info.gregorianEnd,
+          netPoints: 20,
+          fastingType: FastingType.fard,
+        );
+        granted = await db.statsDao.checkAndGrantAchievements(
+          asOfHijri: ramadanFirst,
+        );
+        expect(granted.map((a) => a.type), contains('ramadan_complete'));
+      },
+    );
+
+    test(
+      'ramadan_complete is not granted outside of Ramadan even with a full month fasted',
+      () async {
+        final ramadanFirst = HijriCalendar()
+          ..hYear = 1447
+          ..hMonth = 9
+          ..hDay = 1;
+        final info = computeRamadanInfo(ramadanFirst);
+        for (var i = 0; i < info.totalDays; i++) {
+          await seedDay(
+            info.gregorianStart.add(Duration(days: i)),
+            netPoints: 20,
+            fastingType: FastingType.fard,
+          );
+        }
+
+        final shawwal = HijriCalendar()
+          ..hYear = 1447
+          ..hMonth = 10
+          ..hDay = 5;
+        final granted = await db.statsDao.checkAndGrantAchievements(
+          asOfHijri: shawwal,
+        );
+        expect(granted.map((a) => a.type), isNot(contains('ramadan_complete')));
+      },
+    );
 
     test('points_100 sums net points across every historical day', () async {
       final base = DateTime(2026, 1, 1);

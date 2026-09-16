@@ -1,6 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/widgets.dart' show Locale;
+import 'package:hijri/hijri_calendar.dart';
+import 'package:takwa/core/utils/ramadan_info.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 import 'app_database.dart';
 part 'daos.g.dart';
@@ -967,7 +969,13 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
     );
   }
 
-  Future<List<Achievement>> checkAndGrantAchievements() async {
+  /// [asOfHijri] overrides "now" purely for the Ramadan-complete check
+  /// below — tests inject a fixed date so the check is deterministic
+  /// regardless of which real-world day the suite happens to run on.
+  /// Production callers never pass it (defaults to the real current date).
+  Future<List<Achievement>> checkAndGrantAchievements({
+    HijriCalendar? asOfHijri,
+  }) async {
     final newAchievements = <Achievement>[];
     final streak = await getCurrentStreak();
     final now = DateTime.now();
@@ -1181,6 +1189,38 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
       if (a != null) newAchievements.add(a);
     }
 
+    // Ramadan Complete Check — see docs/specs/ramadan-fasting-tracker.md R6.
+    // Distinct from the lifetime "10 fard days ever" check above: this one
+    // requires every single day of the *current* Ramadan to be fasted.
+    final ramadanInfo = computeRamadanInfo(asOfHijri);
+    if (ramadanInfo.isRamadan) {
+      final fastedThisRamadanExp = dailyRecords.id.count();
+      final fastedThisRamadan =
+          await (selectOnly(dailyRecords)
+                ..addColumns([fastedThisRamadanExp])
+                ..where(
+                  dailyRecords.date.isBetweenValues(
+                        ramadanInfo.gregorianStart,
+                        ramadanInfo.gregorianEnd,
+                      ) &
+                      dailyRecords.fastingType.isNotValue(
+                        FastingType.none.index,
+                      ),
+                ))
+              .map((row) => row.read(fastedThisRamadanExp) ?? 0)
+              .getSingle();
+      if (fastedThisRamadan >= ramadanInfo.totalDays) {
+        final a = await _tryGrant(
+          'ramadan_complete',
+          l10n.achievementRamadanCompleteTitle,
+          l10n.achievementRamadanCompleteDesc,
+          '🌙',
+          300,
+        );
+        if (a != null) newAchievements.add(a);
+      }
+    }
+
     // Total Lifetime Points Check
     final totalPointsExp = dailyRecords.netPoints.sum();
     final totalPoints =
@@ -1210,6 +1250,19 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
 
     return newAchievements;
   }
+
+  /// Grants a one-off achievement outside the usual
+  /// [checkAndGrantAchievements] sweep — for events a feature knows about
+  /// immediately (e.g. joining a circle) rather than something derivable
+  /// from `daily_records` history. Idempotent, same as every other grant
+  /// here (a no-op if [type] was already earned).
+  Future<Achievement?> tryGrantAchievement(
+    String type,
+    String titleAr,
+    String descAr,
+    String emoji,
+    int pointsReward,
+  ) => _tryGrant(type, titleAr, descAr, emoji, pointsReward);
 
   Future<Achievement?> _tryGrant(
     String type,

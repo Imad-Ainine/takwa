@@ -1,6 +1,9 @@
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/supabase/supabase_config.dart';
 import 'package:takwa/features/circles/domain/circle_models.dart';
+import 'package:takwa/l10n/app_localizations.dart';
 
 // ── My circles ──────────────────────────────────────────────────
 class MyCirclesNotifier extends AsyncNotifier<List<CircleSummary>> {
@@ -15,9 +18,28 @@ class MyCirclesNotifier extends AsyncNotifier<List<CircleSummary>> {
     await future;
   }
 
+  /// See docs/specs/family-community-features.md's data-model section —
+  /// 'circle_joined' fires once, the first time this user has ever created
+  /// or joined a circle. Same locale-agnostic grant-time text approach as
+  /// StatsDao.checkAndGrantAchievements() (the app is Arabic-only at
+  /// runtime today; see that method's own comment).
+  Future<void> _grantCircleJoinedAchievement() async {
+    final l10n = lookupAppLocalizations(const Locale('ar'));
+    await ref
+        .read(statsDaoProvider)
+        .tryGrantAchievement(
+          'circle_joined',
+          l10n.achievementCircleJoinedTitle,
+          l10n.achievementCircleJoinedDesc,
+          '👨‍👩‍👧‍👦',
+          30,
+        );
+  }
+
   Future<CircleSummary> create(String name) async {
     final map = await ref.read(supabaseServiceProvider).createCircle(name);
     await refresh();
+    await _grantCircleJoinedAchievement();
     return CircleSummary.fromMap(map);
   }
 
@@ -26,6 +48,7 @@ class MyCirclesNotifier extends AsyncNotifier<List<CircleSummary>> {
         .read(supabaseServiceProvider)
         .joinCircleByCode(inviteCode);
     await refresh();
+    await _grantCircleJoinedAchievement();
     return CircleSummary.fromMap(map);
   }
 
@@ -62,6 +85,19 @@ final circleLeaderboardProvider = AsyncNotifierProvider.family<
   List<CircleMemberRow>,
   String
 >(CircleLeaderboardNotifier.new);
+
+/// Reactions the current device's user has received in a given circle —
+/// see docs/specs/family-community-features.md R6.
+final circleReactionsReceivedProvider = FutureProvider.family
+    .autoDispose<List<CircleReactionReceived>, ({String circleId, String myUserId})>((
+      ref,
+      args,
+    ) async {
+      final raw = await ref
+          .read(supabaseServiceProvider)
+          .getCircleReactionsReceived(args.circleId, args.myUserId);
+      return raw.map(CircleReactionReceived.fromMap).toList();
+    });
 
 // ── This device's own sharing toggles for a circle ─────────────
 // Read off the leaderboard's own row rather than a separate query — the

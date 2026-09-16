@@ -195,6 +195,15 @@ abstract class SupabaseService {
     required String toUserId,
     required String phraseKey,
   });
+
+  /// Reactions this user has received in [circleId], most recent first —
+  /// this is the read side of R6 in the spec ("deliver it ... to the
+  /// recipient"). No RPC needed: the migration's own `circle_reactions`
+  /// SELECT policy (`is_circle_member`) already permits this read directly.
+  Future<List<Map<String, dynamic>>> getCircleReactionsReceived(
+    String circleId,
+    String userId,
+  );
 }
 
 /// Real implementation, talking to an injected [SupabaseClient].
@@ -1088,5 +1097,20 @@ class SupabaseClientService implements SupabaseService {
         'p_phrase_key': phraseKey,
       },
     );
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getCircleReactionsReceived(
+    String circleId,
+    String userId,
+  ) async {
+    final data = await _db
+        .from('circle_reactions')
+        .select()
+        .eq('circle_id', circleId)
+        .eq('to_user_id', userId)
+        .order('created_at', ascending: false)
+        .limit(20);
+    return List<Map<String, dynamic>>.from(data);
   }
 }

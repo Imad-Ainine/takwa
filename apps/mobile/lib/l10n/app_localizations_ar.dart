@@ -96,6 +96,18 @@ class AppLocalizationsAr extends AppLocalizations {
       'أكملت 10 أيام من رمضان في المحاسبة';
 
   @override
+  String get achievementRamadanCompleteTitle => 'شهر كامل';
+
+  @override
+  String get achievementRamadanCompleteDesc => 'صمت رمضان كاملاً هذا العام';
+
+  @override
+  String get achievementCircleJoinedTitle => 'دائرة العائلة';
+
+  @override
+  String get achievementCircleJoinedDesc => 'انضممت إلى أول دائرة محاسبة لك';
+
+  @override
   String get achievementPoints100Title => 'مئة خطوة';
 
   @override
@@ -4537,6 +4549,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ramadanNotRamadanMessage => 'لسنا في شهر رمضان الآن';
 
   @override
+  String get ramadanPrayerTimesUnavailable =>
+      'تعذّر تحديد مواقيت الصلاة — تحقق من إذن الموقع';
+
+  @override
   String get ramadanSuhoorEndsIn => 'الإمساك بعد';
 
   @override
@@ -4672,6 +4688,12 @@ class AppLocalizationsAr extends AppLocalizations {
       'أدخل سعر الجرام لمعيار النصاب المختار لحساب الحد';
 
   @override
+  String get zakatSetReminderButton => 'ضبط تذكير سنوي بالزكاة';
+
+  @override
+  String get zakatReminderDefaultTitle => 'موعد إخراج الزكاة';
+
+  @override
   String get homeFeatureCircles => 'دوائر\nالمحاسبة';
 
   @override
@@ -4773,6 +4795,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reactionPhraseMashallah => 'ما شاء الله ✨';
+
+  @override
+  String get circleSortByPoints => 'النقاط';
+
+  @override
+  String get circleSortByStreak => 'سلسلة الأيام';
+
+  @override
+  String get circleReactionsReceivedTitle => 'تشجيع لك 💌';
 
   @override
   String get homeFeatureQada => 'قضاء\nالصلوات';

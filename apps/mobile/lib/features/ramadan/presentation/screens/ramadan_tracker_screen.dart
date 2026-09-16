@@ -12,6 +12,7 @@ import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/primary_switch.dart';
+import 'package:takwa/core/widgets/takwa_error_state.dart';
 import 'package:takwa/features/ramadan/data/ramadan_duas_data.dart';
 import 'package:takwa/features/ramadan/providers/ramadan_providers.dart';
 import 'package:takwa/l10n/app_localizations.dart';
@@ -179,17 +180,23 @@ class _CountdownCard extends ConsumerWidget {
           padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
           child: Center(child: CircularProgressIndicator()),
         ),
-        error: (_, _) => Text(
-          l10n.ramadanNotRamadanMessage,
-          style: context.typography.bodyMedium,
+        // Same fallback shape as prayer_screen.dart's own _ErrorView (this
+        // is almost always a missing/denied location permission, since
+        // prayerTimesProvider needs a location to compute anything) — see
+        // docs/specs/ramadan-fasting-tracker.md R7.
+        error: (_, _) => TakwaErrorState(
+          onRetry: () => ref.invalidate(prayerTimesProvider),
+          message: l10n.ramadanPrayerTimesUnavailable,
+          compact: true,
         ),
         data: (times) {
           final fajr = times.where((p) => p.name == 'fajr').firstOrNull;
           final maghrib = times.where((p) => p.name == 'maghrib').firstOrNull;
           if (fajr == null || maghrib == null) {
-            return Text(
-              l10n.ramadanNotRamadanMessage,
-              style: context.typography.bodyMedium,
+            return TakwaErrorState(
+              onRetry: () => ref.invalidate(prayerTimesProvider),
+              message: l10n.ramadanPrayerTimesUnavailable,
+              compact: true,
             );
           }
 

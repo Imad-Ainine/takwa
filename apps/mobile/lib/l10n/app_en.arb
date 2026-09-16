@@ -112,6 +112,22 @@
   "@achievementRamadanKnightDesc": {
     "description": "Achievement description: 10 days of Ramadan fasting logged"
   },
+  "achievementRamadanCompleteTitle": "A Full Month",
+  "@achievementRamadanCompleteTitle": {
+    "description": "Achievement title: fasted every day of the current Ramadan"
+  },
+  "achievementRamadanCompleteDesc": "You fasted the entire month of Ramadan this year",
+  "@achievementRamadanCompleteDesc": {
+    "description": "Achievement description: fasted every day of the current Ramadan"
+  },
+  "achievementCircleJoinedTitle": "Family Circle",
+  "@achievementCircleJoinedTitle": {
+    "description": "Achievement title: joined or created a family/community accountability circle"
+  },
+  "achievementCircleJoinedDesc": "You joined your first accountability circle",
+  "@achievementCircleJoinedDesc": {
+    "description": "Achievement description: joined or created a family/community accountability circle"
+  },
   "achievementPoints100Title": "A Hundred Steps",
   "@achievementPoints100Title": {
     "description": "Achievement title: reached 100 lifetime Taqwa points"
@@ -2051,6 +2067,10 @@
   "@ramadanNotRamadanMessage": {
     "description": "Defensive empty state if the Ramadan tracker screen is somehow opened outside Ramadan"
   },
+  "ramadanPrayerTimesUnavailable": "Couldn't resolve prayer times — check your location permission",
+  "@ramadanPrayerTimesUnavailable": {
+    "description": "Shown in place of the Suhoor/Iftar countdown when prayer times can't be resolved (usually a missing location permission)"
+  },
   "ramadanSuhoorEndsIn": "Suhoor ends in",
   "@ramadanSuhoorEndsIn": {
     "description": "Label before a countdown to Fajr (end of Suhoor) on the Ramadan tracker"
@@ -2229,6 +2249,14 @@
   "@zakatMissingPriceMessage": {
     "description": "Shown when the Nisab threshold can't be computed because no price was entered for the selected standard"
   },
+  "zakatSetReminderButton": "Set an Annual Zakat Reminder",
+  "@zakatSetReminderButton": {
+    "description": "Button that opens the add-reminder sheet pre-filled for an annual Zakat reminder"
+  },
+  "zakatReminderDefaultTitle": "Zakat Due Date",
+  "@zakatReminderDefaultTitle": {
+    "description": "Default reminder title pre-filled when creating a Zakat reminder"
+  },
   "homeFeatureCircles": "Accountability\nCircles",
   "@homeFeatureCircles": {
     "description": "Home feature-grid label for the family/community accountability circles feature"
@@ -2365,6 +2393,18 @@
   "reactionPhraseMashallah": "MashaAllah ✨",
   "@reactionPhraseMashallah": {
     "description": "Fixed encouragement phrase"
+  },
+  "circleSortByPoints": "Points",
+  "@circleSortByPoints": {
+    "description": "Leaderboard sort-metric selector option: sort by points"
+  },
+  "circleSortByStreak": "Streak",
+  "@circleSortByStreak": {
+    "description": "Leaderboard sort-metric selector option: sort by streak"
+  },
+  "circleReactionsReceivedTitle": "Encouragement for You 💌",
+  "@circleReactionsReceivedTitle": {
+    "description": "Section title listing encouragement reactions this user has received in the circle"
   },
   "homeFeatureQada": "Qada\nPrayers",
   "@homeFeatureQada": {

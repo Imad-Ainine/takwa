@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,6 +52,14 @@ class CircleDetailScreen extends ConsumerWidget {
                             myUserId: myUserId,
                             l10n: l10n,
                           ),
+                        if (myUserId != null) ...[
+                          const SizedBox(height: AppSpacing.lg),
+                          _ReceivedReactions(
+                            circleId: circle.id,
+                            myUserId: myUserId,
+                            l10n: l10n,
+                          ),
+                        ],
                         const SizedBox(height: AppSpacing.lg),
                         Text(
                           l10n.circleLeaderboardTitle,
@@ -245,6 +254,88 @@ class _SharingSettingsCard extends ConsumerWidget {
   }
 }
 
+class _ReceivedReactions extends ConsumerWidget {
+  final String circleId;
+  final String myUserId;
+  final AppLocalizations l10n;
+  const _ReceivedReactions({
+    required this.circleId,
+    required this.myUserId,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reactionsAsync = ref.watch(
+      circleReactionsReceivedProvider((circleId: circleId, myUserId: myUserId)),
+    );
+    // Reuses the leaderboard's already-fetched rows to resolve a sender's
+    // display name instead of a second query — see the provider's own doc
+    // comment on circleReactionsReceivedProvider.
+    final members = ref.watch(circleLeaderboardProvider(circleId)).valueOrNull;
+
+    return reactionsAsync.maybeWhen(
+      data: (reactions) {
+        if (reactions.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.circleReactionsReceivedTitle,
+              style: context.typography.labelLarge,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            ...reactions.map((r) {
+              final phrase = ReactionPhrase.fromKey(r.phraseKey);
+              final sender = members
+                  ?.where((m) => m.userId == r.fromUserId)
+                  .firstOrNull;
+              return Container(
+                margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: context.colors.successDim,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      phrase?.emoji ?? '💌',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        phrase != null
+                            ? '${sender?.username ?? ''} — ${reactionPhraseLabel(l10n, phrase)}'
+                            : sender?.username ?? '',
+                        style: context.typography.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
+    );
+  }
+}
+
+enum _SortMetric { points, streak }
+
+/// Which metric a circle's member list is currently sorted by. `family`
+/// scopes it per-circle rather than app-wide — StateProvider.family caches
+/// one value per circleId, defaulting to points.
+final _leaderboardSortProvider = StateProvider.family<_SortMetric, String>(
+  (ref, circleId) => _SortMetric.points,
+);
+
 class _Leaderboard extends ConsumerWidget {
   final String circleId;
   final String? myUserId;
@@ -258,33 +349,113 @@ class _Leaderboard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rowsAsync = ref.watch(circleLeaderboardProvider(circleId));
+    final sortMetric = ref.watch(_leaderboardSortProvider(circleId));
 
-    return rowsAsync.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
-        child: Center(child: TakwaLoadingIndicator()),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _SortSelector(circleId: circleId, l10n: l10n),
+        const SizedBox(height: AppSpacing.sm),
+        rowsAsync.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+            child: Center(child: TakwaLoadingIndicator()),
+          ),
+          error: (_, _) => TakwaErrorState(
+            onRetry: () => ref.invalidate(circleLeaderboardProvider(circleId)),
+            message: l10n.circleErrorGeneric,
+            compact: true,
+          ),
+          data: (rows) {
+            final sorted = [...rows]..sort((a, b) {
+              final aVal = sortMetric == _SortMetric.streak
+                  ? a.currentStreak
+                  : a.totalPoints;
+              final bVal = sortMetric == _SortMetric.streak
+                  ? b.currentStreak
+                  : b.totalPoints;
+              return (bVal ?? -1).compareTo(aVal ?? -1);
+            });
+            return Column(
+              children: sorted
+                  .map(
+                    (row) => _MemberTile(
+                      row: row,
+                      isMe: row.userId == myUserId,
+                      circleId: circleId,
+                      l10n: l10n,
+                    ),
+                  )
+                  .toList(),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _SortSelector extends ConsumerWidget {
+  final String circleId;
+  final AppLocalizations l10n;
+  const _SortSelector({required this.circleId, required this.l10n});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current = ref.watch(_leaderboardSortProvider(circleId));
+    return Row(
+      children: [
+        Expanded(
+          child: _option(
+            context,
+            ref,
+            l10n.circleSortByPoints,
+            _SortMetric.points,
+            current,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _option(
+            context,
+            ref,
+            l10n.circleSortByStreak,
+            _SortMetric.streak,
+            current,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _option(
+    BuildContext context,
+    WidgetRef ref,
+    String label,
+    _SortMetric metric,
+    _SortMetric current,
+  ) {
+    final selected = metric == current;
+    return GestureDetector(
+      onTap: () =>
+          ref.read(_leaderboardSortProvider(circleId).notifier).state = metric,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? context.colors.tealDim : context.colors.card,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(
+            color: selected ? context.colors.teal : context.colors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: context.typography.labelMedium.copyWith(
+            color: selected ? context.colors.tealText : context.colors.textSecondary,
+          ),
+        ),
       ),
-      error: (_, _) => TakwaErrorState(
-        onRetry: () => ref.invalidate(circleLeaderboardProvider(circleId)),
-        message: l10n.circleErrorGeneric,
-        compact: true,
-      ),
-      data: (rows) {
-        final sorted = [...rows]
-          ..sort((a, b) => (b.totalPoints ?? -1).compareTo(a.totalPoints ?? -1));
-        return Column(
-          children: sorted
-              .map(
-                (row) => _MemberTile(
-                  row: row,
-                  isMe: row.userId == myUserId,
-                  circleId: circleId,
-                  l10n: l10n,
-                ),
-              )
-              .toList(),
-        );
-      },
     );
   }
 }
@@ -398,17 +569,17 @@ class _MemberTile extends ConsumerWidget {
   }
 }
 
+String reactionPhraseLabel(AppLocalizations l10n, ReactionPhrase p) => switch (p) {
+  ReactionPhrase.duaForYou => l10n.reactionPhraseDuaForYou,
+  ReactionPhrase.keepGoing => l10n.reactionPhraseKeepGoing,
+  ReactionPhrase.proudOfYou => l10n.reactionPhraseProudOfYou,
+  ReactionPhrase.youCanDoIt => l10n.reactionPhraseYouCanDoIt,
+  ReactionPhrase.mashallah => l10n.reactionPhraseMashallah,
+};
+
 class _ReactionPicker extends StatelessWidget {
   final AppLocalizations l10n;
   const _ReactionPicker({required this.l10n});
-
-  String _label(ReactionPhrase p) => switch (p) {
-    ReactionPhrase.duaForYou => l10n.reactionPhraseDuaForYou,
-    ReactionPhrase.keepGoing => l10n.reactionPhraseKeepGoing,
-    ReactionPhrase.proudOfYou => l10n.reactionPhraseProudOfYou,
-    ReactionPhrase.youCanDoIt => l10n.reactionPhraseYouCanDoIt,
-    ReactionPhrase.mashallah => l10n.reactionPhraseMashallah,
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -424,7 +595,7 @@ class _ReactionPicker extends StatelessWidget {
             ...ReactionPhrase.values.map(
               (p) => ListTile(
                 leading: Text(p.emoji, style: const TextStyle(fontSize: 22)),
-                title: Text(_label(p)),
+                title: Text(reactionPhraseLabel(l10n, p)),
                 onTap: () => Navigator.pop(context, p),
               ),
             ),

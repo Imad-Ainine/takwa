@@ -266,6 +266,30 @@ abstract class AppLocalizations {
   /// **'أكملت 10 أيام من رمضان في المحاسبة'**
   String get achievementRamadanKnightDesc;
 
+  /// Achievement title: fasted every day of the current Ramadan
+  ///
+  /// In ar, this message translates to:
+  /// **'شهر كامل'**
+  String get achievementRamadanCompleteTitle;
+
+  /// Achievement description: fasted every day of the current Ramadan
+  ///
+  /// In ar, this message translates to:
+  /// **'صمت رمضان كاملاً هذا العام'**
+  String get achievementRamadanCompleteDesc;
+
+  /// Achievement title: joined or created a family/community accountability circle
+  ///
+  /// In ar, this message translates to:
+  /// **'دائرة العائلة'**
+  String get achievementCircleJoinedTitle;
+
+  /// Achievement description: joined or created a family/community accountability circle
+  ///
+  /// In ar, this message translates to:
+  /// **'انضممت إلى أول دائرة محاسبة لك'**
+  String get achievementCircleJoinedDesc;
+
   /// Achievement title: reached 100 lifetime Taqwa points
   ///
   /// In ar, this message translates to:
@@ -8210,6 +8234,12 @@ abstract class AppLocalizations {
   /// **'لسنا في شهر رمضان الآن'**
   String get ramadanNotRamadanMessage;
 
+  /// Shown in place of the Suhoor/Iftar countdown when prayer times can't be resolved (usually a missing location permission)
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحديد مواقيت الصلاة — تحقق من إذن الموقع'**
+  String get ramadanPrayerTimesUnavailable;
+
   /// Label before a countdown to Fajr (end of Suhoor) on the Ramadan tracker
   ///
   /// In ar, this message translates to:
@@ -8462,6 +8492,18 @@ abstract class AppLocalizations {
   /// **'أدخل سعر الجرام لمعيار النصاب المختار لحساب الحد'**
   String get zakatMissingPriceMessage;
 
+  /// Button that opens the add-reminder sheet pre-filled for an annual Zakat reminder
+  ///
+  /// In ar, this message translates to:
+  /// **'ضبط تذكير سنوي بالزكاة'**
+  String get zakatSetReminderButton;
+
+  /// Default reminder title pre-filled when creating a Zakat reminder
+  ///
+  /// In ar, this message translates to:
+  /// **'موعد إخراج الزكاة'**
+  String get zakatReminderDefaultTitle;
+
   /// Home feature-grid label for the family/community accountability circles feature
   ///
   /// In ar, this message translates to:
@@ -8659,6 +8701,24 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'ما شاء الله ✨'**
   String get reactionPhraseMashallah;
+
+  /// Leaderboard sort-metric selector option: sort by points
+  ///
+  /// In ar, this message translates to:
+  /// **'النقاط'**
+  String get circleSortByPoints;
+
+  /// Leaderboard sort-metric selector option: sort by streak
+  ///
+  /// In ar, this message translates to:
+  /// **'سلسلة الأيام'**
+  String get circleSortByStreak;
+
+  /// Section title listing encouragement reactions this user has received in the circle
+  ///
+  /// In ar, this message translates to:
+  /// **'تشجيع لك 💌'**
+  String get circleReactionsReceivedTitle;
 
   /// Home feature-grid label for the Qada (missed prayers) tracker
   ///
