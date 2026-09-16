@@ -56,6 +56,9 @@ import 'package:takwa/features/auth/presentation/screens/forgot_password_screen.
 import 'package:takwa/features/ramadan/presentation/screens/ramadan_tracker_screen.dart';
 import 'package:takwa/features/zakat/presentation/screens/zakat_calculator_screen.dart';
 import 'package:takwa/features/circles/presentation/screens/circles_list_screen.dart';
+import 'package:takwa/features/qada/presentation/screens/qada_tracker_screen.dart';
+import 'package:takwa/features/sadaqah/presentation/screens/sadaqah_tracker_screen.dart';
+import 'package:takwa/features/occasions/presentation/screens/islamic_occasions_screen.dart';
 
 /// Defines all the route names used in the application.
 class Routes {
@@ -116,6 +119,9 @@ class Routes {
   static const String ramadanTracker = '/ramadan-tracker';
   static const String zakatCalculator = '/zakat-calculator';
   static const String circles = '/circles';
+  static const String qadaTracker = '/qada-tracker';
+  static const String sadaqahTracker = '/sadaqah-tracker';
+  static const String islamicOccasions = '/islamic-occasions';
 }
 
 /// Centralized route generation and management.
@@ -320,6 +326,12 @@ class AppRoutes {
         return MaterialPageRoute(settings: settings, builder: (_) => const ZakatCalculatorScreen());
       case Routes.circles:
         return MaterialPageRoute(settings: settings, builder: (_) => const CirclesListScreen());
+      case Routes.qadaTracker:
+        return MaterialPageRoute(settings: settings, builder: (_) => const QadaTrackerScreen());
+      case Routes.sadaqahTracker:
+        return MaterialPageRoute(settings: settings, builder: (_) => const SadaqahTrackerScreen());
+      case Routes.islamicOccasions:
+        return MaterialPageRoute(settings: settings, builder: (_) => const IslamicOccasionsScreen());
       default:
         return MaterialPageRoute(
           settings: settings,

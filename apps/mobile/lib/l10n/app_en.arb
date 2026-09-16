@@ -2365,5 +2365,134 @@
   "reactionPhraseMashallah": "MashaAllah ✨",
   "@reactionPhraseMashallah": {
     "description": "Fixed encouragement phrase"
+  },
+  "homeFeatureQada": "Qada\nPrayers",
+  "@homeFeatureQada": {
+    "description": "Home feature-grid label for the Qada (missed prayers) tracker"
+  },
+  "qadaAppBarTitle": "Qada Prayer Tracker",
+  "@qadaAppBarTitle": {
+    "description": "App bar title of the Qada tracker screen"
+  },
+  "qadaIntroText": "Log how many missed prayers you intend to make up, and track your progress",
+  "@qadaIntroText": {
+    "description": "Short explainer at the top of the Qada tracker"
+  },
+  "qadaOwedLabel": "Owed",
+  "@qadaOwedLabel": {
+    "description": "Label for the count of prayers still owed for a given prayer"
+  },
+  "qadaCompletedLabel": "Made Up",
+  "@qadaCompletedLabel": {
+    "description": "Label for the lifetime count of completed Qada prayers for a given prayer"
+  },
+  "qadaMarkOneDoneButton": "Mark One Done",
+  "@qadaMarkOneDoneButton": {
+    "description": "Button that decrements the owed count by one and increments completed"
+  },
+  "qadaSetOwedButton": "Edit Count",
+  "@qadaSetOwedButton": {
+    "description": "Button that opens a dialog to set/edit the owed count"
+  },
+  "qadaSetOwedDialogTitle": "Missed Prayers Count",
+  "@qadaSetOwedDialogTitle": {
+    "description": "Dialog title for setting a prayer's owed count"
+  },
+  "qadaSetOwedConfirm": "Save",
+  "@qadaSetOwedConfirm": {
+    "description": "Confirm button on the set-owed dialog"
+  },
+  "sadaqahAmountFieldLabel": "Amount (optional)",
+  "@sadaqahAmountFieldLabel": {
+    "description": "Optional amount field shown below the Sadaqah toggle in the daily checklist"
+  },
+  "homeFeatureSadaqah": "Sadaqah",
+  "@homeFeatureSadaqah": {
+    "description": "Home feature-grid label for the Sadaqah tracker"
+  },
+  "sadaqahTrackerAppBarTitle": "Sadaqah Tracker",
+  "@sadaqahTrackerAppBarTitle": {
+    "description": "App bar title of the Sadaqah tracker screen"
+  },
+  "sadaqahTotalsWeekLabel": "This Week",
+  "@sadaqahTotalsWeekLabel": {
+    "description": "Sadaqah total label: this week"
+  },
+  "sadaqahTotalsMonthLabel": "This Month",
+  "@sadaqahTotalsMonthLabel": {
+    "description": "Sadaqah total label: this month"
+  },
+  "sadaqahTotalsAllTimeLabel": "All-Time",
+  "@sadaqahTotalsAllTimeLabel": {
+    "description": "Sadaqah total label: all-time"
+  },
+  "sadaqahHistoryTitle": "History",
+  "@sadaqahHistoryTitle": {
+    "description": "Title for the Sadaqah history list"
+  },
+  "sadaqahHistoryEmpty": "No Sadaqah logged yet",
+  "@sadaqahHistoryEmpty": {
+    "description": "Empty state for the Sadaqah history list"
+  },
+  "sadaqahLoggedNoAmount": "Sadaqah (no amount)",
+  "@sadaqahLoggedNoAmount": {
+    "description": "Shown for a history entry logged without an amount, distinct from a real zero"
+  },
+  "homeFeatureOccasions": "Islamic\nOccasions",
+  "@homeFeatureOccasions": {
+    "description": "Home feature-grid label for the Islamic occasions screen"
+  },
+  "occasionsAppBarTitle": "Islamic Occasions",
+  "@occasionsAppBarTitle": {
+    "description": "App bar title of the Islamic occasions screen"
+  },
+  "occasionsWhiteDaysTitle": "White Days",
+  "@occasionsWhiteDaysTitle": {
+    "description": "Section title for this Hijri month's White Days (Ayyam al-Beed)"
+  },
+  "occasionsWhiteDaysSubtitle": "The 13th, 14th and 15th of the current Hijri month — recommended fasting days",
+  "@occasionsWhiteDaysSubtitle": {
+    "description": "Explainer for White Days"
+  },
+  "occasionsDaysUntilToday": "Today",
+  "@occasionsDaysUntilToday": {
+    "description": "Shown instead of a day count when the occasion is today"
+  },
+  "occasionsDaysUntil": "in {days} days",
+  "@occasionsDaysUntil": {
+    "description": "Countdown to an occasion",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "occasionsAddReminderTooltip": "Add a reminder",
+  "@occasionsAddReminderTooltip": {
+    "description": "Tooltip on the button that opens the add-reminder sheet pre-filled with this occasion"
+  },
+  "occasionAshura": "Day of Ashura",
+  "@occasionAshura": {
+    "description": "Occasion name"
+  },
+  "occasionIsraMiraj": "Isra' and Mi'raj",
+  "@occasionIsraMiraj": {
+    "description": "Occasion name"
+  },
+  "occasionRamadanStart": "Start of Ramadan",
+  "@occasionRamadanStart": {
+    "description": "Occasion name"
+  },
+  "occasionEidAlFitr": "Eid al-Fitr",
+  "@occasionEidAlFitr": {
+    "description": "Occasion name"
+  },
+  "occasionMawlid": "Mawlid al-Nabi",
+  "@occasionMawlid": {
+    "description": "Occasion name"
+  },
+  "occasionEidAlAdha": "Eid al-Adha",
+  "@occasionEidAlAdha": {
+    "description": "Occasion name"
   }
 }

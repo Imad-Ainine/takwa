@@ -22,7 +22,12 @@ const Map<String, IconData> kReminderIcons = {
 };
 
 class AddReminderBottomSheet extends ConsumerStatefulWidget {
-  const AddReminderBottomSheet({super.key});
+  /// Pre-fills the title field — used by the Islamic Occasions screen's
+  /// "add reminder" shortcut so the user doesn't have to retype the
+  /// occasion's name (see docs/specs/islamic-occasions.md).
+  final String? initialTitle;
+
+  const AddReminderBottomSheet({super.key, this.initialTitle});
 
   @override
   ConsumerState<AddReminderBottomSheet> createState() =>
@@ -31,7 +36,9 @@ class AddReminderBottomSheet extends ConsumerStatefulWidget {
 
 class _AddReminderBottomSheetState
     extends ConsumerState<AddReminderBottomSheet> {
-  final _titleController = TextEditingController();
+  late final _titleController = TextEditingController(
+    text: widget.initialTitle ?? '',
+  );
   final _formKey = GlobalKey<FormState>();
   TimeOfDay _selectedTime = TimeOfDay.now();
   String _selectedIconKey = 'favorite_rounded';

@@ -7707,6 +7707,329 @@ class ZakatCalculationsCompanion extends UpdateCompanion<ZakatCalculation> {
   }
 }
 
+class $QadaCountersTable extends QadaCounters
+    with TableInfo<$QadaCountersTable, QadaCounter> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QadaCountersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _prayerNameMeta = const VerificationMeta(
+    'prayerName',
+  );
+  @override
+  late final GeneratedColumn<String> prayerName = GeneratedColumn<String>(
+    'prayer_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _owedCountMeta = const VerificationMeta(
+    'owedCount',
+  );
+  @override
+  late final GeneratedColumn<int> owedCount = GeneratedColumn<int>(
+    'owed_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _completedCountMeta = const VerificationMeta(
+    'completedCount',
+  );
+  @override
+  late final GeneratedColumn<int> completedCount = GeneratedColumn<int>(
+    'completed_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    prayerName,
+    owedCount,
+    completedCount,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'qada_counters';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QadaCounter> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('prayer_name')) {
+      context.handle(
+        _prayerNameMeta,
+        prayerName.isAcceptableOrUnknown(data['prayer_name']!, _prayerNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_prayerNameMeta);
+    }
+    if (data.containsKey('owed_count')) {
+      context.handle(
+        _owedCountMeta,
+        owedCount.isAcceptableOrUnknown(data['owed_count']!, _owedCountMeta),
+      );
+    }
+    if (data.containsKey('completed_count')) {
+      context.handle(
+        _completedCountMeta,
+        completedCount.isAcceptableOrUnknown(
+          data['completed_count']!,
+          _completedCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {prayerName};
+  @override
+  QadaCounter map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QadaCounter(
+      prayerName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prayer_name'],
+      )!,
+      owedCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}owed_count'],
+      )!,
+      completedCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}completed_count'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $QadaCountersTable createAlias(String alias) {
+    return $QadaCountersTable(attachedDatabase, alias);
+  }
+}
+
+class QadaCounter extends DataClass implements Insertable<QadaCounter> {
+  /// One of 'fajr' | 'dhuhr' | 'asr' | 'maghrib' | 'isha'.
+  final String prayerName;
+  final int owedCount;
+  final int completedCount;
+  final DateTime updatedAt;
+  const QadaCounter({
+    required this.prayerName,
+    required this.owedCount,
+    required this.completedCount,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['prayer_name'] = Variable<String>(prayerName);
+    map['owed_count'] = Variable<int>(owedCount);
+    map['completed_count'] = Variable<int>(completedCount);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  QadaCountersCompanion toCompanion(bool nullToAbsent) {
+    return QadaCountersCompanion(
+      prayerName: Value(prayerName),
+      owedCount: Value(owedCount),
+      completedCount: Value(completedCount),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory QadaCounter.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QadaCounter(
+      prayerName: serializer.fromJson<String>(json['prayerName']),
+      owedCount: serializer.fromJson<int>(json['owedCount']),
+      completedCount: serializer.fromJson<int>(json['completedCount']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'prayerName': serializer.toJson<String>(prayerName),
+      'owedCount': serializer.toJson<int>(owedCount),
+      'completedCount': serializer.toJson<int>(completedCount),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  QadaCounter copyWith({
+    String? prayerName,
+    int? owedCount,
+    int? completedCount,
+    DateTime? updatedAt,
+  }) => QadaCounter(
+    prayerName: prayerName ?? this.prayerName,
+    owedCount: owedCount ?? this.owedCount,
+    completedCount: completedCount ?? this.completedCount,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  QadaCounter copyWithCompanion(QadaCountersCompanion data) {
+    return QadaCounter(
+      prayerName: data.prayerName.present
+          ? data.prayerName.value
+          : this.prayerName,
+      owedCount: data.owedCount.present ? data.owedCount.value : this.owedCount,
+      completedCount: data.completedCount.present
+          ? data.completedCount.value
+          : this.completedCount,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QadaCounter(')
+          ..write('prayerName: $prayerName, ')
+          ..write('owedCount: $owedCount, ')
+          ..write('completedCount: $completedCount, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(prayerName, owedCount, completedCount, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QadaCounter &&
+          other.prayerName == this.prayerName &&
+          other.owedCount == this.owedCount &&
+          other.completedCount == this.completedCount &&
+          other.updatedAt == this.updatedAt);
+}
+
+class QadaCountersCompanion extends UpdateCompanion<QadaCounter> {
+  final Value<String> prayerName;
+  final Value<int> owedCount;
+  final Value<int> completedCount;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const QadaCountersCompanion({
+    this.prayerName = const Value.absent(),
+    this.owedCount = const Value.absent(),
+    this.completedCount = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  QadaCountersCompanion.insert({
+    required String prayerName,
+    this.owedCount = const Value.absent(),
+    this.completedCount = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : prayerName = Value(prayerName);
+  static Insertable<QadaCounter> custom({
+    Expression<String>? prayerName,
+    Expression<int>? owedCount,
+    Expression<int>? completedCount,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (prayerName != null) 'prayer_name': prayerName,
+      if (owedCount != null) 'owed_count': owedCount,
+      if (completedCount != null) 'completed_count': completedCount,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  QadaCountersCompanion copyWith({
+    Value<String>? prayerName,
+    Value<int>? owedCount,
+    Value<int>? completedCount,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return QadaCountersCompanion(
+      prayerName: prayerName ?? this.prayerName,
+      owedCount: owedCount ?? this.owedCount,
+      completedCount: completedCount ?? this.completedCount,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (prayerName.present) {
+      map['prayer_name'] = Variable<String>(prayerName.value);
+    }
+    if (owedCount.present) {
+      map['owed_count'] = Variable<int>(owedCount.value);
+    }
+    if (completedCount.present) {
+      map['completed_count'] = Variable<int>(completedCount.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QadaCountersCompanion(')
+          ..write('prayerName: $prayerName, ')
+          ..write('owedCount: $owedCount, ')
+          ..write('completedCount: $completedCount, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7734,6 +8057,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   late final $ZakatCalculationsTable zakatCalculations =
       $ZakatCalculationsTable(this);
+  late final $QadaCountersTable qadaCounters = $QadaCountersTable(this);
   late final Index idxProhibitionsLogRecord = Index(
     'idx_prohibitions_log_record',
     'CREATE INDEX idx_prohibitions_log_record ON prohibitions_log (record_id)',
@@ -7772,6 +8096,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final SyncOutboxDao syncOutboxDao = SyncOutboxDao(this as AppDatabase);
   late final ZakatDao zakatDao = ZakatDao(this as AppDatabase);
+  late final QadaDao qadaDao = QadaDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7791,6 +8116,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     bookReadingProgress,
     syncOutbox,
     zakatCalculations,
+    qadaCounters,
     idxProhibitionsLogRecord,
     idxCustomIbadahLogRecordIbadah,
     idxRamadanProgressRecord,
@@ -12659,6 +12985,200 @@ typedef $$ZakatCalculationsTableProcessedTableManager =
       ZakatCalculation,
       PrefetchHooks Function()
     >;
+typedef $$QadaCountersTableCreateCompanionBuilder =
+    QadaCountersCompanion Function({
+      required String prayerName,
+      Value<int> owedCount,
+      Value<int> completedCount,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$QadaCountersTableUpdateCompanionBuilder =
+    QadaCountersCompanion Function({
+      Value<String> prayerName,
+      Value<int> owedCount,
+      Value<int> completedCount,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$QadaCountersTableFilterComposer
+    extends Composer<_$AppDatabase, $QadaCountersTable> {
+  $$QadaCountersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get prayerName => $composableBuilder(
+    column: $table.prayerName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get owedCount => $composableBuilder(
+    column: $table.owedCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get completedCount => $composableBuilder(
+    column: $table.completedCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$QadaCountersTableOrderingComposer
+    extends Composer<_$AppDatabase, $QadaCountersTable> {
+  $$QadaCountersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get prayerName => $composableBuilder(
+    column: $table.prayerName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get owedCount => $composableBuilder(
+    column: $table.owedCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get completedCount => $composableBuilder(
+    column: $table.completedCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$QadaCountersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QadaCountersTable> {
+  $$QadaCountersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get prayerName => $composableBuilder(
+    column: $table.prayerName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get owedCount =>
+      $composableBuilder(column: $table.owedCount, builder: (column) => column);
+
+  GeneratedColumn<int> get completedCount => $composableBuilder(
+    column: $table.completedCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$QadaCountersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QadaCountersTable,
+          QadaCounter,
+          $$QadaCountersTableFilterComposer,
+          $$QadaCountersTableOrderingComposer,
+          $$QadaCountersTableAnnotationComposer,
+          $$QadaCountersTableCreateCompanionBuilder,
+          $$QadaCountersTableUpdateCompanionBuilder,
+          (
+            QadaCounter,
+            BaseReferences<_$AppDatabase, $QadaCountersTable, QadaCounter>,
+          ),
+          QadaCounter,
+          PrefetchHooks Function()
+        > {
+  $$QadaCountersTableTableManager(_$AppDatabase db, $QadaCountersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QadaCountersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QadaCountersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QadaCountersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> prayerName = const Value.absent(),
+                Value<int> owedCount = const Value.absent(),
+                Value<int> completedCount = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => QadaCountersCompanion(
+                prayerName: prayerName,
+                owedCount: owedCount,
+                completedCount: completedCount,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String prayerName,
+                Value<int> owedCount = const Value.absent(),
+                Value<int> completedCount = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => QadaCountersCompanion.insert(
+                prayerName: prayerName,
+                owedCount: owedCount,
+                completedCount: completedCount,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$QadaCountersTable, QadaCounter>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $QadaCountersTable,
+                    QadaCounter
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QadaCountersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QadaCountersTable,
+      QadaCounter,
+      $$QadaCountersTableFilterComposer,
+      $$QadaCountersTableOrderingComposer,
+      $$QadaCountersTableAnnotationComposer,
+      $$QadaCountersTableCreateCompanionBuilder,
+      $$QadaCountersTableUpdateCompanionBuilder,
+      (
+        QadaCounter,
+        BaseReferences<_$AppDatabase, $QadaCountersTable, QadaCounter>,
+      ),
+      QadaCounter,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -12691,4 +13211,6 @@ class $AppDatabaseManager {
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
   $$ZakatCalculationsTableTableManager get zakatCalculations =>
       $$ZakatCalculationsTableTableManager(_db, _db.zakatCalculations);
+  $$QadaCountersTableTableManager get qadaCounters =>
+      $$QadaCountersTableTableManager(_db, _db.qadaCounters);
 }
