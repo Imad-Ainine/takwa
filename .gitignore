@@ -62,3 +62,6 @@ key.properties
 
 # Melos
 .melos/
+
+# Claude AI local config
+.claude/
