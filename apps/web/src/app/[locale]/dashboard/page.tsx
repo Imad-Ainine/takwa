@@ -1,7 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { redirect } from '@/i18n/routing';
+import { redirect, Link } from '@/i18n/routing';
 import { createClient } from '@/lib/supabase/server';
-import { getLatestRelease } from '@/lib/releases';
 import {
 	getAchievements,
 	getProfileSummary,
@@ -14,9 +13,11 @@ import styles from './dashboard.module.css';
 const PRAYER_KEYS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const;
 
 /**
- * Dashboard — user info, APK early-access download card, and a read-only
- * view of the same data the mobile app syncs to Supabase (today's summary,
- * recent history, achievements). See docs/specs/web-dashboard-parity.md.
+ * Dashboard — user info and a read-only view of the same data the mobile
+ * app syncs to Supabase (today's summary, recent history, achievements).
+ * The APK/iOS download UI lives on its own /download page (see
+ * apps/web/src/app/[locale]/download/page.tsx) so this screen stays
+ * focused on the user's own data. See docs/specs/web-dashboard-parity.md.
  */
 export default async function DashboardPage({
 	params,
@@ -35,19 +36,12 @@ export default async function DashboardPage({
 		redirect({ href: '/login', locale });
 	}
 
-	const [release, profile, todayRecord, recentRecords, achievements] = await Promise.all([
-		getLatestRelease(),
+	const [profile, todayRecord, recentRecords, achievements] = await Promise.all([
 		getProfileSummary(supabase, user!.id),
 		getTodayRecord(supabase, user!.id),
 		getRecentRecords(supabase, user!.id),
 		getAchievements(supabase, user!.id),
 	]);
-	const apkUrl = release.apkUrl;
-	const apkVersion = release.version;
-	const apkSize = release.size;
-	const apkSha1 = release.sha1;
-	const apkSha256 = release.sha256;
-	const downloadFilename = release.downloadFilename;
 
 	const dateFormatter = new Intl.DateTimeFormat(locale, {
 		month: 'short',
@@ -94,76 +88,35 @@ export default async function DashboardPage({
 					</form>
 				</div>
 
-				{/* ── APK Download card ── */}
+				{/* ── Get the app card ── */}
 				<div className={`${styles.card} ${styles.downloadCard}`}>
 					{/* Decorative top glow */}
 					<div className={styles.downloadGlow} aria-hidden="true" />
 
 					<div className={styles.downloadHeader}>
-						<div className={styles.androidIcon}>🤖</div>
+						<div className={styles.androidIcon}>📲</div>
 						<div>
-							<span className={styles.earlyBadge}>{t('download.badge')}</span>
-							<h2 className={`amiri ${styles.downloadTitle}`}>{t('download.title')}</h2>
-							<p className={styles.downloadSubtitle}>{t('download.subtitle')}</p>
+							<span className={styles.earlyBadge}>{t('getApp.badge')}</span>
+							<h2 className={`amiri ${styles.downloadTitle}`}>{t('getApp.title')}</h2>
+							<p className={styles.downloadSubtitle}>{t('getApp.subtitle')}</p>
 						</div>
 					</div>
 
 					<div className={styles.downloadMeta}>
 						<div className={styles.metaPill}>
-							<span className={styles.metaIcon}>📱</span>
-							<span>{t('download.platform')}</span>
+							<span className={styles.metaIcon}>🤖</span>
+							<span>{t('getApp.android')}</span>
 						</div>
-						{apkVersion && (
-							<div className={styles.metaPill}>
-								<span className={styles.metaIcon}>🏷️</span>
-								<span>{t('download.version', { version: apkVersion })}</span>
-							</div>
-						)}
-						{apkSize && (
-							<div className={styles.metaPill}>
-								<span className={styles.metaIcon}>⚖️</span>
-								<span>{t('download.size', { size: apkSize })}</span>
-							</div>
-						)}
+						<div className={styles.metaPill}>
+							<span className={styles.metaIcon}>🍎</span>
+							<span>{t('getApp.ios')}</span>
+						</div>
 					</div>
 
-					{apkUrl ? (
-						<a
-							id="download-apk-btn"
-							href={apkUrl}
-							download={downloadFilename}
-							className={styles.downloadBtn}
-						>
-							<span className={styles.downloadBtnIcon}>⬇️</span>
-							{t('download.button')}
-						</a>
-					) : (
-						<button
-							id="download-apk-unavailable"
-							type="button"
-							disabled
-							className={styles.downloadBtnDisabled}
-						>
-							<span className={styles.downloadBtnIcon}>⏳</span>
-							{t('download.unavailable')}
-						</button>
-					)}
-
-					<p className={styles.instructions}>{t('download.instructions')}</p>
-
-					{apkSha256 && (
-						<div className={styles.sha1Row}>
-							<span className={styles.sha1Label}>SHA-256</span>
-							<code className={styles.sha1Hash}>{apkSha256}</code>
-						</div>
-					)}
-
-					{apkSha1 && (
-						<div className={styles.sha1Row}>
-							<span className={styles.sha1Label}>{t('download.sha1Label')}</span>
-							<code className={styles.sha1Hash}>{apkSha1}</code>
-						</div>
-					)}
+					<Link href="/download" id="go-to-downloads-btn" className={styles.downloadBtn}>
+						<span className={styles.downloadBtnIcon}>⬇️</span>
+						{t('getApp.cta')}
+					</Link>
 				</div>
 
 			</div>
