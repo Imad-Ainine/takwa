@@ -463,7 +463,7 @@ void main() {
             // without starting any long-running concurrent work (no audio,
             // no 8-second navigator poll). This makes the test fully
             // synchronous and eliminates all race conditions between triggers.
-            final prefs = const UserPreferences(
+            const prefs = UserPreferences(
               adhanMode: 'silent',
               adhanScreenEnabled: false,
               flipToSilenceEnabled: false,

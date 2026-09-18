@@ -480,7 +480,7 @@ void main() {
           // Use adhanScreenEnabled=false so handleForegroundData exits
           // immediately after claiming the dedupe key, with no pending
           // navigator-poll timer that would interfere with the second call.
-          final prefs = const UserPreferences(
+          const prefs = UserPreferences(
             adhanMode: 'silent',
             adhanScreenEnabled: false,
             flipToSilenceEnabled: false,
@@ -778,7 +778,7 @@ void main() {
       () {
     /// Produces the observable outcome for a given toggle sequence: does the
     /// handler call onSendDataToMain after the sequence is applied?
-    Future<bool> _runSequenceAndObserve(List<bool> sequence) async {
+    Future<bool> runSequenceAndObserve(List<bool> sequence) async {
       SharedPreferences.setMockInitialValues({
         'overlay_triggered_prayers_date': '',
         'overlay_triggered_prayers': '',
@@ -810,7 +810,7 @@ void main() {
       test(
         '4a single-value sequence [$v] → trigger=${v ? "fires" : "suppressed"}',
         () async {
-          final fired = await _runSequenceAndObserve([v]);
+          final fired = await runSequenceAndObserve([v]);
           expect(
             fired,
             equals(v),
@@ -830,7 +830,7 @@ void main() {
           '4b all-$v sequence length=$length → trigger=${v ? "fires" : "suppressed"}',
           () async {
             final seq = List.filled(length, v);
-            final fired = await _runSequenceAndObserve(seq);
+            final fired = await runSequenceAndObserve(seq);
             expect(
               fired,
               equals(v),
@@ -855,7 +855,7 @@ void main() {
               (i) => i.isEven ? startValue : !startValue,
             );
             final lastValue = seq.last;
-            final fired = await _runSequenceAndObserve(seq);
+            final fired = await runSequenceAndObserve(seq);
             expect(
               fired,
               equals(lastValue),
@@ -877,7 +877,7 @@ void main() {
         for (var mask = 0; mask < 32; mask++) {
           final seq = List.generate(5, (i) => (mask >> (4 - i)) & 1 == 1);
           final lastValue = seq.last;
-          final fired = await _runSequenceAndObserve(seq);
+          final fired = await runSequenceAndObserve(seq);
           expect(
             fired,
             equals(lastValue),
