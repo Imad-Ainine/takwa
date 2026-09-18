@@ -209,8 +209,11 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     final mode = prefs.adhanMode;
 
     if (mode == 'silent' || mode == 'vibrate') {
-      if (mounted) setState(() => _silenced = true);
-      else _silenced = true;
+      if (mounted) {
+        setState(() => _silenced = true);
+      } else {
+        _silenced = true;
+      }
       return;
     }
 
