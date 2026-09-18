@@ -55,7 +55,7 @@ _Hold yourselves accountable before you are held accountable._
 | 📊 **Qada Prayer Tracker** | Log and track missed prayers to make them up |
 | 🌟 **Sadaqah Tracker** | Record and reflect on your daily charity |
 | 🏠 **Home Screen Widget** | At-a-glance prayer times right on your Android home screen |
-| 🌐 **Web Companion** | Full-featured web dashboard at [takwa-app.vercel.app](https://takwa-app.vercel.app) |
+| 🌐 **Web Companion** | Full-featured web dashboard at [takwa-web.vercel.app](https://takwa-web.vercel.app/) |
 
 ---
 
