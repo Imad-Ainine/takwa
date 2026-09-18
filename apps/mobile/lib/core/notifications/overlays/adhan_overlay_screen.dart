@@ -1,29 +1,35 @@
+import 'dart:async';
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:takwa/core/theme/app_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:hijri/hijri_calendar.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:sound_mode/sound_mode.dart';
 import 'package:sound_mode/utils/ringer_mode_statuses.dart';
-import 'dart:async';
-import 'package:takwa/core/widgets/primary_button.dart';
-import 'package:takwa/features/settings/providers/user_preferences_provider.dart';
-import 'package:takwa/features/settings/data/user_preferences.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
+
 import 'package:takwa/core/notifications/adhan_auto_trigger.dart';
 import 'package:takwa/core/notifications/adhan_foreground_service.dart';
 import 'package:takwa/core/routes/app_routes.dart';
+import 'package:takwa/core/theme/app_theme.dart';
+import 'package:takwa/core/widgets/primary_button.dart';
+import 'package:takwa/features/settings/data/user_preferences.dart';
+import 'package:takwa/features/settings/providers/user_preferences_provider.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 class AdhanOverlayScreen extends ConsumerStatefulWidget {
   /// Null when the route was opened without a prayer argument — the screen
-  /// then falls back to a localized generic label. Route generation has no
-  /// BuildContext, so it cannot localize the fallback itself.
+  /// then falls back to a localized generic label.
   final String? prayerName;
   final bool autoPlay;
 
-  const AdhanOverlayScreen({super.key, this.prayerName, this.autoPlay = true});
+  const AdhanOverlayScreen({
+    super.key,
+    this.prayerName,
+    this.autoPlay = true,
+  });
 
   @override
   ConsumerState<AdhanOverlayScreen> createState() => _AdhanOverlayScreenState();
@@ -34,10 +40,20 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
   late final AnimationController _pulseCtrl;
   late final AnimationController _starsCtrl;
   late final AnimationController _entryCtrl;
+
   Timer? _vibrationTimer;
-  // Prevents _silenceAdhan from being called repeatedly while the phone
-  // stays face-down (the accelerometer stream fires ~50 times/sec).
+  StreamSubscription<AccelerometerEvent>? _accelSub;
+
+  // Prevents repeated silence calls while the phone stays face-down.
   bool _silenced = false;
+  bool _flipArmed = false;
+
+  // Face-down detection thresholds (tuned for real devices)
+  static const double _zFaceDownThreshold = -8.0;
+  static const double _xyStillThreshold = 4.0;
+  static const Duration _faceDownConfirm = Duration(milliseconds: 280);
+
+  DateTime? _faceDownSince;
 
   @override
   void initState() {
@@ -52,9 +68,6 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
       vsync: this,
       duration: const Duration(seconds: 20),
     );
-    // Both repeat()s are started from didChangeDependencies below, gated
-    // on reduce-motion.
-
     _entryCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -66,44 +79,40 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Purely decorative pulse/starfield — respects reduce-motion.
+    // Decorative animations respect reduce-motion.
     _pulseCtrl.repeatUnlessReducedMotion(context, reverse: true);
     _starsCtrl.repeatUnlessReducedMotion(context);
   }
 
   Future<void> _initializePreferences() async {
-    // Use the synchronously cached value when available so sensors and
-    // wakelock are set up as quickly as possible. Only await if the
-    // provider hasn't finished loading yet (first cold start).
     final UserPreferences prefs =
         ref.read(userPreferencesProvider).valueOrNull ??
-        await ref.read(userPreferencesProvider.future);
+            await ref.read(userPreferencesProvider.future);
     if (!mounted) return;
 
     if (prefs.wakeScreenEnabled) {
       WakelockPlus.enable();
     }
 
-    // Flip-to-silence itself now lives in AdhanAudioPlayer, armed the
-    // moment it starts playing (see _initAudio below and
-    // AdhanAutoTrigger's own play() calls) rather than here — this only
-    // mirrors its `silenced` flag into local UI state, so the button/label
-    // update correctly even if the silence happened before this screen
-    // finished mounting (e.g. audio was already started by
-    // AdhanAutoTrigger and the user flipped the phone during the brief
-    // gap before the route landed).
+    // Mirror player silence state into local UI.
     AdhanAudioPlayer.silenced.addListener(_onPlayerSilencedChanged);
-    // Sync any pre-existing value (e.g. audio was already silenced before
-    // this screen mounted) — addListener only fires on future changes.
     _onPlayerSilencedChanged();
+
     _initVibration(prefs);
 
     if (widget.autoPlay) {
       await _initAudio(prefs);
+
+      // Arm the player's own flip logic (keeps compatibility).
       AdhanAudioPlayer.ensureFlipArmed(
         prefs.flipToSilenceEnabled,
         flipSilencePhone: prefs.autoSilentAfterAdhan,
       );
+
+      // Also arm our own reliable detector.
+      if (prefs.flipToSilenceEnabled) {
+        _armFlipToSilence(prefs.autoSilentAfterAdhan);
+      }
     }
   }
 
@@ -117,18 +126,53 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     }
   }
 
-  void _initVibration(prefs) {
+  // ─── Flip-to-Silence (self-contained, reliable) ───────────────────────────
+
+  void _armFlipToSilence(bool alsoSilentPhone) {
+    if (_flipArmed) return;
+    _flipArmed = true;
+
+    _accelSub?.cancel();
+    _accelSub = accelerometerEventStream(
+      samplingPeriod: SensorInterval.uiInterval,
+    ).listen(
+      (event) => _onAccelerometer(event, alsoSilentPhone),
+      onError: (e) => debugPrint('Accelerometer error: $e'),
+      cancelOnError: false,
+    );
+  }
+
+  void _onAccelerometer(AccelerometerEvent event, bool alsoSilentPhone) {
+    if (_silenced || !mounted) return;
+
+    final z = event.z;
+    final xy = math.sqrt(event.x * event.x + event.y * event.y);
+
+    final isFaceDown = z <= _zFaceDownThreshold && xy <= _xyStillThreshold;
+
+    if (isFaceDown) {
+      _faceDownSince ??= DateTime.now();
+      if (DateTime.now().difference(_faceDownSince!) >= _faceDownConfirm) {
+        _silenceAdhan(alsoSilentPhone: alsoSilentPhone);
+      }
+    } else {
+      _faceDownSince = null;
+    }
+  }
+
+  // ─── Vibration ───────────────────────────────────────────────────────────
+
+  void _initVibration(UserPreferences prefs) {
     final mode = prefs.adhanMode;
 
-    // Only vibrate if mode is vibrate, or if mode is sound and vibrateWithAdhan is true.
     if (mode == 'vibrate' || (mode == 'sound' && prefs.vibrateWithAdhan)) {
       _vibrationTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
         if (AdhanAudioPlayer.isPlaying || mode == 'vibrate') {
           HapticFeedback.vibrate();
         }
       });
+
       if (mode == 'vibrate') {
-        // Stop vibrating after 3 minutes max (no audio state to track).
         Future.delayed(const Duration(minutes: 3), () {
           _vibrationTimer?.cancel();
         });
@@ -136,19 +180,13 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     }
   }
 
-  /// Stops all Adhan audio and vibration immediately.
-  ///
-  /// Called from the "Stop Audio" button. A face-down flip is now handled
-  /// entirely inside AdhanAudioPlayer (see _onPlayerSilencedChanged above
-  /// for how this screen picks that up), so this only covers the manual
-  /// tap path. The screen remains open so the user can see the prayer
-  /// name and choose to close or go to prayer — matching the expected UX.
-  Future<void> _silenceAdhan() async {
+  // ─── Silence / Audio ─────────────────────────────────────────────────────
+
+  Future<void> _silenceAdhan({bool alsoSilentPhone = false}) async {
     if (_silenced) return;
+
     if (mounted) {
-      setState(() {
-        _silenced = true;
-      });
+      setState(() => _silenced = true);
     } else {
       _silenced = true;
     }
@@ -157,29 +195,27 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     await AdhanAudioPlayer.stop();
     AdhanAudioPlayer.silenced.value = true;
 
-    // Give a brief haptic confirmation so the user knows silence worked.
     if (mounted) HapticFeedback.mediumImpact();
+
+    // Optional: put the whole phone into silent mode after flip.
+    if (alsoSilentPhone) {
+      try {
+        await SoundMode.setSoundMode(RingerModeStatus.silent);
+      } catch (_) {}
+    }
   }
 
-  Future<void> _initAudio(prefs) async {
-    // Respect the adhan mode (sound vs silent/vibrate)
+  Future<void> _initAudio(UserPreferences prefs) async {
     final mode = prefs.adhanMode;
 
     if (mode == 'silent' || mode == 'vibrate') {
-      if (mounted) {
-        setState(() {
-          _silenced = true;
-        });
-      } else {
-        _silenced = true;
-      }
+      if (mounted) setState(() => _silenced = true);
+      else _silenced = true;
       return;
     }
 
-    // Use the user-selected sound file
     final soundFile = prefs.adhanSound;
     final asset = 'assets/sounds/$soundFile';
-
     final volume = prefs.adhanVolumeLevel;
 
     if (!AdhanAudioPlayer.isPlaying) {
@@ -192,31 +228,14 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     } else {
       await AdhanAudioPlayer.setVolume(volume);
     }
-    if (mounted) {
-      setState(() {
-        _silenced = false;
-      });
-    }
+
+    if (mounted) setState(() => _silenced = false);
   }
 
-  @override
-  void dispose() {
-    WakelockPlus.disable();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    AdhanAudioPlayer.silenced.removeListener(_onPlayerSilencedChanged);
-    _vibrationTimer?.cancel();
-    AdhanAudioPlayer.stop();
-    AdhanForegroundService.stopAdhanService();
-    _pulseCtrl.dispose();
-    _starsCtrl.dispose();
-    _entryCtrl.dispose();
-    super.dispose();
-  }
+  // ─── Navigation helpers ──────────────────────────────────────────────────
 
   void _close() {
-    AdhanAudioPlayer.stop();
-    _vibrationTimer?.cancel();
-    AdhanForegroundService.stopAdhanService();
+    _cleanup();
     _applyAutoSilent();
     if (Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
@@ -226,9 +245,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
   }
 
   void _goToPrayer() {
-    AdhanAudioPlayer.stop();
-    _vibrationTimer?.cancel();
-    AdhanForegroundService.stopAdhanService();
+    _cleanup();
     _applyAutoSilent();
     if (Navigator.of(context).canPop()) {
       Navigator.of(context).popUntil((r) => r.isFirst);
@@ -238,71 +255,110 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     }
   }
 
+  void _cleanup() {
+    AdhanAudioPlayer.stop();
+    _vibrationTimer?.cancel();
+    _accelSub?.cancel();
+    AdhanForegroundService.stopAdhanService();
+  }
+
   Future<void> _applyAutoSilent() async {
     final prefs = ref.read(userPreferencesProvider).valueOrNull;
     if (prefs?.autoSilentAfterAdhan ?? false) {
       try {
-        // Switch to silent or vibrate based on preference (defaulting to silent if autoSilent is on)
-        // You might want to add a preference for WHICH mode, but for now we follow the toggle.
         await SoundMode.setSoundMode(RingerModeStatus.silent);
-        debugPrint('🔇 Mode: Auto-Silent applied.');
       } catch (e) {
-        debugPrint('❌ Error applying auto-silent: $e');
+        debugPrint('Auto-silent error: $e');
       }
     }
   }
 
   @override
+  void dispose() {
+    WakelockPlus.disable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    AdhanAudioPlayer.silenced.removeListener(_onPlayerSilencedChanged);
+    _vibrationTimer?.cancel();
+    _accelSub?.cancel();
+    AdhanAudioPlayer.stop();
+    AdhanForegroundService.stopAdhanService();
+    _pulseCtrl.dispose();
+    _starsCtrl.dispose();
+    _entryCtrl.dispose();
+    super.dispose();
+  }
+
+  // ─── Build ───────────────────────────────────────────────────────────────
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     final hijri = HijriCalendar.now();
     final hijriStr =
         '${hijri.hDay} ${hijri.getLongMonthName()} ${hijri.hYear} ${l10n.hijriEraSuffix}';
 
+    // Theme-aware palette
+    final gold = isDark ? const Color(0xFFD4AF37) : const Color(0xFFB8860B);
+    final goldSoft = gold.withValues(alpha: isDark ? 0.8 : 0.9);
+    final bgGradient = isDark
+        ? const [
+            Color(0xFF02061A),
+            Color(0xFF050D2A),
+            Color(0xFF0A1540),
+            Color(0xFF0E1A50),
+          ]
+        : [
+            colorScheme.surface,
+            colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+            colorScheme.primaryContainer.withValues(alpha: 0.25),
+            colorScheme.surface,
+          ];
+
+    final textPrimary = isDark ? Colors.white : colorScheme.onSurface;
+    final textSecondary =
+        isDark ? Colors.white.withValues(alpha: 0.65) : colorScheme.onSurfaceVariant;
+    final muteChipBg = _silenced
+        ? (isDark ? Colors.white.withValues(alpha: 0.1) : colorScheme.surfaceContainerHighest)
+        : gold.withValues(alpha: isDark ? 0.2 : 0.15);
+    final muteChipBorder = _silenced
+        ? (isDark ? Colors.white24 : colorScheme.outline.withValues(alpha: 0.4))
+        : gold.withValues(alpha: 0.6);
+
     return PopScope(
-      // WillPopScope is deprecated in favor of PopScope. The old
-      // onWillPop always returned true — it only existed to stop the
-      // adhan audio as a side effect of the pop, never to actually block
-      // navigation — so canPop: true (always allow) preserves that.
       canPop: true,
       onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          AdhanAudioPlayer.stop();
-          _vibrationTimer?.cancel();
-          AdhanForegroundService.stopAdhanService();
-        }
+        if (didPop) _cleanup();
       },
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: Stack(
           children: [
-            // ① Deep Night Gradient
+            // ① Adaptive background
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFF02061A),
-                    Color(0xFF050D2A),
-                    Color(0xFF0A1540),
-                    Color(0xFF0E1A50),
-                  ],
+                  colors: bgGradient,
                 ),
               ),
             ),
 
-            // ② Animated Stars
-            AnimatedBuilder(
-              animation: _starsCtrl,
-              builder: (_, _) => CustomPaint(
-                painter: _AdhanStarsPainter(progress: _starsCtrl.value),
-                size: Size.infinite,
+            // ② Animated stars (dark mode only – subtle in light)
+            if (isDark)
+              AnimatedBuilder(
+                animation: _starsCtrl,
+                builder: (_, __) => CustomPaint(
+                  painter: _AdhanStarsPainter(progress: _starsCtrl.value),
+                  size: Size.infinite,
+                ),
               ),
-            ),
 
-            // ③ Mosque Silhouette
+            // ③ Mosque silhouette
             Positioned(
               bottom: 0,
               left: 0,
@@ -315,8 +371,10 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                   ),
                 ),
                 child: CustomPaint(
-                  painter: _MosqueSilhouettePainter(),
-                  size: Size(MediaQuery.of(context).size.width, 220),
+                  painter: _MosqueSilhouettePainter(
+                    color: gold.withValues(alpha: isDark ? 0.07 : 0.12),
+                  ),
+                  size: Size(MediaQuery.sizeOf(context).width, 220),
                 ),
               ),
             ),
@@ -324,28 +382,24 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
             // ④ Content
             SafeArea(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Top action bar (Mute Adhan & Quick Close)
+                  // Top bar
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 8,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
                           onPressed: _close,
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.close_rounded,
-                            color: Colors.white70,
+                            color: textSecondary,
                             size: 26,
                           ),
                           tooltip: l10n.adhanOverlayCloseButton,
                         ),
                         InkWell(
-                          onTap: _silenceAdhan,
+                          onTap: () => _silenceAdhan(),
                           borderRadius: BorderRadius.circular(20),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
@@ -354,19 +408,9 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                               vertical: 7,
                             ),
                             decoration: BoxDecoration(
-                              color: _silenced
-                                  ? Colors.white.withValues(alpha: 0.1)
-                                  : const Color(
-                                      0xFFD4AF37,
-                                    ).withValues(alpha: 0.2),
+                              color: muteChipBg,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: _silenced
-                                    ? Colors.white24
-                                    : const Color(
-                                        0xFFD4AF37,
-                                      ).withValues(alpha: 0.6),
-                              ),
+                              border: Border.all(color: muteChipBorder),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -375,27 +419,27 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                                   _silenced
                                       ? Icons.volume_off_rounded
                                       : Icons.volume_up_rounded,
-                                  color: _silenced
-                                      ? Colors.white60
-                                      : const Color(0xFFD4AF37),
+                                  color: _silenced ? textSecondary : gold,
                                   size: 18,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   _silenced
-                                      ? (Localizations.localeOf(context).languageCode == 'ar'
+                                      ? (Localizations.localeOf(context)
+                                                  .languageCode ==
+                                              'ar'
                                           ? 'الصوت متوقف'
                                           : 'Muted')
-                                      : (Localizations.localeOf(context).languageCode == 'ar'
+                                      : (Localizations.localeOf(context)
+                                                  .languageCode ==
+                                              'ar'
                                           ? 'إيقاف الصوت'
                                           : 'Stop Audio'),
                                   style: TextStyle(
                                     fontFamily: 'NotoNaskhArabic',
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: _silenced
-                                        ? Colors.white60
-                                        : const Color(0xFFD4AF37),
+                                    color: _silenced ? textSecondary : gold,
                                   ),
                                 ),
                               ],
@@ -408,7 +452,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
 
                   const Spacer(flex: 2),
 
-                  // Radiant pulse circle
+                  // Radiant pulse + crescent
                   FadeTransition(
                     opacity: Tween<double>(begin: 0, end: 1).animate(
                       CurvedAnimation(
@@ -418,30 +462,28 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                     ),
                     child: AnimatedBuilder(
                       animation: _pulseCtrl,
-                      builder: (_, child) {
+                      builder: (_, __) {
                         final pulse = _pulseCtrl.value;
                         return Stack(
                           alignment: Alignment.center,
                           children: [
-                            // Outer glow rings
                             ...List.generate(3, (i) {
                               final delay = i / 3.0;
-                              final wrappedPulse = (pulse + delay) % 1.0;
+                              final wrapped = (pulse + delay) % 1.0;
                               return Container(
-                                width: 120 + wrappedPulse * 100,
-                                height: 120 + wrappedPulse * 100,
+                                width: 120 + wrapped * 100,
+                                height: 120 + wrapped * 100,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: const Color(0xFFD4AF37).withValues(
-                                      alpha: 0.3 * (1 - wrappedPulse),
+                                    color: gold.withValues(
+                                      alpha: 0.3 * (1 - wrapped),
                                     ),
                                     width: 1.5,
                                   ),
                                 ),
                               );
                             }),
-                            // Center crescent
                             Container(
                               width: 100,
                               height: 100,
@@ -449,30 +491,28 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                                 shape: BoxShape.circle,
                                 gradient: RadialGradient(
                                   colors: [
-                                    const Color(
-                                      0xFFD4AF37,
-                                    ).withValues(alpha: 0.3),
+                                    gold.withValues(alpha: 0.3),
                                     Colors.transparent,
                                   ],
                                 ),
-                                border: Border.all(
-                                  color: const Color(0xFFD4AF37),
-                                  width: 1.5,
-                                ),
+                                border: Border.all(color: gold, width: 1.5),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(
-                                      0xFFD4AF37,
-                                    ).withValues(alpha: 0.3 + 0.2 * pulse),
+                                    color: gold.withValues(
+                                      alpha: 0.25 + 0.2 * pulse,
+                                    ),
                                     blurRadius: 30 + 15 * pulse,
                                     spreadRadius: 2,
                                   ),
                                 ],
                               ),
-                              child: const Center(
+                              child: Center(
                                 child: Text(
                                   '☪',
-                                  style: TextStyle(fontSize: 42),
+                                  style: TextStyle(
+                                    fontSize: 42,
+                                    color: gold,
+                                  ),
                                 ),
                               ),
                             ),
@@ -486,20 +526,15 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
 
                   // Prayer name
                   SlideTransition(
-                    position:
-                        Tween<Offset>(
-                          begin: const Offset(0, 0.3),
-                          end: Offset.zero,
-                        ).animate(
-                          CurvedAnimation(
-                            parent: _entryCtrl,
-                            curve: const Interval(
-                              0.2,
-                              0.8,
-                              curve: Curves.easeOutCubic,
-                            ),
-                          ),
-                        ),
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 0.3),
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(
+                        parent: _entryCtrl,
+                        curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
+                      ),
+                    ),
                     child: FadeTransition(
                       opacity: Tween<double>(begin: 0, end: 1).animate(
                         CurvedAnimation(
@@ -508,24 +543,33 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                         ),
                       ),
                       child: ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [
-                            Color(0xFFD4AF37),
-                            Color(0xFFF5E070),
-                            Color(0xFF2DD4BF),
-                          ],
+                        shaderCallback: (bounds) => LinearGradient(
+                          colors: isDark
+                              ? [
+                                  const Color(0xFFD4AF37),
+                                  const Color(0xFFF5E070),
+                                  const Color(0xFF2DD4BF),
+                                ]
+                              : [
+                                  gold,
+                                  colorScheme.primary,
+                                  colorScheme.tertiary,
+                                ],
                         ).createShader(bounds),
                         child: Text(
                           l10n.adhanOverlayPrayerTimeTitle(
                             widget.prayerName ?? l10n.prayerGenericLabel,
                           ),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Amiri',
                             fontSize: 34,
                             fontWeight: FontWeight.w800,
-                            color: Colors.white,
+                            color: Colors.white, // masked
                             shadows: [
-                              Shadow(color: Color(0xFFD4AF37), blurRadius: 20),
+                              Shadow(
+                                color: gold.withValues(alpha: 0.4),
+                                blurRadius: 18,
+                              ),
                             ],
                           ),
                           textAlign: TextAlign.center,
@@ -549,7 +593,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                       style: TextStyle(
                         fontFamily: 'NotoNaskhArabic',
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: textSecondary,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -557,7 +601,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
 
                   const SizedBox(height: AppSpacing.sm),
 
-                  // Hadith quote
+                  // Hadith
                   FadeTransition(
                     opacity: Tween<double>(begin: 0, end: 1).animate(
                       CurvedAnimation(
@@ -572,7 +616,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                         style: TextStyle(
                           fontFamily: 'Amiri',
                           fontSize: 16,
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.8),
+                          color: goldSoft,
                           fontStyle: FontStyle.italic,
                         ),
                         textAlign: TextAlign.center,
@@ -582,7 +626,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
 
                   const Spacer(flex: 2),
 
-                  // Buttons
+                  // Action buttons
                   FadeTransition(
                     opacity: Tween<double>(begin: 0, end: 1).animate(
                       CurvedAnimation(
@@ -594,18 +638,16 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 28),
                       child: Row(
                         children: [
-                          // Close
                           Expanded(
                             child: PrimaryButton(
                               onTap: () async => _close(),
                               icon: Icons.close_rounded,
                               label: l10n.adhanOverlayCloseButton,
                               isOutline: true,
-                              baseColor: Colors.white70,
+                              baseColor: isDark ? Colors.white70 : colorScheme.onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(width: AppSpacing.md),
-                          // Go to Prayer
                           Expanded(
                             flex: 2,
                             child: PrimaryButton(
@@ -619,9 +661,9 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
 
-                  // ── دعاء ما بعد الأذان ──
+                  // Dua after Adhan
                   FadeTransition(
                     opacity: Tween<double>(begin: 0, end: 1).animate(
                       CurvedAnimation(
@@ -630,20 +672,14 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                       ),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.xxl,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
                       child: Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: const Color(
-                            0xFFD4AF37,
-                          ).withValues(alpha: 0.08),
+                          color: gold.withValues(alpha: isDark ? 0.08 : 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.lg),
                           border: Border.all(
-                            color: const Color(
-                              0xFFD4AF37,
-                            ).withValues(alpha: 0.2),
+                            color: gold.withValues(alpha: isDark ? 0.2 : 0.3),
                           ),
                         ),
                         child: Column(
@@ -651,31 +687,26 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text(
-                                  '🤲',
-                                  style: TextStyle(fontSize: 14),
-                                ),
+                                const Text('🤲', style: TextStyle(fontSize: 14)),
                                 const SizedBox(width: 6),
                                 Text(
                                   l10n.adhanOverlayDuaSectionLabel,
                                   style: TextStyle(
                                     fontFamily: 'NotoNaskhArabic',
                                     fontSize: 12,
-                                    color: const Color(
-                                      0xFFD4AF37,
-                                    ).withValues(alpha: 0.7),
+                                    color: gold.withValues(alpha: 0.8),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: AppSpacing.sm),
-                            const Text(
+                            Text(
                               'اللَّهُمَّ رَبَّ هَٰذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ',
                               style: TextStyle(
                                 fontFamily: 'Amiri',
                                 fontSize: 15,
-                                color: Colors.white,
+                                color: textPrimary,
                                 height: 1.8,
                               ),
                               textAlign: TextAlign.center,
@@ -697,7 +728,6 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     );
   }
 
-  /// يُرجع حديثاً أو قولاً مناسباً لكل صلاة
   String _prayerHadith(String prayer) {
     if (prayer.contains('فجر') || prayer.contains('Fajr')) {
       return 'الصلاة خير من النوم';
@@ -713,6 +743,8 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     return 'الصلوات الخمس كفارة لما بينهن';
   }
 }
+
+// ─── Painters ──────────────────────────────────────────────────────────────
 
 class _AdhanStarsPainter extends CustomPainter {
   final double progress;
@@ -743,49 +775,48 @@ class _AdhanStarsPainter extends CustomPainter {
 }
 
 class _MosqueSilhouettePainter extends CustomPainter {
+  final Color color;
+  _MosqueSilhouettePainter({required this.color});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFFD4AF37).withValues(alpha: 0.07)
+      ..color = color
       ..style = PaintingStyle.fill;
 
     final w = size.width;
     final h = size.height;
 
-    final path = Path();
-    // Ground
-    path.moveTo(0, h);
-    path.lineTo(w, h);
+    final path = Path()
+      ..moveTo(0, h)
+      ..lineTo(w, h)
+      // Right minaret
+      ..lineTo(w, h * 0.3)
+      ..lineTo(w - w * 0.04, h * 0.3)
+      ..lineTo(w - w * 0.04, h * 0.1)
+      ..lineTo(w - w * 0.06, h * 0.05)
+      ..lineTo(w - w * 0.08, h * 0.1)
+      ..lineTo(w - w * 0.08, h * 0.3)
+      ..lineTo(w - w * 0.12, h * 0.3)
+      ..lineTo(w - w * 0.12, h * 0.5)
+      // Main dome
+      ..lineTo(w * 0.75, h * 0.5)
+      ..quadraticBezierTo(w * 0.5, -h * 0.1, w * 0.25, h * 0.5)
+      // Left side
+      ..lineTo(w * 0.12, h * 0.5)
+      ..lineTo(w * 0.12, h * 0.3)
+      ..lineTo(w * 0.08, h * 0.3)
+      ..lineTo(w * 0.08, h * 0.1)
+      ..lineTo(w * 0.06, h * 0.05)
+      ..lineTo(w * 0.04, h * 0.1)
+      ..lineTo(w * 0.04, h * 0.3)
+      ..lineTo(0, h * 0.3)
+      ..lineTo(0, h)
+      ..close();
 
-    // Right minaret
-    path.lineTo(w, h * 0.3);
-    path.lineTo(w - w * 0.04, h * 0.3);
-    path.lineTo(w - w * 0.04, h * 0.1);
-    path.lineTo(w - w * 0.06, h * 0.05);
-    path.lineTo(w - w * 0.08, h * 0.1);
-    path.lineTo(w - w * 0.08, h * 0.3);
-    path.lineTo(w - w * 0.12, h * 0.3);
-    path.lineTo(w - w * 0.12, h * 0.5);
-
-    // Main dome
-    path.lineTo(w * 0.75, h * 0.5);
-    path.quadraticBezierTo(w * 0.5, -h * 0.1, w * 0.25, h * 0.5);
-
-    // Left side
-    path.lineTo(w * 0.12, h * 0.5);
-    path.lineTo(w * 0.12, h * 0.3);
-    path.lineTo(w * 0.08, h * 0.3);
-    path.lineTo(w * 0.08, h * 0.1);
-    path.lineTo(w * 0.06, h * 0.05);
-    path.lineTo(w * 0.04, h * 0.1);
-    path.lineTo(w * 0.04, h * 0.3);
-    path.lineTo(0, h * 0.3);
-    path.lineTo(0, h);
-
-    path.close();
     canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(_MosqueSilhouettePainter old) => false;
+  bool shouldRepaint(_MosqueSilhouettePainter old) => old.color != color;
 }
