@@ -43,6 +43,7 @@ class AdhanAudioPlayer {
     try {
       await stop();
       silenced.value = false;
+      onPlayAttemptForTesting?.call();
       _player = AudioPlayer();
       await _player!.setVolume(volume);
       await _player!.setAsset(asset);
@@ -97,6 +98,34 @@ class AdhanAudioPlayer {
   }
 
   static bool get isPlaying => _isPlaying;
+
+  /// Testing hook: called whenever [play] is about to start audio.
+  /// Null in production. Set by tests to track when audio starts.
+  @visibleForTesting
+  static void Function()? onPlayAttemptForTesting;
+
+  /// Whether the flip-to-silence accelerometer subscription is currently
+  /// active. Exposed for testing — production code must not depend on this.
+  @visibleForTesting
+  static bool get isFlipSubscriptionActive => _flipSub != null;
+
+  /// Re-arms the flip-to-silence accelerometer subscription if [enabled] is
+  /// true, audio is currently playing, and the subscription is not already
+  /// active. Safe no-op in all other cases.
+  ///
+  /// Call this from [AdhanOverlayScreen._initializePreferences] immediately
+  /// after `await _initAudio(prefs)` to close the gap where:
+  ///   1. [AdhanAutoTrigger._check] calls [play] (arms subscription),
+  ///   2. [AdhanOverlayScreen._initAudio] sees [isPlaying] == true and only
+  ///      calls [setVolume] (does NOT re-arm),
+  ///   3. the OS briefly pauses the accelerometer between steps 1 and 2 —
+  ///      from this point on, flipping the phone does nothing.
+  static void ensureFlipArmed(bool enabled) {
+    if (!enabled) return;
+    if (_flipSub != null) return; // already armed
+    if (_player == null || !_isPlaying) return; // nothing playing to arm
+    _armFlipToSilence();
+  }
 }
 
 class AdhanAutoTrigger {
@@ -106,6 +135,20 @@ class AdhanAutoTrigger {
   // Guards concurrent executions: avoids stacking multiple async _check
   // calls when the provider is slow to resolve on the first tick.
   static bool _checking = false;
+
+  /// Testing hook: called whenever [FlutterForegroundTask.launchApp] is about
+  /// to be invoked. Null in production (default), set by tests to track calls.
+  @visibleForTesting
+  static void Function(DateTime)? onLaunchAppForTesting;
+
+  /// Resets in-memory state between tests. Never call from production code.
+  @visibleForTesting
+  static void resetForTesting() {
+    _lastTriggeredPrayer = null;
+    _checking = false;
+    onLaunchAppForTesting = null;
+    AdhanAudioPlayer.onPlayAttemptForTesting = null;
+  }
 
   // Same SharedPreferences keys/format `OverlayBackgroundService` uses for
   // its own per-prayer-per-day dedupe (`_kTriggeredPrayersKey`/
@@ -203,11 +246,7 @@ class AdhanAutoTrigger {
           ref.read(userPreferencesProvider).valueOrNull ??
           await ref.read(userPreferencesProvider.future);
 
-      final adhanMode = prefs.adhanMode;
-      final playSound = adhanMode == 'sound';
-      final adhanVolumeLevel = prefs.adhanVolumeLevel;
       final adhanScreen = prefs.adhanScreenEnabled;
-      final adhanSoundFile = prefs.adhanSound;
 
       final now = DateTime.now();
       for (final prayer in prayers) {
@@ -257,19 +296,19 @@ class AdhanAutoTrigger {
 
         debugPrint('🕌 Auto-trigger adhan: ${prayer.nameAr}');
 
-        // تشغيل صوت الأذان المختار من الإعدادات
-        if (playSound && !AdhanAudioPlayer.isPlaying) {
-          await AdhanAudioPlayer.play(
-            asset: 'assets/sounds/$adhanSoundFile',
-            volume: adhanVolumeLevel,
-            flipToSilenceEnabled: prefs.flipToSilenceEnabled,
-          );
-        }
-
         // فتح شاشة الأذان
         if (adhanScreen && !adhanAlreadyVisible) {
+          // wakeUpScreen() is always safe: it is a no-op when the screen is
+          // already on. launchApp() is only needed when the app is
+          // backgrounded/killed (navigatorKey.currentState == null); calling
+          // it unconditionally when the app is already in the foreground
+          // causes a brief activity re-focus on Android 12+ that transiently
+          // nulls the NavigatorState, which then drops the push silently.
           FlutterForegroundTask.wakeUpScreen();
-          FlutterForegroundTask.launchApp();
+          if (navigatorKey.currentState == null) {
+            FlutterForegroundTask.launchApp();
+            onLaunchAppForTesting?.call(DateTime.now());
+          }
           // Used to bail out here entirely if `navigatorKey.currentContext`
           // was null at this exact instant, with no retry — a real gap
           // whenever the widget tree wasn't built yet (e.g. right after
@@ -332,38 +371,24 @@ class AdhanAutoTrigger {
     }
 
     final prayerName = (data['prayer'] as String?) ?? 'الصلاة';
-    // The background service now sends 'adhanMode' (the canonical string);
-    // fall back to interpreting the legacy bool 'sound' field so older
-    // background isolates still work correctly.
-    final String adhanModeFromBg =
-        (data['adhanMode'] as String?) ??
-        ((data['sound'] as bool?) == true ? 'sound' : 'silent');
 
     // Prefer the live Riverpod value (already cached); only await if loading.
     final UserPreferences prefs =
         ref.read(userPreferencesProvider).valueOrNull ??
         await ref.read(userPreferencesProvider.future);
 
-    final adhanMode = prefs.adhanMode;
-    final playSoundPref = adhanMode == 'sound';
-    // Only play if both the user setting AND the background signal agree.
-    final shouldPlaySound = playSoundPref && adhanModeFromBg == 'sound';
-
-    final adhanVolumeLevel = prefs.adhanVolumeLevel;
     final adhanScreen = prefs.adhanScreenEnabled;
 
-    if (shouldPlaySound && !AdhanAudioPlayer.isPlaying) {
-      final adhanSoundFile = prefs.adhanSound;
-      await AdhanAudioPlayer.play(
-        asset: 'assets/sounds/$adhanSoundFile',
-        volume: adhanVolumeLevel,
-        flipToSilenceEnabled: prefs.flipToSilenceEnabled,
-      );
-    }
-
     if (adhanScreen) {
+      // wakeUpScreen() is always safe (no-op when screen is on).
+      // launchApp() is only needed when the app is backgrounded/killed;
+      // skip it when the navigator is already live to avoid the transient-null
+      // window that drops the push on Android 12+.
       FlutterForegroundTask.wakeUpScreen();
-      FlutterForegroundTask.launchApp();
+      if (navigatorKey.currentState == null) {
+        FlutterForegroundTask.launchApp();
+        onLaunchAppForTesting?.call(DateTime.now());
+      }
       // Guard: don't push on top of an already-visible Adhan screen.
       bool adhanAlreadyVisible = false;
       navigatorKey.currentState?.popUntil((route) {
@@ -377,10 +402,14 @@ class AdhanAutoTrigger {
         // flat 300ms wait is least likely to be enough for the navigator to
         // exist yet. Poll instead of guessing a fixed delay.
         await _waitForNavigatorReady(navigatorKey);
-        navigatorKey.currentState?.pushNamed(
-          Routes.adhan,
-          arguments: prayerName,
-        );
+        try {
+          navigatorKey.currentState?.pushNamed(
+            Routes.adhan,
+            arguments: prayerName,
+          );
+        } catch (e) {
+          debugPrint('AdhanAutoTrigger: pushNamed failed: $e');
+        }
       }
     }
   }

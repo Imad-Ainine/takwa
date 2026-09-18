@@ -100,6 +100,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
 
     if (widget.autoPlay) {
       await _initAudio(prefs);
+      AdhanAudioPlayer.ensureFlipArmed(prefs.flipToSilenceEnabled);
     }
   }
 

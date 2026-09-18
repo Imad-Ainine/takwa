@@ -751,6 +751,8 @@
   "adhanEnableNotifInSilentSublabel": "تشغيل صوت التنبيهات حتى وإن كان الجهاز في وضع الصامت",
   "adhanNotifSilentSheetTitle": "التنبيهات المفعلة في الوضع الصامت",
   "adhanSystemNotifSectionTitle": "تنبيهات النظام",
+  "adhanScreenEnabledLabel": "شاشة الأذان",
+  "adhanScreenEnabledSublabel": "عرض شاشة الأذان الكاملة عند دخول وقت الصلاة",
   "adhanWakeScreenLabel": "تشغيل الشاشة أثناء الأذان",
   "adhanWakeScreenSublabel": "إبقاء الشاشة مفعلة عند تشغيل الأذان",
   "adhanFlipToSilenceLabel": "ايقاف الأذان عند قلب الجهاز",

@@ -2498,6 +2498,18 @@ abstract class AppLocalizations {
   /// **'تنبيهات النظام'**
   String get adhanSystemNotifSectionTitle;
 
+  /// No description provided for @adhanScreenEnabledLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'شاشة الأذان'**
+  String get adhanScreenEnabledLabel;
+
+  /// No description provided for @adhanScreenEnabledSublabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'عرض شاشة الأذان الكاملة عند دخول وقت الصلاة'**
+  String get adhanScreenEnabledSublabel;
+
   /// No description provided for @adhanWakeScreenLabel.
   ///
   /// In ar, this message translates to:

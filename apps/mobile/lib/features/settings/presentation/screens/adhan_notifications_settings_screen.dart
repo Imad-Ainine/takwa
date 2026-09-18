@@ -445,6 +445,20 @@ class AdhanNotificationSettingsScreen extends ConsumerWidget {
                           SettingsCard(
                             children: [
                               CheckboxSetting(
+                                label: l10n.adhanScreenEnabledLabel,
+                                sublabel: l10n.adhanScreenEnabledSublabel,
+                                value: prefs.adhanScreenEnabled,
+                                onChanged: (v) {
+                                  ref
+                                      .read(userPreferencesProvider.notifier)
+                                      .updatePref('adhan_screen_enabled', v);
+                                  OverlayBackgroundService.updateSettings(
+                                    adhanScreenEnabled: v,
+                                  );
+                                },
+                              ),
+                              const SettingsDivider(),
+                              CheckboxSetting(
                                 label: l10n.adhanWakeScreenLabel,
                                 sublabel: l10n.adhanWakeScreenSublabel,
                                 value: prefs.wakeScreenEnabled,

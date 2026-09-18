@@ -743,6 +743,8 @@
   "adhanEnableNotifInSilentSublabel": "Play notification sounds even when the device is on silent",
   "adhanNotifSilentSheetTitle": "Notifications Enabled in Silent Mode",
   "adhanSystemNotifSectionTitle": "System Notifications",
+  "adhanScreenEnabledLabel": "Adhan Overlay Screen",
+  "adhanScreenEnabledSublabel": "Show the full-screen adhan overlay when a prayer time arrives",
   "adhanWakeScreenLabel": "Wake Screen During Adhan",
   "adhanWakeScreenSublabel": "Keep the screen on while the adhan plays",
   "adhanFlipToSilenceLabel": "Silence by Flipping the Device",

@@ -1276,6 +1276,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adhanSystemNotifSectionTitle => 'تنبيهات النظام';
 
   @override
+  String get adhanScreenEnabledLabel => 'شاشة الأذان';
+
+  @override
+  String get adhanScreenEnabledSublabel =>
+      'عرض شاشة الأذان الكاملة عند دخول وقت الصلاة';
+
+  @override
   String get adhanWakeScreenLabel => 'تشغيل الشاشة أثناء الأذان';
 
   @override

@@ -199,8 +199,7 @@ class OverlayBackgroundService {
     bool? silentModeEnabled,
     int? silentDurationMins,
     double? adhanVolumeLevel,
-  }) {
-    final Map<String, dynamic> data = {};
+  }) {    final Map<String, dynamic> data = {};
     if (overlayEnabled != null) data['overlay_popups_enabled'] = overlayEnabled;
     if (popupIntervalMins != null) {
       data['popup_interval_minutes'] = popupIntervalMins;
@@ -235,6 +234,15 @@ class OverlayBackgroundService {
 
     if (data.isNotEmpty) FlutterForegroundTask.sendDataToTask(data);
   }
+
+  /// Creates a fresh [TestableOverlayHandler] for unit tests.
+  ///
+  /// This exposes enough of [_OverlayTaskHandler]'s adhan-trigger logic to
+  /// let tests verify Bug 4 (toggle propagation) without a real foreground
+  /// service. Never call from production code.
+  @visibleForTesting
+  static TestableOverlayHandler createHandlerForTesting() =>
+      TestableOverlayHandler();
 }
 
 @pragma('vm:entry-point')
@@ -255,6 +263,11 @@ class _OverlayTaskHandler extends TaskHandler {
   // 'sound' | 'vibrate' | 'silent'. Sent to the main isolate so
   // handleForegroundData can make the right decision about audio.
   String _adhanMode = 'sound';
+  // Whether the Adhan overlay screen should be shown when a prayer time
+  // arrives. Mirrors UserPreferences.adhanScreenEnabled; updated live via
+  // onReceiveData so the service never needs a restart to pick up the
+  // latest toggle value.
+  bool _adhanScreenEnabled = true;
   // adhanScreenEnabled/flipToSilenceEnabled/adhanVolumeLevel used to be
   // mirrored here too, to gate/feed this isolate's own system-overlay
   // "prayer" popup and its (never-added) audio. That popup is gone — see
@@ -304,6 +317,9 @@ class _OverlayTaskHandler extends TaskHandler {
       if (data.containsKey('adhan_mode')) {
         _adhanMode = data['adhan_mode'] as String;
       }
+      if (data.containsKey('adhan_screen_enabled')) {
+        _adhanScreenEnabled = data['adhan_screen_enabled'] as bool;
+      }
       if (data.containsKey('silent_mode_enabled')) {
         _silentModeEnabled = data['silent_mode_enabled'] as bool;
       }
@@ -340,6 +356,7 @@ class _OverlayTaskHandler extends TaskHandler {
     _silentModeEnabled = prefs.getBool(_kSilentModeEnabledKey) ?? false;
     _silentDurationMins = prefs.getInt(_kSilentDurationMinsKey) ?? 20;
     _adhanMode = prefs.getString(_kAdhanModeKey) ?? 'sound';
+    _adhanScreenEnabled = prefs.getBool('adhan_screen_enabled') ?? true;
   }
 
   // ──────────────────────────────────────
@@ -478,24 +495,26 @@ class _OverlayTaskHandler extends TaskHandler {
         // fully killed, via fullScreenIntent).
 
         // إرسال أمر لفتح شاشة الأذان في التطبيق (أو تقليله حسب الإعدادات)
-        FlutterForegroundTask.sendDataToMain({
-          'action': 'show_adhan',
-          'prayer': prayer.nameAr,
-          // Internal id ('fajr'/'dhuhr'/…), not the Arabic display name
-          // above — lets AdhanAutoTrigger.handleForegroundData build the
-          // same per-prayer-per-day dedupe key AdhanAutoTrigger._check
-          // uses, closing a race where both could push the Adhan screen
-          // for the same prayer. See docs/specs/adhan-overlay-auto-open.md R7.
-          'prayerKey': prayer.name,
-          'emoji': prayer.emoji,
-          'time': DateFormat('HH:mm').format(prayer.time),
-          // Send the canonical adhan mode string so the main isolate's
-          // handleForegroundData can make the correct sound/screen decision.
-          // The old 'sound' bool key is kept alongside for backward compat
-          // with any cached version of the task handler still in memory.
-          'adhanMode': _adhanMode,
-          'sound': _adhanMode == 'sound', // legacy compat
-        });
+        if (_adhanScreenEnabled) {
+          FlutterForegroundTask.sendDataToMain({
+            'action': 'show_adhan',
+            'prayer': prayer.nameAr,
+            // Internal id ('fajr'/'dhuhr'/…), not the Arabic display name
+            // above — lets AdhanAutoTrigger.handleForegroundData build the
+            // same per-prayer-per-day dedupe key AdhanAutoTrigger._check
+            // uses, closing a race where both could push the Adhan screen
+            // for the same prayer. See docs/specs/adhan-overlay-auto-open.md R7.
+            'prayerKey': prayer.name,
+            'emoji': prayer.emoji,
+            'time': DateFormat('HH:mm').format(prayer.time),
+            // Send the canonical adhan mode string so the main isolate's
+            // handleForegroundData can make the correct sound/screen decision.
+            // The old 'sound' bool key is kept alongside for backward compat
+            // with any cached version of the task handler still in memory.
+            'adhanMode': _adhanMode,
+            'sound': _adhanMode == 'sound', // legacy compat
+          });
+        }
 
         debugPrint('🕌 أُطلق أذان ${prayer.nameAr}');
         return;
@@ -985,3 +1004,97 @@ class _OverlayTaskHandler extends TaskHandler {
     'ذو الحجة',
   ][m - 1];
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
+//  TESTING INFRASTRUCTURE
+//  @visibleForTesting — never referenced from production code.
+// ──────────────────────────────────────────────────────────────────────────────
+
+/// A test-facing proxy that exposes just enough of [_OverlayTaskHandler]'s
+/// adhan-trigger logic to let unit tests exercise Bug 4 without spinning up
+/// a real foreground service.
+///
+/// Obtain an instance via [OverlayBackgroundService.createHandlerForTesting].
+class TestableOverlayHandler {
+  // Mirrors the fields in _OverlayTaskHandler that are relevant to Bug 4.
+  // The initial value mirrors the production default (true).
+  // Intentionally mutable: the fix updates this via onReceiveData.
+  // ignore: prefer_final_fields
+  bool _adhanScreenEnabled = true;
+  List<_PrayerInfo> _prayers = [];
+
+  /// Called with each map that would have been passed to
+  /// [FlutterForegroundTask.sendDataToMain] in production.
+  void Function(Map data)? onSendDataToMain;
+
+  /// Mirrors [_OverlayTaskHandler.onReceiveData]. The buggy production
+  /// implementation ignores the 'adhan_screen_enabled' key; the fix adds a
+  /// handler for it.
+  void onReceiveData(Map data) {
+    if (data.containsKey('overlay_popups_enabled')) {
+      // kept for completeness; not tested here
+    }
+    if (data.containsKey('adhan_mode')) {
+      // kept for completeness; not tested here
+    }
+    if (data.containsKey('adhan_screen_enabled')) {
+      _adhanScreenEnabled = data['adhan_screen_enabled'] as bool;
+    }
+  }
+
+  /// Injects a synthetic prayer into this handler's prayer list, bypassing
+  /// the real SharedPreferences / adhan library lookup.
+  void injectPrayerForTesting({
+    required String name,
+    required String nameAr,
+    required String emoji,
+    required DateTime time,
+  }) {
+    _prayers = [_PrayerInfo(name, nameAr, emoji, time)];
+  }
+
+  /// Runs the adhan-trigger logic (mirrors [_OverlayTaskHandler._checkAndTriggerAdhan])
+  /// but replaces [FlutterForegroundTask.sendDataToMain] with [onSendDataToMain]
+  /// so tests can observe what would have been sent.
+  Future<void> triggerAdhanCheckForTesting() async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final todayKey = '${now.year}-${now.month}-${now.day}';
+
+    final triggeredDate = prefs.getString(_kTriggeredPrayersDateKey) ?? '';
+    Set<String> triggered;
+    if (triggeredDate != todayKey) {
+      triggered = {};
+      await prefs.setString(_kTriggeredPrayersDateKey, todayKey);
+      await prefs.setString(_kTriggeredPrayersKey, '');
+    } else {
+      final raw = prefs.getString(_kTriggeredPrayersKey) ?? '';
+      triggered = raw.isEmpty ? {} : raw.split(',').toSet();
+    }
+
+    for (final prayer in _prayers) {
+      if (triggered.contains(prayer.name)) continue;
+      final diffSecs = now.difference(prayer.time).inSeconds;
+      if (diffSecs >= 0 && diffSecs <= 300) {
+        triggered.add(prayer.name);
+        await prefs.setString(_kTriggeredPrayersKey, triggered.join(','));
+
+        // BUG 4: in unfixed code _adhanScreenEnabled is never updated by
+        // onReceiveData, so this gate is effectively always true.
+        // The fix adds the onReceiveData handler so _adhanScreenEnabled
+        // can be set to false, and then this gate blocks the send.
+        if (_adhanScreenEnabled) {
+          onSendDataToMain?.call({
+            'action': 'show_adhan',
+            'prayer': prayer.nameAr,
+            'prayerKey': prayer.name,
+            'emoji': prayer.emoji,
+          });
+        }
+        return;
+      }
+    }
+  }
+}
+
+

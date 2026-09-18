@@ -1305,6 +1305,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adhanSystemNotifSectionTitle => 'System Notifications';
 
   @override
+  String get adhanScreenEnabledLabel => 'Adhan Overlay Screen';
+
+  @override
+  String get adhanScreenEnabledSublabel =>
+      'Show the full-screen adhan overlay when a prayer time arrives';
+
+  @override
   String get adhanWakeScreenLabel => 'Wake Screen During Adhan';
 
   @override
