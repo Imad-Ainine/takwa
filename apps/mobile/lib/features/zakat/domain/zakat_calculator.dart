@@ -102,3 +102,56 @@ ZakatResult computeZakat(ZakatInputs inputs) {
     shortfallToNisab: meetsNisab ? 0 : (nisab - wealth).clamp(0, double.infinity),
   );
 }
+
+// ---------------------------------------------------------------------------
+// Zakat al-Fitr
+// ---------------------------------------------------------------------------
+
+class ZakatFitrahInputs {
+  /// Number of household members. Valid range: 1–99.
+  final int members;
+
+  /// Local staple-food price per person. Valid range: 0.01–999,999.99.
+  final double pricePerPerson;
+
+  /// Optional currency label for display purposes.
+  final String currencyLabel;
+
+  const ZakatFitrahInputs({
+    required this.members,
+    required this.pricePerPerson,
+    this.currencyLabel = '',
+  });
+}
+
+class ZakatFitrahResult {
+  /// `members * pricePerPerson` rounded to 2 decimal places, or 0 when invalid.
+  final double totalDue;
+
+  /// `false` if either input is out of its valid range.
+  final bool isValid;
+
+  const ZakatFitrahResult({required this.totalDue, required this.isValid});
+}
+
+/// Computes Zakat al-Fitr for [inputs].
+///
+/// Returns `isValid = true` and `totalDue` rounded to 2 dp when:
+///   - `members` is in [1, 99]
+///   - `pricePerPerson` is in [0.01, 999,999.99]
+///
+/// Returns `isValid = false` and `totalDue = 0` otherwise.
+ZakatFitrahResult computeZakatFitrah(ZakatFitrahInputs inputs) {
+  final validMembers = inputs.members >= 1 && inputs.members <= 99;
+  final validPrice =
+      inputs.pricePerPerson >= 0.01 && inputs.pricePerPerson <= 999999.99;
+
+  if (!validMembers || !validPrice) {
+    return const ZakatFitrahResult(totalDue: 0, isValid: false);
+  }
+
+  final raw = inputs.members * inputs.pricePerPerson;
+  // Round to 2 decimal places.
+  final rounded = (raw * 100).round() / 100;
+  return ZakatFitrahResult(totalDue: rounded, isValid: true);
+}

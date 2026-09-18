@@ -9,11 +9,21 @@ enum IslamicOccasionKind {
   ramadanStart(hijriMonth: 9, hijriDay: 1),
   eidAlFitr(hijriMonth: 10, hijriDay: 1),
   mawlid(hijriMonth: 3, hijriDay: 12),
-  eidAlAdha(hijriMonth: 12, hijriDay: 10);
+  eidAlAdha(hijriMonth: 12, hijriDay: 10),
+  islamicNewYear(hijriMonth: 1, hijriDay: 1),
+  laylatAlQadr(hijriMonth: 9, hijriDay: 27),
+  dayOfArafah(hijriMonth: 12, hijriDay: 9);
 
   final int hijriMonth;
   final int hijriDay;
   const IslamicOccasionKind({required this.hijriMonth, required this.hijriDay});
+
+  /// Whether voluntary fasting is specifically recommended on this occasion.
+  bool get isFastingRecommended => switch (this) {
+    IslamicOccasionKind.ashura => true,
+    IslamicOccasionKind.dayOfArafah => true,
+    _ => false,
+  };
 }
 
 /// A resolved occurrence: which Hijri year it falls in next, its Gregorian
@@ -22,11 +32,13 @@ class ResolvedOccasion {
   final IslamicOccasionKind kind;
   final DateTime gregorianDate;
   final int daysUntil;
+  final bool isFastingRecommended;
 
   const ResolvedOccasion({
     required this.kind,
     required this.gregorianDate,
     required this.daysUntil,
+    required this.isFastingRecommended,
   });
 }
 
@@ -54,6 +66,7 @@ ResolvedOccasion resolveNextOccurrence(
         kind: kind,
         gregorianDate: gDate,
         daysUntil: gDate.difference(today).inDays,
+        isFastingRecommended: kind.isFastingRecommended,
       );
     }
   }
@@ -74,6 +87,7 @@ ResolvedOccasion resolveNextOccurrence(
     kind: kind,
     gregorianDate: g,
     daysUntil: g.difference(today).inDays,
+    isFastingRecommended: kind.isFastingRecommended,
   );
 }
 
@@ -91,34 +105,44 @@ class WhiteDay {
   final int hijriDay; // 13, 14, or 15
   final DateTime gregorianDate;
   final int daysUntil;
+  final bool isFastingRecommended; // always true for White Days
 
   const WhiteDay({
     required this.hijriDay,
     required this.gregorianDate,
     required this.daysUntil,
+    this.isFastingRecommended = true,
   });
 }
 
-/// The current Hijri month's three White Days (Ayyam al-Beed), each resolved
-/// to its Gregorian date and days-until. These are within the *current*
-/// Hijri month only — "next month's White Days" isn't computed here, since
-/// the screen only ever needs "how soon is the next one this cycle."
+/// The upcoming Hijri month's three White Days (Ayyam al-Beed), each resolved
+/// to its Gregorian date and days-until. Returns the current Hijri month's
+/// White Days unless all three have already passed, in which case it rolls
+/// forward to the next Hijri month.
 List<WhiteDay> resolveWhiteDays({DateTime? now}) {
   final today = _dateOnly(now ?? DateTime.now());
   final hijriNow = HijriCalendar.now();
 
-  return [13, 14, 15].map((day) {
+  List<WhiteDay> forMonth(int year, int month) => [13, 14, 15].map((day) {
     final hijri = HijriCalendar()
-      ..hYear = hijriNow.hYear
-      ..hMonth = hijriNow.hMonth
+      ..hYear = year
+      ..hMonth = month
       ..hDay = day;
-    final g = _dateOnly(
-      hijri.hijriToGregorian(hijriNow.hYear, hijriNow.hMonth, day),
-    );
+    final g = _dateOnly(hijri.hijriToGregorian(year, month, day));
     return WhiteDay(
       hijriDay: day,
       gregorianDate: g,
       daysUntil: g.difference(today).inDays,
+      isFastingRecommended: true,
     );
   }).toList();
+
+  final current = forMonth(hijriNow.hYear, hijriNow.hMonth);
+  // If all three White Days for this month have passed, show next month's.
+  if (current.every((d) => d.daysUntil < 0)) {
+    final nextYear = hijriNow.hMonth == 12 ? hijriNow.hYear + 1 : hijriNow.hYear;
+    final nextMonth = hijriNow.hMonth == 12 ? 1 : hijriNow.hMonth + 1;
+    return forMonth(nextYear, nextMonth);
+  }
+  return current;
 }

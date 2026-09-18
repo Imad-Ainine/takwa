@@ -227,52 +227,96 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-class _CircleCard extends StatelessWidget {
+class _CircleCard extends ConsumerWidget {
   final CircleSummary circle;
   const _CircleCard({required this.circle});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => CircleDetailScreen(circle: circle),
-          ),
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          decoration: BoxDecoration(
-            color: context.colors.card,
+    final unreadAsync = ref.watch(circleUnreadCountProvider(circle.id));
+    final unreadCount = unreadAsync.valueOrNull ?? 0;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
             borderRadius: BorderRadius.circular(AppRadius.xl),
-            border: Border.all(color: context.colors.border),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(circle.name, style: context.typography.labelLarge),
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.circlesMemberCount(circle.memberCount),
-                      style: context.typography.caption,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => CircleDetailScreen(circle: circle),
+              ),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: context.colors.card,
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+                border: Border.all(color: context.colors.border),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(circle.name, style: context.typography.labelLarge),
+                        const SizedBox(height: 4),
+                        Text(
+                          l10n.circlesMemberCount(circle.memberCount),
+                          style: context.typography.caption,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: context.colors.textDim,
+                  ),
+                ],
               ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: context.colors.textDim,
-              ),
-            ],
+            ),
           ),
         ),
+        if (unreadCount > 0)
+          Positioned(
+            top: -6,
+            right: -6,
+            child: _UnreadBadge(count: unreadCount),
+          ),
+      ],
+    );
+  }
+}
+
+class _UnreadBadge extends StatelessWidget {
+  final int count;
+  const _UnreadBadge({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    if (count <= 0) return const SizedBox.shrink();
+    final label = count > 99 ? '99+' : count.toString();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: context.colors.danger,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.colors.background, width: 1.5),
+      ),
+      constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          height: 1.2,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }

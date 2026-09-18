@@ -204,6 +204,44 @@ abstract class SupabaseService {
     String circleId,
     String userId,
   );
+
+  // ─────────────── CIRCLE OWNER CONTROLS ───────────────
+
+  /// Rename a circle the caller owns. Throws [CircleOperationException] if
+  /// the caller is not the owner or the name is invalid (empty, whitespace-only,
+  /// or longer than 50 characters).
+  Future<void> renameCircle({
+    required String circleId,
+    required String newName,
+  });
+
+  /// Delete a circle and all its [circle_members] rows atomically (server-side).
+  /// Throws [CircleOperationException] if the caller is not the owner.
+  Future<void> deleteCircle(String circleId);
+
+  /// Remove a specific member from a circle the caller owns.
+  /// Throws [CircleOperationException] if the caller is not the owner or
+  /// tries to remove themselves.
+  Future<void> removeCircleMember({
+    required String circleId,
+    required String userId,
+  });
+}
+
+/// Thrown when a circle owner-control RPC returns a known Postgres error.
+///
+/// [code] is one of:
+/// - `'not_owner'` — the caller does not own the circle
+/// - `'invalid_name'` — the name is empty, whitespace-only, or > 50 characters
+/// - `'cannot_remove_self'` — the owner attempted to remove their own membership
+class CircleOperationException implements Exception {
+  const CircleOperationException(this.code);
+
+  /// Raw code string from the Postgres RAISE EXCEPTION message.
+  final String code;
+
+  @override
+  String toString() => 'CircleOperationException($code)';
 }
 
 /// Real implementation, talking to an injected [SupabaseClient].
@@ -1112,5 +1150,52 @@ class SupabaseClientService implements SupabaseService {
         .order('created_at', ascending: false)
         .limit(20);
     return List<Map<String, dynamic>>.from(data);
+  }
+
+  // ─────────────── CIRCLE OWNER CONTROLS ───────────────
+
+  @override
+  Future<void> renameCircle({
+    required String circleId,
+    required String newName,
+  }) async {
+    try {
+      await _safeRequest(
+        () => _db.rpc('rename_circle', params: {
+          'circle_id': circleId,
+          'new_name': newName,
+        }),
+      );
+    } on PostgrestException catch (e) {
+      throw CircleOperationException(e.message);
+    }
+  }
+
+  @override
+  Future<void> deleteCircle(String circleId) async {
+    try {
+      await _safeRequest(
+        () => _db.rpc('delete_circle', params: {'circle_id': circleId}),
+      );
+    } on PostgrestException catch (e) {
+      throw CircleOperationException(e.message);
+    }
+  }
+
+  @override
+  Future<void> removeCircleMember({
+    required String circleId,
+    required String userId,
+  }) async {
+    try {
+      await _safeRequest(
+        () => _db.rpc('remove_circle_member', params: {
+          'circle_id': circleId,
+          'member_user_id': userId,
+        }),
+      );
+    } on PostgrestException catch (e) {
+      throw CircleOperationException(e.message);
+    }
   }
 }

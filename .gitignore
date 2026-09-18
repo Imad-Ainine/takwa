@@ -65,3 +65,5 @@ key.properties
 
 # Claude AI local config
 .claude/
+# Kiro AI local config
+.kiro/

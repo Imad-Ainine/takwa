@@ -42,6 +42,9 @@ class QadaTrackerScreen extends ConsumerWidget {
                     style: context.typography.caption,
                   ),
                 ),
+                const SizedBox(height: AppSpacing.sm),
+                // R6.1 — Summary row at the top
+                const _SummaryRow(),
                 const SizedBox(height: AppSpacing.md),
                 Expanded(
                   child: countersAsync.when(
@@ -99,6 +102,71 @@ class QadaTrackerScreen extends ConsumerWidget {
   }
 }
 
+/// Summary row showing the aggregate totals across all prayers (R6.1, R6.4).
+class _SummaryRow extends ConsumerWidget {
+  const _SummaryRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final summaryAsync = ref.watch(qadaSummaryProvider);
+
+    return summaryAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (summary) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            decoration: BoxDecoration(
+              color: context.colors.card,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: context.colors.border),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _SummaryStat(
+                  label: l10n.qadaSummaryTotalOwed(summary.totalOwed),
+                  color: context.colors.warning,
+                ),
+                Container(
+                  width: 1,
+                  height: 28,
+                  color: context.colors.border,
+                ),
+                _SummaryStat(
+                  label: l10n.qadaSummaryTotalCompleted(summary.totalCompleted),
+                  color: context.colors.success,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SummaryStat extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _SummaryStat({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: context.typography.labelLarge.copyWith(color: color),
+    );
+  }
+}
+
 class _PrayerCounterCard extends ConsumerWidget {
   final String prayerName;
   final QadaCounter? counter;
@@ -114,6 +182,11 @@ class _PrayerCounterCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final owed = counter?.owedCount ?? 0;
     final completed = counter?.completedCount ?? 0;
+
+    // R6.2 — progress = completedCount / (owedCount + completedCount), clamped
+    // R6.3 — when both are 0, result is exactly 0.0 (no division by zero)
+    final total = owed + completed;
+    final progress = total == 0 ? 0.0 : (completed / total).clamp(0.0, 1.0);
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -145,6 +218,17 @@ class _PrayerCounterCard extends ConsumerWidget {
                 context.colors.success,
               ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          // R6.2, R6.3 — per-card linear progress indicator
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: context.colors.border,
+              valueColor: AlwaysStoppedAnimation<Color>(context.colors.success),
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           Row(
@@ -196,31 +280,98 @@ class _PrayerCounterCard extends ConsumerWidget {
     WidgetRef ref,
     int current,
   ) async {
-    final controller = TextEditingController(text: current.toString());
-    final result = await showDialog<String>(
+    final result = await showDialog<int>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.qadaSetOwedDialogTitle),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          keyboardType: TextInputType.number,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('—'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: Text(l10n.qadaSetOwedConfirm),
-          ),
-        ],
+      builder: (context) => _SetOwedDialog(
+        l10n: l10n,
+        currentValue: current,
       ),
     );
     if (result == null) return;
-    final parsed = int.tryParse(result);
-    if (parsed == null) return;
-    await ref.read(qadaDaoProvider).setOwed(prayerName, parsed);
+    await ref.read(qadaDaoProvider).setOwed(prayerName, result);
+  }
+}
+
+/// Stateful dialog for setting the owed count on a prayer (R7.1, R7.2, R7.3).
+///
+/// - Allows 0 as a valid value (R7.1)
+/// - Shows an inline error and keeps the dialog open for negative or
+///   non-numeric input without calling any DAO method (R7.3)
+class _SetOwedDialog extends StatefulWidget {
+  final AppLocalizations l10n;
+  final int currentValue;
+
+  const _SetOwedDialog({required this.l10n, required this.currentValue});
+
+  @override
+  State<_SetOwedDialog> createState() => _SetOwedDialogState();
+}
+
+class _SetOwedDialogState extends State<_SetOwedDialog> {
+  late final TextEditingController _controller;
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.currentValue.toString());
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onConfirm() {
+    final raw = _controller.text.trim();
+    final parsed = int.tryParse(raw);
+
+    // R7.3 — reject non-numeric or negative; keep dialog open
+    if (parsed == null || parsed < 0) {
+      setState(() {
+        _errorText = widget.l10n.qadaSetOwedErrorInvalid;
+        // Restore the previous valid value in the field
+        _controller.text = widget.currentValue.toString();
+        _controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: _controller.text.length),
+        );
+      });
+      return;
+    }
+
+    // R7.1 — 0 is valid
+    Navigator.pop(context, parsed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.l10n.qadaSetOwedDialogTitle),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        keyboardType: TextInputType.number,
+        onChanged: (_) {
+          // Clear error as the user starts typing
+          if (_errorText != null) {
+            setState(() => _errorText = null);
+          }
+        },
+        decoration: InputDecoration(
+          errorText: _errorText,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('—'),
+        ),
+        TextButton(
+          onPressed: _onConfirm,
+          child: Text(widget.l10n.qadaSetOwedConfirm),
+        ),
+      ],
+    );
   }
 }

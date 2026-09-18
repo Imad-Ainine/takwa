@@ -29,7 +29,8 @@ const Map<String, int> _kIqamaOffsets = {
 };
 
 // ─────────────────────────────────────────
-//  PRAYER VISUAL DATA
+//  PRAYER VISUAL DATA – Refined Islamic Palette
+//  Deep emerald, rich gold, indigo night, soft ivory
 // ─────────────────────────────────────────
 class _PrayerVisual {
   final String key, emoji;
@@ -48,43 +49,43 @@ const _kPrayerVisuals = {
   'fajr': _PrayerVisual(
     key: 'fajr',
     emoji: '🌙',
-    primaryColor: Color(0xFF4A5568),
-    secondaryColor: Color(0xFF7B8FA6),
+    primaryColor: Color(0xFF2C3E50), // Deep indigo-grey
+    secondaryColor: Color(0xFF5D7A8C), // Soft dawn blue
     skyPhase: 'dawn',
   ),
   'sunrise': _PrayerVisual(
     key: 'sunrise',
     emoji: '🌅',
-    primaryColor: Color(0xFFE8945A),
-    secondaryColor: Color(0xFFF6AD55),
+    primaryColor: Color(0xFFC17F3E), // Warm amber
+    secondaryColor: Color(0xFFE8A85C), // Soft gold
     skyPhase: 'morning',
   ),
   'dhuhr': _PrayerVisual(
     key: 'dhuhr',
     emoji: '☀️',
-    primaryColor: Color(0xFF1A6B8A),
-    secondaryColor: Color(0xFF2E9CC4),
+    primaryColor: Color(0xFF0D5C63), // Deep emerald
+    secondaryColor: Color(0xFF1A9A8B), // Bright teal-emerald
     skyPhase: 'noon',
   ),
   'asr': _PrayerVisual(
     key: 'asr',
     emoji: '🌤',
-    primaryColor: Color(0xFF8B5E3C),
-    secondaryColor: Color(0xFFE8945A),
+    primaryColor: Color(0xFF8B5E3C), // Warm sand
+    secondaryColor: Color(0xFFD4A017), // Rich gold
     skyPhase: 'afternoon',
   ),
   'maghrib': _PrayerVisual(
     key: 'maghrib',
     emoji: '🌆',
-    primaryColor: Color(0xFF7B3F6E),
-    secondaryColor: Color(0xFFE87B5A),
+    primaryColor: Color(0xFF5C2A4A), // Deep burgundy
+    secondaryColor: Color(0xFFC97B63), // Soft coral-gold
     skyPhase: 'sunset',
   ),
   'isha': _PrayerVisual(
     key: 'isha',
     emoji: '🌃',
-    primaryColor: Color(0xFF0D1117),
-    secondaryColor: Color(0xFF1A2332),
+    primaryColor: Color(0xFF0B1320), // Deep navy
+    secondaryColor: Color(0xFF1C2E4A), // Indigo night
     skyPhase: 'night',
   ),
 };
@@ -387,6 +388,7 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen>
       backgroundColor: style.bg,
       body: Stack(
         children: [
+          // Soft gradient wash
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -394,18 +396,19 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen>
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    style.bg.withValues(alpha: 0.3),
-                    style.bg.withValues(alpha: 0.95),
+                    style.bg.withValues(alpha: 0.25),
+                    style.bg.withValues(alpha: 0.92),
                   ],
                 ),
               ),
             ),
           ),
+          // Subtle Islamic geometric pattern
           const Positioned.fill(
             child: CustomPatternBackground(pattern: BackgroundPattern.adhkar),
           ),
 
-          // ── Floating Particles ──
+          // ── Floating Geometric Particles ──
           Positioned.fill(child: _FloatingParticles(visual: visual)),
 
           // ── Content ──
@@ -532,12 +535,12 @@ class _FloatingParticlesState extends State<_FloatingParticles>
   late final AnimationController _ctrl;
   static final _rng = math.Random(99);
   static final _particles = List.generate(
-    18,
+    22,
     (i) => _Particle(
       x: _rng.nextDouble(),
       y: _rng.nextDouble(),
-      size: 1.0 + _rng.nextDouble() * 2.5,
-      speed: 0.0002 + _rng.nextDouble() * 0.0004,
+      size: 1.2 + _rng.nextDouble() * 2.8,
+      speed: 0.00015 + _rng.nextDouble() * 0.00035,
       phase: _rng.nextDouble() * 2 * math.pi,
     ),
   );
@@ -547,7 +550,7 @@ class _FloatingParticlesState extends State<_FloatingParticles>
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 12),
     );
     // repeat() is started from didChangeDependencies below, gated on
     // reduce-motion.
@@ -576,8 +579,6 @@ class _FloatingParticlesState extends State<_FloatingParticles>
           t: _ctrl.value,
           color: widget.visual.secondaryColor,
         ),
-        // We remove size: Size.infinite because it causes offsets to be Infinity.
-        // Being inside a Positioned.fill already provides the correct layout constraints.
         size: Size.copy(MediaQuery.sizeOf(context)),
       ),
     );
@@ -611,17 +612,18 @@ class _ParticlePainter extends CustomPainter {
     if (size.width <= 0 || size.height <= 0) return;
 
     for (final p in particles) {
-      final dx = math.sin(t * 2 * math.pi + p.phase) * 20;
-      final dy = -(t * size.height * 0.3 + p.y * size.height) % size.height;
-      final opacity = (0.1 + 0.15 * math.sin(t * 2 * math.pi + p.phase + 1))
+      final dx = math.sin(t * 2 * math.pi + p.phase) * 18;
+      final dy = -(t * size.height * 0.28 + p.y * size.height) % size.height;
+      final opacity = (0.08 + 0.14 * math.sin(t * 2 * math.pi + p.phase + 1))
           .clamp(0.0, 1.0);
 
+      // Soft glowing points (star-like feel)
       canvas.drawCircle(
         Offset(p.x * size.width + dx, dy),
         p.size,
         Paint()
           ..color = color.withValues(alpha: opacity)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5),
       );
     }
   }
@@ -658,12 +660,12 @@ class _PrayerHeader extends StatelessWidget {
         child: ClipPath(
           clipper: HeaderCurveClipper(),
           child: Container(
-            height: 90, // Increased slightly from 60 to accommodate the curve
+            height: 96,
             width: double.infinity,
             color: style.bg,
             child: Stack(
               children: [
-                // ── Mosque Silhouette Background ──
+                // ── Mosque Silhouette Background with richer gold ──
                 Positioned.fill(
                   child: ClipPath(
                     clipper: MosqueClipper(),
@@ -673,13 +675,13 @@ class _PrayerHeader extends StatelessWidget {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            style.gold.withValues(alpha: 0.3),
-                            style.gold.withValues(alpha: 0.05),
+                            style.gold.withValues(alpha: 0.38),
+                            style.gold.withValues(alpha: 0.08),
                           ],
                         ),
                       ),
                       child: const Opacity(
-                        opacity: 0.1,
+                        opacity: 0.12,
                         child: CustomPatternBackground(
                           pattern: BackgroundPattern.adhkar,
                         ),
@@ -688,13 +690,13 @@ class _PrayerHeader extends StatelessWidget {
                   ),
                 ),
 
-                // ── Top Bar Content (Positioned) ──
+                // ── Top Bar Content ──
                 Positioned(
                   top: 0,
                   left: 0,
                   right: 0,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
                     child: Row(
                       children: [
                         const CustomLeadingButton(),
@@ -722,7 +724,7 @@ class _PrayerHeader extends StatelessWidget {
                                     children: [
                                       Icon(
                                         Icons.location_on_rounded,
-                                        size: 12,
+                                        size: 13,
                                         color: style.gold,
                                       ),
                                       const SizedBox(width: 3),
@@ -742,18 +744,21 @@ class _PrayerHeader extends StatelessWidget {
                         ),
                         TakwaTappable(
                           onTap: isUpdating ? null : onRefresh,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(22),
                           child: Container(
-                            width: 40,
-                            height: 40,
+                            width: 42,
+                            height: 42,
                             decoration: BoxDecoration(
-                              color: style.card.withValues(alpha: 0.8),
+                              color: style.card.withValues(alpha: 0.85),
                               shape: BoxShape.circle,
-                              border: Border.all(color: style.border),
+                              border: Border.all(
+                                color: style.gold.withValues(alpha: 0.35),
+                                width: 1.2,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 10,
+                                  color: style.gold.withValues(alpha: 0.12),
+                                  blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 ),
                               ],
@@ -797,9 +802,9 @@ class HeaderCurveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
-    path.lineTo(0, size.height - 15);
-    final controlPoint = Offset(size.width / 2, size.height);
-    final endPoint = Offset(size.width, size.height - 15);
+    path.lineTo(0, size.height - 18);
+    final controlPoint = Offset(size.width / 2, size.height + 4);
+    final endPoint = Offset(size.width, size.height - 18);
     path.quadraticBezierTo(
       controlPoint.dx,
       controlPoint.dy,
@@ -857,14 +862,22 @@ class _MainPrayerCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(AppSpacing.xxl),
             decoration: BoxDecoration(
-              color: style.bg,
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(color: style.bg),
+              color: style.bg.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(36),
+              border: Border.all(
+                color: style.gold.withValues(alpha: 0.22),
+                width: 1.3,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: style.bg.withValues(alpha: 0.4),
-                  blurRadius: 40,
-                  offset: const Offset(0, 20),
+                  color: style.gold.withValues(alpha: 0.08),
+                  blurRadius: 32,
+                  offset: const Offset(0, 16),
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
                 ),
               ],
             ),
@@ -924,24 +937,32 @@ class _PrayerNameBadge extends StatelessWidget {
     return Column(
       children: [
         ScaleTransition(
-          scale: const AlwaysStoppedAnimation(1.1),
+          scale: const AlwaysStoppedAnimation(1.08),
           child: Container(
-            width: 64,
-            height: 64,
+            width: 68,
+            height: 68,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: style.gold.withValues(alpha: 0.1),
-              border: Border.all(color: style.gold.withValues(alpha: 0.2)),
+              gradient: RadialGradient(
+                colors: [
+                  style.gold.withValues(alpha: 0.18),
+                  style.gold.withValues(alpha: 0.05),
+                ],
+              ),
+              border: Border.all(
+                color: style.gold.withValues(alpha: 0.35),
+                width: 1.4,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: style.gold.withValues(alpha: 0.1),
-                  blurRadius: 20,
-                  spreadRadius: 2,
+                  color: style.gold.withValues(alpha: 0.15),
+                  blurRadius: 18,
+                  spreadRadius: 1,
                 ),
               ],
             ),
             child: Center(
-              child: Text(visual.emoji, style: const TextStyle(fontSize: 28)),
+              child: Text(visual.emoji, style: const TextStyle(fontSize: 30)),
             ),
           ),
         ),
@@ -964,7 +985,7 @@ class _PrayerNameBadge extends StatelessWidget {
   }
 }
 
-// ── دائرة العداد المتناقص ──
+// ── دائرة العداد المتناقص – Ornate Geometric Version ──
 class _CountdownRing extends StatelessWidget {
   final Duration remaining;
   final _PrayerVisual visual;
@@ -990,8 +1011,7 @@ class _CountdownRing extends StatelessWidget {
   }
 
   double get _progress {
-    // نسبة الوقت المتبقي من الوقت الكامل بين صلاتين (~4-6 ساعات)
-    final maxSecs = isIqama ? 1200.0 : 21600.0; // 20 دقيقة أو 6 ساعات
+    final maxSecs = isIqama ? 1200.0 : 21600.0;
     return (remaining.inSeconds / maxSecs).clamp(0.0, 1.0);
   }
 
@@ -1001,61 +1021,66 @@ class _CountdownRing extends StatelessWidget {
     return ScaleTransition(
       scale: pulseAnim,
       child: SizedBox(
-        width: 220,
-        height: 220,
+        width: 228,
+        height: 228,
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // حلقات خارجية (halo)
+            // Soft outer halos
             ...List.generate(
               3,
               (i) => Container(
-                width: 220 - i * 28.0,
-                height: 220 - i * 28.0,
+                width: 228 - i * 30.0,
+                height: 228 - i * 30.0,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: visual.secondaryColor.withValues(
-                      alpha: 0.06 + i * 0.04,
+                      alpha: 0.05 + i * 0.035,
                     ),
-                    width: 1,
+                    width: 1.1,
                   ),
                 ),
               ),
             ),
 
-            // الحلقة الرئيسية
+            // Main ornate arc
             CustomPaint(
-              size: const Size(200, 200),
+              size: const Size(206, 206),
               painter: _CountdownArcPainter(
                 progress: _progress,
                 primaryColor: visual.secondaryColor,
                 successColor: context.colors.success,
                 tealColor: context.colors.teal,
                 isIqama: isIqama,
-                // The track/end-dot sit on this card's own `style.bg`
-                // background (not the fixed-color inner disc below), so —
-                // like everything else in this file — a hardcoded white was
-                // nearly invisible in light mode.
                 onSurfaceColor: style.text,
+                goldColor: style.gold,
               ),
             ),
 
-            // المحتوى الداخلي
+            // Inner content disc
             Container(
-              width: 150,
-              height: 150,
+              width: 154,
+              height: 154,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    visual.primaryColor.withValues(alpha: 0.8),
-                    visual.primaryColor.withValues(alpha: 0.4),
+                    visual.primaryColor.withValues(alpha: 0.88),
+                    visual.primaryColor.withValues(alpha: 0.45),
                   ],
                 ),
                 border: Border.all(
-                  color: visual.secondaryColor.withValues(alpha: 0.2),
+                  color: visual.secondaryColor.withValues(alpha: 0.28),
+                  width: 1.3,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: visual.secondaryColor.withValues(alpha: 0.18),
+                    blurRadius: 16,
+                    spreadRadius: 1,
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1067,7 +1092,7 @@ class _CountdownRing extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'NotoNaskhArabic',
                       fontSize: 11,
-                      color: Colors.white.withValues(alpha: 0.55),
+                      color: Colors.white.withValues(alpha: 0.6),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
@@ -1075,28 +1100,28 @@ class _CountdownRing extends StatelessWidget {
                     _timeStr,
                     style: TextStyle(
                       fontFamily: 'NotoNaskhArabic',
-                      fontSize: remaining.inHours > 0 ? 26 : 32,
+                      fontSize: remaining.inHours > 0 ? 26 : 33,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
                       shadows: [
                         Shadow(
-                          color: visual.secondaryColor.withValues(alpha: 0.5),
-                          blurRadius: 12,
+                          color: visual.secondaryColor.withValues(alpha: 0.55),
+                          blurRadius: 14,
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 7),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.md,
                       vertical: AppSpacing.xs,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.08),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppRadius.md),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.12),
+                        color: Colors.white.withValues(alpha: 0.15),
                       ),
                     ),
                     child: Text(
@@ -1106,7 +1131,7 @@ class _CountdownRing extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: 'NotoNaskhArabic',
                         fontSize: 11,
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: Colors.white.withValues(alpha: 0.85),
                       ),
                     ),
                   ),
@@ -1127,6 +1152,7 @@ class _CountdownArcPainter extends CustomPainter {
   final Color tealColor;
   final bool isIqama;
   final Color onSurfaceColor;
+  final Color goldColor;
 
   _CountdownArcPainter({
     required this.progress,
@@ -1135,27 +1161,28 @@ class _CountdownArcPainter extends CustomPainter {
     required this.tealColor,
     required this.isIqama,
     required this.onSurfaceColor,
+    required this.goldColor,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final c = Offset(size.width / 2, size.height / 2);
-    final r = (size.width - 14) / 2;
+    final r = (size.width - 16) / 2;
     final rect = Rect.fromCircle(center: c, radius: r);
 
-    // Track
+    // Soft track
     canvas.drawCircle(
       c,
       r,
       Paint()
-        ..color = onSurfaceColor.withValues(alpha: 0.08)
+        ..color = onSurfaceColor.withValues(alpha: 0.07)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 10,
+        ..strokeWidth = 11,
     );
 
     if (progress <= 0) return;
 
-    // Outer glow
+    // Outer soft glow
     canvas.drawArc(
       rect,
       -math.pi / 2,
@@ -1169,17 +1196,17 @@ class _CountdownArcPainter extends CustomPainter {
               ? [successColor, tealColor, successColor]
               : [
                   primaryColor,
-                  Colors.white.withValues(alpha: 0.9),
+                  goldColor.withValues(alpha: 0.95),
                   primaryColor,
                 ],
         ).createShader(rect)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 16
+        ..strokeWidth = 17
         ..strokeCap = StrokeCap.round
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7),
     );
 
-    // Solid arc
+    // Solid elegant arc
     canvas.drawArc(
       rect,
       -math.pi / 2,
@@ -1191,28 +1218,29 @@ class _CountdownArcPainter extends CustomPainter {
           endAngle: 3 * math.pi / 2,
           colors: isIqama
               ? [successColor, tealColor, successColor]
-              : [primaryColor, Colors.white, primaryColor],
+              : [primaryColor, goldColor, primaryColor],
         ).createShader(rect)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 8
+        ..strokeWidth = 8.5
         ..strokeCap = StrokeCap.round,
     );
 
-    // End dot
+    // End glowing dot
     final angle = -math.pi / 2 + 2 * math.pi * progress;
     final dx = c.dx + r * math.cos(angle);
     final dy = c.dy + r * math.sin(angle);
+
     canvas.drawCircle(
       Offset(dx, dy),
-      8,
+      9,
       Paint()
-        ..color = Colors.white
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+        ..color = Colors.white.withValues(alpha: 0.9)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
     );
     canvas.drawCircle(
       Offset(dx, dy),
-      5,
-      Paint()..color = isIqama ? successColor : primaryColor,
+      5.5,
+      Paint()..color = isIqama ? successColor : goldColor,
     );
   }
 
@@ -1303,27 +1331,33 @@ class _TimeCard extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 350),
       padding: const EdgeInsets.symmetric(
-        vertical: 14,
+        vertical: 15,
         horizontal: AppSpacing.md,
       ),
       decoration: BoxDecoration(
         color: isActive
-            ? color.withValues(alpha: 0.15)
-            : style.text.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+            ? color.withValues(alpha: 0.14)
+            : style.text.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isActive
-              ? color.withValues(alpha: 0.4)
-              : style.text.withValues(alpha: 0.1),
-          width: isActive ? 1.5 : 1,
+              ? color.withValues(alpha: 0.42)
+              : style.gold.withValues(alpha: 0.12),
+          width: isActive ? 1.5 : 1.1,
         ),
         boxShadow: isActive
-            ? [BoxShadow(color: color.withValues(alpha: 0.2), blurRadius: 12)]
+            ? [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.18),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
+                ),
+              ]
             : null,
       ),
       child: Column(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 20)),
+          Text(icon, style: const TextStyle(fontSize: 21)),
           const SizedBox(height: 6),
           Text(
             label,
@@ -1362,13 +1396,13 @@ class _TimeCard extends StatelessWidget {
             ),
           ),
           if (subtitle != null) ...[
-            const SizedBox(height: 2),
+            const SizedBox(height: 3),
             Text(
               subtitle!,
               style: TextStyle(
                 fontFamily: 'NotoNaskhArabic',
                 fontSize: 9,
-                color: color.withValues(alpha: 0.7),
+                color: color.withValues(alpha: 0.72),
               ),
             ),
           ],
@@ -1418,22 +1452,29 @@ class _DailyPrayersTable extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         child: Container(
           decoration: BoxDecoration(
-            color: style.bg,
-            borderRadius: BorderRadius.circular(AppRadius.xl),
-            border: Border.all(color: style.bg),
+            color: style.bg.withValues(alpha: 0.94),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: style.gold.withValues(alpha: 0.18),
+              width: 1.2,
+            ),
             boxShadow: [
-              BoxShadow(color: style.bg.withValues(alpha: 0.3), blurRadius: 20),
+              BoxShadow(
+                color: style.gold.withValues(alpha: 0.06),
+                blurRadius: 22,
+                offset: const Offset(0, 8),
+              ),
             ],
           ),
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                padding: const EdgeInsets.fromLTRB(16, 15, 16, 11),
                 child: Row(
                   children: [
                     Container(
-                      width: 3,
-                      height: 18,
+                      width: 3.5,
+                      height: 19,
                       decoration: BoxDecoration(
                         color: context.colors.gold,
                         borderRadius: BorderRadius.circular(2),
@@ -1452,18 +1493,16 @@ class _DailyPrayersTable extends StatelessWidget {
                     const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
+                        horizontal: 11,
                         vertical: AppSpacing.xs,
                       ),
                       decoration: BoxDecoration(
                         color: context.colors.textPrimary.withValues(
-                          alpha: 0.07,
+                          alpha: 0.06,
                         ),
                         borderRadius: BorderRadius.circular(AppRadius.xl),
                         border: Border.all(
-                          color: context.colors.textPrimary.withValues(
-                            alpha: 0.1,
-                          ),
+                          color: style.gold.withValues(alpha: 0.12),
                         ),
                       ),
                       child: Text(
@@ -1480,7 +1519,7 @@ class _DailyPrayersTable extends StatelessWidget {
               ),
               Container(
                 height: 1,
-                color: context.colors.textPrimary.withValues(alpha: 0.06),
+                color: context.colors.textPrimary.withValues(alpha: 0.05),
               ),
 
               ...prayers.asMap().entries.map((e) {
@@ -1530,24 +1569,24 @@ class _PrayerTableRow extends StatelessWidget {
     final visual = _kPrayerVisuals[prayer.name]!;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 280),
       decoration: BoxDecoration(
         color: isNext
-            ? visual.secondaryColor.withValues(alpha: 0.12)
+            ? visual.secondaryColor.withValues(alpha: 0.11)
             : Colors.transparent,
         borderRadius: isLast
-            ? const BorderRadius.vertical(bottom: Radius.circular(20))
+            ? const BorderRadius.vertical(bottom: Radius.circular(22))
             : null,
         border: isNext
             ? BorderDirectional(
-                end: BorderSide(color: visual.secondaryColor, width: 3),
+                end: BorderSide(color: visual.secondaryColor, width: 3.2),
               )
             : null,
       ),
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               children: [
                 // أيقونة + اسم
@@ -1621,7 +1660,7 @@ class _PrayerTableRow extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.md,
                     ),
-                    color: context.colors.textPrimary.withValues(alpha: 0.08),
+                    color: context.colors.textPrimary.withValues(alpha: 0.07),
                   ),
 
                   // وقت الإقامة
@@ -1636,7 +1675,7 @@ class _PrayerTableRow extends StatelessWidget {
                           color: isNext
                               ? context.colors.success
                               : isPast
-                              ? context.colors.textDim.withValues(alpha: 0.6)
+                              ? context.colors.textDim.withValues(alpha: 0.55)
                               : context.colors.textDim,
                           fontWeight: isNext
                               ? FontWeight.w700
@@ -1660,7 +1699,7 @@ class _PrayerTableRow extends StatelessWidget {
                   Icon(
                     Icons.check_circle_rounded,
                     size: 16,
-                    color: context.colors.success.withValues(alpha: 0.4),
+                    color: context.colors.success.withValues(alpha: 0.42),
                   ),
                 ],
               ],
@@ -1669,7 +1708,7 @@ class _PrayerTableRow extends StatelessWidget {
           if (!isLast)
             Container(
               height: 1,
-              color: context.colors.textPrimary.withValues(alpha: 0.04),
+              color: context.colors.textPrimary.withValues(alpha: 0.035),
             ),
         ],
       ),
@@ -1692,12 +1731,12 @@ class _MihrabPrayerChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2.5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: isActive ? 0.15 : 0.05),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+        color: color.withValues(alpha: isActive ? 0.16 : 0.05),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
         border: Border.all(
-          color: color.withValues(alpha: isActive ? 0.3 : 0.1),
+          color: color.withValues(alpha: isActive ? 0.32 : 0.1),
         ),
       ),
       child: Text(
@@ -1705,7 +1744,7 @@ class _MihrabPrayerChip extends StatelessWidget {
         style: TextStyle(
           fontFamily: 'NotoNaskhArabic',
           fontSize: 9,
-          color: color.withValues(alpha: isActive ? 1.0 : 0.6),
+          color: color.withValues(alpha: isActive ? 1.0 : 0.58),
           fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
         ),
       ),
@@ -1759,19 +1798,20 @@ class _LiveClockBannerState extends State<_LiveClockBanner> {
         child: Container(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.xl,
-            vertical: 14,
+            vertical: 15,
           ),
           decoration: BoxDecoration(
-            color: widget.style.text.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(22),
+            color: widget.style.text.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: widget.style.text.withValues(alpha: 0.09),
+              color: widget.style.gold.withValues(alpha: 0.15),
+              width: 1.1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.18),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
@@ -1780,7 +1820,7 @@ class _LiveClockBannerState extends State<_LiveClockBanner> {
             children: [
               // ── Clock ──
               Padding(
-                padding: const EdgeInsets.only(top: 16),
+                padding: const EdgeInsets.only(top: 14),
                 child: RichText(
                   text: TextSpan(
                     children: [
@@ -1810,7 +1850,7 @@ class _LiveClockBannerState extends State<_LiveClockBanner> {
               const SizedBox(width: 6),
 
               Padding(
-                padding: const EdgeInsets.only(top: 20),
+                padding: const EdgeInsets.only(top: 18),
                 child: Text(
                   ':$s',
                   style: TextStyle(
@@ -1892,7 +1932,7 @@ class _SunPhaseRow extends StatelessWidget {
                 icon: '🌙',
                 label: prayerLocalizedName(l10n, 'fajr'),
                 time: _fmt(fajrP.time),
-                color: const Color(0xFF7B8FA6),
+                color: const Color(0xFF5D7A8C),
               ),
             ),
           if (fajrP != null && sunriseP != null)
@@ -1903,7 +1943,7 @@ class _SunPhaseRow extends StatelessWidget {
                 icon: '🌅',
                 label: prayerLocalizedName(l10n, 'sunrise'),
                 time: _fmt(sunriseP.time),
-                color: const Color(0xFFE8945A),
+                color: const Color(0xFFE8A85C),
               ),
             ),
           if (sunriseP != null && maghribP != null)
@@ -1914,7 +1954,7 @@ class _SunPhaseRow extends StatelessWidget {
                 icon: '🌆',
                 label: prayerLocalizedName(l10n, 'maghrib'),
                 time: _fmt(maghribP.time),
-                color: const Color(0xFF7B3F6E),
+                color: const Color(0xFFC97B63),
               ),
             ),
         ],
@@ -1937,13 +1977,13 @@ class _SunChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        vertical: 11,
+        vertical: 12,
         horizontal: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: 0.22)),
+        color: color.withValues(alpha: 0.09),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1978,7 +2018,7 @@ class _SunChip extends StatelessWidget {
                     fontFamily: 'NotoNaskhArabic',
                     fontSize: 9,
                     fontWeight: FontWeight.w700,
-                    color: color.withValues(alpha: 0.7),
+                    color: color.withValues(alpha: 0.72),
                   ),
                 ),
               ],
@@ -1990,12 +2030,7 @@ class _SunChip extends StatelessWidget {
   }
 }
 
-/// Shape-matched skeleton for the prayer screen's loading state — mirrors
-/// _MainPrayerCard (badge + countdown ring + adhan/iqama row),
-/// _SunPhaseRow (3 chips) and _DailyPrayersTable (header + 5 rows) so the
-/// layout doesn't visibly jump once real data arrives. Previously this
-/// was a bare spinner + "جارٍ تحديد موقعك..." text — see the audit's
-/// "UI/UX Polish" section.
+/// Shape-matched skeleton for the prayer screen's loading state
 class _LoadingOverlay extends StatefulWidget {
   final AdaptiveStyle style;
   const _LoadingOverlay({required this.style});
@@ -2016,9 +2051,6 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
       vsync: this,
       duration: const Duration(milliseconds: 1100),
     );
-    // repeat() is started from didChangeDependencies below, gated on
-    // reduce-motion. The skeleton *shapes* already convey the loading
-    // state on their own, so the shimmer pulse on top is decorative.
     _pulse = Tween<double>(
       begin: 0.35,
       end: 0.75,
@@ -2045,9 +2077,9 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: style.gold.withValues(alpha: _pulse.value * 0.12),
+          color: style.gold.withValues(alpha: _pulse.value * 0.13),
           borderRadius: BorderRadius.circular(radius),
-          border: Border.all(color: style.border.withValues(alpha: 0.5)),
+          border: Border.all(color: style.gold.withValues(alpha: 0.18)),
         ),
       ),
     );
@@ -2062,41 +2094,44 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
         child: Column(
           children: [
             const SizedBox(height: AppSpacing.md),
-            // ── Header placeholder ──
+            // Header placeholder
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Row(
                 children: [
-                  _bone(width: 40, height: 40, radius: 20),
+                  _bone(width: 42, height: 42, radius: 21),
                   const SizedBox(width: AppSpacing.md),
-                  _bone(width: 120, height: 16),
+                  _bone(width: 130, height: 17),
                   const Spacer(),
-                  _bone(width: 40, height: 40, radius: 20),
+                  _bone(width: 42, height: 42, radius: 21),
                 ],
               ),
             ),
             const SizedBox(height: AppSpacing.xxl),
 
-            // ── Main card placeholder (badge + ring + adhan/iqama row) ──
+            // Main card placeholder
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Container(
                 padding: const EdgeInsets.all(AppSpacing.xxl),
                 decoration: BoxDecoration(
                   color: style.bg,
-                  borderRadius: BorderRadius.circular(32),
+                  borderRadius: BorderRadius.circular(36),
+                  border: Border.all(
+                    color: style.gold.withValues(alpha: 0.15),
+                  ),
                 ),
                 child: Column(
                   children: [
-                    _bone(width: 140, height: 28, radius: 14),
+                    _bone(width: 150, height: 30, radius: 15),
                     const SizedBox(height: AppSpacing.xxxl),
-                    Center(child: _bone(width: 200, height: 200, radius: 100)),
+                    Center(child: _bone(width: 206, height: 206, radius: 103)),
                     const SizedBox(height: AppSpacing.xxxl),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _bone(width: 90, height: 44),
-                        _bone(width: 90, height: 44),
+                        _bone(width: 95, height: 48, radius: 16),
+                        _bone(width: 95, height: 48, radius: 16),
                       ],
                     ),
                   ],
@@ -2105,37 +2140,40 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
             ),
             const SizedBox(height: AppSpacing.lg),
 
-            // ── Sun phase row placeholder ──
+            // Sun phase row placeholder
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Row(
                 children: [
-                  Expanded(child: _bone(height: 77, radius: 18)),
+                  Expanded(child: _bone(height: 80, radius: 20)),
                   const SizedBox(width: AppSpacing.sm),
-                  Expanded(child: _bone(height: 77, radius: 18)),
+                  Expanded(child: _bone(height: 80, radius: 20)),
                   const SizedBox(width: AppSpacing.sm),
-                  Expanded(child: _bone(height: 77, radius: 18)),
+                  Expanded(child: _bone(height: 80, radius: 20)),
                 ],
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
 
-            // ── Daily prayers table placeholder ──
+            // Daily prayers table placeholder
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Container(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 decoration: BoxDecoration(
                   color: style.bg,
-                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: style.gold.withValues(alpha: 0.12),
+                  ),
                 ),
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        _bone(width: 3, height: 16, radius: 2),
+                        _bone(width: 3.5, height: 17, radius: 2),
                         const SizedBox(width: 10),
-                        _bone(width: 100, height: 14),
+                        _bone(width: 110, height: 15),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.lg),
@@ -2144,9 +2182,9 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                         children: [
                           _bone(width: 28, height: 28, radius: 14),
                           const SizedBox(width: AppSpacing.md),
-                          _bone(width: 70, height: 14),
+                          _bone(width: 75, height: 14),
                           const Spacer(),
-                          _bone(width: 60, height: 14),
+                          _bone(width: 62, height: 14),
                         ],
                       ),
                       if (i < 4) const SizedBox(height: 18),
@@ -2174,7 +2212,20 @@ class _ErrorView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('📍', style: TextStyle(fontSize: 40)),
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: context.colors.gold.withValues(alpha: 0.12),
+              border: Border.all(
+                color: context.colors.gold.withValues(alpha: 0.3),
+              ),
+            ),
+            child: const Center(
+              child: Text('📍', style: TextStyle(fontSize: 32)),
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
           Text(
             l10n.prayerScreenLocationErrorTitle,

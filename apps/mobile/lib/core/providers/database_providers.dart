@@ -55,6 +55,12 @@ final zakatDaoProvider = Provider<ZakatDao>((ref) {
   return ZakatDao(ref.watch(appDatabaseProvider));
 });
 
+/// History stream — automatically refreshes via Drift's reactive stream
+/// whenever a new calculation is saved (R1.1, R1.4).
+final zakatHistoryProvider = StreamProvider<List<ZakatCalculation>>((ref) {
+  return ref.watch(zakatDaoProvider).watchHistory();
+});
+
 final qadaDaoProvider = Provider<QadaDao>((ref) {
   return QadaDao(ref.watch(appDatabaseProvider));
 });
@@ -62,6 +68,13 @@ final qadaDaoProvider = Provider<QadaDao>((ref) {
 final qadaCountersProvider = StreamProvider<List<QadaCounter>>((ref) {
   return ref.watch(qadaDaoProvider).watchAll();
 });
+
+/// Reactive sum of all prayers' owedCount and completedCount — backs the
+/// summary row in QadaTrackerScreen (R6.1, R6.4).
+final qadaSummaryProvider =
+    StreamProvider<({int totalOwed, int totalCompleted})>((ref) {
+      return ref.watch(qadaDaoProvider).watchSummary();
+    });
 
 final updateCheckServiceProvider = Provider<UpdateCheckService>((ref) {
   return UpdateCheckService(ref.watch(settingsDaoProvider));

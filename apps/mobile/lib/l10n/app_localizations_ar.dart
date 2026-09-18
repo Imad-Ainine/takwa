@@ -4716,6 +4716,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get zakatReminderDefaultTitle => 'موعد إخراج الزكاة';
 
   @override
+  String get zakatMalSectionHeading => 'زكاة المال';
+
+  @override
+  String get zakatHistorySectionTitle => 'سجل الحسابات';
+
+  @override
+  String get zakatHistoryEmpty => 'لا توجد حسابات محفوظة بعد';
+
+  @override
+  String get zakatFitrahSectionHeading => 'زكاة الفطر';
+
+  @override
+  String get zakatFitrahMembersLabel => 'عدد أفراد الأسرة (١–٩٩)';
+
+  @override
+  String get zakatFitrahPricePerPersonLabel => 'سعر قوت اليوم للشخص الواحد';
+
+  @override
+  String get zakatFitrahCurrencyLabel => 'رمز العملة';
+
+  @override
+  String get zakatFitrahTotalLabel => 'إجمالي زكاة الفطر المستحقة';
+
+  @override
+  String get zakatFitrahInvalidMembers => 'أدخل عدداً صحيحاً بين ١ و٩٩';
+
+  @override
+  String get zakatFitrahInvalidPrice => 'أدخل قيمة بين ٠٫٠١ و٩٩٩٬٩٩٩٫٩٩';
+
+  @override
   String get homeFeatureCircles => 'دوائر\nالمحاسبة';
 
   @override
@@ -4828,6 +4858,46 @@ class AppLocalizationsAr extends AppLocalizations {
   String get circleReactionsReceivedTitle => 'تشجيع لك 💌';
 
   @override
+  String get circleRenameButton => 'تغيير اسم الدائرة';
+
+  @override
+  String get circleDeleteButton => 'حذف الدائرة';
+
+  @override
+  String get circleRenameDialogTitle => 'تغيير اسم الدائرة';
+
+  @override
+  String get circleRenameNameLabel => 'اسم الدائرة';
+
+  @override
+  String get circleRenameConfirm => 'تغيير الاسم';
+
+  @override
+  String get circleRenameValidationError =>
+      'يجب أن يكون الاسم من 1 إلى 50 حرفًا غير فارغة';
+
+  @override
+  String get circleDeleteConfirmTitle => 'حذف هذه الدائرة؟';
+
+  @override
+  String get circleDeleteConfirmBody =>
+      'سيؤدي هذا إلى حذف الدائرة نهائيًا وإزالة جميع الأعضاء.';
+
+  @override
+  String get circleDeleteConfirm => 'حذف';
+
+  @override
+  String get circleRemoveMemberConfirmTitle => 'إزالة العضو؟';
+
+  @override
+  String circleRemoveMemberConfirmBody(String username) {
+    return 'هل تريد إزالة $username من هذه الدائرة؟';
+  }
+
+  @override
+  String get circleRemoveMemberConfirm => 'إزالة';
+
+  @override
   String get homeFeatureQada => 'قضاء\nالصلوات';
 
   @override
@@ -4856,7 +4926,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get qadaSetOwedConfirm => 'حفظ';
 
   @override
+  String qadaSummaryTotalOwed(int count) {
+    return 'المتبقي: $count';
+  }
+
+  @override
+  String qadaSummaryTotalCompleted(int count) {
+    return 'تم قضاؤها: $count';
+  }
+
+  @override
+  String get qadaSetOwedErrorInvalid => 'أدخل عدداً صحيحاً لا يقل عن 0';
+
+  @override
   String get sadaqahAmountFieldLabel => 'المبلغ (اختياري)';
+
+  @override
+  String get sadaqahAmountInvalidError =>
+      'أدخل مبلغاً بين ٠٫٠١ و٩٩٩٬٩٩٩٬٩٩٩٫٩٩ (حتى خانتين عشريتين)';
 
   @override
   String get homeFeatureSadaqah => 'الصدقات';
@@ -4923,4 +5010,31 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get occasionEidAlAdha => 'عيد الأضحى';
+
+  @override
+  String get occasionIslamicNewYear => 'رأس السنة الهجرية';
+
+  @override
+  String get occasionLaylatAlQadr => 'ليلة القدر';
+
+  @override
+  String get occasionDayOfArafah => 'يوم عرفة';
+
+  @override
+  String get occasionsFastingRecommended => '🌙 صيام مستحب';
+
+  @override
+  String get sadaqahLogButton => 'تسجيل صدقة';
+
+  @override
+  String get sadaqahLogSheetTitle => 'تسجيل صدقة';
+
+  @override
+  String get sadaqahLogDateLabel => 'التاريخ';
+
+  @override
+  String get sadaqahLogConfirmButton => 'تأكيد';
+
+  @override
+  String get sadaqahLogErrorText => 'فشل الحفظ. يرجى المحاولة مجدداً.';
 }

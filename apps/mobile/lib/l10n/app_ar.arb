@@ -2826,6 +2826,46 @@
   "@zakatReminderDefaultTitle": {
     "description": "Default reminder title pre-filled when creating a Zakat reminder"
   },
+  "zakatMalSectionHeading": "زكاة المال",
+  "@zakatMalSectionHeading": {
+    "description": "Section heading for the Zakat al-Mal (wealth zakat) form (R2.5)"
+  },
+  "zakatHistorySectionTitle": "سجل الحسابات",
+  "@zakatHistorySectionTitle": {
+    "description": "Section title for the saved calculations history list (R1.1)"
+  },
+  "zakatHistoryEmpty": "لا توجد حسابات محفوظة بعد",
+  "@zakatHistoryEmpty": {
+    "description": "Empty-state text shown when there are no saved Zakat calculations (R1.3)"
+  },
+  "zakatFitrahSectionHeading": "زكاة الفطر",
+  "@zakatFitrahSectionHeading": {
+    "description": "Section heading / ExpansionTile title for the Zakat al-Fitr companion section (R2.1)"
+  },
+  "zakatFitrahMembersLabel": "عدد أفراد الأسرة (١–٩٩)",
+  "@zakatFitrahMembersLabel": {
+    "description": "Input label for the number of household members in Zakat al-Fitr (R2.2)"
+  },
+  "zakatFitrahPricePerPersonLabel": "سعر قوت اليوم للشخص الواحد",
+  "@zakatFitrahPricePerPersonLabel": {
+    "description": "Input label for the local staple-food price per person for Zakat al-Fitr (R2.2)"
+  },
+  "zakatFitrahCurrencyLabel": "رمز العملة",
+  "@zakatFitrahCurrencyLabel": {
+    "description": "Input label for the free-text currency label in the Zakat al-Fitr section (R2.2)"
+  },
+  "zakatFitrahTotalLabel": "إجمالي زكاة الفطر المستحقة",
+  "@zakatFitrahTotalLabel": {
+    "description": "Label displayed next to the computed Zakat al-Fitr total (R2.3)"
+  },
+  "zakatFitrahInvalidMembers": "أدخل عدداً صحيحاً بين ١ و٩٩",
+  "@zakatFitrahInvalidMembers": {
+    "description": "Inline error shown when the members field is invalid in Zakat al-Fitr (R2.4)"
+  },
+  "zakatFitrahInvalidPrice": "أدخل قيمة بين ٠٫٠١ و٩٩٩٬٩٩٩٫٩٩",
+  "@zakatFitrahInvalidPrice": {
+    "description": "Inline error shown when the price-per-person field is invalid in Zakat al-Fitr (R2.4)"
+  },
   "homeFeatureCircles": "دوائر\nالمحاسبة",
   "@homeFeatureCircles": {
     "description": "Home feature-grid label for the family/community accountability circles feature"
@@ -2975,6 +3015,59 @@
   "@circleReactionsReceivedTitle": {
     "description": "Section title listing encouragement reactions this user has received in the circle"
   },
+  "circleRenameButton": "تغيير اسم الدائرة",
+  "@circleRenameButton": {
+    "description": "Menu item / button label for the owner to rename the circle"
+  },
+  "circleDeleteButton": "حذف الدائرة",
+  "@circleDeleteButton": {
+    "description": "Menu item / button label for the owner to delete the circle"
+  },
+  "circleRenameDialogTitle": "تغيير اسم الدائرة",
+  "@circleRenameDialogTitle": {
+    "description": "Dialog title when renaming a circle"
+  },
+  "circleRenameNameLabel": "اسم الدائرة",
+  "@circleRenameNameLabel": {
+    "description": "Input label for the new circle name in the rename dialog"
+  },
+  "circleRenameConfirm": "تغيير الاسم",
+  "@circleRenameConfirm": {
+    "description": "Confirm button on the rename dialog"
+  },
+  "circleRenameValidationError": "يجب أن يكون الاسم من 1 إلى 50 حرفًا غير فارغة",
+  "@circleRenameValidationError": {
+    "description": "Validation error shown when the rename input is blank, whitespace-only, or too long"
+  },
+  "circleDeleteConfirmTitle": "حذف هذه الدائرة؟",
+  "@circleDeleteConfirmTitle": {
+    "description": "Confirmation dialog title before deleting a circle"
+  },
+  "circleDeleteConfirmBody": "سيؤدي هذا إلى حذف الدائرة نهائيًا وإزالة جميع الأعضاء.",
+  "@circleDeleteConfirmBody": {
+    "description": "Confirmation dialog body before deleting a circle"
+  },
+  "circleDeleteConfirm": "حذف",
+  "@circleDeleteConfirm": {
+    "description": "Confirm button on the delete-circle dialog"
+  },
+  "circleRemoveMemberConfirmTitle": "إزالة العضو؟",
+  "@circleRemoveMemberConfirmTitle": {
+    "description": "Confirmation dialog title before removing a circle member"
+  },
+  "circleRemoveMemberConfirmBody": "هل تريد إزالة {username} من هذه الدائرة؟",
+  "@circleRemoveMemberConfirmBody": {
+    "description": "Confirmation dialog body before removing a circle member",
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "circleRemoveMemberConfirm": "إزالة",
+  "@circleRemoveMemberConfirm": {
+    "description": "Confirm button on the remove-member dialog"
+  },
   "homeFeatureQada": "قضاء\nالصلوات",
   "@homeFeatureQada": {
     "description": "Home feature-grid label for the Qada (missed prayers) tracker"
@@ -3011,9 +3104,35 @@
   "@qadaSetOwedConfirm": {
     "description": "Confirm button on the set-owed dialog"
   },
+  "qadaSummaryTotalOwed": "المتبقي: {count}",
+  "@qadaSummaryTotalOwed": {
+    "description": "Summary row label showing the total number of missed prayers still owed",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qadaSummaryTotalCompleted": "تم قضاؤها: {count}",
+  "@qadaSummaryTotalCompleted": {
+    "description": "Summary row label showing the total number of Qada prayers completed",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qadaSetOwedErrorInvalid": "أدخل عدداً صحيحاً لا يقل عن 0",
+  "@qadaSetOwedErrorInvalid": {
+    "description": "Validation error shown in the set-owed dialog when the input is non-numeric or negative"
+  },
   "sadaqahAmountFieldLabel": "المبلغ (اختياري)",
   "@sadaqahAmountFieldLabel": {
     "description": "Optional amount field shown below the Sadaqah toggle in the daily checklist"
+  },
+  "sadaqahAmountInvalidError": "أدخل مبلغاً بين ٠٫٠١ و٩٩٩٬٩٩٩٬٩٩٩٫٩٩ (حتى خانتين عشريتين)",
+  "@sadaqahAmountInvalidError": {
+    "description": "Inline validation error on the Sadaqah amount field when the value is non-numeric, negative, or out of range"
   },
   "homeFeatureSadaqah": "الصدقات",
   "@homeFeatureSadaqah": {
@@ -3103,5 +3222,41 @@
   "occasionEidAlAdha": "عيد الأضحى",
   "@occasionEidAlAdha": {
     "description": "Occasion name"
+  },
+  "occasionIslamicNewYear": "رأس السنة الهجرية",
+  "@occasionIslamicNewYear": {
+    "description": "Occasion name — 1 Muharram"
+  },
+  "occasionLaylatAlQadr": "ليلة القدر",
+  "@occasionLaylatAlQadr": {
+    "description": "Occasion name — 27 Ramadan"
+  },
+  "occasionDayOfArafah": "يوم عرفة",
+  "@occasionDayOfArafah": {
+    "description": "Occasion name — 9 Dhul Hijjah"
+  },
+  "occasionsFastingRecommended": "🌙 صيام مستحب",
+  "@occasionsFastingRecommended": {
+    "description": "Small chip label shown on occasions where voluntary fasting is recommended (Ashura, White Days, Day of Arafah)"
+  },
+  "sadaqahLogButton": "تسجيل صدقة",
+  "@sadaqahLogButton": {
+    "description": "FAB / button label that opens the log-sadaqah bottom sheet"
+  },
+  "sadaqahLogSheetTitle": "تسجيل صدقة",
+  "@sadaqahLogSheetTitle": {
+    "description": "Title of the log-sadaqah bottom sheet"
+  },
+  "sadaqahLogDateLabel": "التاريخ",
+  "@sadaqahLogDateLabel": {
+    "description": "Label for the date-picker row in the log-sadaqah sheet"
+  },
+  "sadaqahLogConfirmButton": "تأكيد",
+  "@sadaqahLogConfirmButton": {
+    "description": "Confirm button in the log-sadaqah bottom sheet"
+  },
+  "sadaqahLogErrorText": "فشل الحفظ. يرجى المحاولة مجدداً.",
+  "@sadaqahLogErrorText": {
+    "description": "Inline error shown in the log-sadaqah sheet when the DAO write fails"
   }
 }

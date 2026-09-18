@@ -8540,6 +8540,66 @@ abstract class AppLocalizations {
   /// **'موعد إخراج الزكاة'**
   String get zakatReminderDefaultTitle;
 
+  /// Section heading for the Zakat al-Mal (wealth zakat) form (R2.5)
+  ///
+  /// In ar, this message translates to:
+  /// **'زكاة المال'**
+  String get zakatMalSectionHeading;
+
+  /// Section title for the saved calculations history list (R1.1)
+  ///
+  /// In ar, this message translates to:
+  /// **'سجل الحسابات'**
+  String get zakatHistorySectionTitle;
+
+  /// Empty-state text shown when there are no saved Zakat calculations (R1.3)
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد حسابات محفوظة بعد'**
+  String get zakatHistoryEmpty;
+
+  /// Section heading / ExpansionTile title for the Zakat al-Fitr companion section (R2.1)
+  ///
+  /// In ar, this message translates to:
+  /// **'زكاة الفطر'**
+  String get zakatFitrahSectionHeading;
+
+  /// Input label for the number of household members in Zakat al-Fitr (R2.2)
+  ///
+  /// In ar, this message translates to:
+  /// **'عدد أفراد الأسرة (١–٩٩)'**
+  String get zakatFitrahMembersLabel;
+
+  /// Input label for the local staple-food price per person for Zakat al-Fitr (R2.2)
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر قوت اليوم للشخص الواحد'**
+  String get zakatFitrahPricePerPersonLabel;
+
+  /// Input label for the free-text currency label in the Zakat al-Fitr section (R2.2)
+  ///
+  /// In ar, this message translates to:
+  /// **'رمز العملة'**
+  String get zakatFitrahCurrencyLabel;
+
+  /// Label displayed next to the computed Zakat al-Fitr total (R2.3)
+  ///
+  /// In ar, this message translates to:
+  /// **'إجمالي زكاة الفطر المستحقة'**
+  String get zakatFitrahTotalLabel;
+
+  /// Inline error shown when the members field is invalid in Zakat al-Fitr (R2.4)
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل عدداً صحيحاً بين ١ و٩٩'**
+  String get zakatFitrahInvalidMembers;
+
+  /// Inline error shown when the price-per-person field is invalid in Zakat al-Fitr (R2.4)
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل قيمة بين ٠٫٠١ و٩٩٩٬٩٩٩٫٩٩'**
+  String get zakatFitrahInvalidPrice;
+
   /// Home feature-grid label for the family/community accountability circles feature
   ///
   /// In ar, this message translates to:
@@ -8756,6 +8816,78 @@ abstract class AppLocalizations {
   /// **'تشجيع لك 💌'**
   String get circleReactionsReceivedTitle;
 
+  /// Menu item / button label for the owner to rename the circle
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير اسم الدائرة'**
+  String get circleRenameButton;
+
+  /// Menu item / button label for the owner to delete the circle
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف الدائرة'**
+  String get circleDeleteButton;
+
+  /// Dialog title when renaming a circle
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير اسم الدائرة'**
+  String get circleRenameDialogTitle;
+
+  /// Input label for the new circle name in the rename dialog
+  ///
+  /// In ar, this message translates to:
+  /// **'اسم الدائرة'**
+  String get circleRenameNameLabel;
+
+  /// Confirm button on the rename dialog
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير الاسم'**
+  String get circleRenameConfirm;
+
+  /// Validation error shown when the rename input is blank, whitespace-only, or too long
+  ///
+  /// In ar, this message translates to:
+  /// **'يجب أن يكون الاسم من 1 إلى 50 حرفًا غير فارغة'**
+  String get circleRenameValidationError;
+
+  /// Confirmation dialog title before deleting a circle
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف هذه الدائرة؟'**
+  String get circleDeleteConfirmTitle;
+
+  /// Confirmation dialog body before deleting a circle
+  ///
+  /// In ar, this message translates to:
+  /// **'سيؤدي هذا إلى حذف الدائرة نهائيًا وإزالة جميع الأعضاء.'**
+  String get circleDeleteConfirmBody;
+
+  /// Confirm button on the delete-circle dialog
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف'**
+  String get circleDeleteConfirm;
+
+  /// Confirmation dialog title before removing a circle member
+  ///
+  /// In ar, this message translates to:
+  /// **'إزالة العضو؟'**
+  String get circleRemoveMemberConfirmTitle;
+
+  /// Confirmation dialog body before removing a circle member
+  ///
+  /// In ar, this message translates to:
+  /// **'هل تريد إزالة {username} من هذه الدائرة؟'**
+  String circleRemoveMemberConfirmBody(String username);
+
+  /// Confirm button on the remove-member dialog
+  ///
+  /// In ar, this message translates to:
+  /// **'إزالة'**
+  String get circleRemoveMemberConfirm;
+
   /// Home feature-grid label for the Qada (missed prayers) tracker
   ///
   /// In ar, this message translates to:
@@ -8810,11 +8942,35 @@ abstract class AppLocalizations {
   /// **'حفظ'**
   String get qadaSetOwedConfirm;
 
+  /// Summary row label showing the total number of missed prayers still owed
+  ///
+  /// In ar, this message translates to:
+  /// **'المتبقي: {count}'**
+  String qadaSummaryTotalOwed(int count);
+
+  /// Summary row label showing the total number of Qada prayers completed
+  ///
+  /// In ar, this message translates to:
+  /// **'تم قضاؤها: {count}'**
+  String qadaSummaryTotalCompleted(int count);
+
+  /// Validation error shown in the set-owed dialog when the input is non-numeric or negative
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل عدداً صحيحاً لا يقل عن 0'**
+  String get qadaSetOwedErrorInvalid;
+
   /// Optional amount field shown below the Sadaqah toggle in the daily checklist
   ///
   /// In ar, this message translates to:
   /// **'المبلغ (اختياري)'**
   String get sadaqahAmountFieldLabel;
+
+  /// Inline validation error on the Sadaqah amount field when the value is non-numeric, negative, or out of range
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل مبلغاً بين ٠٫٠١ و٩٩٩٬٩٩٩٬٩٩٩٫٩٩ (حتى خانتين عشريتين)'**
+  String get sadaqahAmountInvalidError;
 
   /// Home feature-grid label for the Sadaqah tracker
   ///
@@ -8941,6 +9097,60 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'عيد الأضحى'**
   String get occasionEidAlAdha;
+
+  /// Occasion name — 1 Muharram
+  ///
+  /// In ar, this message translates to:
+  /// **'رأس السنة الهجرية'**
+  String get occasionIslamicNewYear;
+
+  /// Occasion name — 27 Ramadan
+  ///
+  /// In ar, this message translates to:
+  /// **'ليلة القدر'**
+  String get occasionLaylatAlQadr;
+
+  /// Occasion name — 9 Dhul Hijjah
+  ///
+  /// In ar, this message translates to:
+  /// **'يوم عرفة'**
+  String get occasionDayOfArafah;
+
+  /// Small chip label shown on occasions where voluntary fasting is recommended (Ashura, White Days, Day of Arafah)
+  ///
+  /// In ar, this message translates to:
+  /// **'🌙 صيام مستحب'**
+  String get occasionsFastingRecommended;
+
+  /// FAB / button label that opens the log-sadaqah bottom sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجيل صدقة'**
+  String get sadaqahLogButton;
+
+  /// Title of the log-sadaqah bottom sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجيل صدقة'**
+  String get sadaqahLogSheetTitle;
+
+  /// Label for the date-picker row in the log-sadaqah sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'التاريخ'**
+  String get sadaqahLogDateLabel;
+
+  /// Confirm button in the log-sadaqah bottom sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'تأكيد'**
+  String get sadaqahLogConfirmButton;
+
+  /// Inline error shown in the log-sadaqah sheet when the DAO write fails
+  ///
+  /// In ar, this message translates to:
+  /// **'فشل الحفظ. يرجى المحاولة مجدداً.'**
+  String get sadaqahLogErrorText;
 }
 
 class _AppLocalizationsDelegate

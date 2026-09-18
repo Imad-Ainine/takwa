@@ -100,7 +100,10 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
 
     if (widget.autoPlay) {
       await _initAudio(prefs);
-      AdhanAudioPlayer.ensureFlipArmed(prefs.flipToSilenceEnabled);
+      AdhanAudioPlayer.ensureFlipArmed(
+        prefs.flipToSilenceEnabled,
+        flipSilencePhone: prefs.autoSilentAfterAdhan,
+      );
     }
   }
 
@@ -184,6 +187,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
         asset: asset,
         volume: volume,
         flipToSilenceEnabled: prefs.flipToSilenceEnabled,
+        flipSilencePhone: prefs.autoSilentAfterAdhan,
       );
     } else {
       await AdhanAudioPlayer.setVolume(volume);

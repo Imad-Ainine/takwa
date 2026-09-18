@@ -6,6 +6,8 @@ import 'package:just_audio/just_audio.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sound_mode/sound_mode.dart';
+import 'package:sound_mode/utils/ringer_mode_statuses.dart';
 
 import '../routes/app_routes.dart';
 import 'notifications_service.dart';
@@ -29,6 +31,11 @@ class AdhanAudioPlayer {
   // feature — instead of to whether a particular screen happened to build.
   static StreamSubscription<AccelerometerEvent>? _flipSub;
 
+  /// Whether to also switch the phone to silent mode when a flip is detected.
+  /// Stored here (set by [play]/[ensureFlipArmed]) so [_silenceViaFlip] can
+  /// act on it without needing a BuildContext or Riverpod ref.
+  static bool _flipSilencePhone = false;
+
   /// True once flip-to-silence has fired for the currently playing Adhan.
   /// AdhanOverlayScreen listens to this instead of running its own sensor
   /// subscription, so the UI reflects a flip even if it happened before
@@ -39,10 +46,12 @@ class AdhanAudioPlayer {
     String asset = 'assets/sounds/Adhan-Makkah.mp3',
     double volume = 1.0,
     bool flipToSilenceEnabled = true,
+    bool flipSilencePhone = false,
   }) async {
     try {
       await stop();
       silenced.value = false;
+      _flipSilencePhone = flipSilencePhone;
       onPlayAttemptForTesting?.call();
       _player = AudioPlayer();
       await _player!.setVolume(volume);
@@ -69,11 +78,47 @@ class AdhanAudioPlayer {
     });
   }
 
+  /// Called when the accelerometer detects a face-down flip while the Adhan
+  /// is playing.
+  ///
+  /// **Reentrancy fix:** this method is invoked from inside the accelerometer
+  /// stream listener callback. The old code called `await stop()` directly,
+  /// and `stop()` does `await _flipSub?.cancel()`. Awaiting a subscription's
+  /// cancel() from within its own dispatch callback deadlocks on some
+  /// platforms — the cancel waits for the current event delivery to finish,
+  /// which is blocked waiting for the cancel. The fix is to:
+  ///   1. Grab and null out `_flipSub` synchronously before any await, so
+  ///      `stop()` sees null and skips the cancel entirely.
+  ///   2. Cancel the old subscription asynchronously (fire-and-forget) so it
+  ///      eventually cleans up without blocking the current execution.
   static Future<void> _silenceViaFlip() async {
-    if (silenced.value) return; // already silenced this Adhan
+    if (silenced.value) return; // already silenced this Adhan — guard against
+    // repeated calls while the phone stays face-down (stream fires ~50 Hz).
     silenced.value = true;
+
+    // Detach and cancel the subscription outside stop() to avoid the
+    // reentrancy deadlock described above.
+    final sub = _flipSub;
+    _flipSub = null;
+    sub?.cancel(); // fire-and-forget: no await
+
+    // Stop audio (stop() will see _flipSub == null and skip its own cancel).
     await stop();
+
+    // Haptic confirmation — let the user know the flip worked.
     HapticFeedback.mediumImpact();
+
+    // Optionally switch the phone ringer to silent so the rest of the
+    // prayer time stays quiet (controlled by the "auto-silent after adhan"
+    // preference, stored in _flipSilencePhone when play() was called).
+    if (_flipSilencePhone) {
+      try {
+        await SoundMode.setSoundMode(RingerModeStatus.silent);
+        debugPrint('🔇 Flip-to-silence: phone switched to silent mode.');
+      } catch (e) {
+        debugPrint('❌ Flip-to-silence: could not set silent mode: $e');
+      }
+    }
   }
 
   static Future<void> setVolume(double volume) async {
@@ -120,8 +165,13 @@ class AdhanAudioPlayer {
   ///      calls [setVolume] (does NOT re-arm),
   ///   3. the OS briefly pauses the accelerometer between steps 1 and 2 —
   ///      from this point on, flipping the phone does nothing.
-  static void ensureFlipArmed(bool enabled) {
+  static void ensureFlipArmed(bool enabled, {bool flipSilencePhone = false}) {
     if (!enabled) return;
+    // Update the ringer-change preference even when already armed — the
+    // overlay screen knows the live pref value; AdhanAutoTrigger._check
+    // may have called play() before the screen mounted and may not have had
+    // the pref yet.
+    _flipSilencePhone = flipSilencePhone;
     if (_flipSub != null) return; // already armed
     if (_player == null || !_isPlaying) return; // nothing playing to arm
     _armFlipToSilence();

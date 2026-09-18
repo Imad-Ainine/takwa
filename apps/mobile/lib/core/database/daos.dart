@@ -142,6 +142,34 @@ class DailyRecordDao extends DatabaseAccessor<AppDatabase>
     );
   }
 
+  /// Get-or-create a daily record for an arbitrary [date] (not just today).
+  /// Uses the same `insertOrIgnore` + fetch pattern as [getOrCreateToday].
+  Future<DailyRecord> getOrCreateForDate(DateTime date) async {
+    final day = _dateOnly(date);
+
+    await into(dailyRecords).insert(
+      DailyRecordsCompanion(date: Value(day)),
+      mode: InsertMode.insertOrIgnore,
+    );
+
+    return (select(
+      dailyRecords,
+    )..where((r) => r.date.equals(day))).getSingle();
+  }
+
+  /// Mark sadaqah logged and persist [amount] for an arbitrary [date].
+  /// Creates the daily record for that date if it doesn't exist yet.
+  Future<void> logSadaqahForDate(DateTime date, double amount) async {
+    final record = await getOrCreateForDate(date);
+    await (update(dailyRecords)..where((r) => r.id.equals(record.id))).write(
+      DailyRecordsCompanion(
+        sadaqah: const Value(true),
+        sadaqahAmount: Value(amount),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   /// Sadaqah-logged days in reverse-chronological order, for the tracker's
   /// history list. `limit` keeps a "since forever" history bounded.
   Future<List<DailyRecord>> getSadaqahHistory({int limit = 100}) {
@@ -1319,6 +1347,21 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
 
   Future<void> setBool(String key, bool value) => set(key, value.toString());
 
+  /// Returns the last time the user visited a given circle's detail screen,
+  /// or null if the circle has never been visited. Used to compute unread
+  /// reaction counts — see R5 in the home-feature-completeness spec.
+  Future<DateTime?> getCircleLastVisited(String circleId) async {
+    final v = await get('circle_last_visited_$circleId');
+    if (v == null) return null;
+    return DateTime.tryParse(v);
+  }
+
+  /// Persists [timestamp] as the last-visited time for [circleId] (ISO 8601).
+  Future<void> setCircleLastVisited(
+    String circleId,
+    DateTime timestamp,
+  ) => set('circle_last_visited_$circleId', timestamp.toIso8601String());
+
   Stream<String?> watch(String key) {
     return (select(userSettings)..where((s) => s.key.equals(key)))
         .watchSingleOrNull()
@@ -2092,6 +2135,24 @@ class ZakatDao extends DatabaseAccessor<AppDatabase> with _$ZakatDaoMixin {
         .watchSingleOrNull();
   }
 
+  /// Up to [limit] most-recent calculations, newest first — backs the
+  /// history section in the calculator screen (R1.1, R1.4).
+  Stream<List<ZakatCalculation>> watchHistory({int limit = 50}) {
+    return (select(zakatCalculations)
+          ..orderBy([(t) => OrderingTerm.desc(t.computedAt)])
+          ..limit(limit))
+        .watch();
+  }
+
+  /// One-shot equivalent of [watchHistory] — useful for unit tests and
+  /// one-time reads.
+  Future<List<ZakatCalculation>> getHistory({int limit = 50}) {
+    return (select(zakatCalculations)
+          ..orderBy([(t) => OrderingTerm.desc(t.computedAt)])
+          ..limit(limit))
+        .get();
+  }
+
   Future<int> save(ZakatCalculationsCompanion companion) {
     return into(zakatCalculations).insert(companion);
   }
@@ -2141,5 +2202,28 @@ class QadaDao extends DatabaseAccessor<AppDatabase> with _$QadaDaoMixin {
         ),
       );
     });
+  }
+
+  /// Returns the sum of [owedCount] and [completedCount] across all prayers.
+  /// Used to back the summary row in [QadaTrackerScreen] (R6.1).
+  Future<({int totalOwed, int totalCompleted})> getSummary() async {
+    final owedSum = qadaCounters.owedCount.sum();
+    final completedSum = qadaCounters.completedCount.sum();
+    final row = await (selectOnly(qadaCounters)
+          ..addColumns([owedSum, completedSum]))
+        .getSingle();
+    return (
+      totalOwed: row.read(owedSum) ?? 0,
+      totalCompleted: row.read(completedSum) ?? 0,
+    );
+  }
+
+  /// Reactive stream version of [getSummary] — re-emits whenever the
+  /// [qadaCounters] table changes (R6.4).
+  Stream<({int totalOwed, int totalCompleted})> watchSummary() {
+    return customSelect(
+      'SELECT 1',
+      readsFrom: {qadaCounters},
+    ).watch().asyncMap((_) => getSummary());
   }
 }

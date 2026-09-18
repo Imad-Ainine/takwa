@@ -9,6 +9,9 @@ import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
+// ══════════════════════════════════════════════════════
+//  AUTH CHOICE SCREEN – Refined Islamic
+// ══════════════════════════════════════════════════════
 class AuthChoiceScreen extends ConsumerWidget {
   const AuthChoiceScreen({super.key});
 
@@ -21,12 +24,30 @@ class AuthChoiceScreen extends ConsumerWidget {
     return Scaffold(
       body: Stack(
         children: [
+          // Soft geometric Islamic pattern
           const Positioned.fill(
             child: CustomPatternBackground(
               pattern: BackgroundPattern.adhkar,
-              opacity: 0.1,
+              opacity: 0.09,
             ),
           ),
+
+          // Soft gradient overlay
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    style.bg.withValues(alpha: 0.1),
+                    style.bg.withValues(alpha: 0.94),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
@@ -34,25 +55,30 @@ class AuthChoiceScreen extends ConsumerWidget {
                 children: [
                   const Spacer(flex: 2),
 
-                  // Logo & Name
+                  // Logo & Name – refined gold ring
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.xl),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: context.colors.gold.withValues(alpha: 0.1),
+                      gradient: RadialGradient(
+                        colors: [
+                          context.colors.gold.withValues(alpha: 0.16),
+                          context.colors.gold.withValues(alpha: 0.04),
+                        ],
+                      ),
                       border: Border.all(
-                        color: context.colors.gold.withValues(alpha: 0.3),
-                        width: 2,
+                        color: context.colors.gold.withValues(alpha: 0.38),
+                        width: 2.2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: context.colors.gold.withValues(alpha: 0.1),
-                          blurRadius: 30,
-                          spreadRadius: 5,
+                          color: context.colors.gold.withValues(alpha: 0.18),
+                          blurRadius: 36,
+                          spreadRadius: 6,
                         ),
                       ],
                     ),
-                    child: const Text('🌙', style: TextStyle(fontSize: 60)),
+                    child: const Text('🌙', style: TextStyle(fontSize: 62)),
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   ShaderMask(

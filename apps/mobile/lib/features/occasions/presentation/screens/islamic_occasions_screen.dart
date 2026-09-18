@@ -21,6 +21,14 @@ class IslamicOccasionsScreen extends StatelessWidget {
     final occasions = resolveAllOccasions();
     final whiteDays = resolveWhiteDays();
 
+    // Sort by daysUntil ascending; tie-break alphabetically by localized name
+    // (R11.2 — occasions with equal daysUntil must be sorted alphabetically).
+    occasions.sort((a, b) {
+      final byDays = a.daysUntil.compareTo(b.daysUntil);
+      if (byDays != 0) return byDays;
+      return _occasionName(l10n, a.kind).compareTo(_occasionName(l10n, b.kind));
+    });
+
     return Scaffold(
       backgroundColor: context.colors.background,
       body: Stack(
@@ -77,14 +85,18 @@ class IslamicOccasionsScreen extends StatelessWidget {
   }
 }
 
-String _occasionName(AppLocalizations l10n, IslamicOccasionKind kind) => switch (kind) {
-  IslamicOccasionKind.ashura => l10n.occasionAshura,
-  IslamicOccasionKind.isra1Miraj => l10n.occasionIsraMiraj,
-  IslamicOccasionKind.ramadanStart => l10n.occasionRamadanStart,
-  IslamicOccasionKind.eidAlFitr => l10n.occasionEidAlFitr,
-  IslamicOccasionKind.mawlid => l10n.occasionMawlid,
-  IslamicOccasionKind.eidAlAdha => l10n.occasionEidAlAdha,
-};
+String _occasionName(AppLocalizations l10n, IslamicOccasionKind kind) =>
+    switch (kind) {
+      IslamicOccasionKind.ashura => l10n.occasionAshura,
+      IslamicOccasionKind.isra1Miraj => l10n.occasionIsraMiraj,
+      IslamicOccasionKind.ramadanStart => l10n.occasionRamadanStart,
+      IslamicOccasionKind.eidAlFitr => l10n.occasionEidAlFitr,
+      IslamicOccasionKind.mawlid => l10n.occasionMawlid,
+      IslamicOccasionKind.eidAlAdha => l10n.occasionEidAlAdha,
+      IslamicOccasionKind.islamicNewYear => l10n.occasionIslamicNewYear,
+      IslamicOccasionKind.laylatAlQadr => l10n.occasionLaylatAlQadr,
+      IslamicOccasionKind.dayOfArafah => l10n.occasionDayOfArafah,
+    };
 
 String _daysUntilLabel(AppLocalizations l10n, int daysUntil) =>
     daysUntil == 0 ? l10n.occasionsDaysUntilToday : l10n.occasionsDaysUntil(daysUntil);
@@ -97,6 +109,43 @@ void _openAddReminder(BuildContext context, String title) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Fasting chip — shown on occasions and White Days where fasting is recommended.
+// ---------------------------------------------------------------------------
+
+/// Small chip displayed next to an occasion or White Day title when voluntary
+/// fasting is specifically recommended on that day (R12.1–12.4).
+class _FastingChip extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _FastingChip({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: context.colors.goldDim,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        border: Border.all(color: context.colors.gold.withValues(alpha: 0.3)),
+      ),
+      child: Text(
+        l10n.occasionsFastingRecommended,
+        style: context.typography.caption.copyWith(
+          color: context.colors.goldText,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// White Days card
+// ---------------------------------------------------------------------------
+
 class _WhiteDaysCard extends StatelessWidget {
   final List<WhiteDay> whiteDays;
   final AppLocalizations l10n;
@@ -105,9 +154,16 @@ class _WhiteDaysCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFmt = DateFormat.MMMd();
-    final soonest = whiteDays.reduce(
-      (a, b) => a.daysUntil.abs() < b.daysUntil.abs() ? a : b,
-    );
+
+    // R10.3 — highlight the White Day with the smallest non-negative daysUntil.
+    // Fall back to smallest absolute value only if all have passed (should not
+    // happen after the R10 domain fix, but kept for safety).
+    final upcoming = whiteDays.where((d) => d.daysUntil >= 0);
+    final soonest = upcoming.isNotEmpty
+        ? upcoming.reduce((a, b) => a.daysUntil < b.daysUntil ? a : b)
+        : whiteDays.reduce(
+            (a, b) => a.daysUntil.abs() < b.daysUntil.abs() ? a : b,
+          );
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -130,7 +186,10 @@ class _WhiteDaysCard extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.notifications_active_outlined, color: context.colors.gold),
+                icon: Icon(
+                  Icons.notifications_active_outlined,
+                  color: context.colors.gold,
+                ),
                 tooltip: l10n.occasionsAddReminderTooltip,
                 onPressed: () =>
                     _openAddReminder(context, l10n.occasionsWhiteDaysTitle),
@@ -148,14 +207,20 @@ class _WhiteDaysCard extends StatelessWidget {
                       Text(
                         dateFmt.format(d.gregorianDate),
                         style: context.typography.bodyMedium.copyWith(
-                          fontWeight: d == soonest ? FontWeight.w800 : FontWeight.w400,
-                          color: d == soonest ? context.colors.gold : context.colors.textPrimary,
+                          fontWeight:
+                              d == soonest ? FontWeight.w800 : FontWeight.w400,
+                          color: d == soonest
+                              ? context.colors.gold
+                              : context.colors.textPrimary,
                         ),
                       ),
                       Text(
                         _daysUntilLabel(l10n, d.daysUntil),
                         style: context.typography.caption,
                       ),
+                      const SizedBox(height: 4),
+                      // White Days always have isFastingRecommended = true (R12.1, 12.3)
+                      _FastingChip(l10n: l10n),
                     ],
                   ),
                 )
@@ -166,6 +231,10 @@ class _WhiteDaysCard extends StatelessWidget {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Occasion tile
+// ---------------------------------------------------------------------------
 
 class _OccasionTile extends StatelessWidget {
   final ResolvedOccasion occasion;
@@ -189,6 +258,12 @@ class _OccasionTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // R12.3 — fasting chip has the same visual form and position
+                // on every annotated occasion.
+                if (occasion.isFastingRecommended) ...[
+                  _FastingChip(l10n: l10n),
+                  const SizedBox(height: 4),
+                ],
                 Text(
                   _occasionName(l10n, occasion.kind),
                   style: context.typography.labelLarge,

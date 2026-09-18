@@ -4,7 +4,10 @@
 // backed by Dart collections instead of network calls.
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:takwa/core/supabase/supabase_service.dart';
+import 'package:takwa/core/supabase/supabase_service.dart'
+    show
+        SupabaseService,
+        CircleOperationException;
 
 class FakeSupabaseService implements SupabaseService {
   // Keyed storage, mirroring each table's real unique constraint.
@@ -430,5 +433,33 @@ class FakeSupabaseService implements SupabaseService {
     return circleReactions
         .where((r) => r['circle_id'] == circleId && r['to_user_id'] == userId)
         .toList();
+  }
+
+  // ─────────────── CIRCLE OWNER CONTROLS ───────────────
+
+  @override
+  Future<void> renameCircle({
+    required String circleId,
+    required String newName,
+  }) async {
+    callLog.add('renameCircle:$circleId:$newName');
+    final idx = circles.indexWhere((c) => c['id'] == circleId);
+    if (idx == -1) throw const CircleOperationException('not_owner');
+    circles[idx] = {...circles[idx], 'name': newName};
+  }
+
+  @override
+  Future<void> deleteCircle(String circleId) async {
+    callLog.add('deleteCircle:$circleId');
+    circles.removeWhere((c) => c['id'] == circleId);
+  }
+
+  @override
+  Future<void> removeCircleMember({
+    required String circleId,
+    required String userId,
+  }) async {
+    callLog.add('removeCircleMember:$circleId:$userId');
+    // No-op in fake — members list is managed by the caller in tests
   }
 }

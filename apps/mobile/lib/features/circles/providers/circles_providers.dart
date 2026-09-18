@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:takwa/core/providers/auth_providers.dart';
 import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/supabase/supabase_config.dart';
 import 'package:takwa/features/circles/domain/circle_models.dart';
@@ -56,6 +57,18 @@ class MyCirclesNotifier extends AsyncNotifier<List<CircleSummary>> {
     await ref.read(supabaseServiceProvider).leaveCircle(circleId);
     await refresh();
   }
+
+  Future<void> rename(String circleId, String newName) async {
+    await ref
+        .read(supabaseServiceProvider)
+        .renameCircle(circleId: circleId, newName: newName);
+    await refresh();
+  }
+
+  Future<void> delete(String circleId) async {
+    await ref.read(supabaseServiceProvider).deleteCircle(circleId);
+    await refresh();
+  }
 }
 
 final myCirclesProvider =
@@ -75,6 +88,14 @@ class CircleLeaderboardNotifier
   }
 
   Future<void> refresh() async {
+    ref.invalidateSelf();
+    await future;
+  }
+
+  Future<void> removeMember(String circleId, String userId) async {
+    await ref
+        .read(supabaseServiceProvider)
+        .removeCircleMember(circleId: circleId, userId: userId);
     ref.invalidateSelf();
     await future;
   }
@@ -114,3 +135,32 @@ final myCircleMembershipProvider = Provider.family<CircleMemberRow?, ({String ci
     return null;
   },
 );
+
+// ── Unread reaction badge count per circle (R5) ────────────────
+/// Returns the count of reactions received by the current user in [circleId]
+/// that are newer than the last-visited timestamp stored in [SettingsDao].
+/// - Returns 0 silently on any error (a missing badge is less disruptive
+///   than a broken layout).
+/// - Treats null last-visited (first-ever visit) as "all reactions unread".
+final circleUnreadCountProvider =
+    FutureProvider.family.autoDispose<int, String>((ref, circleId) async {
+  try {
+    final uid = ref.watch(supabaseUserProvider).value?.id;
+    if (uid == null) return 0;
+
+    final lastVisited = await ref
+        .read(settingsDaoProvider)
+        .getCircleLastVisited(circleId);
+
+    final raw = await ref
+        .read(supabaseServiceProvider)
+        .getCircleReactionsReceived(circleId, uid);
+
+    final reactions = raw.map(CircleReactionReceived.fromMap).toList();
+
+    if (lastVisited == null) return reactions.length;
+    return reactions.where((r) => r.createdAt.isAfter(lastVisited)).length;
+  } catch (_) {
+    return 0;
+  }
+});

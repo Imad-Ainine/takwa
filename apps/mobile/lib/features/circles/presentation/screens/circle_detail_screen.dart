@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:takwa/core/providers/auth_providers.dart';
+import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/supabase/supabase_config.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
@@ -15,14 +16,34 @@ import 'package:takwa/features/circles/domain/circle_models.dart';
 import 'package:takwa/features/circles/providers/circles_providers.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
-class CircleDetailScreen extends ConsumerWidget {
+class CircleDetailScreen extends ConsumerStatefulWidget {
   final CircleSummary circle;
   const CircleDetailScreen({super.key, required this.circle});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CircleDetailScreen> createState() => _CircleDetailScreenState();
+}
+
+class _CircleDetailScreenState extends ConsumerState<CircleDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Persist the current timestamp as last-visited and clear the unread
+    // badge — see R5.3 in home-feature-completeness spec.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref
+          .read(settingsDaoProvider)
+          .setCircleLastVisited(widget.circle.id, DateTime.now());
+      ref.invalidate(circleUnreadCountProvider(widget.circle.id));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final myUserId = ref.watch(supabaseUserProvider).value?.id;
+    final isOwner = myUserId != null && myUserId == widget.circle.ownerId;
 
     return Scaffold(
       backgroundColor: context.colors.background,
@@ -34,7 +55,7 @@ class CircleDetailScreen extends ConsumerWidget {
           SafeArea(
             child: Column(
               children: [
-                _buildAppBar(context, l10n),
+                _buildAppBar(context, l10n, isOwner),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
@@ -44,18 +65,18 @@ class CircleDetailScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _InviteCodeCard(circle: circle, l10n: l10n),
+                        _InviteCodeCard(circle: widget.circle, l10n: l10n),
                         const SizedBox(height: AppSpacing.lg),
                         if (myUserId != null)
                           _SharingSettingsCard(
-                            circleId: circle.id,
+                            circleId: widget.circle.id,
                             myUserId: myUserId,
                             l10n: l10n,
                           ),
                         if (myUserId != null) ...[
                           const SizedBox(height: AppSpacing.lg),
                           _ReceivedReactions(
-                            circleId: circle.id,
+                            circleId: widget.circle.id,
                             myUserId: myUserId,
                             l10n: l10n,
                           ),
@@ -67,12 +88,13 @@ class CircleDetailScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         _Leaderboard(
-                          circleId: circle.id,
+                          circleId: widget.circle.id,
                           myUserId: myUserId,
+                          isOwner: isOwner,
                           l10n: l10n,
                         ),
                         const SizedBox(height: AppSpacing.xl),
-                        _LeaveButton(circle: circle, l10n: l10n),
+                        _LeaveButton(circle: widget.circle, l10n: l10n),
                         const SizedBox(height: AppSpacing.xxl),
                       ],
                     ),
@@ -86,7 +108,11 @@ class CircleDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context, AppLocalizations l10n) {
+  Widget _buildAppBar(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isOwner,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
@@ -97,11 +123,134 @@ class CircleDetailScreen extends ConsumerWidget {
           CustomLeadingButton(onPressed: () => Navigator.pop(context)),
           const SizedBox(width: AppSpacing.md),
           Expanded(
-            child: Text(circle.name, style: context.typography.headingMedium),
+            child: Text(widget.circle.name, style: context.typography.headingMedium),
+          ),
+          if (isOwner)
+            PopupMenuButton<_OwnerAction>(
+              icon: const Icon(Icons.more_vert),
+              onSelected: (action) {
+                switch (action) {
+                  case _OwnerAction.rename:
+                    _showRenameDialog(context, l10n);
+                  case _OwnerAction.delete:
+                    _showDeleteDialog(context, l10n);
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: _OwnerAction.rename,
+                  child: Text(l10n.circleRenameButton),
+                ),
+                PopupMenuItem(
+                  value: _OwnerAction.delete,
+                  child: Text(
+                    l10n.circleDeleteButton,
+                    style: TextStyle(color: context.colors.danger),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showRenameDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) async {
+    final controller = TextEditingController(text: widget.circle.name);
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          String? errorText;
+
+          return AlertDialog(
+            title: Text(l10n.circleRenameDialogTitle),
+            content: TextField(
+              controller: controller,
+              autofocus: true,
+              maxLength: 50,
+              decoration: InputDecoration(
+                labelText: l10n.circleRenameNameLabel,
+                errorText: errorText,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(l10n.commonCancel),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final newName = controller.text.trim();
+                  if (newName.isEmpty || newName.length > 50) {
+                    setDialogState(() {
+                      errorText = l10n.circleRenameValidationError;
+                    });
+                    return;
+                  }
+                  Navigator.pop(dialogContext);
+                  try {
+                    await ref
+                        .read(myCirclesProvider.notifier)
+                        .rename(widget.circle.id, newName);
+                    ref.invalidate(myCirclesProvider);
+                  } catch (_) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.circleErrorGeneric)),
+                      );
+                    }
+                  }
+                },
+                child: Text(l10n.circleRenameConfirm),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    controller.dispose();
+  }
+
+  Future<void> _showDeleteDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.circleDeleteConfirmTitle),
+        content: Text(l10n.circleDeleteConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.commonCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: TextButton.styleFrom(
+              foregroundColor: context.colors.danger,
+            ),
+            child: Text(l10n.circleDeleteConfirm),
           ),
         ],
       ),
     );
+    if (confirmed == true) {
+      try {
+        await ref.read(myCirclesProvider.notifier).delete(widget.circle.id);
+        if (context.mounted) Navigator.pop(context);
+      } catch (_) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.circleErrorGeneric)),
+          );
+        }
+      }
+    }
   }
 }
 
@@ -329,6 +478,8 @@ class _ReceivedReactions extends ConsumerWidget {
 
 enum _SortMetric { points, streak }
 
+enum _OwnerAction { rename, delete }
+
 /// Which metric a circle's member list is currently sorted by. `family`
 /// scopes it per-circle rather than app-wide — StateProvider.family caches
 /// one value per circleId, defaulting to points.
@@ -339,10 +490,12 @@ final _leaderboardSortProvider = StateProvider.family<_SortMetric, String>(
 class _Leaderboard extends ConsumerWidget {
   final String circleId;
   final String? myUserId;
+  final bool isOwner;
   final AppLocalizations l10n;
   const _Leaderboard({
     required this.circleId,
     required this.myUserId,
+    required this.isOwner,
     required this.l10n,
   });
 
@@ -382,6 +535,7 @@ class _Leaderboard extends ConsumerWidget {
                     (row) => _MemberTile(
                       row: row,
                       isMe: row.userId == myUserId,
+                      isOwner: isOwner,
                       circleId: circleId,
                       l10n: l10n,
                     ),
@@ -463,11 +617,13 @@ class _SortSelector extends ConsumerWidget {
 class _MemberTile extends ConsumerWidget {
   final CircleMemberRow row;
   final bool isMe;
+  final bool isOwner;
   final String circleId;
   final AppLocalizations l10n;
   const _MemberTile({
     required this.row,
     required this.isMe,
+    required this.isOwner,
     required this.circleId,
     required this.l10n,
   });
@@ -524,6 +680,13 @@ class _MemberTile extends ConsumerWidget {
               color: context.colors.gold,
               onPressed: () => _showReactionSheet(context, ref),
             ),
+          if (isOwner && !isMe)
+            IconButton(
+              icon: const Icon(Icons.person_remove_outlined),
+              tooltip: l10n.circleRemoveMemberConfirm,
+              color: context.colors.danger,
+              onPressed: () => _showRemoveMemberDialog(context, ref),
+            ),
         ],
       ),
     );
@@ -564,6 +727,48 @@ class _MemberTile extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.circleErrorGeneric)),
         );
+      }
+    }
+  }
+
+  Future<void> _showRemoveMemberDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final memberName = row.username ?? '—';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.circleRemoveMemberConfirmTitle),
+        content: Text(
+          l10n.circleRemoveMemberConfirmBody(memberName),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.commonCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: TextButton.styleFrom(
+              foregroundColor: context.colors.danger,
+            ),
+            child: Text(l10n.circleRemoveMemberConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      try {
+        await ref
+            .read(circleLeaderboardProvider(circleId).notifier)
+            .removeMember(circleId, row.userId);
+      } catch (_) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.circleErrorGeneric)),
+          );
+        }
       }
     }
   }

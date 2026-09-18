@@ -1032,11 +1032,19 @@ class _IbadahGroup extends ConsumerWidget {
             });
           },
         ),
-        if (record?.sadaqah ?? false)
-          _SadaqahAmountField(
-            key: ValueKey('sadaqah-amount-${record!.id}'),
-            record: record!,
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 220),
+          transitionBuilder: (child, animation) => SizeTransition(
+            sizeFactor: animation,
+            child: FadeTransition(opacity: animation, child: child),
           ),
+          child: (record?.sadaqah ?? false)
+              ? _SadaqahAmountField(
+                  key: ValueKey('sadaqah-amount-${record!.id}'),
+                  record: record!,
+                )
+              : const SizedBox.shrink(key: ValueKey('sadaqah-amount-none')),
+        ),
         _ToggleRow(
           emoji: '👁️',
           label: l10n.ibadahGhadhBasarLabel,
@@ -1305,6 +1313,7 @@ class _SadaqahAmountField extends ConsumerStatefulWidget {
 
 class _SadaqahAmountFieldState extends ConsumerState<_SadaqahAmountField> {
   late final TextEditingController _controller;
+  String? _errorText;
 
   @override
   void initState() {
@@ -1320,18 +1329,48 @@ class _SadaqahAmountFieldState extends ConsumerState<_SadaqahAmountField> {
     return s.endsWith('.00') ? s.substring(0, s.length - 3) : s;
   }
 
+  /// Returns true for a decimal value in [0.01, 999_999_999.99] with at most
+  /// 2 decimal places. Blank input is handled separately (→ 0.0).
+  static bool _isValidAmount(double v) {
+    if (v < 0.01 || v > 999999999.99) return false;
+    // Ensure at most 2 decimal places.
+    return (v * 100).round() == (v * 100);
+  }
+
+  void _save(String text) {
+    final l10n = AppLocalizations.of(context)!;
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) {
+      // Blank → persist 0.0
+      setState(() => _errorText = null);
+      _saveAndSync(ref, context, () async {
+        final dao = ref.read(dailyRecordDaoProvider);
+        final rec = await dao.getOrCreateToday();
+        await dao.updateSadaqahAmount(rec.id, 0.0);
+        return dao.getOrCreateToday();
+      });
+      return;
+    }
+
+    final parsed = double.tryParse(trimmed);
+    if (parsed == null || !_isValidAmount(parsed)) {
+      setState(() => _errorText = l10n.sadaqahAmountInvalidError);
+      return;
+    }
+
+    setState(() => _errorText = null);
+    _saveAndSync(ref, context, () async {
+      final dao = ref.read(dailyRecordDaoProvider);
+      final rec = await dao.getOrCreateToday();
+      await dao.updateSadaqahAmount(rec.id, parsed);
+      return dao.getOrCreateToday();
+    });
+  }
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  void _save() {
-    final amount = double.tryParse(_controller.text.trim());
-    if (amount == null) return;
-    ref
-        .read(dailyRecordDaoProvider)
-        .updateSadaqahAmount(widget.record.id, amount);
   }
 
   @override
@@ -1339,14 +1378,48 @@ class _SadaqahAmountFieldState extends ConsumerState<_SadaqahAmountField> {
     final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: TextField(
+      child: TextFormField(
         controller: _controller,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        onSubmitted: (_) => _save(),
-        onTapOutside: (_) => _save(),
+        onFieldSubmitted: _save,
+        onTapOutside: (_) => _save(_controller.text),
+        style: context.typography.bodyMedium.copyWith(
+          fontSize: 13,
+          color: context.colors.textPrimary,
+        ),
         decoration: InputDecoration(
           labelText: l10n.sadaqahAmountFieldLabel,
+          errorText: _errorText,
           isDense: true,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: 10,
+          ),
+          filled: true,
+          fillColor: context.colors.card,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderSide: BorderSide(color: context.colors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderSide: BorderSide(color: context.colors.border),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderSide: BorderSide(
+              color: context.colors.teal,
+              width: 1.5,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderSide: BorderSide(color: context.colors.danger),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderSide: BorderSide(color: context.colors.danger, width: 1.5),
+          ),
         ),
       ),
     );

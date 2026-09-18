@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:takwa/core/database/app_database.dart';
 import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/theme/app_theme.dart';
@@ -8,6 +9,8 @@ import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/primary_switch.dart';
+import 'package:takwa/core/widgets/takwa_error_state.dart';
+import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/features/reminders/presentation/widgets/add_reminder_bottom_sheet.dart';
 import 'package:takwa/features/zakat/domain/zakat_calculator.dart';
 import 'package:takwa/l10n/app_localizations.dart';
@@ -123,6 +126,28 @@ class _ZakatCalculatorScreenState
     ).showSnackBar(SnackBar(content: Text(l10n.zakatSavedMessage)));
   }
 
+  /// Populate all form controllers and toggles from a saved history record.
+  /// Called when the user taps a history row (R1.2).
+  void _populateFromHistory(ZakatCalculation record) {
+    setState(() {
+      _cashCtrl.text = _fmtInput(record.cashAmount);
+      _bankCtrl.text = _fmtInput(record.bankAmount);
+      _goldGramsCtrl.text = _fmtInput(record.goldGrams);
+      _goldPriceCtrl.text = _fmtInput(record.goldPricePerGram);
+      _silverGramsCtrl.text = _fmtInput(record.silverGrams);
+      _silverPriceCtrl.text = _fmtInput(record.silverPricePerGram);
+      _tradeGoodsCtrl.text = _fmtInput(record.tradeGoodsValue);
+      _debtCtrl.text = _fmtInput(record.debtAmount);
+      _currencyCtrl.text = record.currencyLabel;
+      _nisabBasis = record.nisabStandard == NisabStandard.gold
+          ? ZakatNisabBasis.gold
+          : ZakatNisabBasis.silver;
+      _hawlConfirmed = record.hawlConfirmed;
+      // Clear the result so the user sees the populated inputs fresh.
+      _result = null;
+    });
+  }
+
   @override
   void dispose() {
     _cashCtrl.dispose();
@@ -163,6 +188,9 @@ class _ZakatCalculatorScreenState
                       children: [
                         _DisclaimerBanner(text: l10n.zakatDisclaimer),
                         const SizedBox(height: AppSpacing.lg),
+                        // ── Zakat al-Mal heading (R2.5) ──────────────
+                        _sectionTitle(context, l10n.zakatMalSectionHeading),
+                        const SizedBox(height: AppSpacing.sm),
                         _sectionTitle(context, l10n.zakatAssetsSectionTitle),
                         const SizedBox(height: AppSpacing.sm),
                         _numberField(l10n.zakatCashLabel, _cashCtrl),
@@ -243,6 +271,15 @@ class _ZakatCalculatorScreenState
                             label: Text(l10n.zakatSetReminderButton),
                           ),
                         ],
+                        // ── Zakat al-Fitr section (R2.1–2.5) ─────────
+                        const SizedBox(height: AppSpacing.lg),
+                        _ZakatFitrahSection(l10n: l10n),
+                        // ── Calculation history (R1.1, 1.3, 1.5) ─────
+                        const SizedBox(height: AppSpacing.lg),
+                        _ZakatHistorySection(
+                          l10n: l10n,
+                          onRowTap: _populateFromHistory,
+                        ),
                         const SizedBox(height: AppSpacing.xxl),
                       ],
                     ),
@@ -292,6 +329,290 @@ class _ZakatCalculatorScreenState
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  History Section — R1.1, R1.3, R1.5
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Displays up to 50 most-recent saved Zakat calculations.
+///
+/// Handles loading, error, empty, and data states. Tapping a row calls
+/// [onRowTap] so the parent state can populate the form fields (R1.2).
+class _ZakatHistorySection extends ConsumerWidget {
+  const _ZakatHistorySection({
+    required this.l10n,
+    required this.onRowTap,
+  });
+
+  final AppLocalizations l10n;
+  final ValueChanged<ZakatCalculation> onRowTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final historyAsync = ref.watch(zakatHistoryProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.zakatHistorySectionTitle,
+          style: context.typography.headingMedium,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        historyAsync.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+            child: TakwaLoadingIndicator(),
+          ),
+          error: (_, __) => TakwaErrorState(
+            compact: true,
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+            onRetry: () => ref.invalidate(zakatHistoryProvider),
+          ),
+          data: (history) {
+            if (history.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                child: Text(
+                  l10n.zakatHistoryEmpty,
+                  style: context.typography.bodyMedium.copyWith(
+                    color: context.colors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
+            return ListView.separated(
+              // The outer SingleChildScrollView handles scrolling —
+              // keep this list non-scrollable and sized to its content.
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: history.length,
+              separatorBuilder: (_, __) =>
+                  Divider(color: context.colors.border, height: 1),
+              itemBuilder: (context, index) => _ZakatHistoryRow(
+                record: history[index],
+                onTap: () => onRowTap(history[index]),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+/// One row in the history list (date, amount, currency).
+class _ZakatHistoryRow extends StatelessWidget {
+  const _ZakatHistoryRow({required this.record, required this.onTap});
+
+  final ZakatCalculation record;
+  final VoidCallback onTap;
+
+  static final _dateFmt = DateFormat('dd MMM yyyy');
+
+  @override
+  Widget build(BuildContext context) {
+    final currency = record.currencyLabel.trim();
+    final amountStr = record.resultDue.toStringAsFixed(2);
+    final displayAmount = currency.isEmpty ? amountStr : '$amountStr $currency';
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.sm,
+          horizontal: AppSpacing.xs,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              _dateFmt.format(record.computedAt),
+              style: context.typography.bodyMedium,
+            ),
+            Text(
+              displayAmount,
+              style: context.typography.bodyMedium.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Zakat al-Fitr Section — R2.1–2.5
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Collapsible companion section for Zakat al-Fitr calculation.
+///
+/// Holds its own local state for the three inputs and the computed result,
+/// recomputing on every change. Invalid inputs show field-level error text;
+/// the total is only shown when both inputs are valid.
+class _ZakatFitrahSection extends StatefulWidget {
+  const _ZakatFitrahSection({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  State<_ZakatFitrahSection> createState() => _ZakatFitrahSectionState();
+}
+
+class _ZakatFitrahSectionState extends State<_ZakatFitrahSection> {
+  final _membersCtrl = TextEditingController();
+  final _priceCtrl = TextEditingController();
+  final _currencyCtrl = TextEditingController();
+
+  ZakatFitrahResult _fitrahResult =
+      const ZakatFitrahResult(totalDue: 0, isValid: false);
+
+  String? _membersError;
+  String? _priceError;
+
+  @override
+  void initState() {
+    super.initState();
+    _membersCtrl.addListener(_recompute);
+    _priceCtrl.addListener(_recompute);
+    _currencyCtrl.addListener(_recompute);
+  }
+
+  void _recompute() {
+    final membersText = _membersCtrl.text.trim();
+    final priceText = _priceCtrl.text.trim();
+
+    final members = int.tryParse(membersText) ?? -1;
+    final price = double.tryParse(priceText) ?? -1;
+
+    final validMembers = members >= 1 && members <= 99;
+    final validPrice = price >= 0.01 && price <= 999999.99;
+
+    setState(() {
+      // Only show errors when the field has content (don't pre-validate empty).
+      _membersError = membersText.isNotEmpty && !validMembers
+          ? widget.l10n.zakatFitrahInvalidMembers
+          : null;
+      _priceError = priceText.isNotEmpty && !validPrice
+          ? widget.l10n.zakatFitrahInvalidPrice
+          : null;
+
+      _fitrahResult = computeZakatFitrah(
+        ZakatFitrahInputs(
+          members: members,
+          pricePerPerson: price,
+          currencyLabel: _currencyCtrl.text.trim(),
+        ),
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _membersCtrl.dispose();
+    _priceCtrl.dispose();
+    _currencyCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+    final currency = _currencyCtrl.text.trim();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: context.colors.card,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: context.colors.border),
+      ),
+      child: ExpansionTile(
+        shape: const Border(),  // remove default ExpansionTile borders
+        collapsedShape: const Border(),
+        tilePadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        childrenPadding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          0,
+          AppSpacing.lg,
+          AppSpacing.lg,
+        ),
+        title: Text(
+          l10n.zakatFitrahSectionHeading,
+          style: context.typography.headingMedium,
+        ),
+        children: [
+          // Members field
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: TextFormField(
+              controller: _membersCtrl,
+              decoration: InputDecoration(
+                labelText: l10n.zakatFitrahMembersLabel,
+                errorText: _membersError,
+              ),
+              keyboardType: TextInputType.number,
+            ),
+          ),
+          // Price per person field
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: TextFormField(
+              controller: _priceCtrl,
+              decoration: InputDecoration(
+                labelText: l10n.zakatFitrahPricePerPersonLabel,
+                errorText: _priceError,
+              ),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+          ),
+          // Currency label field
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: TextFormField(
+              controller: _currencyCtrl,
+              decoration: InputDecoration(
+                labelText: l10n.zakatFitrahCurrencyLabel,
+              ),
+            ),
+          ),
+          // Total — only displayed when both inputs are valid (R2.3, R2.4)
+          if (_fitrahResult.isValid) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.zakatFitrahTotalLabel,
+                  style: context.typography.bodyMedium,
+                ),
+                Text(
+                  currency.isEmpty
+                      ? _fitrahResult.totalDue.toStringAsFixed(2)
+                      : '${_fitrahResult.totalDue.toStringAsFixed(2)} $currency',
+                  style: context.typography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.success,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Existing private widgets (unchanged)
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _DisclaimerBanner extends StatelessWidget {
   final String text;
