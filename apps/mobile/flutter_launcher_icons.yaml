@@ -5,7 +5,7 @@ flutter_launcher_icons:
   min_sdk_android: 21
 
   # For modern Android adaptive icons:
-  adaptive_icon_background: "#FFFFFF" # Or your brand color e.g. "#1B4D3E"
+  #adaptive_icon_background: "#FFFFFF" # Or your brand color e.g. "#1B4D3E"
   adaptive_icon_foreground: "assets/images/takwa_transparent_bg.png"
 
   web:

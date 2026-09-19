@@ -77,6 +77,10 @@ class CircleMemberRow {
   final int? totalPoints;
   final int? quranPages;
   final bool? checklistDoneToday;
+  final bool shareStreak;
+  final bool sharePoints;
+  final bool shareChecklistDone;
+  final bool shareQuranPages;
 
   const CircleMemberRow({
     required this.userId,
@@ -86,15 +90,32 @@ class CircleMemberRow {
     this.totalPoints,
     this.quranPages,
     this.checklistDoneToday,
+    this.shareStreak = false,
+    this.sharePoints = false,
+    this.shareChecklistDone = false,
+    this.shareQuranPages = false,
   });
 
-  factory CircleMemberRow.fromMap(Map<String, dynamic> map) => CircleMemberRow(
-    userId: map['user_id'] as String,
-    username: map['username'] as String?,
-    avatarEmoji: map['avatar_emoji'] as String?,
-    currentStreak: (map['current_streak'] as num?)?.toInt(),
-    totalPoints: (map['total_points'] as num?)?.toInt(),
-    quranPages: (map['quran_pages'] as num?)?.toInt(),
-    checklistDoneToday: map['checklist_done_today'] as bool?,
-  );
+  factory CircleMemberRow.fromMap(Map<String, dynamic> map) {
+    final currentStreak = (map['current_streak'] as num?)?.toInt();
+    final totalPoints = (map['total_points'] as num?)?.toInt();
+    final quranPages = (map['quran_pages'] as num?)?.toInt();
+    final checklistDone = map['checklist_done_today'] as bool?;
+
+    return CircleMemberRow(
+      userId: map['user_id'] as String,
+      username: map['username'] as String?,
+      avatarEmoji: map['avatar_emoji'] as String?,
+      currentStreak: currentStreak,
+      totalPoints: totalPoints,
+      quranPages: quranPages,
+      checklistDoneToday: checklistDone,
+      shareStreak: (map['share_streak'] as bool?) ?? (currentStreak != null),
+      sharePoints: (map['share_points'] as bool?) ?? (totalPoints != null),
+      shareChecklistDone:
+          (map['share_checklist_done'] as bool?) ?? (checklistDone != null),
+      shareQuranPages:
+          (map['share_quran_pages'] as bool?) ?? (quranPages != null),
+    );
+  }
 }

@@ -318,13 +318,10 @@ class _SharingSettingsCard extends ConsumerWidget {
       myCircleMembershipProvider((circleId: circleId, myUserId: myUserId)),
     );
 
-    // Non-null value on the leaderboard row means "this signal is shared"
-    // — see myCircleMembershipProvider's own comment for why that's a safe
-    // inference from get_circle_leaderboard()'s null-when-not-shared shape.
-    final shareStreak = myRow?.currentStreak != null;
-    final sharePoints = myRow?.totalPoints != null;
-    final shareChecklist = myRow?.checklistDoneToday != null;
-    final shareQuran = myRow?.quranPages != null;
+    final shareStreak = myRow?.shareStreak ?? false;
+    final sharePoints = myRow?.sharePoints ?? false;
+    final shareChecklist = myRow?.shareChecklistDone ?? false;
+    final shareQuran = myRow?.shareQuranPages ?? false;
 
     Future<void> update({
       bool? streak,
@@ -332,16 +329,24 @@ class _SharingSettingsCard extends ConsumerWidget {
       bool? checklist,
       bool? quran,
     }) async {
-      await ref
-          .read(supabaseServiceProvider)
-          .updateCircleSharing(
-            circleId: circleId,
-            shareStreak: streak ?? shareStreak,
-            sharePoints: points ?? sharePoints,
-            shareChecklistDone: checklist ?? shareChecklist,
-            shareQuranPages: quran ?? shareQuran,
+      try {
+        await ref
+            .read(supabaseServiceProvider)
+            .updateCircleSharing(
+              circleId: circleId,
+              shareStreak: streak ?? shareStreak,
+              sharePoints: points ?? sharePoints,
+              shareChecklistDone: checklist ?? shareChecklist,
+              shareQuranPages: quran ?? shareQuran,
+            );
+        ref.invalidate(circleLeaderboardProvider(circleId));
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.circleErrorGeneric)),
           );
-      ref.invalidate(circleLeaderboardProvider(circleId));
+        }
+      }
     }
 
     return Container(
@@ -828,7 +833,7 @@ class _LeaveButton extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('—'),
+                child: Text(l10n.commonCancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),

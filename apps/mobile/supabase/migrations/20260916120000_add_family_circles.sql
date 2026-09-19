@@ -254,7 +254,11 @@ returns table (
   total_points int,
   quran_pages int,
   checklist_done_today boolean,
-  joined_at timestamptz
+  joined_at timestamptz,
+  share_streak boolean,
+  share_points boolean,
+  share_checklist_done boolean,
+  share_quran_pages boolean
 )
 language plpgsql
 security definer
@@ -262,7 +266,8 @@ set search_path = public
 as $$
 begin
   if not exists (
-    select 1 from public.circle_members where circle_id = p_circle_id and user_id = auth.uid()
+    select 1 from public.circle_members cm
+    where cm.circle_id = p_circle_id and cm.user_id = auth.uid()
   ) then
     raise exception 'Not a member of this circle' using errcode = 'P0001';
   end if;
@@ -272,9 +277,9 @@ begin
     m.user_id,
     p.username,
     p.avatar_emoji,
-    case when m.share_streak then p.current_streak else null end,
-    case when m.share_points then p.total_points else null end,
-    case when m.share_quran_pages then p.quran_pages else null end,
+    case when m.share_streak then coalesce(p.current_streak, 0) else null end,
+    case when m.share_points then coalesce(p.total_points, 0) else null end,
+    case when m.share_quran_pages then coalesce(p.quran_pages, 0) else null end,
     case when m.share_checklist_done then
       exists(
         select 1 from public.daily_records d
@@ -283,7 +288,11 @@ begin
           and d.net_points > 0
       )
     else null end,
-    m.joined_at
+    m.joined_at,
+    m.share_streak,
+    m.share_points,
+    m.share_checklist_done,
+    m.share_quran_pages
   from public.circle_members m
   left join public.profiles p on p.id = m.user_id
   where m.circle_id = p_circle_id;
