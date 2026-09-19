@@ -251,19 +251,60 @@ jobs:
             #
             # Placed after the manifest publish above so the notification's
             # deep link is only ever sent once the release is actually live.
-            - name: Check for FCM secret
+            - name: Check and validate FCM service-account secret
               id: fcm_check
-              run: echo "has_secret=${{ secrets.FCM_SERVICE_ACCOUNT_JSON != '' }}" >> "$GITHUB_OUTPUT"
+              env:
+                FCM_CREDENTIALS: ${{ secrets.FCM_SERVICE_ACCOUNT_JSON }}
+              run: |
+                if [ -z "$FCM_CREDENTIALS" ]; then
+                  echo "has_secret=false" >> "$GITHUB_OUTPUT"
+                  exit 0
+                fi
+
+                python3 - <<'PY'
+                import json
+                import os
+                import sys
+
+                raw = os.environ.get("FCM_CREDENTIALS", "").strip()
+                out_path = os.environ.get("GITHUB_OUTPUT", "")
+
+                try:
+                    credentials = json.loads(raw)
+                except Exception as error:
+                    print(f"::warning::FCM_SERVICE_ACCOUNT_JSON is not valid JSON ({error}). Skipping release push notification.")
+                    if out_path:
+                        with open(out_path, "a") as f:
+                            f.write("has_secret=false\n")
+                    sys.exit(0)
+
+                required = {"type", "project_id", "private_key", "client_email"}
+                missing = sorted(required - credentials.keys())
+
+                if credentials.get("type") != "service_account" or missing:
+                    details = f"missing {', '.join(missing)}" if missing else f"type={credentials.get('type')} (expected service_account)"
+                    print(f"::warning::FCM_SERVICE_ACCOUNT_JSON is not a valid Google Service Account key ({details}). Skipping release push notification.")
+                    if out_path:
+                        with open(out_path, "a") as f:
+                            f.write("has_secret=false\n")
+                    sys.exit(0)
+
+                print("FCM service-account credentials are valid")
+                if out_path:
+                    with open(out_path, "a") as f:
+                        f.write("has_secret=true\n")
+                PY
 
             - name: Authenticate to Google Cloud (Firebase)
               id: gcp_auth
               if: steps.fcm_check.outputs.has_secret == 'true'
+              continue-on-error: true
               uses: google-github-actions/auth@v2
               with:
                   credentials_json: ${{ secrets.FCM_SERVICE_ACCOUNT_JSON }}
 
             - name: Send release push notification
-              if: steps.fcm_check.outputs.has_secret == 'true'
+              if: steps.fcm_check.outputs.has_secret == 'true' && steps.gcp_auth.outcome == 'success'
               run: |
                   VERSION="${{ steps.get_version.outputs.VERSION }}"
                   PROJECT_ID="${{ steps.gcp_auth.outputs.project_id }}"
