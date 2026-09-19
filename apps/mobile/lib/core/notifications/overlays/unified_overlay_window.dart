@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
@@ -17,17 +18,126 @@ import 'package:takwa/l10n/app_localizations.dart';
 final AppLocalizations _l10n = lookupAppLocalizations(const Locale('ar'));
 
 class _IGold {
-  // static const deep = Color(0xFF0B0F1C); // خلفية عميقة
-  // static const card = Color(0xFF111827); // بطاقة
-  // static const border = Color(0xFF12192E); // حدود داخلية
   static const gold1 = Color(0xFFF0C040); // ذهبي فاتح
   static const gold2 = Color(0xFFC8960C); // ذهبي وسط
   static const gold3 = Color(0xFF7A5500); // ذهبي غامق
+  static const goldDeep = Color(0xFF5E4000); // برونزي غامق للوضع الفاتح
   static const teal = Color(0xFF3ABFA8); // فيروزي
+  static const tealDark = Color(0xFF1B8A78); // فيروزي داكن للوضع الفاتح
   static const white80 = Color(0xCCF5F0E8); // أبيض دافئ
   static const white50 = Color(0x80F5F0E8);
-  // static const white30 = Color(0x4DF5F0E8);
-  // static const glow = Color(0x33F0C040); // هالة ذهبية
+}
+
+class _OverlayPalette {
+  final bool isDark;
+  final Color bgStart;
+  final Color bgMid;
+  final Color bgEnd;
+  final Color outerBorder;
+  final Color innerBorder;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textMeaning;
+  final Color meaningBg;
+  final Color meaningBorder;
+  final Color headerTitle;
+  final Color badgeBgStart;
+  final Color badgeBgEnd;
+  final Color btnBg;
+  final Color patternColor;
+  final List<BoxShadow> shadows;
+
+  const _OverlayPalette({
+    required this.isDark,
+    required this.bgStart,
+    required this.bgMid,
+    required this.bgEnd,
+    required this.outerBorder,
+    required this.innerBorder,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textMeaning,
+    required this.meaningBg,
+    required this.meaningBorder,
+    required this.headerTitle,
+    required this.badgeBgStart,
+    required this.badgeBgEnd,
+    required this.btnBg,
+    required this.patternColor,
+    required this.shadows,
+  });
+
+  factory _OverlayPalette.of(BuildContext context) {
+    final isDark = (MediaQuery.maybePlatformBrightnessOf(context) ??
+            Theme.of(context).brightness) ==
+        Brightness.dark;
+
+    if (isDark) {
+      return _OverlayPalette(
+        isDark: true,
+        bgStart: const Color(0xFF141C2E),
+        bgMid: const Color(0xFF0D1220),
+        bgEnd: const Color(0xFF0A0F1A),
+        outerBorder: _IGold.gold2.withValues(alpha: 0.5),
+        innerBorder: _IGold.gold1.withValues(alpha: 0.08),
+        textPrimary: _IGold.white80,
+        textSecondary: _IGold.white50,
+        textMeaning: const Color(0xFFCBD5E1),
+        meaningBg: const Color(0xFF131A2B).withValues(alpha: 0.7),
+        meaningBorder: _IGold.gold2.withValues(alpha: 0.2),
+        headerTitle: Colors.white,
+        badgeBgStart: const Color(0xFF2A1F00),
+        badgeBgEnd: const Color(0xFF0D1220),
+        btnBg: _IGold.gold3.withValues(alpha: 0.25),
+        patternColor: _IGold.gold1,
+        shadows: [
+          BoxShadow(
+            color: _IGold.gold2.withValues(alpha: 0.2),
+            blurRadius: 15,
+            spreadRadius: 0.5,
+            offset: const Offset(-3, 0),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.6),
+            blurRadius: 24,
+            offset: const Offset(2, 8),
+          ),
+        ],
+      );
+    } else {
+      return _OverlayPalette(
+        isDark: false,
+        bgStart: const Color(0xFFFFFDF9),
+        bgMid: const Color(0xFFFAF5EB),
+        bgEnd: const Color(0xFFF3ECE0),
+        outerBorder: _IGold.gold2.withValues(alpha: 0.65),
+        innerBorder: _IGold.gold2.withValues(alpha: 0.15),
+        textPrimary: const Color(0xFF1E2530),
+        textSecondary: const Color(0xFF5E6778),
+        textMeaning: const Color(0xFF334155),
+        meaningBg: const Color(0xFFEDE5D5).withValues(alpha: 0.65),
+        meaningBorder: _IGold.gold2.withValues(alpha: 0.35),
+        headerTitle: const Color(0xFF2C2416),
+        badgeBgStart: const Color(0xFFFFF7DC),
+        badgeBgEnd: const Color(0xFFF3E2B8),
+        btnBg: _IGold.gold2.withValues(alpha: 0.15),
+        patternColor: _IGold.gold2,
+        shadows: [
+          BoxShadow(
+            color: const Color(0xFF8C6D23).withValues(alpha: 0.18),
+            blurRadius: 20,
+            spreadRadius: 1,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      );
+    }
+  }
 }
 
 class _PopupItem {
@@ -112,12 +222,13 @@ List<_PopupItem> _buildAllItems() {
 
 class _IslamicPatternPainter extends CustomPainter {
   final double opacity;
-  const _IslamicPatternPainter({this.opacity = 0.07});
+  final Color color;
+  const _IslamicPatternPainter({this.opacity = 0.07, this.color = _IGold.gold1});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = _IGold.gold1.withValues(alpha: opacity)
+      ..color = color.withValues(alpha: opacity)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.6;
 
@@ -130,7 +241,7 @@ class _IslamicPatternPainter extends CustomPainter {
     }
     // خطوط الشبكة الهندسية
     final gridPaint = Paint()
-      ..color = _IGold.gold1.withValues(alpha: opacity * 0.5)
+      ..color = color.withValues(alpha: opacity * 0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.3;
     for (double x = 0; x < size.width; x += step) {
@@ -159,17 +270,21 @@ class _IslamicPatternPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_IslamicPatternPainter old) => old.opacity != opacity;
+  bool shouldRepaint(_IslamicPatternPainter old) =>
+      old.opacity != opacity || old.color != color;
 }
 
 class _CornerOrnamentPainter extends CustomPainter {
-  const _CornerOrnamentPainter();
+  final bool isDark;
+  const _CornerOrnamentPainter({this.isDark = true});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..shader = const LinearGradient(
-        colors: [_IGold.gold1, _IGold.gold2],
+      ..shader = LinearGradient(
+        colors: isDark
+            ? const [_IGold.gold1, _IGold.gold2]
+            : const [_IGold.gold2, _IGold.goldDeep],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2
@@ -240,11 +355,13 @@ class _CornerOrnamentPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_) => false;
+  bool shouldRepaint(_CornerOrnamentPainter old) => old.isDark != isDark;
 }
 
 class _GoldDivider extends StatelessWidget {
-  const _GoldDivider();
+  final bool isDark;
+  const _GoldDivider({this.isDark = true});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -252,9 +369,13 @@ class _GoldDivider extends StatelessWidget {
         Expanded(
           child: Container(
             height: 0.6,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.transparent, _IGold.gold2, Colors.transparent],
+                colors: [
+                  Colors.transparent,
+                  isDark ? _IGold.gold2 : _IGold.gold2.withValues(alpha: 0.6),
+                  Colors.transparent,
+                ],
               ),
             ),
           ),
@@ -264,7 +385,9 @@ class _GoldDivider extends StatelessWidget {
           child: Text(
             '✦',
             style: TextStyle(
-              color: _IGold.gold1.withValues(alpha: 0.8),
+              color: isDark
+                  ? _IGold.gold1.withValues(alpha: 0.8)
+                  : _IGold.goldDeep.withValues(alpha: 0.8),
               fontSize: 10,
             ),
           ),
@@ -272,9 +395,13 @@ class _GoldDivider extends StatelessWidget {
         Expanded(
           child: Container(
             height: 0.6,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.transparent, _IGold.gold2, Colors.transparent],
+                colors: [
+                  Colors.transparent,
+                  isDark ? _IGold.gold2 : _IGold.gold2.withValues(alpha: 0.6),
+                  Colors.transparent,
+                ],
               ),
             ),
           ),
@@ -287,8 +414,13 @@ class _GoldDivider extends StatelessWidget {
 class _GoldProgressBar extends StatefulWidget {
   final Duration duration;
   final Key barKey;
-  const _GoldProgressBar({required this.duration, required this.barKey})
-    : super(key: barKey);
+  final bool isDark;
+  const _GoldProgressBar({
+    required this.duration,
+    required this.barKey,
+    this.isDark = true,
+  }) : super(key: barKey);
+
   @override
   State<_GoldProgressBar> createState() => _GoldProgressBarState();
 }
@@ -304,10 +436,6 @@ class _GoldProgressBarState extends State<_GoldProgressBar>
       vsync: this,
       duration: const Duration(seconds: 2),
     );
-    // repeat() is started from didChangeDependencies below, gated on
-    // reduce-motion. The actual progress is the TweenAnimationBuilder
-    // below, driven by widget.duration — this is a decorative sheen
-    // layered on top of it, so gating it loses no information.
   }
 
   @override
@@ -324,6 +452,10 @@ class _GoldProgressBarState extends State<_GoldProgressBar>
 
   @override
   Widget build(BuildContext context) {
+    final colors = widget.isDark
+        ? const [_IGold.gold3, _IGold.gold1, _IGold.gold3]
+        : const [_IGold.gold2, _IGold.gold1, _IGold.gold2];
+
     return TweenAnimationBuilder<double>(
       key: widget.barKey,
       tween: Tween(begin: 1.0, end: 0.0),
@@ -333,10 +465,10 @@ class _GoldProgressBarState extends State<_GoldProgressBar>
           animation: _shimmer,
           builder: (_, __) {
             return Container(
-              height: 3,
+              height: 3.5,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: const [_IGold.gold3, _IGold.gold1, _IGold.gold3],
+                  colors: colors,
                   stops: [
                     (_shimmer.value - 0.3).clamp(0.0, 1.0),
                     _shimmer.value.clamp(0.0, 1.0),
@@ -348,9 +480,11 @@ class _GoldProgressBarState extends State<_GoldProgressBar>
               child: FractionallySizedBox(
                 widthFactor: value,
                 child: Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [_IGold.gold3, _IGold.gold1],
+                      colors: widget.isDark
+                          ? const [_IGold.gold3, _IGold.gold1]
+                          : const [_IGold.goldDeep, _IGold.gold2],
                     ),
                   ),
                 ),
@@ -378,6 +512,7 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
   Timer? _closeTimer;
   String? _filter;
   final Duration _displayDuration = const Duration(seconds: 15);
+  bool _copied = false;
 
   late final AnimationController _slideCtrl;
   late final Animation<Offset> _slideAnim;
@@ -392,13 +527,13 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
     // ── Slide Animation ──
     _slideCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 700),
     );
-    _slideAnim = Tween<Offset>(begin: const Offset(1.6, 0), end: Offset.zero)
+    _slideAnim = Tween<Offset>(begin: const Offset(1.5, 0), end: Offset.zero)
         .animate(
           CurvedAnimation(
             parent: _slideCtrl,
-            curve: Curves.elasticOut,
+            curve: Curves.easeOutCubic,
             reverseCurve: Curves.easeInCubic,
           ),
         );
@@ -409,8 +544,6 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
       vsync: this,
       duration: const Duration(seconds: 3),
     );
-    // repeat() is started from didChangeDependencies below, gated on
-    // reduce-motion.
     _glowAnim = Tween<double>(
       begin: 0.3,
       end: 0.7,
@@ -425,15 +558,6 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
     _startCloseTimer();
 
     FlutterOverlayWindow.overlayListener.listen((data) {
-      // OverlayBackgroundService._checkAndTriggerAdhan used to also pop a
-      // 'type: prayer' card here on this same system overlay — a second,
-      // separate popup for "prayer time reached" with no audio and no
-      // flip-to-silence of its own, competing with the real Adhan screen.
-      // Removed: the real AdhanOverlayScreen (sound + flip-to-silence) is
-      // now the only surface for prayer time, opened directly via
-      // sendDataToMain when the app is alive, and via the already-scheduled
-      // full-screen-intent notification when it isn't. This overlay is
-      // back to only ever showing the routine adhkar/dua popups below.
       if (data is Map && data.containsKey('type')) {
         setState(() {
           _filter = data['type'];
@@ -454,7 +578,6 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Purely decorative glow pulse — respects reduce-motion.
     _glowCtrl.repeatUnlessReducedMotion(context, reverse: true);
   }
 
@@ -482,6 +605,7 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
     if (pool.isEmpty) pool = _allItems;
 
     final next = pool[_random.nextInt(pool.length)];
+    setState(() => _copied = false);
     if (animate) {
       _slideCtrl.reverse().then((_) {
         if (!mounted) return;
@@ -492,6 +616,24 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
     } else {
       setState(() => _current = next);
     }
+  }
+
+  void _copyToClipboard() {
+    if (_current == null) return;
+    final buffer = StringBuffer()..writeln(_current!.arabic);
+    if (_current!.meaning != null && _current!.meaning!.trim().isNotEmpty) {
+      buffer.writeln(_current!.meaning!.trim());
+    }
+    final source = _current!.source ?? _current!.fadl;
+    if (source != null && source.trim().isNotEmpty) {
+      buffer.writeln(source.trim());
+    }
+    Clipboard.setData(ClipboardData(text: buffer.toString().trim()));
+    HapticFeedback.lightImpact();
+    setState(() => _copied = true);
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _copied = false);
+    });
   }
 
   @override
@@ -506,6 +648,7 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
   @override
   Widget build(BuildContext context) {
     if (_current == null) return const SizedBox.shrink();
+    final palette = _OverlayPalette.of(context);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -523,16 +666,25 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
 
             // ── Card: center right ──
             Positioned(
-              top: 220,
+              top: 210,
               left: 12,
               right: 12,
               child: Padding(
-                padding: const EdgeInsets.only(right: 10, left: 30),
+                padding: const EdgeInsets.only(right: 8, left: 24),
                 child: SlideTransition(
                   position: _slideAnim,
                   child: FadeTransition(
                     opacity: _fadeAnim,
-                    child: GestureDetector(onTap: () {}, child: _buildCard()),
+                    child: GestureDetector(
+                      onTap: () {},
+                      onHorizontalDragEnd: (details) {
+                        if (details.primaryVelocity != null &&
+                            details.primaryVelocity!.abs() > 80) {
+                          _pickRandom(animate: true);
+                        }
+                      },
+                      child: _buildCard(palette),
+                    ),
                   ),
                 ),
               ),
@@ -546,58 +698,48 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
   // ═══════════════════════════════════════
   //  CARD
   // ═══════════════════════════════════════
-  Widget _buildCard() {
+  Widget _buildCard(_OverlayPalette palette) {
     final item = _current!;
 
     return AnimatedBuilder(
       animation: _glowAnim,
       builder: (_, child) => Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          // ── Multi-layer glow ──
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: _IGold.gold2.withValues(alpha: _glowAnim.value * 0.2),
-              blurRadius: 15,
+              color: _IGold.gold2.withValues(
+                alpha: _glowAnim.value * (palette.isDark ? 0.2 : 0.15),
+              ),
+              blurRadius: 16,
               spreadRadius: 0.5,
               offset: const Offset(-3, 0),
             ),
-            BoxShadow(
-              color: _IGold.gold1.withValues(alpha: _glowAnim.value * 0.05),
-              blurRadius: 25,
-              spreadRadius: 1,
-              offset: const Offset(-6, 0),
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.55),
-              blurRadius: 20,
-              offset: const Offset(2, 6),
-            ),
+            ...palette.shadows,
           ],
         ),
         child: child,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
-              colors: [
-                Color(0xFF141C2E), // أزرق داكن عميق
-                Color(0xFF0D1220), // أعمق
-                Color(0xFF0A0F1A), // أسود إسلامي
-              ],
-              stops: [0.0, 0.5, 1.0],
+              colors: [palette.bgStart, palette.bgMid, palette.bgEnd],
+              stops: const [0.0, 0.5, 1.0],
             ),
           ),
           child: Stack(
             children: [
               // ── Islamic Pattern Background ──
-              const Positioned.fill(
+              Positioned.fill(
                 child: CustomPaint(
-                  painter: _IslamicPatternPainter(opacity: 0.055),
+                  painter: _IslamicPatternPainter(
+                    opacity: palette.isDark ? 0.055 : 0.04,
+                    color: palette.patternColor,
+                  ),
                 ),
               ),
 
@@ -613,7 +755,9 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        _IGold.gold3.withValues(alpha: 0.18),
+                        _IGold.gold3.withValues(
+                          alpha: palette.isDark ? 0.18 : 0.08,
+                        ),
                         Colors.transparent,
                       ],
                     ),
@@ -625,9 +769,9 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: _IGold.gold2.withValues(alpha: 0.5),
+                      color: palette.outerBorder,
                       width: 1.0,
                     ),
                   ),
@@ -642,9 +786,9 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
                 bottom: 3,
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(17),
                     border: Border.all(
-                      color: _IGold.gold1.withValues(alpha: 0.08),
+                      color: palette.innerBorder,
                       width: 0.8,
                     ),
                   ),
@@ -652,8 +796,10 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
               ),
 
               // ── Corner ornaments ──
-              const Positioned.fill(
-                child: CustomPaint(painter: _CornerOrnamentPainter()),
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _CornerOrnamentPainter(isDark: palette.isDark),
+                ),
               ),
 
               // ── Shimmer progress bar at bottom ──
@@ -663,10 +809,11 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
                 right: 0,
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(18),
+                    bottom: Radius.circular(20),
                   ),
                   child: _GoldProgressBar(
                     duration: _displayDuration,
+                    isDark: palette.isDark,
                     barKey: ValueKey('progress_${item.arabic.hashCode}'),
                   ),
                 ),
@@ -674,21 +821,19 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
 
               // ── Main Content ──
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildHeader(item),
+                    _buildHeader(item, palette),
                     const SizedBox(height: 10),
-                    const _GoldDivider(),
+                    _GoldDivider(isDark: palette.isDark),
                     const SizedBox(height: AppSpacing.md),
-                    _buildArabicText(item),
-                    if (item.source != null || item.fadl != null) ...[
-                      const SizedBox(height: 10),
-                      const _GoldDivider(),
-                      const SizedBox(height: AppSpacing.sm),
-                      _buildSource(item),
-                    ],
+                    _buildArabicText(item, palette),
+                    const SizedBox(height: 10),
+                    _GoldDivider(isDark: palette.isDark),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildFooter(item, palette),
                   ],
                 ),
               ),
@@ -702,21 +847,21 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
   // ─────────────────────────────
   //  HEADER ROW
   // ─────────────────────────────
-  Widget _buildHeader(_PopupItem item) {
+  Widget _buildHeader(_PopupItem item, _OverlayPalette palette) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Emoji في دائرة ذهبية
+        // Emoji في دائرة مزخرفة
         Container(
           width: 40,
           height: 40,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: const RadialGradient(
-              colors: [Color(0xFF2A1F00), Color(0xFF0D1220)],
+            gradient: RadialGradient(
+              colors: [palette.badgeBgStart, palette.badgeBgEnd],
             ),
             border: Border.all(
-              color: _IGold.gold2.withValues(alpha: 0.6),
+              color: _IGold.gold2.withValues(alpha: 0.65),
               width: 1.2,
             ),
             boxShadow: [
@@ -733,53 +878,70 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
 
         const SizedBox(width: 10),
 
-        // اسم التصنيف
+        // اسم التصنيف + نوع الذكر
         Expanded(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  colors: [_IGold.gold1, _IGold.gold2, _IGold.gold1],
-                  stops: [0.0, 0.5, 1.0],
+                shaderCallback: (bounds) => LinearGradient(
+                  colors: palette.isDark
+                      ? const [_IGold.gold1, _IGold.gold2, _IGold.gold1]
+                      : const [_IGold.goldDeep, _IGold.gold2, _IGold.goldDeep],
+                  stops: const [0.0, 0.5, 1.0],
                 ).createShader(bounds),
                 child: Text(
                   item.categoryName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Amiri',
-                    fontSize: 17,
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white, // يُطغى عليه بـ ShaderMask
+                    color: palette.headerTitle,
                     height: 1.2,
                   ),
                 ),
               ),
+              const SizedBox(height: 2),
               Row(
                 children: [
-                  Text(
-                    item.isDua ? _l10n.overlayTypeDua : _l10n.overlayTypeDhikr,
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 10,
-                      color: _IGold.teal.withValues(alpha: 0.85),
-                      letterSpacing: 0.3,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 1.5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: (palette.isDark ? _IGold.teal : _IGold.tealDark)
+                          .withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      item.isDua ? _l10n.overlayTypeDua : _l10n.overlayTypeDhikr,
+                      style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: palette.isDark ? _IGold.teal : _IGold.tealDark,
+                      ),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
-                  const Text(
+                  Text(
                     '•',
-                    style: TextStyle(color: _IGold.gold3, fontSize: 8),
+                    style: TextStyle(
+                      color: palette.isDark ? _IGold.gold3 : _IGold.gold2,
+                      fontSize: 8,
+                    ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     _l10n.overlayTapOutsideToClose,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Amiri',
                       fontSize: 10,
-                      color: _IGold.white50,
+                      color: palette.textSecondary,
                     ),
                   ),
                 ],
@@ -788,10 +950,37 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
           ),
         ),
 
-        // زر الإغلاق الذهبي
+        // زر تحديث / ذكر آخر
+        TakwaTappable(
+          onTap: () => _pickRandom(animate: true),
+          minTapSize: null,
+          borderRadius: BorderRadius.circular(15),
+          child: Container(
+            width: 30,
+            height: 30,
+            margin: const EdgeInsets.only(left: 4),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: palette.btnBg,
+              border: Border.all(
+                color: _IGold.gold2.withValues(alpha: 0.4),
+                width: 0.8,
+              ),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.refresh_rounded,
+              color: palette.isDark
+                  ? _IGold.gold1.withValues(alpha: 0.85)
+                  : _IGold.goldDeep,
+              size: 15,
+            ),
+          ),
+        ),
+
+        // زر الإغلاق
         TakwaTappable(
           onTap: _closeOverlay,
-          // Inline in the header row alongside the category name.
           minTapSize: null,
           borderRadius: BorderRadius.circular(15),
           child: Container(
@@ -799,7 +988,7 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
             height: 30,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: _IGold.gold3.withValues(alpha: 0.25),
+              color: palette.btnBg,
               border: Border.all(
                 color: _IGold.gold2.withValues(alpha: 0.4),
                 width: 0.8,
@@ -808,7 +997,9 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
             alignment: Alignment.center,
             child: Icon(
               Icons.close_rounded,
-              color: _IGold.gold1.withValues(alpha: 0.8),
+              color: palette.isDark
+                  ? _IGold.gold1.withValues(alpha: 0.8)
+                  : _IGold.goldDeep,
               size: 14,
             ),
           ),
@@ -818,11 +1009,11 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
   }
 
   // ─────────────────────────────
-  //  ARABIC TEXT
+  //  ARABIC TEXT & MEANING
   // ─────────────────────────────
-  Widget _buildArabicText(_PopupItem item) {
+  Widget _buildArabicText(_PopupItem item, _OverlayPalette palette) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 210),
+      constraints: const BoxConstraints(maxHeight: 240),
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Container(
@@ -836,25 +1027,70 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
                 '﷽',
                 style: TextStyle(
                   fontFamily: 'Amiri',
-                  fontSize: 13,
-                  color: _IGold.gold2.withValues(alpha: 0.55),
+                  fontSize: 14,
+                  color: _IGold.gold2.withValues(
+                    alpha: palette.isDark ? 0.65 : 0.85,
+                  ),
                   height: 1.0,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
+              const SizedBox(height: 10),
+              // النص العربي الرئيسي
+              SelectableText(
                 item.arabic,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Amiri',
-                  fontSize: 21,
-                  color: _IGold.white80,
-                  height: 1.85,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 23,
+                  color: palette.textPrimary,
+                  height: 1.9,
+                  fontWeight: FontWeight.w600,
                   letterSpacing: 0.2,
                 ),
               ),
+              // المعنى أو الترجمة إن وجد
+              if (item.meaning != null && item.meaning!.trim().isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: palette.meaningBg,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: palette.meaningBorder, width: 0.7),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2, left: 6),
+                        child: Icon(
+                          Icons.translate_rounded,
+                          size: 13,
+                          color: palette.isDark
+                              ? _IGold.teal.withValues(alpha: 0.9)
+                              : _IGold.tealDark,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          item.meaning!.trim(),
+                          style: TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 13,
+                            color: palette.textMeaning,
+                            height: 1.5,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -863,47 +1099,137 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
   }
 
   // ─────────────────────────────
-  //  SOURCE BADGE
+  //  FOOTER / SOURCE BADGE & ACTIONS
   // ─────────────────────────────
-  Widget _buildSource(_PopupItem item) {
+  Widget _buildFooter(_PopupItem item, _OverlayPalette palette) {
     final text = item.source ?? item.fadl ?? '';
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: 5,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          gradient: LinearGradient(
-            colors: [
-              _IGold.gold3.withValues(alpha: 0.3),
-              _IGold.gold3.withValues(alpha: 0.15),
-            ],
+
+    return Row(
+      children: [
+        // زر النسخ السريع
+        TakwaTappable(
+          onTap: _copyToClipboard,
+          minTapSize: null,
+          borderRadius: BorderRadius.circular(12),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: _copied
+                  ? (palette.isDark ? _IGold.teal : _IGold.tealDark)
+                      .withValues(alpha: 0.2)
+                  : palette.btnBg,
+              border: Border.all(
+                color: _copied
+                    ? (palette.isDark ? _IGold.teal : _IGold.tealDark)
+                    : _IGold.gold2.withValues(alpha: 0.35),
+                width: 0.8,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _copied ? Icons.check_rounded : Icons.copy_rounded,
+                  size: 12,
+                  color: _copied
+                      ? (palette.isDark ? _IGold.teal : _IGold.tealDark)
+                      : (palette.isDark ? _IGold.gold1 : _IGold.goldDeep),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  _copied ? 'تم النسخ' : 'نسخ',
+                  style: TextStyle(
+                    fontFamily: 'Amiri',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: _copied
+                        ? (palette.isDark ? _IGold.teal : _IGold.tealDark)
+                        : (palette.isDark ? _IGold.gold1 : _IGold.goldDeep),
+                  ),
+                ),
+              ],
+            ),
           ),
-          border: Border.all(color: _IGold.gold2.withValues(alpha: 0.35), width: 0.8),
         ),
-        child: Row(
+
+        const SizedBox(width: 8),
+
+        // المصدر / الفضل
+        if (text.trim().isNotEmpty)
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: 5,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+                color: palette.isDark
+                    ? _IGold.gold3.withValues(alpha: 0.2)
+                    : _IGold.gold2.withValues(alpha: 0.1),
+                border: Border.all(
+                  color: _IGold.gold2.withValues(
+                    alpha: palette.isDark ? 0.3 : 0.4,
+                  ),
+                  width: 0.8,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.auto_stories_rounded,
+                    color: palette.isDark ? _IGold.gold2 : _IGold.goldDeep,
+                    size: 11,
+                  ),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      text.trim(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 11,
+                        color: palette.isDark ? _IGold.gold1 : _IGold.goldDeep,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          const Spacer(),
+
+        const SizedBox(width: 8),
+
+        // تلميح السحب
+        Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.auto_stories_rounded, color: _IGold.gold2, size: 12),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                text,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: 'Amiri',
-                  fontSize: 11,
-                  color: _IGold.gold1.withValues(alpha: 0.85),
-                  letterSpacing: 0.2,
-                ),
+            Icon(
+              Icons.swipe_rounded,
+              size: 12,
+              color: palette.textSecondary.withValues(alpha: 0.7),
+            ),
+            const SizedBox(width: 3),
+            Text(
+              'اسحب للتالي',
+              style: TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 10,
+                color: palette.textSecondary.withValues(alpha: 0.8),
               ),
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 }

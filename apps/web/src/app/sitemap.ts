@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://takwa-app.com';
-  
+  const baseUrl = 'https://takwa-web.vercel.app/';
+
   return [
     {
       url: baseUrl,

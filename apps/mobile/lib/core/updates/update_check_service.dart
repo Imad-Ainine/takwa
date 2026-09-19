@@ -15,7 +15,7 @@ import 'package:takwa/l10n/app_localizations.dart';
 /// in .github/workflows/release-apk.yml (search for "release_update") —
 /// there is no single source of truth shareable between Dart and YAML
 /// across this monorepo, so both were set by hand to the same value.
-const String kReleaseDownloadUrl = 'https://takwa-app.com/#download';
+const String kReleaseDownloadUrl = 'https://takwa-web.vercel.app/#download';
 
 const String _kLastNotifiedVersionKey = 'last_notified_release_version';
 
@@ -41,7 +41,7 @@ class UpdateCheckService {
       final installedVersion = (await PackageInfo.fromPlatform()).version;
 
       final response = await _client
-          .get(Uri.parse('https://takwa-app.com/api/releases/latest'))
+          .get(Uri.parse('https://github.com/Imad-Ainine/takwa/releases/latest'))
           .timeout(const Duration(seconds: 8));
       if (response.statusCode != 200) return;
 

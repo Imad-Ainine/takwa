@@ -50,8 +50,8 @@ export default function PrivacyPolicy() {
         <section className="policy-section">
           <h2>{t('sections.contact.title')}</h2>
           <p>
-            {t('sections.contact.content')} 
-            <span className="gold-text"> support@takwa-app.com</span>
+            {t('sections.contact.content')}
+            <span className="gold-text"> support@takwa.com</span>
           </p>
         </section>
       </div>

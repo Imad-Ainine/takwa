@@ -118,10 +118,10 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
   bool _silenced = false;
   bool _flipArmed = false;
 
-  // Face-down detection thresholds (tuned for real devices)
-  static const double _zFaceDownThreshold = -8.0;
-  static const double _xyStillThreshold = 4.0;
-  static const Duration _faceDownConfirm = Duration(milliseconds: 280);
+  // Face-down detection thresholds (tuned for real-world devices, camera bumps, soft surfaces)
+  static const double _zFaceDownThreshold = -5.5;
+  static const double _xyStillThreshold = 8.5;
+  static const Duration _faceDownConfirm = Duration(milliseconds: 100);
 
   DateTime? _faceDownSince;
 
@@ -170,6 +170,11 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
 
     _initVibration(prefs);
 
+    // Arm flip detector immediately before starting audio so sensor is ready right away
+    if (prefs.flipToSilenceEnabled) {
+      _armFlipToSilence(prefs.autoSilentAfterAdhan);
+    }
+
     if (widget.autoPlay) {
       await _initAudio(prefs);
 
@@ -178,11 +183,6 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
         prefs.flipToSilenceEnabled,
         flipSilencePhone: prefs.autoSilentAfterAdhan,
       );
-
-      // Also arm our own reliable detector.
-      if (prefs.flipToSilenceEnabled) {
-        _armFlipToSilence(prefs.autoSilentAfterAdhan);
-      }
     }
   }
 
@@ -203,13 +203,27 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     _flipArmed = true;
 
     _accelSub?.cancel();
-    _accelSub = accelerometerEventStream(
-      samplingPeriod: SensorInterval.uiInterval,
-    ).listen(
-      (event) => _onAccelerometer(event, alsoSilentPhone),
-      onError: (e) => debugPrint('Accelerometer error: $e'),
-      cancelOnError: false,
-    );
+    try {
+      _accelSub = accelerometerEventStream(
+        samplingPeriod: SensorInterval.uiInterval,
+      ).listen(
+        (event) => _onAccelerometer(event, alsoSilentPhone),
+        onError: (e) {
+          debugPrint('Accelerometer error: $e, falling back to default stream');
+          _accelSub = accelerometerEventStream().listen(
+            (event) => _onAccelerometer(event, alsoSilentPhone),
+            onError: (e2) => debugPrint('Accelerometer fallback error: $e2'),
+            cancelOnError: false,
+          );
+        },
+        cancelOnError: false,
+      );
+    } catch (_) {
+      _accelSub = accelerometerEventStream().listen(
+        (event) => _onAccelerometer(event, alsoSilentPhone),
+        cancelOnError: false,
+      );
+    }
   }
 
   void _onAccelerometer(AccelerometerEvent event, bool alsoSilentPhone) {
@@ -218,7 +232,11 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     final z = event.z;
     final xy = math.sqrt(event.x * event.x + event.y * event.y);
 
-    final isFaceDown = z <= _zFaceDownThreshold && xy <= _xyStillThreshold;
+    // Face down: z is negative (gravity pulling towards screen face).
+    // Threshold -5.5 m/s² accommodates real-world flips on soft surfaces (beds,
+    // pillows, couches) and camera-bump tilts (up to 55°).
+    // (xy <= _xyStillThreshold || z < -xy) ensures phone is not held upright.
+    final isFaceDown = z <= _zFaceDownThreshold && (xy <= _xyStillThreshold || z < -xy);
 
     if (isFaceDown) {
       _faceDownSince ??= DateTime.now();
@@ -487,66 +505,106 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
             SafeArea(
               child: Column(
                 children: [
-                  // Top bar
+                  // ── Top bar ──────────────────────────────────────────────
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // Close button
                         IconButton(
                           onPressed: _close,
                           icon: Icon(
                             Icons.close_rounded,
                             color: textSecondary,
-                            size: 26,
+                            size: 24,
                           ),
                           tooltip: l10n.adhanOverlayCloseButton,
                         ),
-                        InkWell(
-                          onTap: () => _silenceAdhan(),
-                          borderRadius: BorderRadius.circular(20),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 7,
-                            ),
-                            decoration: BoxDecoration(
-                              color: muteChipBg,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: muteChipBorder),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  _silenced
-                                      ? Icons.volume_off_rounded
-                                      : Icons.volume_up_rounded,
-                                  color: _silenced ? textSecondary : gold,
-                                  size: 18,
+
+                        // ── Centered prayer badge ──
+                        Expanded(
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: gold.withValues(alpha: isDark ? 0.12 : 0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: gold.withValues(alpha: isDark ? 0.35 : 0.4),
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  _silenced
-                                      ? (Localizations.localeOf(context)
-                                                  .languageCode ==
-                                              'ar'
-                                          ? 'الصوت متوقف'
-                                          : 'Muted')
-                                      : (Localizations.localeOf(context)
-                                                  .languageCode ==
-                                              'ar'
-                                          ? 'إيقاف الصوت'
-                                          : 'Stop Audio'),
-                                  style: TextStyle(
-                                    fontFamily: 'NotoNaskhArabic',
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: _silenced ? textSecondary : gold,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text('🕌', style: TextStyle(fontSize: 13)),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    widget.prayerName ?? l10n.prayerGenericLabel,
+                                    style: TextStyle(
+                                      fontFamily: 'Amiri',
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: gold,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // ── Mute chip ──
+                        Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: InkWell(
+                            onTap: () => _silenceAdhan(),
+                            borderRadius: BorderRadius.circular(20),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 7,
+                              ),
+                              decoration: BoxDecoration(
+                                color: muteChipBg,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: muteChipBorder),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    _silenced
+                                        ? Icons.volume_off_rounded
+                                        : Icons.volume_up_rounded,
+                                    color: _silenced ? textSecondary : gold,
+                                    size: 17,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _silenced
+                                        ? (Localizations.localeOf(context)
+                                                    .languageCode ==
+                                                'ar'
+                                            ? 'الصوت متوقف'
+                                            : 'Muted')
+                                        : (Localizations.localeOf(context)
+                                                    .languageCode ==
+                                                'ar'
+                                            ? 'إيقاف الصوت'
+                                            : 'Stop Audio'),
+                                    style: TextStyle(
+                                      fontFamily: 'NotoNaskhArabic',
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: _silenced ? textSecondary : gold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -786,7 +844,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
 
                   const SizedBox(height: 32),
 
-                  // Dua after Adhan
+                  // ── Dua after Adhan ─────────────────────────────────────
                   FadeTransition(
                     opacity: Tween<double>(begin: 0, end: 1).animate(
                       CurvedAnimation(
@@ -795,42 +853,71 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                       ),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Container(
-                        padding: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
                         decoration: BoxDecoration(
-                          color: gold.withValues(alpha: isDark ? 0.08 : 0.1),
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                          // Glassmorphism card
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.04)
+                              : gold.withValues(alpha: 0.07),
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
                           border: Border.all(
-                            color: gold.withValues(alpha: isDark ? 0.2 : 0.3),
+                            color: gold.withValues(alpha: isDark ? 0.25 : 0.35),
+                            width: 1.0,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: gold.withValues(alpha: isDark ? 0.06 : 0.08),
+                              blurRadius: 18,
+                              spreadRadius: 1,
+                            ),
+                          ],
                         ),
                         child: Column(
                           children: [
+                            // Label row
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text('🤲', style: TextStyle(fontSize: 14)),
+                                const Text('🤲', style: TextStyle(fontSize: 13)),
                                 const SizedBox(width: 6),
                                 Text(
                                   l10n.adhanOverlayDuaSectionLabel,
                                   style: TextStyle(
                                     fontFamily: 'NotoNaskhArabic',
-                                    fontSize: 12,
-                                    color: gold.withValues(alpha: 0.8),
+                                    fontSize: 11,
+                                    color: gold.withValues(alpha: 0.85),
                                     fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.3,
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: AppSpacing.sm),
+                            const SizedBox(height: 10),
+                            // Gold thin divider
+                            Container(
+                              height: 0.5,
+                              margin: const EdgeInsets.symmetric(horizontal: 24),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.transparent,
+                                    gold.withValues(alpha: 0.5),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            // Dua text
                             Text(
                               'اللَّهُمَّ رَبَّ هَٰذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ',
                               style: TextStyle(
                                 fontFamily: 'Amiri',
                                 fontSize: 15,
                                 color: palette.textColor,
-                                height: 1.8,
+                                height: 1.9,
                               ),
                               textAlign: TextAlign.center,
                               textDirection: TextDirection.rtl,

@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: '/private/',
     },
-    sitemap: 'https://takwa-app.com/sitemap.xml',
+    sitemap: 'https://takwa-web.vercel.app/sitemap.xml',
   };
 }

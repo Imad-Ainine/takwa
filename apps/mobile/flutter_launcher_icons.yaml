@@ -1,7 +1,7 @@
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/logo.png"
+  image_path: "assets/images/takwa_transparent_bg.png"
   min_sdk_android: 21
   web:
     generate: false

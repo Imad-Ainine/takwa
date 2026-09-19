@@ -1,6 +1,7 @@
 # Spec: Release Push Notifications
 
 ## Status
+
 Partially implemented. The in-app update check (Goal 1) is fully working
 today. The real push path (Goal 2) is fully coded but inert until a Firebase
 project is created and its config files are added — see **Manual setup**
@@ -76,7 +77,7 @@ this was split into two halves on purpose (see the two goals below).
   a local notification and record that version as notified.
 - R3: WHEN the user taps either the in-app update notification or a real
   push notification for a release, THE SYSTEM SHALL open
-  `https://takwa-app.com/#download` in the external browser.
+  `https://takwa-web.vercel.app/#download` in the external browser.
 - R4: WHEN `PushNotificationService.initialize()` cannot initialize Firebase
   (no config present), THE SYSTEM SHALL log and continue app startup
   normally — never crash or block on a missing/invalid Firebase config.
@@ -94,7 +95,7 @@ this was split into two halves on purpose (see the two goals below).
 Everything below is the one-time work needed to turn on Firebase Cloud
 Messaging. Until it's done, Goal 1 (in-app check) keeps working on its own.
 
-1. Create a Firebase project at https://console.firebase.google.com (any
+1. Create a Firebase project at <https://console.firebase.google.com> (any
    name; it only needs to exist).
 2. Add an Android app to it with package name `com.takwa` (matches
    `applicationId` in `apps/mobile/android/app/build.gradle.kts`).

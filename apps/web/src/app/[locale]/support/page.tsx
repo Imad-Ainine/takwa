@@ -19,7 +19,7 @@ export default function Support() {
             <div className="icon">📧</div>
             <h2>{t('cards.email.title')}</h2>
             <p>{t('cards.email.content')}</p>
-            <a href="mailto:support@takwa-app.com" className="support-link gold-text">support@takwa-app.com</a>
+            <a href="mailto:support@takwa.com" className="support-link gold-text">support@takwa.com</a>
           </div>
 
           <div className="premium-card support-card">

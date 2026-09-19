@@ -136,7 +136,7 @@ export default function DownloadSection({
   const downloadFilename = `takwa-v${apkVersion}.apk`;
   // Scanning the QR always lands somewhere useful, even pre-launch: the
   // platform's real link once it exists, otherwise the download page itself.
-  const qrUrl = downloadUrl !== '#' ? downloadUrl : 'https://takwa-app.com/#download';
+  const qrUrl = downloadUrl !== '#' ? downloadUrl : 'https://takwa-web.vercel/#download';
   // The native iOS app needs TestFlight (blocked on Apple Developer Program
   // signing — see docs/ios-testflight-setup.md). Until that link exists,
   // don't leave iPhone visitors with a dead "coming soon" button: point

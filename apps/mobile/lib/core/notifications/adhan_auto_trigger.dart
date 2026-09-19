@@ -59,9 +59,9 @@ class AdhanAudioPlayer {
       _player!.playerStateStream.listen((state) {
         _isPlaying = state.playing;
       });
-      await _player!.play();
       _isPlaying = true;
       if (flipToSilenceEnabled) _armFlipToSilence();
+      await _player!.play();
     } catch (e) {
       debugPrint('AdhanAudio: play error: $e');
     }
@@ -70,11 +70,10 @@ class AdhanAudioPlayer {
   static void _armFlipToSilence() {
     _flipSub?.cancel();
     _flipSub = accelerometerEventStream().listen((event) {
-      // Z axis strongly negative = face-down (gravity vector pointing up).
-      // Threshold -8.0 m/s² (~0.82 g) is well below the ±9.8 full-flip
-      // signal while ignoring normal landscape tilts (~±5 m/s²). Same
-      // threshold AdhanOverlayScreen used to apply itself.
-      if (event.z < -8.0) _silenceViaFlip();
+      // Z axis negative = face-down (gravity vector pointing towards screen face).
+      // Threshold -5.5 m/s² accommodates real-world flips on soft surfaces (beds,
+      // cushions, pillows, couches) and camera-bump tilts (up to 55°).
+      if (event.z < -5.5) _silenceViaFlip();
     });
   }
 

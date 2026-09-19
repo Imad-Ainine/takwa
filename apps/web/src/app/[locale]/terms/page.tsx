@@ -46,7 +46,7 @@ export default function TermsOfService() {
 					<h2>{t('sections.contact.title')}</h2>
 					<p>
 						{t('sections.contact.content')}
-						<span className='gold-text'> legal@takwa-app.com</span>
+						<span className='gold-text'> legal@takwa.com</span>
 					</p>
 				</section>
 			</div>
