@@ -48,6 +48,9 @@ const _kSilentModeVibrationKey = 'silent_vibration_enabled';
 // SettingsPrefsBridge so the background isolate can read the canonical
 // value without Riverpod access.
 const _kAdhanModeKey = 'adhan_mode';
+const _kSilentAdhanPrayersKey = 'silent_adhan_prayers';
+const _kSilentNotifPrayersKey = 'silent_notif_prayers';
+const _kOngoingNotifEnabledKey = 'ongoing_notif_enabled';
 
 // ─────────────────────────────────────────
 //  TIMINGS
@@ -110,6 +113,9 @@ class OverlayBackgroundService {
     if (perm != NotificationPermission.granted) return;
 
     final prefs = await SharedPreferences.getInstance();
+    // Gate: respect the user's choice to hide the persistent foreground notification.
+    if (!(prefs.getBool(_kOngoingNotifEnabledKey) ?? true)) return;
+
     final cityName =
         prefs.getString(_kCityNameKey) ?? _l10n.overlayServiceDefaultCity;
 
@@ -495,7 +501,36 @@ class _OverlayTaskHandler extends TaskHandler {
         // fully killed, via fullScreenIntent).
 
         // إرسال أمر لفتح شاشة الأذان في التطبيق (أو تقليله حسب الإعدادات)
-        if (_adhanScreenEnabled) {
+        // Silent-mode allow-list gate: when the phone is in silent/vibrate AND
+        // _silentModeEnabled is true, only send show_adhan if the prayer key
+        // appears in the silent_adhan_prayers allow-list. When _silentModeEnabled
+        // is false, proceed unconditionally (Preservation: Requirement 3.11).
+        bool suppressAdhan = false;
+        if (_silentModeEnabled) {
+          try {
+            final ringerMode = await SoundMode.ringerModeStatus;
+            if (ringerMode == RingerModeStatus.silent ||
+                ringerMode == RingerModeStatus.vibrate) {
+              final allowListRaw =
+                  prefs.getString(_kSilentAdhanPrayersKey) ?? '';
+              final allowList = allowListRaw.isEmpty
+                  ? <String>{}
+                  : allowListRaw.split(',').map((e) => e.trim()).toSet();
+              if (!allowList.contains(prayer.name)) {
+                suppressAdhan = true;
+                debugPrint(
+                  '🔇 Adhan suppressed in silent mode for ${prayer.name} '
+                  '(not in allow-list)',
+                );
+              }
+            }
+          } catch (e) {
+            // If SoundMode throws, default to NOT suppressing.
+            debugPrint('OverlayService: SoundMode check failed: $e');
+          }
+        }
+
+        if (_adhanScreenEnabled && !suppressAdhan) {
           FlutterForegroundTask.sendDataToMain({
             'action': 'show_adhan',
             'prayer': prayer.nameAr,
@@ -817,13 +852,45 @@ class _OverlayTaskHandler extends TaskHandler {
           )
           .toList();
 
+      // Silent-mode allow-list gate for notifications.
+      // When _silentModeEnabled is false, schedule for all prayers
+      // unconditionally (Preservation: Requirement 3.11).
+      List<PrayerTimeInfo> prayersToSchedule = prayers;
+      if (_silentModeEnabled) {
+        try {
+          final ringerMode = await SoundMode.ringerModeStatus;
+          if (ringerMode == RingerModeStatus.silent ||
+              ringerMode == RingerModeStatus.vibrate) {
+            final allowListRaw =
+                prefs.getString(_kSilentNotifPrayersKey) ?? '';
+            final allowList = allowListRaw.isEmpty
+                ? <String>{}
+                : allowListRaw.split(',').map((e) => e.trim()).toSet();
+            prayersToSchedule =
+                prayers.where((p) => allowList.contains(p.name)).toList();
+            if (prayersToSchedule.isEmpty) {
+              debugPrint(
+                '🔇 Exact alarms suppressed: phone in silent/vibrate '
+                'and no prayers in silent_notif_prayers allow-list',
+              );
+              return;
+            }
+          }
+        } catch (e) {
+          // If SoundMode throws, default to scheduling for all prayers.
+          debugPrint('OverlayService: SoundMode check in reschedule failed: $e');
+          prayersToSchedule = prayers;
+        }
+      }
+
       await NotificationsService.schedulePrayerNotifications(
-        prayers: prayers,
+        prayers: prayersToSchedule,
         l10n: _l10n,
         preAdhanEnabled: prefs.getBool('pre_adhan_notif') ?? true,
         iqamaEnabled: prefs.getBool('iqama_notif') ?? true,
         adhanMode: _adhanMode,
         adhanScreenEnabled: prefs.getBool('adhan_screen_enabled') ?? true,
+        adhanAlarmEnabled: prefs.getBool('adhan_alarm_enabled') ?? true,
       );
     } catch (e) {
       debugPrint('OverlayService: exact-alarm reschedule failed: $e');
@@ -1022,6 +1089,8 @@ class TestableOverlayHandler {
   // ignore: prefer_final_fields
   bool _adhanScreenEnabled = true;
   List<_PrayerInfo> _prayers = [];
+  // Silent-mode gate fields (mirroring _OverlayTaskHandler).
+  bool silentModeEnabled = false;
 
   /// Called with each map that would have been passed to
   /// [FlutterForegroundTask.sendDataToMain] in production.
@@ -1079,11 +1148,33 @@ class TestableOverlayHandler {
         triggered.add(prayer.name);
         await prefs.setString(_kTriggeredPrayersKey, triggered.join(','));
 
+        // Silent-mode allow-list gate (mirrors _OverlayTaskHandler logic).
+        // When silentModeEnabled is false, send unconditionally (Req 3.11).
+        bool suppressAdhan = false;
+        if (silentModeEnabled) {
+          try {
+            final ringerMode = await SoundMode.ringerModeStatus;
+            if (ringerMode == RingerModeStatus.silent ||
+                ringerMode == RingerModeStatus.vibrate) {
+              final allowListRaw =
+                  prefs.getString(_kSilentAdhanPrayersKey) ?? '';
+              final allowList = allowListRaw.isEmpty
+                  ? <String>{}
+                  : allowListRaw.split(',').map((e) => e.trim()).toSet();
+              if (!allowList.contains(prayer.name)) {
+                suppressAdhan = true;
+              }
+            }
+          } catch (_) {
+            // Default to NOT suppressing on SoundMode error.
+          }
+        }
+
         // BUG 4: in unfixed code _adhanScreenEnabled is never updated by
         // onReceiveData, so this gate is effectively always true.
         // The fix adds the onReceiveData handler so _adhanScreenEnabled
         // can be set to false, and then this gate blocks the send.
-        if (_adhanScreenEnabled) {
+        if (_adhanScreenEnabled && !suppressAdhan) {
           onSendDataToMain?.call({
             'action': 'show_adhan',
             'prayer': prayer.nameAr,

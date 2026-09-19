@@ -78,6 +78,12 @@ class AdhanAudioPlayer {
     });
   }
 
+  /// The Arabic prayer name currently playing, used for the flip-to-silence
+  /// log entry. Set by [AdhanAutoTrigger] when arming audio from [_check] /
+  /// [handleForegroundData]; also updated by [AdhanOverlayScreen] via
+  /// [ensureFlipArmed] so the name is always current.
+  static String? _currentPrayerNameAr;
+
   /// Called when the accelerometer detects a face-down flip while the Adhan
   /// is playing.
   ///
@@ -114,7 +120,8 @@ class AdhanAudioPlayer {
     if (_flipSilencePhone) {
       try {
         await SoundMode.setSoundMode(RingerModeStatus.silent);
-        debugPrint('🔇 Flip-to-silence: phone switched to silent mode.');
+        // Requirement 2.10: emit a log line confirming flip-to-silence executed.
+        debugPrint('🤫 Flip-to-silence triggered for ${_currentPrayerNameAr ?? 'الصلاة'}');
       } catch (e) {
         debugPrint('❌ Flip-to-silence: could not set silent mode: $e');
       }
@@ -165,13 +172,18 @@ class AdhanAudioPlayer {
   ///      calls [setVolume] (does NOT re-arm),
   ///   3. the OS briefly pauses the accelerometer between steps 1 and 2 —
   ///      from this point on, flipping the phone does nothing.
-  static void ensureFlipArmed(bool enabled, {bool flipSilencePhone = false}) {
+  static void ensureFlipArmed(
+    bool enabled, {
+    bool flipSilencePhone = false,
+    String? prayerNameAr,
+  }) {
     if (!enabled) return;
     // Update the ringer-change preference even when already armed — the
     // overlay screen knows the live pref value; AdhanAutoTrigger._check
     // may have called play() before the screen mounted and may not have had
     // the pref yet.
     _flipSilencePhone = flipSilencePhone;
+    if (prayerNameAr != null) _currentPrayerNameAr = prayerNameAr;
     if (_flipSub != null) return; // already armed
     if (_player == null || !_isPlaying) return; // nothing playing to arm
     _armFlipToSilence();
@@ -186,17 +198,41 @@ class AdhanAutoTrigger {
   // calls when the provider is slow to resolve on the first tick.
   static bool _checking = false;
 
+  /// Vibration timer started from the auto-trigger path when
+  /// [UserPreferences.vibrateWithAdhan] is true and [adhanMode] is `'sound'`.
+  /// Mirrors the `_vibrationTimer` in `_AdhanOverlayScreenState` so vibration
+  /// works even when the overlay screen never mounts (background trigger path).
+  static Timer? _vibrationTimer;
+
   /// Testing hook: called whenever [FlutterForegroundTask.launchApp] is about
   /// to be invoked. Null in production (default), set by tests to track calls.
   @visibleForTesting
   static void Function(DateTime)? onLaunchAppForTesting;
+
+  /// Testing hook: called whenever [FlutterForegroundTask.wakeUpScreen] is
+  /// about to be invoked. Null in production (default), set by tests to track
+  /// calls. Needed because [FlutterForegroundTask.wakeUpScreen] is a no-op on
+  /// non-Android platforms (platform guard inside the plugin), so the
+  /// MethodChannel mock is never reached in host-machine tests.
+  @visibleForTesting
+  static void Function()? onWakeUpScreenForTesting;
+
+  /// Testing hook: called whenever the vibration timer fires (each 2-second
+  /// tick). Null in production. Set by tests to track when the auto-trigger
+  /// vibration timer is active without relying on real time advancing.
+  @visibleForTesting
+  static void Function()? onVibrationTickForTesting;
 
   /// Resets in-memory state between tests. Never call from production code.
   @visibleForTesting
   static void resetForTesting() {
     _lastTriggeredPrayer = null;
     _checking = false;
+    _vibrationTimer?.cancel();
+    _vibrationTimer = null;
     onLaunchAppForTesting = null;
+    onWakeUpScreenForTesting = null;
+    onVibrationTickForTesting = null;
     AdhanAudioPlayer.onPlayAttemptForTesting = null;
   }
 
@@ -269,6 +305,8 @@ class AdhanAutoTrigger {
   static void stop() {
     _checkTimer?.cancel();
     _checkTimer = null;
+    _vibrationTimer?.cancel();
+    _vibrationTimer = null;
     AdhanAudioPlayer.stop();
   }
 
@@ -348,13 +386,11 @@ class AdhanAutoTrigger {
 
         // فتح شاشة الأذان
         if (adhanScreen && !adhanAlreadyVisible) {
-          // wakeUpScreen() is always safe: it is a no-op when the screen is
-          // already on. launchApp() is only needed when the app is
-          // backgrounded/killed (navigatorKey.currentState == null); calling
-          // it unconditionally when the app is already in the foreground
-          // causes a brief activity re-focus on Android 12+ that transiently
-          // nulls the NavigatorState, which then drops the push silently.
-          FlutterForegroundTask.wakeUpScreen();
+          // Requirement 2.18: only wake the screen when the user enabled it.
+          if (prefs.wakeScreenEnabled) {
+            FlutterForegroundTask.wakeUpScreen();
+            onWakeUpScreenForTesting?.call();
+          }
           if (navigatorKey.currentState == null) {
             FlutterForegroundTask.launchApp();
             onLaunchAppForTesting?.call(DateTime.now());
@@ -370,6 +406,42 @@ class AdhanAutoTrigger {
             Routes.adhan,
             arguments: prayer.nameAr,
           );
+
+          // Requirement 2.8/2.9: arm the player's flip-to-silence with the
+          // correct flipSilencePhone value. The overlay screen will call
+          // ensureFlipArmed again after it mounts, but calling it here closes
+          // the race where the overlay hasn't mounted yet and the user
+          // flips the phone during that window.
+          AdhanAudioPlayer.ensureFlipArmed(
+            prefs.flipToSilenceEnabled,
+            flipSilencePhone: prefs.autoSilentAfterAdhan,
+            prayerNameAr: prayer.nameAr,
+          );
+        } else if (!adhanScreen) {
+          // Screen disabled — wake if allowed (no screen to render, but the
+          // wakeScreenEnabled preference still governs screen-on behaviour).
+          if (prefs.wakeScreenEnabled) {
+            FlutterForegroundTask.wakeUpScreen();
+            onWakeUpScreenForTesting?.call();
+          }
+        }
+
+        // Requirement 2.17: start vibration from the auto-trigger path so
+        // HapticFeedback.vibrate() fires even when the overlay screen never
+        // mounts (e.g. background trigger, adhanScreenEnabled=false).
+        if (prefs.vibrateWithAdhan && prefs.adhanMode == 'sound') {
+          _vibrationTimer?.cancel();
+          _vibrationTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+            HapticFeedback.vibrate();
+            onVibrationTickForTesting?.call();
+          });
+          // Cancel the timer when audio stops (player silenced or stopped).
+          AdhanAudioPlayer.silenced.addListener(() {
+            if (AdhanAudioPlayer.silenced.value) {
+              _vibrationTimer?.cancel();
+              _vibrationTimer = null;
+            }
+          });
         }
 
         break;
@@ -430,11 +502,15 @@ class AdhanAutoTrigger {
     final adhanScreen = prefs.adhanScreenEnabled;
 
     if (adhanScreen) {
+      // Requirement 2.18: only wake the screen when the user enabled it.
       // wakeUpScreen() is always safe (no-op when screen is on).
       // launchApp() is only needed when the app is backgrounded/killed;
       // skip it when the navigator is already live to avoid the transient-null
       // window that drops the push on Android 12+.
-      FlutterForegroundTask.wakeUpScreen();
+      if (prefs.wakeScreenEnabled) {
+        FlutterForegroundTask.wakeUpScreen();
+        onWakeUpScreenForTesting?.call();
+      }
       if (navigatorKey.currentState == null) {
         FlutterForegroundTask.launchApp();
         onLaunchAppForTesting?.call(DateTime.now());
@@ -461,6 +537,34 @@ class AdhanAutoTrigger {
           debugPrint('AdhanAutoTrigger: pushNamed failed: $e');
         }
       }
+
+      // Requirement 2.8/2.9: update flipSilencePhone from live prefs in
+      // the foreground-data path just as _check() does above.
+      AdhanAudioPlayer.ensureFlipArmed(
+        prefs.flipToSilenceEnabled,
+        flipSilencePhone: prefs.autoSilentAfterAdhan,
+        prayerNameAr: prayerName,
+      );
+    } else if (prefs.wakeScreenEnabled) {
+      // Screen disabled but wakeScreenEnabled — still respect the preference.
+      FlutterForegroundTask.wakeUpScreen();
+      onWakeUpScreenForTesting?.call();
+    }
+
+    // Requirement 2.17: start vibration from the foreground-data path too
+    // so HapticFeedback fires even when adhanScreen=false.
+    if (prefs.vibrateWithAdhan && prefs.adhanMode == 'sound') {
+      _vibrationTimer?.cancel();
+      _vibrationTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+        HapticFeedback.vibrate();
+        onVibrationTickForTesting?.call();
+      });
+      AdhanAudioPlayer.silenced.addListener(() {
+        if (AdhanAudioPlayer.silenced.value) {
+          _vibrationTimer?.cancel();
+          _vibrationTimer = null;
+        }
+      });
     }
   }
 

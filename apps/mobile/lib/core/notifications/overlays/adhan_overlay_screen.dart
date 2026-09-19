@@ -19,6 +19,75 @@ import 'package:takwa/features/settings/data/user_preferences.dart';
 import 'package:takwa/features/settings/providers/user_preferences_provider.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
+// ─── Palette ─────────────────────────────────────────────────────────────────
+
+/// Theme- and prayer-aware colour palette for the adhan overlay screen.
+///
+/// Use [_AdhanPalette.of] to resolve the palette from the current [Brightness]
+/// and the Arabic prayer name supplied to the screen.
+class _AdhanPalette {
+  final Brightness brightness;
+  final String prayerName;
+
+  const _AdhanPalette._(this.brightness, this.prayerName);
+
+  factory _AdhanPalette.of(Brightness brightness, String? prayerName) {
+    return _AdhanPalette._(brightness, (prayerName ?? '').toLowerCase());
+  }
+
+  bool get _isDark => brightness == Brightness.dark;
+
+  // ── Gradient ──────────────────────────────────────────────────────────────
+
+  List<Color> get gradientColors => _isDark
+      ? const [
+          Color(0xFF02061A),
+          Color(0xFF050D2A),
+          Color(0xFF0A1540),
+          Color(0xFF0E1A50),
+        ]
+      : const [
+          Color(0xFFFFF8E7),
+          Color(0xFFFDF3D0),
+          Color(0xFFFAE8B0),
+          Color(0xFFF5D78A),
+        ];
+
+  LinearGradient get gradient => LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: gradientColors,
+      );
+
+  // ── Accent (prayer-specific) ───────────────────────────────────────────────
+
+  Color get accent {
+    if (prayerName.contains('فجر') || prayerName.contains('fajr')) {
+      return const Color(0xFF6BA3BE); // dawn blue
+    } else if (prayerName.contains('ظهر') || prayerName.contains('dhuhr')) {
+      return const Color(0xFFE8A838); // warm amber
+    } else if (prayerName.contains('عصر') || prayerName.contains('asr')) {
+      return const Color(0xFFD4AF37); // golden yellow
+    } else if (prayerName.contains('مغرب') || prayerName.contains('maghrib')) {
+      return const Color(0xFFD4602A); // deep orange-crimson
+    } else if (prayerName.contains('عشاء') || prayerName.contains('isha')) {
+      return const Color(0xFF4A3F8C); // deep indigo
+    }
+    return const Color(0xFFD4AF37); // default gold
+  }
+
+  // ── Text / opacity helpers ────────────────────────────────────────────────
+
+  Color get textColor =>
+      _isDark ? Colors.white : const Color(0xFF1A1A2E);
+
+  double get mosqueOpacity => _isDark ? 0.6 : 0.45;
+
+  double get geometricOpacity => _isDark ? 0.05 : 0.07;
+}
+
+// ─── Widget ──────────────────────────────────────────────────────────────────
+
 class AdhanOverlayScreen extends ConsumerStatefulWidget {
   /// Null when the route was opened without a prayer argument — the screen
   /// then falls back to a localized generic label.
@@ -42,6 +111,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
   late final AnimationController _entryCtrl;
 
   Timer? _vibrationTimer;
+  Timer? _restoreRingerTimer;
   StreamSubscription<AccelerometerEvent>? _accelSub;
 
   // Prevents repeated silence calls while the phone stays face-down.
@@ -265,14 +335,44 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     AdhanForegroundService.stopAdhanService();
   }
 
+  // ─── Subtask 3.6: Fixed _applyAutoSilent ─────────────────────────────────
+
   Future<void> _applyAutoSilent() async {
     final prefs = ref.read(userPreferencesProvider).valueOrNull;
-    if (prefs?.autoSilentAfterAdhan ?? false) {
-      try {
-        await SoundMode.setSoundMode(RingerModeStatus.silent);
-      } catch (e) {
-        debugPrint('Auto-silent error: $e');
-      }
+    if (prefs == null || !prefs.autoSilentAfterAdhan) return;
+
+    final style = prefs.silentModeAlertStyle;
+    final RingerModeStatus targetMode;
+    switch (style) {
+      case 'vibrate':
+        targetMode = RingerModeStatus.vibrate;
+        break;
+      case 'tone':
+      case 'toneVibrate':
+        targetMode = RingerModeStatus.normal;
+        break;
+      case 'silent':
+      case 'none':
+      default:
+        targetMode = RingerModeStatus.silent;
+        break;
+    }
+
+    try {
+      await SoundMode.setSoundMode(targetMode);
+    } catch (e) {
+      debugPrint('Auto-silent error: $e');
+    }
+
+    if (targetMode != RingerModeStatus.normal) {
+      _restoreRingerTimer?.cancel();
+      _restoreRingerTimer = Timer(Duration(minutes: prefs.silentDurationMins), () async {
+        try {
+          await SoundMode.setSoundMode(RingerModeStatus.normal);
+        } catch (e) {
+          debugPrint('Auto-silent restore error: $e');
+        }
+      });
     }
   }
 
@@ -282,6 +382,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     AdhanAudioPlayer.silenced.removeListener(_onPlayerSilencedChanged);
     _vibrationTimer?.cancel();
+    _restoreRingerTimer?.cancel();
     _accelSub?.cancel();
     AdhanAudioPlayer.stop();
     AdhanForegroundService.stopAdhanService();
@@ -300,28 +401,16 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
+    // Subtask 3.1: resolve palette
+    final palette = _AdhanPalette.of(theme.brightness, widget.prayerName);
+
     final hijri = HijriCalendar.now();
     final hijriStr =
         '${hijri.hDay} ${hijri.getLongMonthName()} ${hijri.hYear} ${l10n.hijriEraSuffix}';
 
-    // Theme-aware palette
-    final gold = isDark ? const Color(0xFFD4AF37) : const Color(0xFFB8860B);
+    // Derive secondary colours from palette
+    final gold = palette.accent;
     final goldSoft = gold.withValues(alpha: isDark ? 0.8 : 0.9);
-    final bgGradient = isDark
-        ? const [
-            Color(0xFF02061A),
-            Color(0xFF050D2A),
-            Color(0xFF0A1540),
-            Color(0xFF0E1A50),
-          ]
-        : [
-            colorScheme.surface,
-            colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-            colorScheme.primaryContainer.withValues(alpha: 0.25),
-            colorScheme.surface,
-          ];
-
-    final textPrimary = isDark ? Colors.white : colorScheme.onSurface;
     final textSecondary =
         isDark ? Colors.white.withValues(alpha: 0.65) : colorScheme.onSurfaceVariant;
     final muteChipBg = _silenced
@@ -333,25 +422,35 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
 
     return PopScope(
       canPop: true,
+      // Subtask 3.5: call _applyAutoSilent on system back-button dismissal
       onPopInvokedWithResult: (didPop, result) {
-        if (didPop) _cleanup();
+        if (didPop) {
+          _cleanup();
+          unawaited(_applyAutoSilent());
+        }
       },
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: Stack(
           children: [
-            // ① Adaptive background
+            // ① Adaptive background — Subtask 3.1: uses palette.gradient
             Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: bgGradient,
+                gradient: palette.gradient,
+              ),
+            ),
+
+            // ② Islamic geometric pattern — Subtask 3.3
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _IslamicGeometricPainter(
+                  color: palette.textColor,
+                  opacity: palette.geometricOpacity,
                 ),
               ),
             ),
 
-            // ② Animated stars (dark mode only – subtle in light)
+            // ③ Animated stars (dark mode only – subtle in light)
             if (isDark)
               AnimatedBuilder(
                 animation: _starsCtrl,
@@ -361,7 +460,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                 ),
               ),
 
-            // ③ Mosque silhouette
+            // ④ Mosque silhouette — Subtask 3.2: enhanced painter
             Positioned(
               bottom: 0,
               left: 0,
@@ -376,13 +475,15 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                 child: CustomPaint(
                   painter: _MosqueSilhouettePainter(
                     color: gold.withValues(alpha: isDark ? 0.07 : 0.12),
+                    accentColor: palette.accent,
+                    opacity: palette.mosqueOpacity,
                   ),
                   size: Size(MediaQuery.sizeOf(context).width, 220),
                 ),
               ),
             ),
 
-            // ④ Content
+            // ⑤ Content
             SafeArea(
               child: Column(
                 children: [
@@ -526,6 +627,25 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                   ),
 
                   const SizedBox(height: 36),
+
+                  // Subtask 3.4: Calligraphic Bismillah header above prayer name
+                  FadeTransition(
+                    opacity: CurvedAnimation(
+                      parent: _entryCtrl,
+                      curve: const Interval(0.1, 0.7),
+                    ),
+                    child: Text(
+                      '\uFDFD', // ﷽ Bismillah
+                      style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 22,
+                        color: palette.accent,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
 
                   // Prayer name
                   SlideTransition(
@@ -709,7 +829,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                               style: TextStyle(
                                 fontFamily: 'Amiri',
                                 fontSize: 15,
-                                color: textPrimary,
+                                color: palette.textColor,
                                 height: 1.8,
                               ),
                               textAlign: TextAlign.center,
@@ -777,23 +897,33 @@ class _AdhanStarsPainter extends CustomPainter {
   bool shouldRepaint(_AdhanStarsPainter old) => old.progress != progress;
 }
 
+// ─── Subtask 3.2: Enhanced _MosqueSilhouettePainter ──────────────────────────
+
 class _MosqueSilhouettePainter extends CustomPainter {
   final Color color;
-  _MosqueSilhouettePainter({required this.color});
+  final Color accentColor;
+  final double opacity;
+
+  _MosqueSilhouettePainter({
+    required this.color,
+    required this.accentColor,
+    required this.opacity,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
     final w = size.width;
     final h = size.height;
+
+    // ── Main body (dome + minarets) ──────────────────────────────────────────
+    final bodyPaint = Paint()
+      ..color = color.withValues(alpha: opacity)
+      ..style = PaintingStyle.fill;
 
     final path = Path()
       ..moveTo(0, h)
       ..lineTo(w, h)
-      // Right minaret
+      // Right minaret body
       ..lineTo(w, h * 0.3)
       ..lineTo(w - w * 0.04, h * 0.3)
       ..lineTo(w - w * 0.04, h * 0.1)
@@ -817,9 +947,143 @@ class _MosqueSilhouettePainter extends CustomPainter {
       ..lineTo(0, h)
       ..close();
 
-    canvas.drawPath(path, paint);
+    canvas.drawPath(path, bodyPaint);
+
+    // ── Arched windows along dome base ───────────────────────────────────────
+    // Cut out 4 small arched openings evenly spaced across the dome base
+    final windowPaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.35)
+      ..style = PaintingStyle.fill;
+
+    const windowCount = 4;
+    final windowWidth = w * 0.055;
+    final windowHeight = h * 0.08;
+    final baselineY = h * 0.52; // just above the dome base edge
+    final startX = w * 0.32;
+    final gap = (w * 0.36) / (windowCount - 1);
+
+    for (int i = 0; i < windowCount; i++) {
+      final cx = startX + i * gap;
+      final top = baselineY - windowHeight;
+      final rect = Rect.fromLTWH(
+        cx - windowWidth / 2,
+        top,
+        windowWidth,
+        windowHeight,
+      );
+      final windowPath = Path()
+        // flat bottom
+        ..moveTo(cx - windowWidth / 2, baselineY)
+        ..lineTo(cx + windowWidth / 2, baselineY)
+        ..lineTo(cx + windowWidth / 2, top + windowHeight * 0.45)
+        // arched top
+        ..arcToPoint(
+          Offset(cx - windowWidth / 2, top + windowHeight * 0.45),
+          radius: Radius.elliptical(windowWidth / 2, windowHeight * 0.55),
+          clockwise: false,
+        )
+        ..close();
+      canvas.drawPath(windowPath, windowPaint);
+      // prevent unused variable warning
+      rect.toString();
+    }
+
+    // ── Crescent finials on minaret tips ─────────────────────────────────────
+    final crescentPaint = Paint()
+      ..color = accentColor.withValues(alpha: opacity)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+
+    // Left minaret crescent (tip at w*0.06, h*0.05)
+    _drawCrescent(canvas, crescentPaint, Offset(w * 0.06, h * 0.04), h * 0.025);
+    // Right minaret crescent (tip at w-w*0.06, h*0.05)
+    _drawCrescent(canvas, crescentPaint, Offset(w - w * 0.06, h * 0.04), h * 0.025);
+  }
+
+  /// Draws a small crescent moon centred at [centre] with outer radius [r].
+  void _drawCrescent(Canvas canvas, Paint paint, Offset centre, double r) {
+    final outerPath = Path()
+      ..addOval(Rect.fromCircle(center: centre, radius: r));
+
+    // Offset inner circle to create the crescent cutout shape
+    final innerOffset = Offset(centre.dx + r * 0.35, centre.dy);
+    final innerPath = Path()
+      ..addOval(Rect.fromCircle(center: innerOffset, radius: r * 0.75));
+
+    final crescent = Path.combine(
+      PathOperation.difference,
+      outerPath,
+      innerPath,
+    );
+    canvas.drawPath(crescent, paint..style = PaintingStyle.fill);
   }
 
   @override
-  bool shouldRepaint(_MosqueSilhouettePainter old) => old.color != color;
+  bool shouldRepaint(_MosqueSilhouettePainter old) =>
+      old.color != color ||
+      old.accentColor != accentColor ||
+      old.opacity != opacity;
+}
+
+// ─── Subtask 3.3: Islamic geometric pattern overlay ──────────────────────────
+
+class _IslamicGeometricPainter extends CustomPainter {
+  final Color color;
+  final double opacity;
+
+  const _IslamicGeometricPainter({
+    required this.color,
+    required this.opacity,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withValues(alpha: opacity)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5;
+
+    const tileSize = 60.0;
+    final cols = (size.width / tileSize).ceil() + 1;
+    final rows = (size.height / tileSize).ceil() + 1;
+
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < cols; col++) {
+        final cx = col * tileSize + tileSize / 2;
+        final cy = row * tileSize + tileSize / 2;
+        _drawEightPointedStar(canvas, paint, Offset(cx, cy), tileSize * 0.38);
+      }
+    }
+  }
+
+  /// Draws an eight-pointed star centred at [centre] with outer radius [r]
+  /// by overlaying two squares — one axis-aligned and one rotated 45°.
+  void _drawEightPointedStar(Canvas canvas, Paint paint, Offset centre, double r) {
+    // Square 1: axis-aligned
+    final sq1 = Path();
+    final half = r;
+    sq1.addRect(Rect.fromCenter(center: centre, width: half * 2, height: half * 2));
+
+    // Square 2: rotated 45°
+    final sq2 = Path();
+    final pts = <Offset>[
+      Offset(centre.dx, centre.dy - r),
+      Offset(centre.dx + r, centre.dy),
+      Offset(centre.dx, centre.dy + r),
+      Offset(centre.dx - r, centre.dy),
+    ];
+    sq2.moveTo(pts[0].dx, pts[0].dy);
+    for (final p in pts.skip(1)) {
+      sq2.lineTo(p.dx, p.dy);
+    }
+    sq2.close();
+
+    canvas.drawPath(sq1, paint);
+    canvas.drawPath(sq2, paint);
+  }
+
+  @override
+  bool shouldRepaint(_IslamicGeometricPainter old) =>
+      old.color != color || old.opacity != opacity;
 }

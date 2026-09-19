@@ -59,7 +59,7 @@ class UserPreferencesNotifier extends AsyncNotifier<UserPreferences> {
     }
 
     // 5. Sync to SharedPreferences for background isolates
-    unawaited(_prefsBridge.mirror(key, value));
+    await _prefsBridge.mirror(key, value);
   }
 
   /// Helper method for modifying multiple preferences at once
@@ -84,7 +84,7 @@ class UserPreferencesNotifier extends AsyncNotifier<UserPreferences> {
 
     // Sync all to SharedPreferences
     for (final entry in updates.entries) {
-      unawaited(_prefsBridge.mirror(entry.key, entry.value));
+      await _prefsBridge.mirror(entry.key, entry.value);
     }
   }
 

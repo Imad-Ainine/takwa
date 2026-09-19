@@ -370,6 +370,7 @@ class NotificationsService {
     bool iqamaEnabled = true,
     String adhanMode = 'sound',
     bool adhanScreenEnabled = true,
+    bool adhanAlarmEnabled = true,
   }) async {
     // إلغاء القديمة
     final ids = [
@@ -441,7 +442,11 @@ class NotificationsService {
           // الصامت، رغم أنه قد يريد رؤية شاشة الأذان بدون صوت. fullScreenIntent
           // هو ما يجعل أندرويد يفتح التطبيق تلقائياً على شاشة الأذان حتى مع
           // إغلاق التطبيق أو قفل الشاشة (ضمن حدود النظام والأذونات الممنوحة).
-          fullScreenIntent: adhanScreenEnabled,
+          // adhanAlarmEnabled gates the full-screen-intent channel entirely —
+          // when false, the notification is still posted (so the user sees a
+          // heads-up at prayer time) but without the fullScreenIntent flag,
+          // preventing the alarm-style screen takeover.
+          fullScreenIntent: adhanScreenEnabled && adhanAlarmEnabled,
         );
       }
 
@@ -1545,6 +1550,7 @@ class NotificationsManager {
         iqamaEnabled: prefs.iqamaNotif,
         adhanMode: prefs.adhanMode,
         adhanScreenEnabled: prefs.adhanScreenEnabled,
+        adhanAlarmEnabled: prefs.adhanAlarmEnabled,
       );
     }
 
@@ -1641,6 +1647,7 @@ class NotificationsManager {
         iqamaEnabled: prefs.iqamaNotif,
         adhanMode: prefs.adhanMode,
         adhanScreenEnabled: prefs.adhanScreenEnabled,
+        adhanAlarmEnabled: prefs.adhanAlarmEnabled,
       );
     }
 
