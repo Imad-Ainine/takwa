@@ -161,13 +161,16 @@ class DailyRecordDao extends DatabaseAccessor<AppDatabase>
   /// Creates the daily record for that date if it doesn't exist yet.
   Future<void> logSadaqahForDate(DateTime date, double amount) async {
     final record = await getOrCreateForDate(date);
-    await (update(dailyRecords)..where((r) => r.id.equals(record.id))).write(
-      DailyRecordsCompanion(
-        sadaqah: const Value(true),
-        sadaqahAmount: Value(amount),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    await transaction(() async {
+      await (update(dailyRecords)..where((r) => r.id.equals(record.id))).write(
+        DailyRecordsCompanion(
+          sadaqah: const Value(true),
+          sadaqahAmount: Value(amount),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+      await recalcPoints(record.id);
+    });
   }
 
   /// Sadaqah-logged days in reverse-chronological order, for the tracker's

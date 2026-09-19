@@ -90,10 +90,10 @@ class _StubRef implements WidgetRef {
 
   @override
   T read<T>(ProviderListenable<T> provider) {
-    if (provider == userPreferencesProvider) {
+    if (identical(provider, userPreferencesProvider)) {
       return AsyncValue.data(prefs) as T;
     }
-    if (provider == prayerTimesProvider) {
+    if (identical(provider, prayerTimesProvider)) {
       return AsyncValue.data(prayers ?? <PrayerTimeInfo>[]) as T;
     }
     // For userPreferencesProvider.future
@@ -269,8 +269,8 @@ void main() {
     // the default 800×600 test surface and raise secondary exceptions
     // that would mask the real assertion failures.
     final binding = TestWidgetsFlutterBinding.ensureInitialized();
-    binding.window.physicalSizeTestValue = const Size(1080, 2340);
-    binding.window.devicePixelRatioTestValue = 2.75;
+    binding.platformDispatcher.views.single.physicalSize = const Size(1080, 2340);
+    binding.platformDispatcher.views.single.devicePixelRatio = 2.75;
   });
 
   setUp(() async {
@@ -315,7 +315,7 @@ void main() {
     testWidgets(
       'D1 — Fajr overlay must use dawn-blue 0xFF6BA3BE accent in ShaderMask, not gold',
       (tester) async {
-        final prefs = const UserPreferences(
+        const prefs = UserPreferences(
           adhanMode: 'silent', // avoid audio channel calls
         );
 
@@ -418,7 +418,7 @@ void main() {
     testWidgets(
       'D2 — Overlay must contain an Islamic geometric pattern CustomPaint layer',
       (tester) async {
-        final prefs = const UserPreferences(adhanMode: 'silent');
+        const prefs = UserPreferences(adhanMode: 'silent');
 
         await tester.pumpWidget(
           _buildOverlay(prefs: prefs, prayerName: 'فجر', db: db),
@@ -473,7 +473,7 @@ void main() {
     testWidgets(
       'D3 — Overlay must contain a Bismillah ﷽ Text widget above prayer name',
       (tester) async {
-        final prefs = const UserPreferences(adhanMode: 'silent');
+        const prefs = UserPreferences(adhanMode: 'silent');
 
         await tester.pumpWidget(
           _buildOverlay(prefs: prefs, prayerName: 'فجر', db: db),
@@ -520,7 +520,7 @@ void main() {
     testWidgets(
       'D4 — Maghrib overlay must use orange-crimson accent (0xFFD4602A), not gold (0xFFD4AF37)',
       (tester) async {
-        final prefs = const UserPreferences(adhanMode: 'silent');
+        const prefs = UserPreferences(adhanMode: 'silent');
 
         await tester.pumpWidget(
           _buildOverlay(
@@ -700,7 +700,7 @@ void main() {
     testWidgets(
       'S1 — Back-button dismissal must call _applyAutoSilent() (setSoundMode must be called)',
       (tester) async {
-        final prefs = const UserPreferences(
+        const prefs = UserPreferences(
           adhanMode: 'silent',
           autoSilentAfterAdhan: true,
           silentModeAlertStyle: 'silent',
@@ -760,7 +760,7 @@ void main() {
     testWidgets(
       'S2 — silentModeAlertStyle=vibrate must set RingerModeStatus.vibrate (not silent)',
       (tester) async {
-        final prefs = const UserPreferences(
+        const prefs = UserPreferences(
           adhanMode: 'silent',
           autoSilentAfterAdhan: true,
           silentModeAlertStyle: 'vibrate',
@@ -832,7 +832,7 @@ void main() {
     testWidgets(
       'S3 — silentModeAlertStyle=tone must set RingerModeStatus.normal (not silent)',
       (tester) async {
-        final prefs = const UserPreferences(
+        const prefs = UserPreferences(
           adhanMode: 'silent',
           autoSilentAfterAdhan: true,
           silentModeAlertStyle: 'tone',
@@ -900,7 +900,7 @@ void main() {
     testWidgets(
       'S4 — Restore timer must fire setSoundMode(normal) after silentDurationMins',
       (tester) async {
-        final prefs = const UserPreferences(
+        const prefs = UserPreferences(
           adhanMode: 'silent',
           autoSilentAfterAdhan: true,
           silentModeAlertStyle: 'silent',
@@ -974,7 +974,7 @@ void main() {
     test(
       'P1 — _check() with wakeScreenEnabled=false must NOT call wakeUpScreen()',
       () async {
-        final prefs = const UserPreferences(
+        const prefs = UserPreferences(
           adhanMode: 'sound',
           wakeScreenEnabled: false,
           adhanScreenEnabled: true,
@@ -1043,7 +1043,7 @@ void main() {
     test(
       'P2 — Vibration timer must fire from auto-trigger path (vibrateWithAdhan=true, adhanMode=sound)',
       () async {
-        final prefs = const UserPreferences(
+        const prefs = UserPreferences(
           adhanMode: 'sound',
           vibrateWithAdhan: true,
           wakeScreenEnabled: false, // avoid wakeUpScreen interference

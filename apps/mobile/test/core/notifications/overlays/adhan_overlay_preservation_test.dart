@@ -412,7 +412,7 @@ void main() {
           // starts its 8-second poll.  We cancel early via timeout.
           final navigatorKey = GlobalKey<NavigatorState>();
 
-          final prefs = UserPreferences(
+          const prefs = UserPreferences(
             wakeScreenEnabled: true, // the preserved condition
             adhanMode: 'silent',
             adhanScreenEnabled: true, // required for wakeUpScreen branch

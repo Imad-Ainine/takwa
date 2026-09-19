@@ -416,31 +416,6 @@ class AppDatabase extends _$AppDatabase {
       await _seedDefaultData();
     },
     onUpgrade: (Migrator m, int from, int to) async {
-      if (from < 11) {
-        await m.createTable(qadaCounters);
-      }
-      if (from < 10) {
-        await m.createTable(zakatCalculations);
-      }
-      if (from < 9) {
-        await m.createTable(syncOutbox);
-        await m.createIndex(idxSyncOutboxTableKey);
-      }
-      if (from < 8) {
-        // RamadanProgress.recordId isn't filtered on by any query today,
-        // but it's a FK like the other two indexed below — indexing it now
-        // avoids a silent full-table scan the day a lookup-by-record query
-        // gets added, for the cost of one small index.
-        await m.createIndex(idxRamadanProgressRecord);
-      }
-      if (from < 7) {
-        // Missing indexes on FK columns that are actually filtered on
-        // (ProhibitionsLog.recordId, and the CustomIbadahLog record+ibadah
-        // lookup used by recalcPoints()/logIbadah()) — previously full
-        // table scans as history grew.
-        await m.createIndex(idxProhibitionsLogRecord);
-        await m.createIndex(idxCustomIbadahLogRecordIbadah);
-      }
       if (from < 2) {
         await m.createTable(reminders);
       }
@@ -517,6 +492,34 @@ class AppDatabase extends _$AppDatabase {
       if (from < 6) {
         await m.createTable(bookReadingProgress);
       }
+      if (from < 7) {
+        // Missing indexes on FK columns that are actually filtered on
+        // (ProhibitionsLog.recordId, and the CustomIbadahLog record+ibadah
+        // lookup used by recalcPoints()/logIbadah()) — previously full
+        // table scans as history grew.
+        await m.createIndex(idxProhibitionsLogRecord);
+        await m.createIndex(idxCustomIbadahLogRecordIbadah);
+      }
+      if (from < 8) {
+        // RamadanProgress.recordId isn't filtered on by any query today,
+        // but it's a FK like the other two indexed below — indexing it now
+        // avoids a silent full-table scan the day a lookup-by-record query
+        // gets added, for the cost of one small index.
+        await m.createIndex(idxRamadanProgressRecord);
+      }
+      if (from < 9) {
+        await m.createTable(syncOutbox);
+        await m.createIndex(idxSyncOutboxTableKey);
+      }
+      if (from < 10) {
+        await m.createTable(zakatCalculations);
+      }
+      if (from < 11) {
+        await m.createTable(qadaCounters);
+      }
+    },
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON;');
     },
   );
 
@@ -573,6 +576,7 @@ LazyDatabase _openConnection() {
       setup: (db) {
         db.execute('PRAGMA journal_mode=WAL;');
         db.execute('PRAGMA busy_timeout=5000;');
+        db.execute('PRAGMA foreign_keys = ON;');
       },
     );
   });
