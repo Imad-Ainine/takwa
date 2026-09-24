@@ -1180,6 +1180,29 @@ class AppLocalizationsEn extends AppLocalizations {
       'Grant the notifications and exact-alarm permissions so the adhan reminder and screen fire exactly when they should.';
 
   @override
+  String get adhanFullScreenIntentLabel =>
+      'Open the Adhan screen over other apps';
+
+  @override
+  String get adhanFullScreenIntentSublabel =>
+      'On Android 14+ the system may revoke this permission, leaving the Adhan screen as a plain notification. Tap to check and grant it.';
+
+  @override
+  String get adhanFullScreenIntentGranted => 'Full-screen intent is enabled ✓';
+
+  @override
+  String get adhanFullScreenIntentDenied =>
+      'Not enabled — please allow it in system settings';
+
+  @override
+  String get batteryOptimizationWarningTitle =>
+      'Adhan may be delayed by battery optimization';
+
+  @override
+  String get batteryOptimizationWarningBody =>
+      'Let the app run in the background without restrictions, so the Adhan screen reaches you on time while you\'re asleep.';
+
+  @override
   String get adhanSettingsAccountSectionTitle => 'Account Settings';
 
   @override

@@ -15,10 +15,12 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:takwa/features/duas/data/duas_data.dart';
 import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/providers/locale_provider.dart';
+import 'package:takwa/core/providers/shared_preferences_provider.dart';
 import 'package:takwa/core/routes/app_routes.dart';
 import 'package:takwa/core/providers/adhkar_providers.dart';
 import 'package:takwa/core/utils/prayer_display.dart';
 import 'package:takwa/core/utils/timezone_resolver.dart';
+import 'package:takwa/features/settings/data/user_preferences.dart';
 import 'package:takwa/features/settings/providers/user_preferences_provider.dart';
 import 'package:takwa/app/main_shell.dart' show currentTabProvider;
 import 'package:takwa/l10n/app_localizations.dart';
@@ -83,7 +85,75 @@ class NotifIds {
 
   // تحديثات التطبيق
   static const appUpdate = 900;
+
+  // ── تنبيهات الصلاة على مدى عدة أيام ──
+  // The five ids above (100–124) are single-day slots: whoever schedules last
+  // overwrites them. They're kept for the cancel paths, but the horizon below
+  // is what actually gets written now.
+
+  /// Internal prayer ids in canonical order. A prayer's index here is the
+  /// ones digit of its horizon alert id — see [_prayerAlertId].
+  static const prayerOrder = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+
+  /// Prayer-alert id bases, one block per alert kind, placed far above the
+  /// single-shot ids so nothing collides.
+  static const _adhanIdBase = 1000;
+  static const _preAdhanIdBase = 2000;
+  static const _iqamaIdBase = 3000;
+
+  /// `<base> + dayOffset * 10 + prayerIndex` — one id per prayer, per alert
+  /// kind, per day of the horizon. Names outside [prayerOrder] (sunrise) get
+  /// no id at all, which is how they're kept out of the alert schedule.
+  ///
+  /// Deterministic on purpose: the main isolate and the background-service
+  /// isolate both schedule the same horizon, and identical ids mean the later
+  /// writer replaces the earlier one instead of leaving two alarms racing to
+  /// announce the same prayer.
+  static int? _prayerAlertId(int base, int dayOffset, String prayerName) {
+    final index = prayerOrder.indexOf(prayerName);
+    if (index < 0) return null;
+    return base + dayOffset * 10 + index;
+  }
+
+  static int? adhanId(int dayOffset, String prayerName) =>
+      _prayerAlertId(_adhanIdBase, dayOffset, prayerName);
+
+  static int? preAdhanId(int dayOffset, String prayerName) =>
+      _prayerAlertId(_preAdhanIdBase, dayOffset, prayerName);
+
+  static int? iqamaId(int dayOffset, String prayerName) =>
+      _prayerAlertId(_iqamaIdBase, dayOffset, prayerName);
+
+  /// Ids 100–124 — what builds up to 1.6.x scheduled for a single day.
+  /// Nothing writes them any more, but a phone upgrading to this version can
+  /// still have them pending, so they're cancelled alongside the horizon.
+  static const legacyPrayerAlertIds = <int>{
+    100,
+    101,
+    102,
+    103,
+    104,
+    110,
+    111,
+    112,
+    113,
+    114,
+    120,
+    121,
+    122,
+    123,
+    124,
+  };
 }
+
+/// How many days of prayer alerts are kept scheduled ahead of time.
+///
+/// The point is that alarms exist *before* the app is next opened: a
+/// single-day schedule — the previous behaviour — left nothing pending the
+/// moment the day rolled over, so a phone that went a day without Takwa being
+/// launched stopped announcing prayers entirely, no matter what the user had
+/// configured. 7 days is well inside Android's per-app alarm budget.
+const int kPrayerScheduleDays = 7;
 
 // ─────────────────────────────────────────
 //  NOTIFICATION CHANNELS (Android)
@@ -328,6 +398,12 @@ class NotificationsService {
       if (!status.isGranted) return false;
       // Android 12+ يحتاج إذن التنبيه الدقيق
       final exact = await Permission.scheduleExactAlarm.request();
+      // Android 14+ ينزع USE_FULL_SCREEN_INTENT تلقائياً من التطبيقات التي
+      // لا يصنّفها متجر Play كتطبيقات منبّه — يُطلب هنا ضمن نفس مسار
+      // الأذونات حتى لا يبقى الإذن ناقصاً بصمت (R8). لا يؤثر على القيمة
+      // المُعادة: `checkPermissions()` يبقى مقياس "هل يمكن جدولة الإشعار
+      // أصلاً".
+      await ensureFullScreenIntentPermission();
       return exact.isGranted;
     }
     if (Platform.isIOS) {
@@ -343,10 +419,57 @@ class NotificationsService {
 
   static Future<bool> checkPermissions() async {
     if (Platform.isAndroid) {
-      return await Permission.notification.isGranted &&
-          await Permission.scheduleExactAlarm.isGranted;
+      if (!await Permission.notification.isGranted) return false;
+      // منح الإشعار على مستوى التطبيق لا يعني أنها مفعّلة فعلاً: يمكن
+      // للمستخدم (أو نظام تصنيف القنوات) إسكات إشعارات التطبيق من إعدادات
+      // النظام، فيبقى `Permission.notification` ممنوحاً بينما لا يظهر أي
+      // إشعار — وهذا بالضبط عرَض "لا شيء يحدث حتى أفتح تقوى". الفحص
+      // الفعلي أدق من فحص الإذن وحده.
+      final enabled = await _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.areNotificationsEnabled();
+      if (enabled == false) return false;
+      return await Permission.scheduleExactAlarm.isGranted;
     }
     return await Permission.notification.isGranted;
+  }
+
+  /// Android 14+ (API 34) ينزع `USE_FULL_SCREEN_INTENT` عن التطبيقات التي
+  /// لا يصنّفها متجر Play كتطبيق منبّه أو اتصال. حينها يظهر إشعار وقت
+  /// الصلاة عادياً (بانر علوي) لكن النظام يتجاهل علم `fullScreenIntent`،
+  /// فلا تُفتح شاشة الأذان تلقائياً فوق التطبيقات ولا فوق شاشة القفل —
+  /// وهو سبب مباشر لشكوى "لا تظهر الشاشة إلا إذا فتحت التطبيق".
+  ///
+  /// لا توفّر حزمة flutter_local_notifications 18 استعلاماً عن حالة هذا
+  /// الإذن، بل الطلب فقط — لذلك هذا "تأكيد" لا "فحص": إن كان الإذن ممنوحاً
+  /// (أو كان الإصدار أقدم من 14) تُرجع الدالة true فوراً دون فتح أي شاشة،
+  /// وتفتح صفحة إعدادات النظام فقط عندما يكون ناقصاً فعلاً.
+  static Future<bool> ensureFullScreenIntentPermission() async {
+    if (!Platform.isAndroid) return true;
+    try {
+      final granted = await _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.requestFullScreenIntentPermission();
+      // `null` تعني أن الحزمة لا تدعم الاستدعاء (إصدار نظام أقدم) — نعتبره
+      // ممنوحاً بدل إظهار تحذير لا يمكن للمستخدم إصلاحه.
+      return granted ?? true;
+    } catch (e) {
+      debugPrint('NotificationsService: FSI permission request failed: $e');
+      return true;
+    }
+  }
+
+  /// هل النظام معفى من تحسين البطارية (Doze / App Standby)؟ المنبهات الدقيقة
+  /// تُطلق أثناء Doze بفضل `exactAllowWhileIdle`، لكن الإشعارات عالية
+  /// الأولوية وشاشة الأذان على هاتف نائم تتأخران أو تُحجَبان حين يقيّد
+  /// النظام التطبيق — وهي الحالة الثالثة التي طلبها المستخدم ("الهاتف نائم").
+  static Future<bool> isBatteryOptimizationExempt() async {
+    if (!Platform.isAndroid) return true;
+    return Permission.ignoreBatteryOptimizations.isGranted;
   }
 
   static Future<bool> requestBackgroundPermission() async {
@@ -362,26 +485,142 @@ class NotificationsService {
     return true;
   }
 
-  // ── جدولة إشعارات الصلاة الكاملة ──
+  /// Cancels every prayer alert this service can have scheduled: the legacy
+  /// single-day ids (100–124) *and* the whole [days]-day horizon.
+  ///
+  /// Both are needed. The legacy ids because an upgrade leaves them pending;
+  /// the horizon because it rolls — a run that scheduled 7 days starting
+  /// yesterday leaves a 7th day that this run won't overwrite, and it would
+  /// fire an alarm computed from stale times.
+  static Future<void> cancelPrayerNotifications({
+    int days = kPrayerScheduleDays,
+  }) async {
+    final targets = <int>{...NotifIds.legacyPrayerAlertIds};
+    for (int dayOffset = 0; dayOffset < days; dayOffset++) {
+      for (final name in NotifIds.prayerOrder) {
+        // Non-null: prayerOrder only ever holds ids these helpers know.
+        targets.add(NotifIds.adhanId(dayOffset, name)!);
+        targets.add(NotifIds.preAdhanId(dayOffset, name)!);
+        targets.add(NotifIds.iqamaId(dayOffset, name)!);
+      }
+    }
+    for (final id in targets) {
+      await _plugin.cancel(id);
+    }
+  }
+
+  /// Schedules the rolling prayer-alert horizon — [days] days starting today.
+  ///
+  /// This computes each day's times itself rather than taking one day's list
+  /// from the caller, because that is the entire point: the alarms have to be
+  /// in the OS queue before the user next opens the app.
+  ///
+  /// [onlyPrayers] restricts the horizon to a set of internal prayer ids
+  /// ('fajr'…'isha'); the background service uses it to honour the
+  /// silent-mode allow-list. Passing an *empty* set is treated as "suppress
+  /// everything" and returns without touching the existing schedule — a
+  /// partial or empty filter must never be able to wipe alarms that are the
+  /// user's only remaining way of hearing about a prayer.
+  static Future<void> scheduleUpcomingPrayerNotifications({
+    required double latitude,
+    required double longitude,
+    required String madhab,
+    required String method,
+    required AppLocalizations l10n,
+    String? highLatitudeRule,
+    String? timezone,
+    int days = kPrayerScheduleDays,
+    int fajrOffset = 0,
+    int sunriseOffset = 0,
+    int dhuhrOffset = 0,
+    int asrOffset = 0,
+    int maghribOffset = 0,
+    int ishaOffset = 0,
+    bool preAdhanEnabled = true,
+    bool iqamaEnabled = true,
+    String adhanMode = 'sound',
+    bool adhanScreenEnabled = true,
+    bool adhanAlarmEnabled = true,
+    Set<String>? onlyPrayers,
+  }) async {
+    if (onlyPrayers != null && onlyPrayers.isEmpty) {
+      debugPrint(
+        '[NotificationsService] horizon not scheduled: empty prayer filter',
+      );
+      return;
+    }
+
+    // iOS caps an app at 64 pending local notifications, and the oldest beyond
+    // that are dropped silently. A 7-day horizon is up to 105 entries, which
+    // would leave the tail unannounced; 4 days (60 entries) fits.
+    final effectiveDays = Platform.isIOS ? min(days, 4) : days;
+
+    await cancelPrayerNotifications(days: effectiveDays);
+
+    final today = DateTime.now();
+    for (int dayOffset = 0; dayOffset < effectiveDays; dayOffset++) {
+      final date = DateTime(today.year, today.month, today.day + dayOffset);
+      List<PrayerTimeInfo> prayers;
+      try {
+        prayers = await PrayerTimesService.calculate(
+          latitude: latitude,
+          longitude: longitude,
+          madhab: madhab,
+          method: method,
+          highLatitudeRule: highLatitudeRule,
+          fajrOffset: fajrOffset,
+          sunriseOffset: sunriseOffset,
+          dhuhrOffset: dhuhrOffset,
+          asrOffset: asrOffset,
+          maghribOffset: maghribOffset,
+          ishaOffset: ishaOffset,
+          date: date,
+          timezone: timezone,
+        );
+      } catch (e) {
+        // One bad day (a malformed timezone rule, a date edge case) must not
+        // cost the user the other six.
+        debugPrint(
+          '[NotificationsService] horizon day $dayOffset calculation failed: $e',
+        );
+        continue;
+      }
+
+      if (onlyPrayers != null) {
+        prayers = prayers.where((p) => onlyPrayers.contains(p.name)).toList();
+      }
+
+      await schedulePrayerNotifications(
+        prayers: prayers,
+        l10n: l10n,
+        dayOffset: dayOffset,
+        preAdhanEnabled: preAdhanEnabled,
+        iqamaEnabled: iqamaEnabled,
+        adhanMode: adhanMode,
+        adhanScreenEnabled: adhanScreenEnabled,
+        adhanAlarmEnabled: adhanAlarmEnabled,
+      );
+    }
+  }
+
+  // ── جدولة إشعارات الصلاة ليوم واحد ──
+  /// Schedules one day's alerts — pre-adhan, adhan, and iqama — using the ids
+  /// for [dayOffset] days from today (0 = today).
+  ///
+  /// Only ever adds to the pending queue; cancelling is
+  /// [scheduleUpcomingPrayerNotifications]'s job so a 7-day pass doesn't
+  /// cancel its own first six days. Times already in the past are skipped by
+  /// [_scheduleExact], which is also what keeps re-running for today safe.
   static Future<void> schedulePrayerNotifications({
     required List<PrayerTimeInfo> prayers,
     required AppLocalizations l10n,
+    int dayOffset = 0,
     bool preAdhanEnabled = true,
     bool iqamaEnabled = true,
     String adhanMode = 'sound',
     bool adhanScreenEnabled = true,
     bool adhanAlarmEnabled = true,
   }) async {
-    // إلغاء القديمة
-    final ids = [
-      ...List.generate(5, (i) => 100 + i), // أذان
-      ...List.generate(5, (i) => 110 + i), // قبل الأذان
-      ...List.generate(5, (i) => 120 + i), // إقامة
-    ];
-    for (final id in ids) {
-      await _plugin.cancel(id);
-    }
-
     final iqamaOffsets = {
       'fajr': 20,
       'dhuhr': 15,
@@ -392,10 +631,11 @@ class NotificationsService {
 
     final now = DateTime.now();
 
-    for (int i = 0; i < prayers.length; i++) {
-      final prayer = prayers[i];
-      // تخطي الشروق من إشعارات الأذان (notifId = -1)
-      if (prayer.notifId <= 0) continue;
+    for (final prayer in prayers) {
+      // null for anything outside NotifIds.prayerOrder — i.e. sunrise, which
+      // gets no alerts of any kind.
+      final adhanId = NotifIds.adhanId(dayOffset, prayer.name);
+      if (adhanId == null) continue;
 
       final prayerName = prayerLocalizedName(l10n, prayer.name);
 
@@ -404,7 +644,7 @@ class NotificationsService {
         final preTime = prayer.time.subtract(const Duration(minutes: 15));
         if (preTime.isAfter(now)) {
           await _scheduleExact(
-            id: 110 + i,
+            id: NotifIds.preAdhanId(dayOffset, prayer.name)!,
             title: l10n.notifPreAdhanTitle(prayerName),
             body: l10n.notifPreAdhanBody(prayerName),
             scheduledTime: preTime,
@@ -426,7 +666,7 @@ class NotificationsService {
             : NotifChannels.prayerSilent;
 
         await _scheduleExact(
-          id: prayer.notifId,
+          id: adhanId,
           title: '${prayer.emoji} ${l10n.notifAdhanTitle(prayerName)}',
           // The Takbir/call-to-prayer phrase itself stays as-is in both
           // languages (transliterated for English) — it's the Adhan's own
@@ -434,7 +674,8 @@ class NotificationsService {
           body: l10n.notifAdhanBody,
           scheduledTime: prayer.time,
           channelId: selectedChannel.id,
-          sound: null, // لا نغمة أذان في الإشعار، الصوت يتم تشغيله حصراً في شاشة الأذان
+          sound:
+              null, // لا نغمة أذان في الإشعار، الصوت يتم تشغيله حصراً في شاشة الأذان
           payload: 'prayer:${prayer.name}',
           // مرتبط بإعداد "شاشة الأذان" (adhanScreenEnabled) وليس بنمط الصوت
           // (adhanMode) — سابقاً كان مرتبطاً بـ `adhanMode != 'silent'`، مما
@@ -456,7 +697,7 @@ class NotificationsService {
         final iqamaTime = prayer.time.add(Duration(minutes: offset));
         if (iqamaTime.isAfter(now)) {
           await _scheduleExact(
-            id: 120 + i,
+            id: NotifIds.iqamaId(dayOffset, prayer.name)!,
             title: l10n.notifIqamaTitle(prayerName),
             body: l10n.notifIqamaBody(prayerName),
             scheduledTime: iqamaTime,
@@ -568,7 +809,9 @@ class NotificationsService {
   }
 
   // ── جدولة أدعية يومية ──
-  static Future<void> scheduleDailyDuas({required AppLocalizations l10n}) async {
+  static Future<void> scheduleDailyDuas({
+    required AppLocalizations l10n,
+  }) async {
     // دعاء الصباح (9:00)
     final morningDua = _getTimedDua(DuaCategory.morning);
     if (morningDua != null) {
@@ -844,7 +1087,7 @@ class NotificationsService {
     NotificationDetails notificationDetails, {
     required AndroidScheduleMode androidScheduleMode,
     required UILocalNotificationDateInterpretation
-        uiLocalNotificationDateInterpretation,
+    uiLocalNotificationDateInterpretation,
     DateTimeComponents? matchDateTimeComponents,
     String? payload,
   }) async {
@@ -1360,6 +1603,53 @@ class NotificationRouter {
   static final _navigatorKey = GlobalKey<NavigatorState>();
   static GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
 
+  /// Which prayer last opened the Adhan screen, and when.
+  ///
+  /// Three independent paths can open that screen for the same prayer: this
+  /// router (a notification tap, or the full-screen-intent launch — the only
+  /// ones that fire while the app is backgrounded or killed), and
+  /// AdhanAutoTrigger's two triggers in the main isolate. Each path has its
+  /// own guard, but none of them covered this one, so a prayer arriving while
+  /// the app was backgrounded could stack a second Adhan screen on top of the
+  /// one the background signal had just opened: two audio players racing, the
+  /// top screen hiding the other, and dismissing it doesn't stop the rest.
+  /// All three now claim this same slot.
+  static String? _lastAdhanClaim;
+  static DateTime? _lastAdhanClaimAt;
+
+  /// Claims the Adhan screen on behalf of the caller for [prayerKey].
+  ///
+  /// Returns false when the same prayer already claimed the slot within
+  /// [_adhanClaimWindow] — i.e. an Adhan screen for it is already showing or
+  /// on its way, and the caller must not open a second one.
+  static bool claimAdhanRoute(String prayerKey, {DateTime? now}) {
+    final at = now ?? DateTime.now();
+    if (prayerKey == _lastAdhanClaim &&
+        _lastAdhanClaimAt != null &&
+        at.difference(_lastAdhanClaimAt!) < _adhanClaimWindow) {
+      return false;
+    }
+    _lastAdhanClaim = prayerKey;
+    _lastAdhanClaimAt = at;
+    return true;
+  }
+
+  /// How long a claim is honoured. Long enough to outlast the other paths'
+  /// navigator-ready waits (8s each, on top of their own polling), short
+  /// enough that deliberately re-tapping the Adhan notification a few minutes
+  /// later still reopens the screen.
+  static const _adhanClaimWindow = Duration(minutes: 2);
+
+  /// Whether an Adhan screen is already on the navigator stack.
+  static bool _adhanAlreadyOnStack() {
+    var visible = false;
+    _navigatorKey.currentState?.popUntil((route) {
+      if (route.settings.name == Routes.adhan) visible = true;
+      return true; // never actually pop anything
+    });
+    return visible;
+  }
+
   static Future<void> route(String payload) async {
     if (payload.isEmpty) return;
     final parts = payload.split(':');
@@ -1389,6 +1679,20 @@ class NotificationRouter {
 
     switch (type) {
       case 'prayer':
+        // A second Adhan screen for the same prayer is never wanted: the
+        // background isolate's signal or the in-app polling loop has usually
+        // opened one already (this path fires at the same instant — the
+        // full-screen intent launches the activity while the signal is being
+        // delivered), and the two would each play the Adhan. See
+        // [claimAdhanRoute].
+        if (param.isNotEmpty && !claimAdhanRoute(param)) {
+          debugPrint('NotificationRouter: adhan already claimed for $param');
+          break;
+        }
+        if (_adhanAlreadyOnStack()) {
+          debugPrint('NotificationRouter: adhan screen already open');
+          break;
+        }
         Navigator.pushNamed(ctx, Routes.adhan, arguments: _prayerNameAr(param));
         break;
       case 'wakeup':
@@ -1491,6 +1795,12 @@ final prayerTimesProvider = FutureProvider<List<PrayerTimeInfo>>((ref) async {
     if (pos != null) {
       await settings.set('latitude', lat.toString());
       await settings.set('longitude', lng.toString());
+      // Mirrored too, for the same reason location_prayer_update persists
+      // both: the background-service isolate reads coordinates off
+      // SharedPreferences, not out of the Drift store.
+      final prefs = ref.read(sharedPreferencesProvider);
+      await prefs.setString('latitude', lat.toString());
+      await prefs.setString('longitude', lng.toString());
     }
   }
 
@@ -1542,16 +1852,7 @@ class NotificationsManager {
 
     // أوقات الصلاة
     if (prefs.prayerReminder) {
-      final prayers = await _ref.read(prayerTimesProvider.future);
-      await NotificationsService.schedulePrayerNotifications(
-        prayers: prayers,
-        l10n: l10n,
-        preAdhanEnabled: prefs.preAdhanNotif,
-        iqamaEnabled: prefs.iqamaNotif,
-        adhanMode: prefs.adhanMode,
-        adhanScreenEnabled: prefs.adhanScreenEnabled,
-        adhanAlarmEnabled: prefs.adhanAlarmEnabled,
-      );
+      await _scheduleUpcomingPrayers(prefs, l10n);
     }
 
     // تنبيه اليقظة قبل الفجر
@@ -1610,45 +1911,62 @@ class NotificationsManager {
     }
   }
 
-  Future<void> _reschedulePrayers() async {
-    // Cancel only prayer-related IDs
-    final ids = [
-      NotifIds.fajr,
-      NotifIds.dhuhr,
-      NotifIds.asr,
-      NotifIds.maghrib,
-      NotifIds.isha,
-      NotifIds.preFajr,
-      NotifIds.preDhuhr,
-      NotifIds.preAsr,
-      NotifIds.preMaghrib,
-      NotifIds.preIsha,
-      NotifIds.iqamaFajr,
-      NotifIds.iqamaDhuhr,
-      NotifIds.iqamaAsr,
-      NotifIds.iqamaMaghrib,
-      NotifIds.iqamaIsha,
-      NotifIds.wakeUpAlarm,
-    ];
+  /// Schedules the rolling multi-day prayer-alert horizon from the stored
+  /// location and calculation settings.
+  ///
+  /// This is the main isolate's replacement for scheduling "today's remaining
+  /// prayers". Everything about it exists so the alarms are already in the OS
+  /// queue when the user's next prayer arrives — including the case where they
+  /// haven't opened the app since yesterday.
+  Future<void> _scheduleUpcomingPrayers(
+    UserPreferences prefs,
+    AppLocalizations l10n,
+  ) async {
+    // Resolving today's times first guarantees a location exists before the
+    // horizon is built: when none is stored yet, prayerTimesProvider is what
+    // acquires one and writes it back to settings, so reading the coordinates
+    // afterwards can't silently fall through to the default city.
+    await _ref.read(prayerTimesProvider.future);
 
-    for (final id in ids) {
-      await NotificationsService.cancel(id);
-    }
+    final settings = _ref.read(settingsDaoProvider);
+    final latitude = double.tryParse(await settings.get('latitude') ?? '');
+    final longitude = double.tryParse(await settings.get('longitude') ?? '');
+    if (latitude == null || longitude == null) return;
+
+    await NotificationsService.scheduleUpcomingPrayerNotifications(
+      latitude: latitude,
+      longitude: longitude,
+      timezone: await settings.get('timezone'),
+      madhab: prefs.madhab,
+      method: prefs.calcMethod,
+      highLatitudeRule: prefs.highLatitudeRule,
+      fajrOffset: prefs.fajrOffset,
+      sunriseOffset: prefs.sunriseOffset,
+      dhuhrOffset: prefs.dhuhrOffset,
+      asrOffset: prefs.asrOffset,
+      maghribOffset: prefs.maghribOffset,
+      ishaOffset: prefs.ishaOffset,
+      l10n: l10n,
+      preAdhanEnabled: prefs.preAdhanNotif,
+      iqamaEnabled: prefs.iqamaNotif,
+      adhanMode: prefs.adhanMode,
+      adhanScreenEnabled: prefs.adhanScreenEnabled,
+      adhanAlarmEnabled: prefs.adhanAlarmEnabled,
+    );
+  }
+
+  Future<void> _reschedulePrayers() async {
+    // Cancels the legacy single-day ids and the whole rolling horizon —
+    // including the day that fell off the end of the previous run, which
+    // nothing else would ever overwrite.
+    await NotificationsService.cancelPrayerNotifications();
+    await NotificationsService.cancel(NotifIds.wakeUpAlarm);
 
     final prefs = await _ref.read(userPreferencesProvider.future);
-    final prayers = await _ref.read(prayerTimesProvider.future);
     final l10n = _currentL10n();
 
     if (prefs.prayerReminder) {
-      await NotificationsService.schedulePrayerNotifications(
-        prayers: prayers,
-        l10n: l10n,
-        preAdhanEnabled: prefs.preAdhanNotif,
-        iqamaEnabled: prefs.iqamaNotif,
-        adhanMode: prefs.adhanMode,
-        adhanScreenEnabled: prefs.adhanScreenEnabled,
-        adhanAlarmEnabled: prefs.adhanAlarmEnabled,
-      );
+      await _scheduleUpcomingPrayers(prefs, l10n);
     }
 
     if (prefs.wakeUpBeforeFajr) {

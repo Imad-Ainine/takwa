@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
@@ -54,6 +55,17 @@ final currentlyPlayingAdhanProvider = StateProvider<String?>((ref) => null);
 /// docs/specs/adhan-overlay-auto-open.md R6.
 final notificationPermissionsGrantedProvider = FutureProvider<bool>((ref) {
   return NotificationsService.checkPermissions();
+});
+
+/// Whether Android's battery optimizer is currently exempting the app.
+/// Exact alarms do fire during Doze (`exactAllowWhileIdle`), but a
+/// restricted app can still have the high-priority adhan notification —
+/// and therefore the full-screen-intent launch — deferred while the phone
+/// is asleep. Re-read via
+/// `ref.invalidate(batteryOptimizationExemptProvider)` after the user
+/// returns from the system prompt.
+final batteryOptimizationExemptProvider = FutureProvider<bool>((ref) {
+  return NotificationsService.isBatteryOptimizationExempt();
 });
 
 class AdhanNotificationSettingsScreen extends ConsumerWidget {
@@ -115,11 +127,16 @@ class AdhanNotificationSettingsScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             if (needsPermission) ...[
-                              _NotificationPermissionWarning(
+                              _PermissionWarning(
+                                title: l10n.notifPermissionWarningTitle,
+                                body: l10n.notifPermissionWarningBody,
                                 onGrant: () async {
                                   await NotificationsService.requestPermissions();
                                   ref.invalidate(
                                     notificationPermissionsGrantedProvider,
+                                  );
+                                  ref.invalidate(
+                                    batteryOptimizationExemptProvider,
                                   );
                                 },
                               ),
@@ -129,384 +146,452 @@ class AdhanNotificationSettingsScreen extends ConsumerWidget {
                               icon: '🕌',
                               title: l10n.adhanSettingsAccountSectionTitle,
                             ),
-                          SettingsCard(
-                            children: [
-                              SelectSetting(
-                                icon: '⚖️',
-                                label: l10n.adhanMadhabLabel,
-                                value: prefs.madhab,
-                                options: {
-                                  'shafi': l10n.madhabShafi,
-                                  'hanafi': l10n.madhabHanafi,
-                                },
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('madhab', v),
-                              ),
-                              const SettingsDivider(),
-                              SelectSetting(
-                                icon: '🌍',
-                                label: l10n.adhanCalcMethodLabel,
-                                value: prefs.calcMethod,
-                                options: {
-                                  'Algeria': l10n.calcMethodAlgeria,
-                                  'MWL': l10n.calcMethodMWL,
-                                  'Egypt': l10n.calcMethodEgypt,
-                                  'Karachi': l10n.calcMethodKarachi,
-                                  'UmmAlQura': l10n.calcMethodUmmAlQura,
-                                  'ISNA': l10n.calcMethodISNA,
-                                },
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('calc_method', v),
-                              ),
-                              const SettingsDivider(),
-                              Builder(
-                                builder: (context) {
-                                  // `cityName` isn't part of UserPreferences —
-                                  // it's written directly via SettingsDao by
-                                  // LocationPrayerManager/the background
-                                  // isolate — so it's watched separately here,
-                                  // same pattern prayer_screen.dart uses.
-                                  final cityName = ref
-                                      .watch(settingStreamProvider('cityName'))
-                                      .value;
-                                  return ActionSetting(
-                                    icon: '📍',
-                                    label: l10n.adhanLocationLabel,
-                                    sublabel:
-                                        (cityName != null &&
-                                            cityName.isNotEmpty)
-                                        ? cityName
-                                        : l10n.adhanLocationSublabel,
-                                    onTap: () => LocationPickerSheet.show(
-                                      context,
+                            SettingsCard(
+                              children: [
+                                SelectSetting(
+                                  icon: '⚖️',
+                                  label: l10n.adhanMadhabLabel,
+                                  value: prefs.madhab,
+                                  options: {
+                                    'shafi': l10n.madhabShafi,
+                                    'hanafi': l10n.madhabHanafi,
+                                  },
+                                  onChanged: (v) => ref
+                                      .read(userPreferencesProvider.notifier)
+                                      .updatePref('madhab', v),
+                                ),
+                                const SettingsDivider(),
+                                SelectSetting(
+                                  icon: '🌍',
+                                  label: l10n.adhanCalcMethodLabel,
+                                  value: prefs.calcMethod,
+                                  options: {
+                                    'Algeria': l10n.calcMethodAlgeria,
+                                    'MWL': l10n.calcMethodMWL,
+                                    'Egypt': l10n.calcMethodEgypt,
+                                    'Karachi': l10n.calcMethodKarachi,
+                                    'UmmAlQura': l10n.calcMethodUmmAlQura,
+                                    'ISNA': l10n.calcMethodISNA,
+                                  },
+                                  onChanged: (v) => ref
+                                      .read(userPreferencesProvider.notifier)
+                                      .updatePref('calc_method', v),
+                                ),
+                                const SettingsDivider(),
+                                Builder(
+                                  builder: (context) {
+                                    // `cityName` isn't part of UserPreferences —
+                                    // it's written directly via SettingsDao by
+                                    // LocationPrayerManager/the background
+                                    // isolate — so it's watched separately here,
+                                    // same pattern prayer_screen.dart uses.
+                                    final cityName = ref
+                                        .watch(
+                                          settingStreamProvider('cityName'),
+                                        )
+                                        .value;
+                                    return ActionSetting(
+                                      icon: '📍',
+                                      label: l10n.adhanLocationLabel,
+                                      sublabel:
+                                          (cityName != null &&
+                                              cityName.isNotEmpty)
+                                          ? cityName
+                                          : l10n.adhanLocationSublabel,
+                                      onTap: () =>
+                                          LocationPickerSheet.show(context),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
+                            // Manual per-prayer minute offsets + high-latitude
+                            // rule — these were previously stored/consumed
+                            // (packages/takwa_core's adhan.CalculationParameters
+                            // .adjustments, via notifications_service.dart and
+                            // location_prayer_update.dart) but had NO settings
+                            // UI anywhere, so a user could never actually set
+                            // them. See docs/specs/settings-notifications-
+                            // improvements.md R5.
+                            SectionHeader(
+                              icon: '🧭',
+                              title: l10n.settingsAdjustmentsSectionTitle,
+                            ),
+                            SettingsCard(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    14,
+                                    10,
+                                    14,
+                                    4,
+                                  ),
+                                  child: Text(
+                                    l10n.settingsAdjustmentsSectionSublabel,
+                                    style: context.typography.caption.copyWith(
+                                      fontSize: 12,
+                                      color: context.colors.textSecondary,
                                     ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.xl),
-                          // Manual per-prayer minute offsets + high-latitude
-                          // rule — these were previously stored/consumed
-                          // (packages/takwa_core's adhan.CalculationParameters
-                          // .adjustments, via notifications_service.dart and
-                          // location_prayer_update.dart) but had NO settings
-                          // UI anywhere, so a user could never actually set
-                          // them. See docs/specs/settings-notifications-
-                          // improvements.md R5.
-                          SectionHeader(
-                            icon: '🧭',
-                            title: l10n.settingsAdjustmentsSectionTitle,
-                          ),
-                          SettingsCard(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  14,
-                                  10,
-                                  14,
-                                  4,
-                                ),
-                                child: Text(
-                                  l10n.settingsAdjustmentsSectionSublabel,
-                                  style: context.typography.caption.copyWith(
-                                    fontSize: 12,
-                                    color: context.colors.textSecondary,
                                   ),
                                 ),
-                              ),
-                              const SettingsDivider(),
-                              _PrayerOffsetRow(
-                                icon: '🌅',
-                                label: l10n.prayerFajr,
-                                value: prefs.fajrOffset,
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('fajr_offset', v),
-                              ),
-                              const SettingsDivider(),
-                              _PrayerOffsetRow(
-                                icon: '🌄',
-                                label: l10n.prayerSunrise,
-                                value: prefs.sunriseOffset,
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('sunrise_offset', v),
-                              ),
-                              const SettingsDivider(),
-                              _PrayerOffsetRow(
-                                icon: '☀️',
-                                label: l10n.prayerDhuhr,
-                                value: prefs.dhuhrOffset,
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('dhuhr_offset', v),
-                              ),
-                              const SettingsDivider(),
-                              _PrayerOffsetRow(
-                                icon: '🌤',
-                                label: l10n.prayerAsr,
-                                value: prefs.asrOffset,
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('asr_offset', v),
-                              ),
-                              const SettingsDivider(),
-                              _PrayerOffsetRow(
-                                icon: '🌆',
-                                label: l10n.prayerMaghrib,
-                                value: prefs.maghribOffset,
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('maghrib_offset', v),
-                              ),
-                              const SettingsDivider(),
-                              _PrayerOffsetRow(
-                                icon: '🌃',
-                                label: l10n.prayerIsha,
-                                value: prefs.ishaOffset,
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('isha_offset', v),
-                              ),
-                              const SettingsDivider(),
-                              SelectSetting(
-                                icon: '🌐',
-                                label: l10n.highLatitudeRuleLabel,
-                                value: prefs.highLatitudeRule,
-                                options: {
-                                  'middle_of_the_night':
-                                      l10n.highLatitudeRuleMiddleOfNight,
-                                  'seventh_of_the_night':
-                                      l10n.highLatitudeRuleSeventhOfNight,
-                                  'twilight_angle':
-                                      l10n.highLatitudeRuleTwilightAngle,
-                                },
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('high_latitude_rule', v),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.xl),
-                          SectionHeader(
-                            icon: '🔊',
-                            title: l10n.adhanSoundSectionTitle,
-                          ),
-                          SettingsCard(
-                            children: [
-                              SelectSetting(
-                                icon: '🎵',
-                                label: l10n.adhanSoundSectionTitle,
-                                value: prefs.adhanSound,
-                                options: adhanOptions(l10n),
-                                itemTrailingBuilder: (ctx, key, isSelected) =>
-                                    AdhanSoundPreviewButton(soundPath: key),
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('adhan_sound', v),
-                              ),
-                              const SettingsDivider(),
-                              SelectSetting(
-                                icon: '🔈',
-                                label: l10n.adhanModeLabel,
-                                value: prefs.adhanMode,
-                                options: {
-                                  'sound': l10n.adhanModeSound,
-                                  'vibrate': l10n.adhanModeVibrate,
-                                  'silent': l10n.adhanModeSilent,
-                                },
-                                onChanged: (v) {
-                                  ref
+                                const SettingsDivider(),
+                                _PrayerOffsetRow(
+                                  icon: '🌅',
+                                  label: l10n.prayerFajr,
+                                  value: prefs.fajrOffset,
+                                  onChanged: (v) => ref
                                       .read(userPreferencesProvider.notifier)
-                                      .updatePref('adhan_mode', v);
-                                  // Push the new mode to the background
-                                  // foreground-task isolate right away — it
-                                  // only reads SharedPreferences on its own
-                                  // start, so without this the adhan-time
-                                  // sound decision there would keep using
-                                  // the old mode until the app/service next
-                                  // restarts. See
-                                  // docs/specs/settings-notifications-
-                                  // improvements.md R6.
-                                  OverlayBackgroundService.updateSettings(
-                                    adhanMode: v,
-                                  );
-                                },
-                              ),
-                              const SettingsDivider(),
-                              SliderSetting(
-                                icon: '🔊',
-                                label: l10n.adhanVolumeLabel,
-                                value: prefs.adhanVolumeLevel,
-                                valueLabelBuilder: (v) =>
-                                    '${(v * 100).round()}%',
-                                onChanged: (v) {
-                                  ref
+                                      .updatePref('fajr_offset', v),
+                                ),
+                                const SettingsDivider(),
+                                _PrayerOffsetRow(
+                                  icon: '🌄',
+                                  label: l10n.prayerSunrise,
+                                  value: prefs.sunriseOffset,
+                                  onChanged: (v) => ref
                                       .read(userPreferencesProvider.notifier)
-                                      .updatePref('adhan_volume_level', v);
-                                  // Same reasoning as adhanMode above: push
-                                  // the new volume to the background
-                                  // isolate right away instead of leaving
-                                  // it stuck at whatever it was on last
-                                  // service start (R6).
-                                  OverlayBackgroundService.updateSettings(
-                                    adhanVolumeLevel: v,
-                                  );
-                                },
-                              ),
-                              const SettingsDivider(),
-                              ToggleSetting(
-                                icon: '📳',
-                                label: l10n.adhanVibrateTypeLabel,
-                                sublabel: l10n.adhanVibrateTypeSublabel,
-                                value: prefs.vibrateWithAdhan,
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('vibrate_with_adhan', v),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.xl),
-                          SectionHeader(
-                            icon: '⚙️',
-                            title: l10n.adhanAdvancedSectionTitle,
-                          ),
-                          SettingsCard(
-                            children: [
-                              ToggleSetting(
-                                icon: '🔇',
-                                label: l10n.adhanAutoSilentLabel,
-                                sublabel: l10n.adhanAutoSilentSublabel,
-                                value: prefs.autoSilentAfterAdhan,
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('auto_silent_after_adhan', v),
-                              ),
-                              const SettingsDivider(),
-                              ActionSetting(
-                                icon: '⚙️',
-                                label: l10n.adhanSilentModeSettingsLabel,
-                                sublabel: l10n.adhanSilentModeSettingsSublabel,
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        const SilentModeSettingsScreen(),
+                                      .updatePref('sunrise_offset', v),
+                                ),
+                                const SettingsDivider(),
+                                _PrayerOffsetRow(
+                                  icon: '☀️',
+                                  label: l10n.prayerDhuhr,
+                                  value: prefs.dhuhrOffset,
+                                  onChanged: (v) => ref
+                                      .read(userPreferencesProvider.notifier)
+                                      .updatePref('dhuhr_offset', v),
+                                ),
+                                const SettingsDivider(),
+                                _PrayerOffsetRow(
+                                  icon: '🌤',
+                                  label: l10n.prayerAsr,
+                                  value: prefs.asrOffset,
+                                  onChanged: (v) => ref
+                                      .read(userPreferencesProvider.notifier)
+                                      .updatePref('asr_offset', v),
+                                ),
+                                const SettingsDivider(),
+                                _PrayerOffsetRow(
+                                  icon: '🌆',
+                                  label: l10n.prayerMaghrib,
+                                  value: prefs.maghribOffset,
+                                  onChanged: (v) => ref
+                                      .read(userPreferencesProvider.notifier)
+                                      .updatePref('maghrib_offset', v),
+                                ),
+                                const SettingsDivider(),
+                                _PrayerOffsetRow(
+                                  icon: '🌃',
+                                  label: l10n.prayerIsha,
+                                  value: prefs.ishaOffset,
+                                  onChanged: (v) => ref
+                                      .read(userPreferencesProvider.notifier)
+                                      .updatePref('isha_offset', v),
+                                ),
+                                const SettingsDivider(),
+                                SelectSetting(
+                                  icon: '🌐',
+                                  label: l10n.highLatitudeRuleLabel,
+                                  value: prefs.highLatitudeRule,
+                                  options: {
+                                    'middle_of_the_night':
+                                        l10n.highLatitudeRuleMiddleOfNight,
+                                    'seventh_of_the_night':
+                                        l10n.highLatitudeRuleSeventhOfNight,
+                                    'twilight_angle':
+                                        l10n.highLatitudeRuleTwilightAngle,
+                                  },
+                                  onChanged: (v) => ref
+                                      .read(userPreferencesProvider.notifier)
+                                      .updatePref('high_latitude_rule', v),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
+                            SectionHeader(
+                              icon: '🔊',
+                              title: l10n.adhanSoundSectionTitle,
+                            ),
+                            SettingsCard(
+                              children: [
+                                SelectSetting(
+                                  icon: '🎵',
+                                  label: l10n.adhanSoundSectionTitle,
+                                  value: prefs.adhanSound,
+                                  options: adhanOptions(l10n),
+                                  itemTrailingBuilder: (ctx, key, isSelected) =>
+                                      AdhanSoundPreviewButton(soundPath: key),
+                                  onChanged: (v) => ref
+                                      .read(userPreferencesProvider.notifier)
+                                      .updatePref('adhan_sound', v),
+                                ),
+                                const SettingsDivider(),
+                                SelectSetting(
+                                  icon: '🔈',
+                                  label: l10n.adhanModeLabel,
+                                  value: prefs.adhanMode,
+                                  options: {
+                                    'sound': l10n.adhanModeSound,
+                                    'vibrate': l10n.adhanModeVibrate,
+                                    'silent': l10n.adhanModeSilent,
+                                  },
+                                  onChanged: (v) {
+                                    ref
+                                        .read(userPreferencesProvider.notifier)
+                                        .updatePref('adhan_mode', v);
+                                    // Push the new mode to the background
+                                    // foreground-task isolate right away — it
+                                    // only reads SharedPreferences on its own
+                                    // start, so without this the adhan-time
+                                    // sound decision there would keep using
+                                    // the old mode until the app/service next
+                                    // restarts. See
+                                    // docs/specs/settings-notifications-
+                                    // improvements.md R6.
+                                    OverlayBackgroundService.updateSettings(
+                                      adhanMode: v,
+                                    );
+                                  },
+                                ),
+                                const SettingsDivider(),
+                                SliderSetting(
+                                  icon: '🔊',
+                                  label: l10n.adhanVolumeLabel,
+                                  value: prefs.adhanVolumeLevel,
+                                  valueLabelBuilder: (v) =>
+                                      '${(v * 100).round()}%',
+                                  onChanged: (v) {
+                                    ref
+                                        .read(userPreferencesProvider.notifier)
+                                        .updatePref('adhan_volume_level', v);
+                                    // Same reasoning as adhanMode above: push
+                                    // the new volume to the background
+                                    // isolate right away instead of leaving
+                                    // it stuck at whatever it was on last
+                                    // service start (R6).
+                                    OverlayBackgroundService.updateSettings(
+                                      adhanVolumeLevel: v,
+                                    );
+                                  },
+                                ),
+                                const SettingsDivider(),
+                                ToggleSetting(
+                                  icon: '📳',
+                                  label: l10n.adhanVibrateTypeLabel,
+                                  sublabel: l10n.adhanVibrateTypeSublabel,
+                                  value: prefs.vibrateWithAdhan,
+                                  onChanged: (v) => ref
+                                      .read(userPreferencesProvider.notifier)
+                                      .updatePref('vibrate_with_adhan', v),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
+                            SectionHeader(
+                              icon: '⚙️',
+                              title: l10n.adhanAdvancedSectionTitle,
+                            ),
+                            SettingsCard(
+                              children: [
+                                ToggleSetting(
+                                  icon: '🔇',
+                                  label: l10n.adhanAutoSilentLabel,
+                                  sublabel: l10n.adhanAutoSilentSublabel,
+                                  value: prefs.autoSilentAfterAdhan,
+                                  onChanged: (v) => ref
+                                      .read(userPreferencesProvider.notifier)
+                                      .updatePref('auto_silent_after_adhan', v),
+                                ),
+                                const SettingsDivider(),
+                                ActionSetting(
+                                  icon: '⚙️',
+                                  label: l10n.adhanSilentModeSettingsLabel,
+                                  sublabel:
+                                      l10n.adhanSilentModeSettingsSublabel,
+                                  onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const SilentModeSettingsScreen(),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SettingsDivider(),
-                              ActionSetting(
-                                icon: '🕌',
-                                label: l10n.adhanEnableInSilentLabel,
-                                sublabel: l10n.adhanEnableInSilentSublabel,
-                                onTap: () => PrayerSelectionSheet.show(
-                                  context: context,
-                                  title: l10n.adhanEnableInSilentLabel,
-                                  selectedPrayers: prefs.silentAdhanPrayers
-                                      .split(','),
-                                  onChanged: (prayers) => ref
-                                      .read(userPreferencesProvider.notifier)
-                                      .updatePref(
-                                        'silent_adhan_prayers',
-                                        prayers.join(','),
-                                      ),
+                                const SettingsDivider(),
+                                ActionSetting(
+                                  icon: '🕌',
+                                  label: l10n.adhanEnableInSilentLabel,
+                                  sublabel: l10n.adhanEnableInSilentSublabel,
+                                  onTap: () => PrayerSelectionSheet.show(
+                                    context: context,
+                                    title: l10n.adhanEnableInSilentLabel,
+                                    selectedPrayers: prefs.silentAdhanPrayers
+                                        .split(','),
+                                    onChanged: (prayers) => ref
+                                        .read(userPreferencesProvider.notifier)
+                                        .updatePref(
+                                          'silent_adhan_prayers',
+                                          prayers.join(','),
+                                        ),
+                                  ),
                                 ),
-                              ),
-                              const SettingsDivider(),
-                              ActionSetting(
-                                icon: '📢',
-                                label: l10n.adhanEnableNotifInSilentLabel,
-                                sublabel: l10n.adhanEnableNotifInSilentSublabel,
-                                onTap: () => PrayerSelectionSheet.show(
-                                  context: context,
-                                  title: l10n.adhanNotifSilentSheetTitle,
-                                  selectedPrayers: prefs.silentNotifPrayers
-                                      .split(','),
-                                  includeSunrise: true,
-                                  onChanged: (prayers) => ref
-                                      .read(userPreferencesProvider.notifier)
-                                      .updatePref(
-                                        'silent_notif_prayers',
-                                        prayers.join(','),
-                                      ),
+                                const SettingsDivider(),
+                                ActionSetting(
+                                  icon: '📢',
+                                  label: l10n.adhanEnableNotifInSilentLabel,
+                                  sublabel:
+                                      l10n.adhanEnableNotifInSilentSublabel,
+                                  onTap: () => PrayerSelectionSheet.show(
+                                    context: context,
+                                    title: l10n.adhanNotifSilentSheetTitle,
+                                    selectedPrayers: prefs.silentNotifPrayers
+                                        .split(','),
+                                    includeSunrise: true,
+                                    onChanged: (prayers) => ref
+                                        .read(userPreferencesProvider.notifier)
+                                        .updatePref(
+                                          'silent_notif_prayers',
+                                          prayers.join(','),
+                                        ),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.xl),
-                          SectionHeader(
-                            icon: '📱',
-                            title: l10n.adhanSystemNotifSectionTitle,
-                          ),
-                          SettingsCard(
-                            children: [
-                              CheckboxSetting(
-                                label: l10n.adhanScreenEnabledLabel,
-                                sublabel: l10n.adhanScreenEnabledSublabel,
-                                value: prefs.adhanScreenEnabled,
-                                onChanged: (v) {
-                                  ref
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
+                            SectionHeader(
+                              icon: '📱',
+                              title: l10n.adhanSystemNotifSectionTitle,
+                            ),
+                            SettingsCard(
+                              children: [
+                                CheckboxSetting(
+                                  label: l10n.adhanScreenEnabledLabel,
+                                  sublabel: l10n.adhanScreenEnabledSublabel,
+                                  value: prefs.adhanScreenEnabled,
+                                  onChanged: (v) {
+                                    ref
+                                        .read(userPreferencesProvider.notifier)
+                                        .updatePref('adhan_screen_enabled', v);
+                                    OverlayBackgroundService.updateSettings(
+                                      adhanScreenEnabled: v,
+                                    );
+                                  },
+                                ),
+                                const SettingsDivider(),
+                                CheckboxSetting(
+                                  label: l10n.adhanWakeScreenLabel,
+                                  sublabel: l10n.adhanWakeScreenSublabel,
+                                  value: prefs.wakeScreenEnabled,
+                                  onChanged: (v) => ref
                                       .read(userPreferencesProvider.notifier)
-                                      .updatePref('adhan_screen_enabled', v);
-                                  OverlayBackgroundService.updateSettings(
-                                    adhanScreenEnabled: v,
-                                  );
-                                },
-                              ),
-                              const SettingsDivider(),
-                              CheckboxSetting(
-                                label: l10n.adhanWakeScreenLabel,
-                                sublabel: l10n.adhanWakeScreenSublabel,
-                                value: prefs.wakeScreenEnabled,
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('wake_screen_enabled', v),
-                              ),
-                              const SettingsDivider(),
-                              CheckboxSetting(
-                                label: l10n.adhanFlipToSilenceLabel,
-                                sublabel: l10n.adhanFlipToSilenceSublabel,
-                                value: prefs.flipToSilenceEnabled,
-                                onChanged: (v) {
-                                  ref
+                                      .updatePref('wake_screen_enabled', v),
+                                ),
+                                const SettingsDivider(),
+                                CheckboxSetting(
+                                  label: l10n.adhanFlipToSilenceLabel,
+                                  sublabel: l10n.adhanFlipToSilenceSublabel,
+                                  value: prefs.flipToSilenceEnabled,
+                                  onChanged: (v) {
+                                    ref
+                                        .read(userPreferencesProvider.notifier)
+                                        .updatePref(
+                                          'flip_to_silence_enabled',
+                                          v,
+                                        );
+                                    // `updateSettings()` already had a
+                                    // `flipToSilenceEnabled` parameter — this
+                                    // toggle just never called it, so the
+                                    // background isolate kept using whatever
+                                    // value it loaded on its last start (R6).
+                                    OverlayBackgroundService.updateSettings(
+                                      flipToSilenceEnabled: v,
+                                    );
+                                  },
+                                ),
+                                const SettingsDivider(),
+                                CheckboxSetting(
+                                  label: l10n.adhanAlarmNotifLabel,
+                                  sublabel: l10n.adhanAlarmNotifSublabel,
+                                  value: prefs.adhanAlarmEnabled,
+                                  onChanged: (v) => ref
                                       .read(userPreferencesProvider.notifier)
-                                      .updatePref('flip_to_silence_enabled', v);
-                                  // `updateSettings()` already had a
-                                  // `flipToSilenceEnabled` parameter — this
-                                  // toggle just never called it, so the
-                                  // background isolate kept using whatever
-                                  // value it loaded on its last start (R6).
-                                  OverlayBackgroundService.updateSettings(
-                                    flipToSilenceEnabled: v,
-                                  );
-                                },
-                              ),
-                              const SettingsDivider(),
-                              CheckboxSetting(
-                                label: l10n.adhanAlarmNotifLabel,
-                                sublabel: l10n.adhanAlarmNotifSublabel,
-                                value: prefs.adhanAlarmEnabled,
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('adhan_alarm_enabled', v),
-                              ),
-                              const SettingsDivider(),
-                              CheckboxSetting(
-                                label: l10n.adhanOngoingNotifLabel,
-                                sublabel: l10n.adhanOngoingNotifSublabel,
-                                value: prefs.ongoingNotifEnabled,
-                                onChanged: (v) => ref
-                                    .read(userPreferencesProvider.notifier)
-                                    .updatePref('ongoing_notif_enabled', v),
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
+                                      .updatePref('adhan_alarm_enabled', v),
+                                ),
+                                const SettingsDivider(),
+                                CheckboxSetting(
+                                  label: l10n.adhanOngoingNotifLabel,
+                                  sublabel: l10n.adhanOngoingNotifSublabel,
+                                  value: prefs.ongoingNotifEnabled,
+                                  onChanged: (v) => ref
+                                      .read(userPreferencesProvider.notifier)
+                                      .updatePref('ongoing_notif_enabled', v),
+                                ),
+                                // Android 14+ can revoke the adhan's
+                                // full-screen intent without any in-app
+                                // signal, and the battery optimizer can hold
+                                // it back on a sleeping phone — the two
+                                // remaining links between "the notification
+                                // fired" and "the Adhan screen is on screen".
+                                // Both live here, at the end of the system
+                                // notifications card.
+                                if (defaultTargetPlatform ==
+                                    TargetPlatform.android) ...[
+                                  const SettingsDivider(),
+                                  ActionSetting(
+                                    icon: '🪟',
+                                    label: l10n.adhanFullScreenIntentLabel,
+                                    sublabel:
+                                        l10n.adhanFullScreenIntentSublabel,
+                                    onTap: () async {
+                                      final granted =
+                                          await NotificationsService.ensureFullScreenIntentPermission();
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            granted
+                                                ? l10n.adhanFullScreenIntentGranted
+                                                : l10n.adhanFullScreenIntentDenied,
+                                          ),
+                                          behavior: SnackBarBehavior.floating,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                                if (defaultTargetPlatform ==
+                                        TargetPlatform.android &&
+                                    ref
+                                            .watch(
+                                              batteryOptimizationExemptProvider,
+                                            )
+                                            .valueOrNull ==
+                                        false) ...[
+                                  const SettingsDivider(),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: AppSpacing.sm,
+                                    ),
+                                    child: _PermissionWarning(
+                                      title:
+                                          l10n.batteryOptimizationWarningTitle,
+                                      body: l10n.batteryOptimizationWarningBody,
+                                      onGrant: () async {
+                                        await NotificationsService.requestBackgroundPermission();
+                                        ref.invalidate(
+                                          batteryOptimizationExemptProvider,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        );
                       },
                     ),
                     const SizedBox(height: AppSpacing.xxxl),
@@ -668,7 +753,9 @@ class _OffsetStepButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.colors.card.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: context.colors.border.withValues(alpha: 0.5)),
+          border: Border.all(
+            color: context.colors.border.withValues(alpha: 0.5),
+          ),
         ),
         child: Icon(
           icon,
@@ -688,12 +775,20 @@ class _OffsetStepButton extends StatelessWidget {
 /// Same visual pattern as overlay_settings_tile.dart's
 /// `_OverlayPermissionWarning` (kept as a separate private widget since
 /// that one isn't exported) — a tinted warning card + a "grant
-/// permission" action, shown whenever `NotificationsManager.scheduleAll()`
-/// would otherwise silently do nothing.
-class _NotificationPermissionWarning extends StatelessWidget {
+/// permission" action, shown whenever the OS is silently holding back the
+/// feature the card sits next to. The copy comes from the call site so the
+/// same widget covers the notification/exact-alarm permission and the
+/// battery-optimization exemption.
+class _PermissionWarning extends StatelessWidget {
+  final String title;
+  final String body;
   final Future<void> Function() onGrant;
 
-  const _NotificationPermissionWarning({required this.onGrant});
+  const _PermissionWarning({
+    required this.title,
+    required this.body,
+    required this.onGrant,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -704,7 +799,9 @@ class _NotificationPermissionWarning extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.warning.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: context.colors.warning.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: context.colors.warning.withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -714,12 +811,15 @@ class _NotificationPermissionWarning extends StatelessWidget {
             children: [
               Text(
                 '⚠️',
-                style: TextStyle(fontSize: 16, color: context.colors.warningText),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: context.colors.warningText,
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  l10n.notifPermissionWarningTitle,
+                  title,
                   style: context.typography.bodyMedium.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -731,7 +831,7 @@ class _NotificationPermissionWarning extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            l10n.notifPermissionWarningBody,
+            body,
             style: context.typography.caption.copyWith(
               fontSize: 12,
               color: context.colors.warningText,

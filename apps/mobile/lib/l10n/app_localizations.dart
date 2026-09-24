@@ -2264,6 +2264,42 @@ abstract class AppLocalizations {
   /// **'امنح إذن الإشعارات والمنبهات الدقيقة ليعمل تذكير الأذان وشاشته في وقتهما بالضبط.'**
   String get notifPermissionWarningBody;
 
+  /// No description provided for @adhanFullScreenIntentLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'فتح شاشة الأذان فوق التطبيقات'**
+  String get adhanFullScreenIntentLabel;
+
+  /// No description provided for @adhanFullScreenIntentSublabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'في أندرويد 14 وما بعده قد يلغي النظام هذا الإذن تلقائياً، فتصبح شاشة الأذان مجرد إشعار عادي. اضغط للتأكد منه ومنحه.'**
+  String get adhanFullScreenIntentSublabel;
+
+  /// No description provided for @adhanFullScreenIntentGranted.
+  ///
+  /// In ar, this message translates to:
+  /// **'النافذة الكاملة مفعّلة ✓'**
+  String get adhanFullScreenIntentGranted;
+
+  /// No description provided for @adhanFullScreenIntentDenied.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يُفعَّل الإذن — فعّله من إعدادات النظام'**
+  String get adhanFullScreenIntentDenied;
+
+  /// No description provided for @batteryOptimizationWarningTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'قد يتأخر الأذان بسبب توفير البطارية'**
+  String get batteryOptimizationWarningTitle;
+
+  /// No description provided for @batteryOptimizationWarningBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسمح للتطبيق بالعمل في الخلفية دون قيود، حتى تصل شاشة الأذان في وقتها وأنت نائم.'**
+  String get batteryOptimizationWarningBody;
+
   /// No description provided for @adhanSettingsAccountSectionTitle.
   ///
   /// In ar, this message translates to:

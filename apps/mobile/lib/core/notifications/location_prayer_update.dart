@@ -7,6 +7,7 @@ import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 
 import 'package:geocoding/geocoding.dart';
 import '../providers/database_providers.dart';
+import '../providers/shared_preferences_provider.dart';
 import 'notifications_service.dart';
 import '../utils/timezone_resolver.dart';
 import '../../features/settings/providers/user_preferences_provider.dart';
@@ -43,7 +44,7 @@ class LocationPrayerManager {
       // استخدم المحفوظ وجدول الإشعارات
       final lat = double.tryParse(savedLat) ?? 36.7;
       final lng = double.tryParse(savedLng ?? '') ?? 3.0;
-      await _scheduleForLocation(ref, lat, lng);
+      await _scheduleForLocation(ref, lat, lng, timezone: savedTz);
     }
 
     scheduleMidnightReschedule(ref);
@@ -574,10 +575,13 @@ class LocationPrayerManager {
       }
 
       // حفظ في الإعدادات
-      await settings.set('latitude', lat.toString());
-      await settings.set('longitude', lng.toString());
-      await settings.set('timezone', tzName);
-      await settings.set('cityName', cityName);
+      await _persistLocation(
+        ref,
+        latitude: lat,
+        longitude: lng,
+        timezone: tzName,
+        cityName: cityName,
+      );
       await settings.set(
         'lastLocationUpdate',
         DateTime.now().toIso8601String(),
@@ -588,7 +592,7 @@ class LocationPrayerManager {
 
       // جدولة الإشعارات بالموقع الجديد (فشل الجدولة لا يجب أن يُفشل نجاح تحديد الموقع)
       try {
-        await _scheduleForLocation(ref, lat, lng);
+        await _scheduleForLocation(ref, lat, lng, timezone: tzName);
       } catch (e) {
         debugPrint('[LocationPrayerManager] notification scheduling failed: $e');
       }
@@ -621,10 +625,13 @@ class LocationPrayerManager {
     required String cityName,
   }) async {
     final settings = ref.read(settingsDaoProvider);
-    await settings.set('latitude', latitude.toString());
-    await settings.set('longitude', longitude.toString());
-    await settings.set('timezone', timezone);
-    await settings.set('cityName', cityName);
+    await _persistLocation(
+      ref,
+      latitude: latitude,
+      longitude: longitude,
+      timezone: timezone,
+      cityName: cityName,
+    );
     await settings.set(
       'lastLocationUpdate',
       DateTime.now().toIso8601String(),
@@ -633,7 +640,7 @@ class LocationPrayerManager {
     TimezoneResolver.setLocalTimezone(timezone);
     ref.invalidate(prayerTimesProvider);
     try {
-      await _scheduleForLocation(ref, latitude, longitude);
+      await _scheduleForLocation(ref, latitude, longitude, timezone: timezone);
     } catch (e) {
       debugPrint('[LocationPrayerManager] setManualLocation schedule failed: $e');
     }
@@ -657,7 +664,7 @@ class LocationPrayerManager {
           }
           ref.invalidate(prayerTimesProvider);
           try {
-            await _scheduleForLocation(ref, lat, lng);
+            await _scheduleForLocation(ref, lat, lng, timezone: cachedTz);
           } catch (e) {
             debugPrint('[LocationPrayerManager] _scheduleForLocation in fallback failed: $e');
           }
@@ -673,21 +680,57 @@ class LocationPrayerManager {
     return null;
   }
 
+  /// Saves the located place to the settings store *and* mirrors it into
+  /// SharedPreferences.
+  ///
+  /// Both halves are required for the same reason: the Drift settings store is
+  /// only reachable from this isolate, while the foreground service that
+  /// schedules the exact alarms runs in its own isolate with no
+  /// `ProviderContainer` and reads these keys straight off SharedPreferences.
+  /// A location written to only one of the two is silently replaced by the
+  /// other's fallback (Algiers) the next time the service recalculates, which
+  /// is how a manually chosen city ended up with the wrong alarm times.
+  static Future<void> _persistLocation(
+    dynamic ref, {
+    required double latitude,
+    required double longitude,
+    required String timezone,
+    required String cityName,
+  }) async {
+    final settings = ref.read(settingsDaoProvider);
+    await settings.set('latitude', latitude.toString());
+    await settings.set('longitude', longitude.toString());
+    await settings.set('timezone', timezone);
+    await settings.set('cityName', cityName);
+
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setString('latitude', latitude.toString());
+    await prefs.setString('longitude', longitude.toString());
+    await prefs.setString('timezone', timezone);
+    await prefs.setString('cityName', cityName);
+  }
+
   /// جدولة إشعارات الصلاة لموقع محدد
+  ///
+  /// Schedules the rolling horizon rather than today alone: a schedule that
+  /// stops at midnight leaves the phone with nothing pending the next day, so
+  /// prayer alerts would only ever fire if the app happened to be reopened
+  /// that morning.
   static Future<void> _scheduleForLocation(
     dynamic ref,
     double lat,
-    double lng,
-  ) async {
+    double lng, {
+    String? timezone,
+  }) async {
     try {
       final prefs = await ref.read(userPreferencesProvider.future);
 
       if (!prefs.prayerReminder) return;
 
-      // حساب الأوقات بالـ timezone الصحيح والمعاملات الكاملة الموحدة
-      final prayers = await PrayerTimesService.calculate(
+      await NotificationsService.scheduleUpcomingPrayerNotifications(
         latitude: lat,
         longitude: lng,
+        timezone: timezone,
         madhab: prefs.madhab,
         method: prefs.calcMethod,
         highLatitudeRule: prefs.highLatitudeRule,
@@ -697,10 +740,6 @@ class LocationPrayerManager {
         asrOffset: prefs.asrOffset,
         maghribOffset: prefs.maghribOffset,
         ishaOffset: prefs.ishaOffset,
-      );
-
-      await NotificationsService.schedulePrayerNotifications(
-        prayers: prayers,
         l10n: lookupAppLocalizations(ref.read(localeProvider)),
         preAdhanEnabled: prefs.preAdhanNotif,
         iqamaEnabled: prefs.iqamaNotif,

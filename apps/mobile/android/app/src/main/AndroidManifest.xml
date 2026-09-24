@@ -16,7 +16,13 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <application android:label="تقوى" android:name="${applicationName}" android:icon="@mipmap/ic_launcher" android:theme="@style/LaunchTheme">
-        <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop" android:taskAffinity="" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
+        <!-- showWhenLocked + turnScreenOn: the adhan's full-screen-intent
+             notification is the one path that reaches a locked, asleep phone,
+             and without these two the PiP/overlay launch is refused while the
+             keyguard is up — the notification lights the screen but the Adhan
+             screen stays hidden behind it, which is the reported "nothing
+             happens until I open Takwa". -->
+        <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop" android:taskAffinity="" android:showWhenLocked="true" android:turnScreenOn="true" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues

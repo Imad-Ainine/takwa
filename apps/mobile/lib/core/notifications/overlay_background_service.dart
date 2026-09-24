@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart' as ow;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:adhan/adhan.dart' as adhan;
 import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
@@ -33,11 +32,13 @@ const _kLngKey = 'longitude';
 const _kMadhabKey = 'madhab';
 const _kCalcMethodKey = 'calc_method';
 const _kCityNameKey = 'cityName';
+const _kTimezoneKey = 'timezone';
+const _kHighLatitudeRuleKey = 'high_latitude_rule';
 const _kLastPopupMsKey = 'last_adhkar_popup_ms';
 const _kLastAdhkarNotifMsKey = 'last_adhkar_notif_ms';
 const _kLastDuaNotifMsKey = 'last_dua_notif_ms';
 const _kOverlayEnabledKey = 'overlay_popups_enabled';
-const _kPreAdhanNotifEnabledKey = 'pre_adhan_notif_enabled';
+const _kPreAdhanNotifEnabledKey = 'pre_adhan_notif';
 const _kPopupIntervalMinsKey = 'popup_interval_minutes';
 const _kAdhanScreenTriggeredKey = 'adhan_screen_triggered';
 const _kSilentModeEnabledKey = 'silent_mode_enabled';
@@ -774,46 +775,59 @@ class _OverlayTaskHandler extends TaskHandler {
     _lastPrayerDate = _dateKey(DateTime.now());
     try {
       final prefs = await SharedPreferences.getInstance();
-      final latStr = prefs.getString(_kLatKey);
-      final lngStr = prefs.getString(_kLngKey);
-      final madhab = prefs.getString(_kMadhabKey) ?? 'shafi';
-      final method = prefs.getString(_kCalcMethodKey) ?? 'Algeria';
+      final lat = _doublePref(prefs, _kLatKey);
+      final lng = _doublePref(prefs, _kLngKey);
+      if (lat == null || lng == null) {
+        // No fix saved yet. Previously this fell back to Algiers and then
+        // *scheduled alarms for that fallback*, overwriting whatever correct
+        // times the main isolate had written — someone in Cairo got Algiers
+        // alarms until their next location refresh. Leaving the existing
+        // schedule alone is strictly better than replacing it with a guess.
+        debugPrint('OverlayService: no saved coordinates, prayer times unchanged');
+        return;
+      }
 
-      final lat = latStr != null ? double.tryParse(latStr) ?? 36.7 : 36.7;
-      final lng = lngStr != null ? double.tryParse(lngStr) ?? 3.0 : 3.0;
-      final now = DateTime.now();
+      // Same pure-Dart calculation the main isolate runs, so both sides agree
+      // to the minute. This isolate used to carry its own copy of the adhan
+      // parameter table, which had drifted from the main isolate's (Algeria
+      // resolved to different angles and different dhuhr/maghrib adjustments)
+      // — so the pre-scheduled exact alarms and this isolate's own polling
+      // could disagree about when the same prayer was.
+      final times = await PrayerTimesService.calculate(
+        latitude: lat,
+        longitude: lng,
+        timezone: prefs.getString(_kTimezoneKey),
+        madhab: prefs.getString(_kMadhabKey) ?? 'shafi',
+        method: prefs.getString(_kCalcMethodKey) ?? 'Algeria',
+        highLatitudeRule: prefs.getString(_kHighLatitudeRuleKey),
+        fajrOffset: _intPref(prefs, 'fajr_offset'),
+        sunriseOffset: _intPref(prefs, 'sunrise_offset'),
+        dhuhrOffset: _intPref(prefs, 'dhuhr_offset'),
+        asrOffset: _intPref(prefs, 'asr_offset'),
+        maghribOffset: _intPref(prefs, 'maghrib_offset'),
+        ishaOffset: _intPref(prefs, 'isha_offset'),
+      );
 
-      final coords = adhan.Coordinates(lat, lng);
-      final dateComponents = adhan.DateComponents(now.year, now.month, now.day);
-      final params = _buildAdhanParams(method, madhab, prefs);
-      final times = adhan.PrayerTimes(coords, dateComponents, params);
+      // Sunrise carries no adhan; the polling loops only ever care about the
+      // five prayers.
+      _todayPrayers = times
+          .where((p) => p.name != 'sunrise')
+          .map((p) => _PrayerInfo(p.name, p.nameAr, p.emoji, p.time))
+          .toList();
 
-      // adhan.PrayerTimes returns UTC times; convert to local timezone
-      _todayPrayers = [
-        _PrayerInfo('fajr', 'الفجر', '🌅', times.fajr.toLocal()),
-        _PrayerInfo('dhuhr', 'الظهر', '☀️', times.dhuhr.toLocal()),
-        _PrayerInfo('asr', 'العصر', '🌤', times.asr.toLocal()),
-        _PrayerInfo('maghrib', 'المغرب', '🌆', times.maghrib.toLocal()),
-        _PrayerInfo('isha', 'العشاء', '🌃', times.isha.toLocal()),
-      ];
-
-      // Keep today's exact-alarm/full-screen-intent Adhan notifications
-      // (NotificationsService.schedulePrayerNotifications) in sync with
-      // whatever day this isolate thinks it is. That's the one mechanism
+      // Keep the exact-alarm/full-screen-intent Adhan notifications in sync
+      // with whatever day this isolate thinks it is. That's the one mechanism
       // meant to fire the Adhan screen right on time regardless of Doze/
-      // App-Standby throttling — the two polling loops (this isolate's own
-      // 1s tick below and AdhanAutoTrigger's in the main isolate) are only
-      // a fallback, bounded by their own dedupe windows, and can't recover
-      // once the OS delays a tick past prayer time. Previously this was
-      // scheduled exactly once, from MainShell on cold start — fine for
-      // that day, but nothing ever rescheduled it for the next one if the
-      // app process (kept alive by this very foreground service) survived
-      // past midnight without a full restart. From the second day onward
-      // the exact alarms were stale/gone, silently degrading the whole
-      // feature to wall-clock polling — which is exactly what "the Adhan
-      // screen opens a few minutes late, with no sound" looks like: by the
-      // time a delayed tick or a reopened app catches up, it may already be
-      // outside the window that plays sound, or outside the window at all.
+      // App-Standby throttling — the two polling loops (this isolate's own 1s
+      // tick below and AdhanAutoTrigger's in the main isolate) are only a
+      // fallback, bounded by their own dedupe windows, and can't recover once
+      // the OS delays a tick past prayer time. Previously this was scheduled
+      // exactly once, from MainShell on cold start — fine for that day, but
+      // nothing ever rescheduled it for the next one if the app process (kept
+      // alive by this very foreground service) survived past midnight without
+      // a full restart, and from the second day onward the exact alarms were
+      // stale/gone. The call below now covers a multi-day horizon, so surviving
+      // past midnight no longer means praying to a stale schedule.
       await _rescheduleExactAlarms();
     } catch (e) {
       debugPrint('OverlayService: Failed to compute prayer times: $e');
@@ -821,54 +835,42 @@ class _OverlayTaskHandler extends TaskHandler {
   }
 
   /// Re-schedules the exact-alarm prayer notifications
-  /// (NotificationsService.schedulePrayerNotifications) for [_todayPrayers].
-  /// Safe to call repeatedly — that method cancels its own notification IDs
-  /// before rescheduling, so calling it again with the same day's prayers
-  /// is a no-op in effect, not a duplicate.
+  /// (NotificationsService.scheduleUpcomingPrayerNotifications) across the
+  /// same multi-day horizon the main isolate uses. Safe to call repeatedly:
+  /// that method cancels the IDs it owns before re-scheduling, so calling it
+  /// again over an overlapping range is idempotent rather than duplicating.
   Future<void> _rescheduleExactAlarms() async {
-    if (_todayPrayers.isEmpty) return;
     try {
       final prefs = await SharedPreferences.getInstance();
       // Mirrors NotificationsManager.scheduleAll()'s own gate — respect the
       // user turning prayer reminders off entirely.
-      if (!(prefs.getBool('prayer_reminder') ?? true)) return;
+      if (!_boolPref(prefs, 'prayer_reminder')) return;
 
-      const notifIds = {
-        'fajr': NotifIds.fajr,
-        'dhuhr': NotifIds.dhuhr,
-        'asr': NotifIds.asr,
-        'maghrib': NotifIds.maghrib,
-        'isha': NotifIds.isha,
-      };
-      final prayers = _todayPrayers
-          .map(
-            (p) => PrayerTimeInfo(
-              name: p.name,
-              nameAr: p.nameAr,
-              emoji: p.emoji,
-              time: p.time,
-              notifId: notifIds[p.name] ?? -1,
-            ),
-          )
-          .toList();
+      final lat = _doublePref(prefs, _kLatKey);
+      final lng = _doublePref(prefs, _kLngKey);
+      if (lat == null || lng == null) return;
 
       // Silent-mode allow-list gate for notifications.
       // When _silentModeEnabled is false, schedule for all prayers
       // unconditionally (Preservation: Requirement 3.11).
-      List<PrayerTimeInfo> prayersToSchedule = prayers;
+      Set<String>? onlyPrayers;
       if (_silentModeEnabled) {
         try {
           final ringerMode = await SoundMode.ringerModeStatus;
           if (ringerMode == RingerModeStatus.silent ||
               ringerMode == RingerModeStatus.vibrate) {
-            final allowListRaw =
-                prefs.getString(_kSilentNotifPrayersKey) ?? '';
-            final allowList = allowListRaw.isEmpty
+            final allowListRaw = prefs.getString(_kSilentNotifPrayersKey) ?? '';
+            onlyPrayers = allowListRaw.isEmpty
                 ? <String>{}
-                : allowListRaw.split(',').map((e) => e.trim()).toSet();
-            prayersToSchedule =
-                prayers.where((p) => allowList.contains(p.name)).toList();
-            if (prayersToSchedule.isEmpty) {
+                : allowListRaw
+                      .split(',')
+                      .map((e) => e.trim())
+                      .where((e) => e.isNotEmpty)
+                      .toSet();
+            if (onlyPrayers.isEmpty) {
+              // Deliberately *not* proceeding: an empty filter would cancel
+              // the whole horizon and schedule nothing, which is a much worse
+              // outcome than leaving the already-scheduled alarms in place.
               debugPrint(
                 '🔇 Exact alarms suppressed: phone in silent/vibrate '
                 'and no prayers in silent_notif_prayers allow-list',
@@ -879,85 +881,71 @@ class _OverlayTaskHandler extends TaskHandler {
         } catch (e) {
           // If SoundMode throws, default to scheduling for all prayers.
           debugPrint('OverlayService: SoundMode check in reschedule failed: $e');
-          prayersToSchedule = prayers;
+          onlyPrayers = null;
         }
       }
 
-      await NotificationsService.schedulePrayerNotifications(
-        prayers: prayersToSchedule,
+      await NotificationsService.scheduleUpcomingPrayerNotifications(
+        latitude: lat,
+        longitude: lng,
+        timezone: prefs.getString(_kTimezoneKey),
+        madhab: prefs.getString(_kMadhabKey) ?? 'shafi',
+        method: prefs.getString(_kCalcMethodKey) ?? 'Algeria',
+        highLatitudeRule: prefs.getString(_kHighLatitudeRuleKey),
+        fajrOffset: _intPref(prefs, 'fajr_offset'),
+        sunriseOffset: _intPref(prefs, 'sunrise_offset'),
+        dhuhrOffset: _intPref(prefs, 'dhuhr_offset'),
+        asrOffset: _intPref(prefs, 'asr_offset'),
+        maghribOffset: _intPref(prefs, 'maghrib_offset'),
+        ishaOffset: _intPref(prefs, 'isha_offset'),
         l10n: _l10n,
-        preAdhanEnabled: prefs.getBool('pre_adhan_notif') ?? true,
-        iqamaEnabled: prefs.getBool('iqama_notif') ?? true,
+        preAdhanEnabled: _boolPref(prefs, _kPreAdhanNotifEnabledKey),
+        iqamaEnabled: _boolPref(prefs, 'iqama_notif'),
         adhanMode: _adhanMode,
-        adhanScreenEnabled: prefs.getBool('adhan_screen_enabled') ?? true,
-        adhanAlarmEnabled: prefs.getBool('adhan_alarm_enabled') ?? true,
+        adhanScreenEnabled: _boolPref(prefs, 'adhan_screen_enabled'),
+        adhanAlarmEnabled: _boolPref(prefs, 'adhan_alarm_enabled'),
+        onlyPrayers: onlyPrayers,
       );
     } catch (e) {
       debugPrint('OverlayService: exact-alarm reschedule failed: $e');
     }
   }
 
-  adhan.CalculationParameters _buildAdhanParams(
-    String method,
-    String madhab,
+  /// Bool pref read that tolerates the string form. Settings are stored in
+  /// SQLite as text (`SettingsPrefsBridge.mirror` only carries over the Dart
+  /// type it happens to be handed), so a raw `getBool` on a mirrored key can
+  /// throw and take the caller down with it.
+  static bool _boolPref(
     SharedPreferences prefs,
-  ) {
-    adhan.CalculationParameters p;
-    switch (method) {
-      case 'Algeria':
-        p = adhan.CalculationMethod.muslim_world_league.getParameters();
-        p.fajrAngle = 18.0;
-        p.ishaAngle = 17.0;
-        p.adjustments.dhuhr = 5;
-        p.adjustments.maghrib = 3;
-        break;
-      case 'Egypt':
-        p = adhan.CalculationMethod.egyptian.getParameters();
-        break;
-      case 'Karachi':
-        p = adhan.CalculationMethod.karachi.getParameters();
-        break;
-      case 'UmmAlQura':
-        p = adhan.CalculationMethod.umm_al_qura.getParameters();
-        break;
-      case 'Dubai':
-        p = adhan.CalculationMethod.dubai.getParameters();
-        break;
-      case 'Kuwait':
-        p = adhan.CalculationMethod.kuwait.getParameters();
-        break;
-      case 'Qatar':
-        p = adhan.CalculationMethod.qatar.getParameters();
-        break;
-      case 'Singapore':
-        p = adhan.CalculationMethod.singapore.getParameters();
-        break;
-      case 'Turkey':
-        p = adhan.CalculationMethod.turkey.getParameters();
-        break;
-      case 'Tehran':
-        p = adhan.CalculationMethod.tehran.getParameters();
-        break;
-      case 'ISNA':
-        p = adhan.CalculationMethod.north_america.getParameters();
-        break;
-      case 'MWL':
-      default:
-        p = adhan.CalculationMethod.muslim_world_league.getParameters();
-        p.fajrAngle = 18.0;
-        p.ishaAngle = 17.0;
+    String key, {
+    bool fallback = true,
+  }) {
+    final value = prefs.get(key);
+    if (value is bool) return value;
+    if (value is String) {
+      final lower = value.toLowerCase();
+      if (lower == 'true') return true;
+      if (lower == 'false') return false;
     }
-    p.madhab = (madhab == 'hanafi') ? adhan.Madhab.hanafi : adhan.Madhab.shafi;
+    return fallback;
+  }
 
-    // Apply manual minute offsets if configured
-    p.adjustments.fajr += prefs.getInt('fajr_offset') ?? 0;
-    p.adjustments.sunrise += prefs.getInt('sunrise_offset') ?? 0;
-    p.adjustments.dhuhr += prefs.getInt('dhuhr_offset') ?? 0;
-    p.adjustments.asr += prefs.getInt('asr_offset') ?? 0;
-    p.adjustments.maghrib += prefs.getInt('maghrib_offset') ?? 0;
-    p.adjustments.isha += prefs.getInt('isha_offset') ?? 0;
+  /// Int pref read that tolerates the string form — see [_boolPref].
+  static int _intPref(SharedPreferences prefs, String key) {
+    final value = prefs.get(key);
+    if (value is int) return value;
+    if (value is double) return value.round();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
 
-    return p;
+  /// Double pref read that tolerates the string form — see [_boolPref].
+  static double? _doublePref(SharedPreferences prefs, String key) {
+    final value = prefs.get(key);
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
   }
 
   // ──────────────────────────────────────

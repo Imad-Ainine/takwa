@@ -11,7 +11,6 @@ import 'package:sound_mode/utils/ringer_mode_statuses.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'package:takwa/core/notifications/adhan_auto_trigger.dart';
-import 'package:takwa/core/notifications/adhan_foreground_service.dart';
 import 'package:takwa/core/routes/app_routes.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
@@ -350,7 +349,6 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     AdhanAudioPlayer.stop();
     _vibrationTimer?.cancel();
     _accelSub?.cancel();
-    AdhanForegroundService.stopAdhanService();
   }
 
   // ─── Subtask 3.6: Fixed _applyAutoSilent ─────────────────────────────────
@@ -403,7 +401,6 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
     _restoreRingerTimer?.cancel();
     _accelSub?.cancel();
     AdhanAudioPlayer.stop();
-    AdhanForegroundService.stopAdhanService();
     _pulseCtrl.dispose();
     _starsCtrl.dispose();
     _entryCtrl.dispose();

@@ -401,6 +401,11 @@ class AdhanAutoTrigger {
           // Adhan screen for that prayer for the rest of the day. Poll
           // instead of taking one snapshot.
           await _waitForNavigatorReady(navigatorKey);
+          // Publish the claim so the notification path — which fires at this
+          // same instant when the prayer arrived while the app was
+          // backgrounded — doesn't stack a second Adhan screen on top of this
+          // one. See NotificationRouter.claimAdhanRoute.
+          NotificationRouter.claimAdhanRoute(prayer.name, now: now);
           navigatorKey.currentState?.pushNamed(
             Routes.adhan,
             arguments: prayer.nameAr,
@@ -528,6 +533,11 @@ class AdhanAutoTrigger {
         // exist yet. Poll instead of guessing a fixed delay.
         await _waitForNavigatorReady(navigatorKey);
         try {
+          // Same shared claim as _check() — see
+          // NotificationRouter.claimAdhanRoute.
+          if (prayerKey != null) {
+            NotificationRouter.claimAdhanRoute(prayerKey);
+          }
           navigatorKey.currentState?.pushNamed(
             Routes.adhan,
             arguments: prayerName,

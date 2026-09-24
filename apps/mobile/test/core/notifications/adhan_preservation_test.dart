@@ -162,7 +162,7 @@ Future<void> _resetAudioPlayer() async {
 void _silencePluginChannels() {
   // flutter_foreground_task — wakeUpScreen / launchApp / isRunningService
   // IMPORTANT: isRunningService returns a bool, so the mock must return false
-  // (not null) to avoid a cast error in AdhanForegroundService.stopAdhanService.
+  // (not null) rather than a null cast.
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(
     const MethodChannel('flutter_foreground_task/methods'),

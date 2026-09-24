@@ -15,7 +15,6 @@ import 'package:takwa/l10n/app_localizations.dart';
 
 import 'package:takwa/core/notifications/notifications_service.dart';
 import 'package:takwa/core/notifications/push_notification_service.dart';
-import 'package:takwa/core/notifications/adhan_foreground_service.dart';
 import 'package:takwa/core/notifications/adhan_auto_trigger.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/theme/ramadan_theme.dart';
@@ -108,12 +107,6 @@ Future<void> _runApp() async {
     prefs = await SharedPreferences.getInstance();
   } catch (e, st) {
     AppLogger.error('SharedPreferences initialize error', e, st);
-  }
-
-  try {
-    AdhanForegroundService.initForegroundTask();
-  } catch (e, st) {
-    AppLogger.error('AdhanForegroundService error', e, st);
   }
 
   try {

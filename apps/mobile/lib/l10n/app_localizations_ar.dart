@@ -1154,6 +1154,28 @@ class AppLocalizationsAr extends AppLocalizations {
       'امنح إذن الإشعارات والمنبهات الدقيقة ليعمل تذكير الأذان وشاشته في وقتهما بالضبط.';
 
   @override
+  String get adhanFullScreenIntentLabel => 'فتح شاشة الأذان فوق التطبيقات';
+
+  @override
+  String get adhanFullScreenIntentSublabel =>
+      'في أندرويد 14 وما بعده قد يلغي النظام هذا الإذن تلقائياً، فتصبح شاشة الأذان مجرد إشعار عادي. اضغط للتأكد منه ومنحه.';
+
+  @override
+  String get adhanFullScreenIntentGranted => 'النافذة الكاملة مفعّلة ✓';
+
+  @override
+  String get adhanFullScreenIntentDenied =>
+      'لم يُفعَّل الإذن — فعّله من إعدادات النظام';
+
+  @override
+  String get batteryOptimizationWarningTitle =>
+      'قد يتأخر الأذان بسبب توفير البطارية';
+
+  @override
+  String get batteryOptimizationWarningBody =>
+      'اسمح للتطبيق بالعمل في الخلفية دون قيود، حتى تصل شاشة الأذان في وقتها وأنت نائم.';
+
+  @override
   String get adhanSettingsAccountSectionTitle => 'إعدادات الحساب';
 
   @override
