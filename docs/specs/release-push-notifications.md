@@ -2,10 +2,16 @@
 
 ## Status
 
-Partially implemented. The in-app update check (Goal 1) is fully working
-today. The real push path (Goal 2) is fully coded but inert until a Firebase
-project is created and its config files are added — see **Manual setup**
-below.
+Implemented end to end. Goal 1 (in-app update check via `UpdateCheckService`) works, and the
+Goal 2 push path is no longer inert: `apps/mobile/android/app/google-services.json` is
+committed (Firebase project `takwa-f86dc`), devices subscribe to the `new_release` topic in
+`push_notification_service.dart`, and `.github/workflows/release-apk.yml` broadcasts the
+release notification through FCM HTTP v1 (`messages:send`) after a GitHub Release is created.
+
+The one remaining step is outside this repository: the workflow's
+`FCM_SERVICE_ACCOUNT_JSON` secret has to be set in GitHub Actions for the broadcast step to
+run — without it the job skips the push silently by design (`fcm_check` step) and only the
+in-app check reaches users. See **Manual setup** below for the exact steps.
 
 ## Context
 

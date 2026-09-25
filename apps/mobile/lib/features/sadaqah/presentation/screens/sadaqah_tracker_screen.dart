@@ -18,11 +18,12 @@ class SadaqahTrackerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final currency = ref.watch(sadaqahCurrencyProvider);
 
     return Scaffold(
       backgroundColor: context.colors.background,
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showLogSheet(context, ref, l10n),
+        onPressed: () => _showLogSheet(context, ref, l10n, currency),
         backgroundColor: context.colors.gold,
         foregroundColor: const Color(0xFF241B05),
         icon: const Icon(Icons.add_rounded),
@@ -46,6 +47,8 @@ class SadaqahTrackerScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        _CurrencyRow(l10n: l10n),
+                        const SizedBox(height: AppSpacing.md),
                         _TotalsRow(l10n: l10n),
                         const SizedBox(height: AppSpacing.xl),
                         Text(
@@ -72,6 +75,7 @@ class SadaqahTrackerScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     AppLocalizations l10n,
+    String currency,
   ) {
     showModalBottomSheet<void>(
       context: context,
@@ -80,7 +84,8 @@ class SadaqahTrackerScreen extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
       ),
-      builder: (_) => _LogSadaqahSheet(l10n: l10n, ref: ref),
+      builder: (_) =>
+          _LogSadaqahSheet(l10n: l10n, ref: ref, currency: currency),
     );
   }
 
@@ -110,8 +115,13 @@ class SadaqahTrackerScreen extends ConsumerWidget {
 class _LogSadaqahSheet extends StatefulWidget {
   final AppLocalizations l10n;
   final WidgetRef ref;
+  final String currency;
 
-  const _LogSadaqahSheet({required this.l10n, required this.ref});
+  const _LogSadaqahSheet({
+    required this.l10n,
+    required this.ref,
+    required this.currency,
+  });
 
   @override
   State<_LogSadaqahSheet> createState() => _LogSadaqahSheetState();
@@ -282,6 +292,9 @@ class _LogSadaqahSheetState extends State<_LogSadaqahSheet> {
             decoration: InputDecoration(
               labelText: l10n.sadaqahAmountFieldLabel,
               errorText: _amountError,
+              // Shows which unit the number is in, so the totals on this
+              // screen can't be read as a different currency.
+              suffixText: widget.currency.isEmpty ? null : widget.currency,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppRadius.lg),
               ),
@@ -325,6 +338,7 @@ class _TotalsRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final totalsAsync = ref.watch(sadaqahTotalsProvider);
+    final currency = ref.watch(sadaqahCurrencyProvider);
 
     return totalsAsync.when(
       loading: () => const Padding(
@@ -337,11 +351,21 @@ class _TotalsRow extends ConsumerWidget {
         return Row(
           children: [
             Expanded(
-              child: _totalCard(context, l10n.sadaqahTotalsWeekLabel, week),
+              child: _totalCard(
+                context,
+                l10n.sadaqahTotalsWeekLabel,
+                week,
+                currency,
+              ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: _totalCard(context, l10n.sadaqahTotalsMonthLabel, month),
+              child: _totalCard(
+                context,
+                l10n.sadaqahTotalsMonthLabel,
+                month,
+                currency,
+              ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
@@ -349,6 +373,7 @@ class _TotalsRow extends ConsumerWidget {
                 context,
                 l10n.sadaqahTotalsAllTimeLabel,
                 allTime,
+                currency,
               ),
             ),
           ],
@@ -357,7 +382,12 @@ class _TotalsRow extends ConsumerWidget {
     );
   }
 
-  Widget _totalCard(BuildContext context, String label, double value) {
+  Widget _totalCard(
+    BuildContext context,
+    String label,
+    double value,
+    String currency,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(
         vertical: AppSpacing.md,
@@ -371,8 +401,14 @@ class _TotalsRow extends ConsumerWidget {
       child: Column(
         children: [
           Text(
-            value > 0 ? value.toStringAsFixed(0) : '—',
-            style: context.typography.headingMedium.copyWith(
+            // Same formatter as the history list: truncating cents here made
+            // a 12.50 entry read as "12" in the totals and "12.5" below it.
+            value > 0 ? _formatSadaqahAmount(value, currency) : '—',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.typography.labelLarge.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
               color: context.colors.gold,
             ),
           ),
@@ -388,6 +424,108 @@ class _TotalsRow extends ConsumerWidget {
   }
 }
 
+/// The tracker's amounts are unitless in the database, so the unit has to be
+/// stated once, here, rather than in every row.
+class _CurrencyRow extends ConsumerWidget {
+  final AppLocalizations l10n;
+  const _CurrencyRow({required this.l10n});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currency = ref.watch(sadaqahCurrencyProvider);
+
+    return Align(
+      alignment: AlignmentDirectional.centerEnd,
+      child: TextButton.icon(
+        onPressed: () => _showCurrencyDialog(context, ref, currency),
+        icon: Icon(
+          Icons.payments_outlined,
+          size: 18,
+          color: currency.isEmpty
+              ? context.colors.textDim
+              : context.colors.gold,
+        ),
+        label: Text(
+          currency.isEmpty ? l10n.sadaqahCurrencyNotSet : currency,
+          style: context.typography.caption.copyWith(
+            color: currency.isEmpty
+                ? context.colors.textDim
+                : context.colors.textPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showCurrencyDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String current,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController(text: current);
+
+    final saved = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: context.colors.card,
+        title: Text(l10n.sadaqahCurrencyDialogTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: controller,
+              autofocus: true,
+              textCapitalization: TextCapitalization.characters,
+              decoration: InputDecoration(
+                hintText: l10n.sadaqahCurrencyFieldHint,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                ),
+              ),
+              onSubmitted: (value) =>
+                  Navigator.pop(dialogContext, value.trim()),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n.sadaqahCurrencyNote,
+              style: context.typography.caption.copyWith(
+                color: context.colors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.pop(dialogContext, controller.text.trim()),
+            child: Text(l10n.commonSave),
+          ),
+        ],
+      ),
+    );
+
+    controller.dispose();
+    if (saved == null) return;
+    await ref
+        .read(settingsDaoProvider)
+        .set(kSadaqahCurrencySettingKey, saved);
+  }
+}
+
+/// Up to two decimals, no trailing `.00`, with the user's currency label
+/// appended when one is set. Plain ASCII digits, matching the rest of the
+/// app's money display.
+String _formatSadaqahAmount(double value, String currency) {
+  final text = NumberFormat('#,##0.##', 'en_US').format(value);
+  return currency.isEmpty ? text : '$text $currency';
+}
+
 class _HistoryList extends ConsumerWidget {
   final AppLocalizations l10n;
   const _HistoryList({required this.l10n});
@@ -395,6 +533,7 @@ class _HistoryList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final historyAsync = ref.watch(sadaqahHistoryProvider);
+    final currency = ref.watch(sadaqahCurrencyProvider);
 
     return historyAsync.when(
       loading: () => const Padding(
@@ -437,7 +576,7 @@ class _HistoryList extends ConsumerWidget {
                       ),
                       Text(
                         r.sadaqahAmount > 0
-                            ? r.sadaqahAmount.toStringAsFixed(2)
+                            ? _formatSadaqahAmount(r.sadaqahAmount, currency)
                             : l10n.sadaqahLoggedNoAmount,
                         style: context.typography.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,

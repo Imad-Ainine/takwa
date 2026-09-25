@@ -84,7 +84,42 @@ class CircleLeaderboardNotifier
     final raw = await ref
         .read(supabaseServiceProvider)
         .getCircleLeaderboard(circleId);
-    return raw.map(CircleMemberRow.fromMap).toList();
+    final rows = raw.map(CircleMemberRow.fromMap).toList();
+    await _grantStreakMatchAchievement(rows);
+    return rows;
+  }
+
+  /// 'circle_streak_match' — docs/specs/family-community-features.md's data
+  /// model names it alongside 'circle_joined'. The leaderboard is the only
+  /// place a user's peers appear with their streaks, so this is where the
+  /// comparison can happen; it reads the *local* streak because
+  /// `get_circle_leaderboard` NULLs the caller's own row unless they opted
+  /// into sharing, which would silently disable the achievement for
+  /// non-sharing users. Peers still only appear with a streak when they
+  /// opted in (R4), so nothing unshared is ever compared.
+  Future<void> _grantStreakMatchAchievement(List<CircleMemberRow> rows) async {
+    try {
+      final myId = ref.read(supabaseUserProvider).value?.id;
+      if (myId == null) return;
+
+      final myStreak = await ref.read(statsDaoProvider).getCurrentStreak();
+      if (!matchesSharedStreak(rows, myUserId: myId, myStreak: myStreak)) {
+        return;
+      }
+
+      final l10n = lookupAppLocalizations(const Locale('ar'));
+      await ref
+          .read(statsDaoProvider)
+          .tryGrantAchievement(
+            'circle_streak_match',
+            l10n.achievementCircleStreakMatchTitle,
+            l10n.achievementCircleStreakMatchDesc,
+            '🤝',
+            40,
+          );
+    } catch (_) {
+      // A failed achievement check must not blank the leaderboard.
+    }
   }
 
   Future<void> refresh() async {

@@ -95,6 +95,53 @@
 | `created_at` | `timestamptz` |  Nullable |
 | `updated_at` | `timestamptz` |  Nullable |
 
+## Table `circles`
+
+Private, invite-only accountability circles — see
+`docs/specs/family-community-features.md`. Created/updated only through the
+`create_circle` / `join_circle` / `rename_circle` / `delete_circle` RPCs.
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `owner_id` | `uuid` |  |
+| `name` | `text` |  |
+| `invite_code` | `text` | Unique |
+| `created_at` | `timestamptz` |  |
+
+## Table `circle_members`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `circle_id` | `uuid` | Primary |
+| `user_id` | `uuid` | Primary |
+| `joined_at` | `timestamptz` |  |
+| `share_streak` | `bool` |  |
+| `share_points` | `bool` |  |
+| `share_checklist_done` | `bool` |  |
+| `share_quran_pages` | `bool` |  |
+
+## Table `circle_reactions`
+
+Fixed phrase set only (`phrase_key` is CHECK-constrained to the five
+`ReactionPhrase` keys in `lib/features/circles/domain/circle_models.dart`) —
+there is no free text anywhere in this table.
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `circle_id` | `uuid` |  |
+| `from_user_id` | `uuid` |  |
+| `to_user_id` | `uuid` |  |
+| `phrase_key` | `text` |  |
+| `created_at` | `timestamptz` |  |
+
 ## Table `community_adhkar`
 
 ### Columns

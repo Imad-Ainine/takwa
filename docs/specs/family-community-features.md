@@ -1,8 +1,23 @@
 # Spec: Family / Community Accountability Circles
 
 ## Status
-Not implemented. Proposed. Largest of the four specs in this batch — first feature that
-needs a real multi-user social graph, not just per-user cloud backup.
+Implemented (R1-R8) on mobile + Supabase: `apps/mobile/lib/features/circles/`
+(list/detail screens, `circle_models.dart`, `circles_providers.dart`) over the
+`circles` / `circle_members` / `circle_reactions` tables and their SECURITY DEFINER RPCs in
+`apps/mobile/supabase/migrations/20260916120000_add_family_circles.sql` — invite codes,
+per-signal opt-in toggles defaulting to off, streak/points leaderboard, the fixed five-phrase
+reaction set with an unread badge, and guest-mode gating. `get_circle_leaderboard()` NULLs any
+signal a member hasn't opted into, which is what makes R4/R8 enforceable server-side rather
+than in the widget tree. Both catalog achievements exist now: `circle_joined` (granted on
+create/join) and `circle_streak_match` (granted when your local streak equals a peer's shared
+streak — `matchesSharedStreak()` in `circle_models.dart`, covered by
+`apps/mobile/test/features/circles/circle_models_test.dart`).
+
+Known deviation: there is **no Drift local mirror** for circles, contrary to the data-model
+sketch below. Circle data is read straight from Supabase, so the feature is
+network-only/offline-empty. That was a deliberate scope call — a cached mirror adds a sync
+surface for data whose whole point is cross-user freshness — and it is the one thing to
+revisit if circles ever need to render offline.
 
 ## Context — what "community" already means in this app today
 

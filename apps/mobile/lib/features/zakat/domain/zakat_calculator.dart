@@ -19,8 +19,14 @@ class ZakatInputs {
   final double bankAmount;
   final double goldGrams;
   final double goldPricePerGram;
+
+  /// Value typed in directly, for users who know what their gold is worth but
+  /// not what it weighs. Used only when the weight×price route is unavailable.
+  final double goldValue;
+
   final double silverGrams;
   final double silverPricePerGram;
+  final double silverValue;
   final double tradeGoodsValue;
   final double debtAmount;
   final ZakatNisabBasis nisabBasis;
@@ -31,22 +37,38 @@ class ZakatInputs {
     this.bankAmount = 0,
     this.goldGrams = 0,
     this.goldPricePerGram = 0,
+    this.goldValue = 0,
     this.silverGrams = 0,
     this.silverPricePerGram = 0,
+    this.silverValue = 0,
     this.tradeGoodsValue = 0,
     this.debtAmount = 0,
     this.nisabBasis = ZakatNisabBasis.silver,
     this.hawlConfirmed = false,
   });
 
-  double get goldValue => goldGrams * goldPricePerGram;
-  double get silverValue => silverGrams * silverPricePerGram;
+  /// Weight × the entered price per gram wins whenever both are known, so
+  /// reusing a saved calculation can't silently double-count the metal.
+  double get goldWorth =>
+      (goldGrams > 0 && goldPricePerGram > 0)
+          ? goldGrams * goldPricePerGram
+          : goldValue;
+
+  double get silverWorth =>
+      (silverGrams > 0 && silverPricePerGram > 0)
+          ? silverGrams * silverPricePerGram
+          : silverValue;
 
   /// Total assets minus deductible short-term debt. Can be negative if debt
   /// exceeds assets — callers should clamp for display, not silently floor
   /// it here (a negative value is meaningful: it shows the shortfall).
   double get netWealth =>
-      cashAmount + bankAmount + goldValue + silverValue + tradeGoodsValue - debtAmount;
+      cashAmount +
+      bankAmount +
+      goldWorth +
+      silverWorth +
+      tradeGoodsValue -
+      debtAmount;
 }
 
 class ZakatResult {

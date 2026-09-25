@@ -1,7 +1,10 @@
 # Spec: Qada' (Missed Prayers) Tracker
 
 ## Status
-Not implemented. Proposed.
+Implemented. `QadaCounters` table + `QadaDao` (`apps/mobile/lib/core/database/daos.dart`),
+the Qada' screen reachable from the checklist, and the lifetime backlog semantics described
+below are all shipped, with tests in
+`apps/mobile/test/core/database/sadaqah_and_qada_test.dart`.
 
 ## Context
 

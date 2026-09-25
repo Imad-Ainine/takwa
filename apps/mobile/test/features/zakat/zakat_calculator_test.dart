@@ -62,7 +62,24 @@ void main() {
 
   test('gold and silver values are grams times user-supplied price', () {
     const inputs = ZakatInputs(goldGrams: 10, goldPricePerGram: 70);
-    expect(inputs.goldValue, 700);
+    expect(inputs.goldWorth, 700);
+  });
+
+  test('a direct value is used when weight or price is missing', () {
+    const inputs = ZakatInputs(goldValue: 900, silverValue: 100);
+    expect(inputs.goldWorth, 900);
+    expect(inputs.silverWorth, 100);
+    expect(inputs.netWealth, 1000);
+  });
+
+  test('weight x price wins over a stale direct value, never both', () {
+    const inputs = ZakatInputs(
+      goldGrams: 10,
+      goldPricePerGram: 70,
+      goldValue: 5000,
+    );
+    expect(inputs.goldWorth, 700);
+    expect(inputs.netWealth, 700);
   });
 
   test('no price supplied yields a zero Nisab threshold, not a false match', () {

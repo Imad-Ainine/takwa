@@ -167,6 +167,45 @@ void main() {
     );
 
     test(
+      'an excused day (makruh) never counts toward ramadan_complete',
+      () async {
+        // FastingType.makruh means "broke the fast with an excuse", so it is
+        // a day NOT fasted. The old query counted anything but `none`.
+        final ramadanFirst = HijriCalendar()
+          ..hYear = 1447
+          ..hMonth = 9
+          ..hDay = 1;
+        final info = computeRamadanInfo(ramadanFirst);
+
+        for (var i = 0; i < info.totalDays; i++) {
+          await seedDay(
+            info.gregorianStart.add(Duration(days: i)),
+            netPoints: 0,
+            fastingType: FastingType.makruh,
+          );
+        }
+        var granted = await db.statsDao.checkAndGrantAchievements(
+          asOfHijri: ramadanFirst,
+        );
+        expect(granted.map((a) => a.type), isNot(contains('ramadan_complete')));
+
+        // One excused day among 29 fasted days still falls short of 30/30.
+        await db.delete(db.dailyRecords).go();
+        for (var i = 0; i < info.totalDays; i++) {
+          await seedDay(
+            info.gregorianStart.add(Duration(days: i)),
+            netPoints: 20,
+            fastingType: i == 0 ? FastingType.makruh : FastingType.fard,
+          );
+        }
+        granted = await db.statsDao.checkAndGrantAchievements(
+          asOfHijri: ramadanFirst,
+        );
+        expect(granted.map((a) => a.type), isNot(contains('ramadan_complete')));
+      },
+    );
+
+    test(
       'ramadan_complete is not granted outside of Ramadan even with a full month fasted',
       () async {
         final ramadanFirst = HijriCalendar()

@@ -323,9 +323,14 @@ class ZakatCalculations extends Table {
   RealColumn get goldGrams => real().withDefault(const Constant(0.0))();
   RealColumn get goldPricePerGram =>
       real().withDefault(const Constant(0.0))();
+  /// Direct money value entered instead of weight × price, for users who
+  /// know what their gold is worth but not what it weighs. See R1 in
+  /// docs/specs/zakat-calculator.md.
+  RealColumn get goldValue => real().withDefault(const Constant(0.0))();
   RealColumn get silverGrams => real().withDefault(const Constant(0.0))();
   RealColumn get silverPricePerGram =>
       real().withDefault(const Constant(0.0))();
+  RealColumn get silverValue => real().withDefault(const Constant(0.0))();
   RealColumn get tradeGoodsValue =>
       real().withDefault(const Constant(0.0))();
   RealColumn get debtAmount => real().withDefault(const Constant(0.0))();
@@ -407,7 +412,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -516,6 +521,13 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 11) {
         await m.createTable(qadaCounters);
+      }
+      if (from < 12) {
+        // R1: gold/silver can now be entered as a straight value instead of
+        // weight × price. DEFAULT 0 keeps existing rows valid — they simply
+        // have no direct-value entry.
+        await m.addColumn(zakatCalculations, zakatCalculations.goldValue);
+        await m.addColumn(zakatCalculations, zakatCalculations.silverValue);
       }
     },
     beforeOpen: (details) async {

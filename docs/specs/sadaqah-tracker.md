@@ -1,7 +1,19 @@
 # Spec: Sadaqah (Charity) Tracker
 
 ## Status
-Not implemented. Proposed.
+Implemented. Amount entry lives in the daily checklist (`_SadaqahAmountField` in
+`checklist_screen.dart`) and the read-only tracker at
+`lib/features/sadaqah/presentation/screens/sadaqah_tracker_screen.dart` (week/month/all-time
+totals + history, plus a manual log sheet for back-dating an entry).
+
+Deviations from the draft, both deliberate:
+- `DailyRecords.sadaqahAmount` stays `NOT NULL DEFAULT 0`. SQLite can only drop a NOT NULL
+  by rebuilding the table, and `daily_records` is under FKs; "logged with no amount" is a
+  display state (`sadaqahLoggedNoAmount`) rather than a schema one.
+- Currency is a local-only, display-only label (`sadaqah_currency` in `user_settings`,
+  edited from the tracker header). It is not in `UserPreferences.toMap()`, so it never
+  reaches Supabase sync, and amounts are never converted — same simplification the Zakat
+  calculator makes.
 
 ## Context
 

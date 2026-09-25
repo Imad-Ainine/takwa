@@ -190,6 +190,16 @@ class AchievementDefinition {
         pointsReward: 30,
         category: AchievementCategory.special,
       ),
+      // Granted by CircleLeaderboardNotifier when this user's current streak
+      // equals another member's shared streak — see the same spec.
+      AchievementDefinition(
+        id: 'circle_streak_match',
+        titleAr: l10n.achievementCircleStreakMatchTitle,
+        descAr: l10n.achievementCircleStreakMatchDesc,
+        emoji: '🤝',
+        pointsReward: 40,
+        category: AchievementCategory.special,
+      ),
     ];
   }
 }

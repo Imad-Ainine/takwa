@@ -244,50 +244,55 @@ class _OccasionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFmt = DateFormat.yMMMd();
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: context.colors.card,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: context.colors.border),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // R12.3 — fasting chip has the same visual form and position
-                // on every annotated occasion.
-                if (occasion.isFastingRecommended) ...[
-                  _FastingChip(l10n: l10n),
-                  const SizedBox(height: 4),
-                ],
-                Text(
-                  _occasionName(l10n, occasion.kind),
-                  style: context.typography.labelLarge,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${dateFmt.format(occasion.gregorianDate)} · ${_daysUntilLabel(l10n, occasion.daysUntil)}',
-                  style: context.typography.caption,
-                ),
-              ],
-            ),
+    final name = _occasionName(l10n, occasion.kind);
+    // Spec R3 is "when the user taps an occasion" — the bell icon alone was a
+    // small affordance most users never find, so the whole card is the action.
+    return Semantics(
+      button: true,
+      label: l10n.occasionsAddReminderTooltip,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _openAddReminder(context, name),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: context.colors.card,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: context.colors.border),
           ),
-          IconButton(
-            icon: Icon(
-              Icons.notifications_active_outlined,
-              color: context.colors.textDim,
-            ),
-            tooltip: l10n.occasionsAddReminderTooltip,
-            onPressed: () => _openAddReminder(
-              context,
-              _occasionName(l10n, occasion.kind),
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // R12.3 — fasting chip has the same visual form and position
+                    // on every annotated occasion.
+                    if (occasion.isFastingRecommended) ...[
+                      _FastingChip(l10n: l10n),
+                      const SizedBox(height: 4),
+                    ],
+                    Text(name, style: context.typography.labelLarge),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${dateFmt.format(occasion.gregorianDate)} · ${_daysUntilLabel(l10n, occasion.daysUntil)}',
+                      style: context.typography.caption,
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.notifications_active_outlined,
+                  color: context.colors.textDim,
+                ),
+                tooltip: l10n.occasionsAddReminderTooltip,
+                onPressed: () => _openAddReminder(context, name),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

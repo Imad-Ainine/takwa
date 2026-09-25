@@ -1,7 +1,15 @@
 # Spec: Ramadan Fasting Tracker
 
 ## Status
-Not implemented. Proposed.
+Implemented (Goals 1-4) as `lib/features/ramadan/presentation/screens/ramadan_tracker_screen.dart`:
+auto-surfaced Ramadan entry, Suhoor/Iftar countdowns shown together, per-day fasting log
+(fard/nafl/excused, written to `DailyRecords.fastingType` from the tracker), the Qiyam
+toggle and the 30-day progress strip.
+
+Remaining: Goal 5's end-of-Ramadan *summary screen*. The grant condition itself exists —
+`ramadan_complete` is awarded by `StatsDao.checkAndGrantAchievements()` for 30 fasted days
+(excused days deliberately do not count, see `stats_and_achievements_test.dart`) — there is
+just no dedicated recap surface at the end of the month.
 
 ## Context
 

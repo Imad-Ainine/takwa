@@ -119,3 +119,16 @@ class CircleMemberRow {
     );
   }
 }
+
+/// Condition behind the 'circle_streak_match' achievement: my current streak
+/// equals a circle peer's. Peers who haven't opted into sharing streaks
+/// arrive as `currentStreak == null` (R4), so they can never match — and a
+/// streak of 0 is nothing to earn a badge for.
+bool matchesSharedStreak(
+  List<CircleMemberRow> rows, {
+  required String myUserId,
+  required int myStreak,
+}) {
+  if (myStreak <= 0) return false;
+  return rows.any((r) => r.userId != myUserId && r.currentStreak == myStreak);
+}

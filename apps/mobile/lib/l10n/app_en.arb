@@ -128,6 +128,14 @@
   "@achievementCircleJoinedDesc": {
     "description": "Achievement description: joined or created a family/community accountability circle"
   },
+  "achievementCircleStreakMatchTitle": "Streak Match",
+  "@achievementCircleStreakMatchTitle": {
+    "description": "Achievement title: matched another circle member's current streak"
+  },
+  "achievementCircleStreakMatchDesc": "You matched a circle member's current streak",
+  "@achievementCircleStreakMatchDesc": {
+    "description": "Achievement description: matched another circle member's current streak"
+  },
   "achievementPoints100Title": "A Hundred Steps",
   "@achievementPoints100Title": {
     "description": "Achievement title: reached 100 lifetime Taqwa points"
@@ -264,6 +272,7 @@
   "checklistFastingLabel": "Fasting",
   "fastingTypeFard": "Obligatory",
   "fastingTypeNafl": "Voluntary",
+  "fastingTypeMakruh": "Excused",
   "fastingTypeNone": "Not fasting",
   "checklistQuranPageSuffix": "/page",
   "semanticsSeparator": ", ",
@@ -2188,21 +2197,9 @@
   "@ramadanFastingStatusTitle": {
     "description": "Section title for today's fasting status on the Ramadan tracker"
   },
-  "ramadanFastingDoneFard": "You fasted today (obligatory) ✅",
-  "@ramadanFastingDoneFard": {
-    "description": "Shown when today's fasting type is logged as obligatory (fard)"
-  },
-  "ramadanFastingDoneNafl": "You fasted today (voluntary) ✅",
-  "@ramadanFastingDoneNafl": {
-    "description": "Shown when today's fasting type is logged as voluntary (nafl)"
-  },
-  "ramadanFastingNotLogged": "You haven't logged today's fast yet",
-  "@ramadanFastingNotLogged": {
-    "description": "Shown when today has no fasting type logged yet"
-  },
-  "ramadanLogFastingButton": "Log your fast",
-  "@ramadanLogFastingButton": {
-    "description": "Button on the Ramadan tracker that opens the daily checklist to log today's fast"
+  "ramadanFastingLogHint": "Log today's fast — an excused break still counts as a day not fasted.",
+  "@ramadanFastingLogHint": {
+    "description": "Hint under the Ramadan tracker's fasting log; explains that makruh (excused) does not count toward 30/30"
   },
   "ramadanProgressStripTitle": "Ramadan Days Progress",
   "@ramadanProgressStripTitle": {
@@ -2239,6 +2236,18 @@
   "zakatGoldPriceLabel": "Today's Gold Price per Gram",
   "@zakatGoldPriceLabel": {
     "description": "Input label: user-supplied current gold price per gram"
+  },
+  "zakatGoldValueLabel": "Gold Value (if weight unknown)",
+  "@zakatGoldValueLabel": {
+    "description": "Input label: direct money value of gold holdings, an alternative to weight x price"
+  },
+  "zakatSilverValueLabel": "Silver Value (if weight unknown)",
+  "@zakatSilverValueLabel": {
+    "description": "Input label: direct money value of silver holdings, an alternative to weight x price"
+  },
+  "zakatMetalValueHelperText": "Weight × price is used when both are filled in; otherwise this value counts as your holding.",
+  "@zakatMetalValueHelperText": {
+    "description": "Helper text explaining precedence between weight x price and the direct value field"
   },
   "zakatSilverGramsLabel": "Silver Weight (grams)",
   "@zakatSilverGramsLabel": {
@@ -2685,6 +2694,22 @@
   "sadaqahLoggedNoAmount": "Sadaqah (no amount)",
   "@sadaqahLoggedNoAmount": {
     "description": "Shown for a history entry logged without an amount, distinct from a real zero"
+  },
+  "sadaqahCurrencyNotSet": "Set currency",
+  "@sadaqahCurrencyNotSet": {
+    "description": "Label on the Sadaqah tracker's currency button before the user has picked one"
+  },
+  "sadaqahCurrencyDialogTitle": "Currency",
+  "@sadaqahCurrencyDialogTitle": {
+    "description": "Title of the Sadaqah tracker's currency dialog"
+  },
+  "sadaqahCurrencyFieldHint": "e.g. DZD, €, $ (optional)",
+  "@sadaqahCurrencyFieldHint": {
+    "description": "Hint for the free-text currency field on the Sadaqah tracker"
+  },
+  "sadaqahCurrencyNote": "For display only — amounts are never converted.",
+  "@sadaqahCurrencyNote": {
+    "description": "Note under the Sadaqah currency field: the label is display-only, no conversion happens"
   },
   "homeFeatureOccasions": "Islamic\nOccasions",
   "@homeFeatureOccasions": {

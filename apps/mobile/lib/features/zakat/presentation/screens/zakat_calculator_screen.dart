@@ -34,8 +34,10 @@ class _ZakatCalculatorScreenState
   final _bankCtrl = TextEditingController();
   final _goldGramsCtrl = TextEditingController();
   final _goldPriceCtrl = TextEditingController();
+  final _goldValueCtrl = TextEditingController();
   final _silverGramsCtrl = TextEditingController();
   final _silverPriceCtrl = TextEditingController();
+  final _silverValueCtrl = TextEditingController();
   final _tradeGoodsCtrl = TextEditingController();
   final _debtCtrl = TextEditingController();
   final _currencyCtrl = TextEditingController();
@@ -58,8 +60,10 @@ class _ZakatCalculatorScreenState
       _bankCtrl.text = _fmtInput(latest.bankAmount);
       _goldGramsCtrl.text = _fmtInput(latest.goldGrams);
       _goldPriceCtrl.text = _fmtInput(latest.goldPricePerGram);
+      _goldValueCtrl.text = _fmtInput(latest.goldValue);
       _silverGramsCtrl.text = _fmtInput(latest.silverGrams);
       _silverPriceCtrl.text = _fmtInput(latest.silverPricePerGram);
+      _silverValueCtrl.text = _fmtInput(latest.silverValue);
       _tradeGoodsCtrl.text = _fmtInput(latest.tradeGoodsValue);
       _debtCtrl.text = _fmtInput(latest.debtAmount);
       _currencyCtrl.text = latest.currencyLabel;
@@ -84,8 +88,10 @@ class _ZakatCalculatorScreenState
     bankAmount: _num(_bankCtrl),
     goldGrams: _num(_goldGramsCtrl),
     goldPricePerGram: _num(_goldPriceCtrl),
+    goldValue: _num(_goldValueCtrl),
     silverGrams: _num(_silverGramsCtrl),
     silverPricePerGram: _num(_silverPriceCtrl),
+    silverValue: _num(_silverValueCtrl),
     tradeGoodsValue: _num(_tradeGoodsCtrl),
     debtAmount: _num(_debtCtrl),
     nisabBasis: _nisabBasis,
@@ -105,8 +111,10 @@ class _ZakatCalculatorScreenState
         bankAmount: Value(inputs.bankAmount),
         goldGrams: Value(inputs.goldGrams),
         goldPricePerGram: Value(inputs.goldPricePerGram),
+        goldValue: Value(inputs.goldValue),
         silverGrams: Value(inputs.silverGrams),
         silverPricePerGram: Value(inputs.silverPricePerGram),
+        silverValue: Value(inputs.silverValue),
         tradeGoodsValue: Value(inputs.tradeGoodsValue),
         debtAmount: Value(inputs.debtAmount),
         nisabStandard: Value(
@@ -134,8 +142,10 @@ class _ZakatCalculatorScreenState
       _bankCtrl.text = _fmtInput(record.bankAmount);
       _goldGramsCtrl.text = _fmtInput(record.goldGrams);
       _goldPriceCtrl.text = _fmtInput(record.goldPricePerGram);
+      _goldValueCtrl.text = _fmtInput(record.goldValue);
       _silverGramsCtrl.text = _fmtInput(record.silverGrams);
       _silverPriceCtrl.text = _fmtInput(record.silverPricePerGram);
+      _silverValueCtrl.text = _fmtInput(record.silverValue);
       _tradeGoodsCtrl.text = _fmtInput(record.tradeGoodsValue);
       _debtCtrl.text = _fmtInput(record.debtAmount);
       _currencyCtrl.text = record.currencyLabel;
@@ -154,8 +164,10 @@ class _ZakatCalculatorScreenState
     _bankCtrl.dispose();
     _goldGramsCtrl.dispose();
     _goldPriceCtrl.dispose();
+    _goldValueCtrl.dispose();
     _silverGramsCtrl.dispose();
     _silverPriceCtrl.dispose();
+    _silverValueCtrl.dispose();
     _tradeGoodsCtrl.dispose();
     _debtCtrl.dispose();
     _currencyCtrl.dispose();
@@ -198,6 +210,10 @@ class _ZakatCalculatorScreenState
                         _numberField(l10n.zakatGoldGramsLabel, _goldGramsCtrl),
                         _numberField(l10n.zakatGoldPriceLabel, _goldPriceCtrl),
                         _numberField(
+                          l10n.zakatGoldValueLabel,
+                          _goldValueCtrl,
+                        ),
+                        _numberField(
                           l10n.zakatSilverGramsLabel,
                           _silverGramsCtrl,
                         ),
@@ -205,12 +221,25 @@ class _ZakatCalculatorScreenState
                           l10n.zakatSilverPriceLabel,
                           _silverPriceCtrl,
                         ),
+                        _numberField(
+                          l10n.zakatSilverValueLabel,
+                          _silverValueCtrl,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: AppSpacing.sm,
+                          ),
+                          child: Text(
+                            l10n.zakatPriceHelperText,
+                            style: context.typography.caption,
+                          ),
+                        ),
                         Padding(
                           padding: const EdgeInsets.only(
                             bottom: AppSpacing.md,
                           ),
                           child: Text(
-                            l10n.zakatPriceHelperText,
+                            l10n.zakatMetalValueHelperText,
                             style: context.typography.caption,
                           ),
                         ),

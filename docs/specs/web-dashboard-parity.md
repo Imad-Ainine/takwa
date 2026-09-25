@@ -1,7 +1,20 @@
 # Spec: Web Dashboard Parity
 
 ## Status
-Not implemented. Proposed.
+Implemented (R1-R7). `apps/web/src/app/[locale]/dashboard/` (`page.tsx`, `actions.ts`, data
+helpers in `src/lib/dashboard.ts`) reads the synced `profiles` / `daily_records` /
+`achievements` tables under the same RLS the mobile app uses: points + streak summary,
+today's prayer/checklist record, recent history, and earned achievements, in all three
+locales (ar/en/fr).
+
+Accepted limitations, not open bugs:
+- "Today" is keyed off the server's UTC date (`getTodayRecord` in `src/lib/dashboard.ts`),
+  because `daily_records.date` carries no timezone column. Around local midnight this can be
+  off by one day for the user; fixing it properly needs a timezone field, which is why it is
+  left as documented behavior.
+- Achievement copy comes from the `title_ar` / `desc_ar` columns as granted on-device, so it
+  renders in Arabic in every locale. The catalog itself
+  (`achievement_definition.dart`) is the source of truth and is Arabic-only at runtime today.
 
 ## Context
 

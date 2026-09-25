@@ -1,8 +1,24 @@
 # Spec: Zakat Calculator
 
 ## Status
-Not implemented. Proposed. (No existing code, strings, or schema reference "zakat" or
-"nisab" anywhere in the repo today — this is greenfield, unlike the Ramadan tracker.)
+Implemented (R1-R7) as `lib/features/zakat/` — a pure math module (`domain/zakat_calculator.dart`,
+unit-tested) plus `presentation/screens/zakat_calculator_screen.dart` with cash, bank, gold,
+silver, trade goods and deductible debt fields, a gold/silver Nisab picker (defaults to the
+silver/595g standard), the Hawl confirmation toggle, the 2.5% result with Nisab shortfall, a
+saved-calculation history you can restore from, an annual reminder via the existing
+`Reminders` feature, and a Zakat al-Fitr section. Persistence is the new local-only
+`zakat_calculations` Drift table (`ZakatDao`); it is deliberately not part of the Supabase
+sync whitelist.
+
+Resolved open questions:
+- **Price source:** the user types today's gold/silver price per gram themselves (helper text
+  says so). There is no network price feed and no cache to go stale — R3's "cannot resolve a
+  price" state is simply an empty field, and the result card then shows
+  `zakatMissingPriceMessage` while still doing gram-based math.
+- **Currency:** free-text display label only, no conversion, matching the app's single-unit
+  approach.
+- **Weight or value (R1):** gold/silver each take either weight × price or a straight value.
+  Weight × price wins when both are filled so a restored calculation can't double-count.
 
 ## Context
 

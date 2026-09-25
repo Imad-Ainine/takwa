@@ -290,6 +290,18 @@ abstract class AppLocalizations {
   /// **'انضممت إلى أول دائرة محاسبة لك'**
   String get achievementCircleJoinedDesc;
 
+  /// Achievement title: matched another circle member's current streak
+  ///
+  /// In ar, this message translates to:
+  /// **'مضاهاة السلسلة'**
+  String get achievementCircleStreakMatchTitle;
+
+  /// Achievement description: matched another circle member's current streak
+  ///
+  /// In ar, this message translates to:
+  /// **'ساوت سلسلتك الحالية سلسلة أحد أفراد دائرتك'**
+  String get achievementCircleStreakMatchDesc;
+
   /// Achievement title: reached 100 lifetime Taqwa points
   ///
   /// In ar, this message translates to:
@@ -727,6 +739,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'نافلة'**
   String get fastingTypeNafl;
+
+  /// No description provided for @fastingTypeMakruh.
+  ///
+  /// In ar, this message translates to:
+  /// **'بعذر'**
+  String get fastingTypeMakruh;
 
   /// No description provided for @fastingTypeNone.
   ///
@@ -8618,29 +8636,11 @@ abstract class AppLocalizations {
   /// **'صيام اليوم'**
   String get ramadanFastingStatusTitle;
 
-  /// Shown when today's fasting type is logged as obligatory (fard)
+  /// Hint under the Ramadan tracker's fasting log; explains that makruh (excused) does not count toward 30/30
   ///
   /// In ar, this message translates to:
-  /// **'صمت اليوم (فرض) ✅'**
-  String get ramadanFastingDoneFard;
-
-  /// Shown when today's fasting type is logged as voluntary (nafl)
-  ///
-  /// In ar, this message translates to:
-  /// **'صمت اليوم (نافلة) ✅'**
-  String get ramadanFastingDoneNafl;
-
-  /// Shown when today has no fasting type logged yet
-  ///
-  /// In ar, this message translates to:
-  /// **'لم تسجل صيامك اليوم بعد'**
-  String get ramadanFastingNotLogged;
-
-  /// Button on the Ramadan tracker that opens the daily checklist to log today's fast
-  ///
-  /// In ar, this message translates to:
-  /// **'سجّل صيامك'**
-  String get ramadanLogFastingButton;
+  /// **'سجّل صيامك اليوم؛ الإفطار بعذر يظل يومًا غير مصوم.'**
+  String get ramadanFastingLogHint;
 
   /// Section title for the 30-day Ramadan fasting progress strip
   ///
@@ -8695,6 +8695,24 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'سعر جرام الذهب اليوم'**
   String get zakatGoldPriceLabel;
+
+  /// Input label: direct money value of gold holdings, an alternative to weight x price
+  ///
+  /// In ar, this message translates to:
+  /// **'قيمة الذهب (إن لم تعرف الوزن)'**
+  String get zakatGoldValueLabel;
+
+  /// Input label: direct money value of silver holdings, an alternative to weight x price
+  ///
+  /// In ar, this message translates to:
+  /// **'قيمة الفضة (إن لم تعرف الوزن)'**
+  String get zakatSilverValueLabel;
+
+  /// Helper text explaining precedence between weight x price and direct value
+  ///
+  /// In ar, this message translates to:
+  /// **'يُستخدم الوزن × السعر عند تعبئتهما معًا، وإلا تُحتسب هذه القيمة كممتلكاتك.'**
+  String get zakatMetalValueHelperText;
 
   /// Input label: silver weight in grams
   ///
@@ -9319,6 +9337,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'صدقة (بدون مبلغ)'**
   String get sadaqahLoggedNoAmount;
+
+  /// Label on the Sadaqah tracker's currency button before the user has picked one
+  ///
+  /// In ar, this message translates to:
+  /// **'حدّد العملة'**
+  String get sadaqahCurrencyNotSet;
+
+  /// Title of the Sadaqah tracker's currency dialog
+  ///
+  /// In ar, this message translates to:
+  /// **'العملة'**
+  String get sadaqahCurrencyDialogTitle;
+
+  /// Hint for the free-text currency field on the Sadaqah tracker
+  ///
+  /// In ar, this message translates to:
+  /// **'مثال: دج، €، \$ (اختياري)'**
+  String get sadaqahCurrencyFieldHint;
+
+  /// Note under the Sadaqah currency field: the label is display-only, no conversion happens
+  ///
+  /// In ar, this message translates to:
+  /// **'للعرض فقط — لا تُحوَّل المبالغ بين العملات.'**
+  String get sadaqahCurrencyNote;
 
   /// Home feature-grid label for the Islamic occasions screen
   ///

@@ -128,6 +128,14 @@
   "@achievementCircleJoinedDesc": {
     "description": "Achievement description: joined or created a family/community accountability circle"
   },
+  "achievementCircleStreakMatchTitle": "مضاهاة السلسلة",
+  "@achievementCircleStreakMatchTitle": {
+    "description": "Achievement title: matched another circle member's current streak"
+  },
+  "achievementCircleStreakMatchDesc": "ساوت سلسلتك الحالية سلسلة أحد أفراد دائرتك",
+  "@achievementCircleStreakMatchDesc": {
+    "description": "Achievement description: matched another circle member's current streak"
+  },
   "achievementPoints100Title": "مئة خطوة",
   "@achievementPoints100Title": {
     "description": "Achievement title: reached 100 lifetime Taqwa points"
@@ -264,6 +272,7 @@
   "checklistFastingLabel": "الصيام",
   "fastingTypeFard": "فريضة",
   "fastingTypeNafl": "نافلة",
+  "fastingTypeMakruh": "بعذر",
   "fastingTypeNone": "لم أصم",
   "checklistQuranPageSuffix": "/صفحة",
   "semanticsSeparator": "، ",
@@ -2740,21 +2749,9 @@
   "@ramadanFastingStatusTitle": {
     "description": "Section title for today's fasting status on the Ramadan tracker"
   },
-  "ramadanFastingDoneFard": "صمت اليوم (فرض) ✅",
-  "@ramadanFastingDoneFard": {
-    "description": "Shown when today's fasting type is logged as obligatory (fard)"
-  },
-  "ramadanFastingDoneNafl": "صمت اليوم (نافلة) ✅",
-  "@ramadanFastingDoneNafl": {
-    "description": "Shown when today's fasting type is logged as voluntary (nafl)"
-  },
-  "ramadanFastingNotLogged": "لم تسجل صيامك اليوم بعد",
-  "@ramadanFastingNotLogged": {
-    "description": "Shown when today has no fasting type logged yet"
-  },
-  "ramadanLogFastingButton": "سجّل صيامك",
-  "@ramadanLogFastingButton": {
-    "description": "Button on the Ramadan tracker that opens the daily checklist to log today's fast"
+  "ramadanFastingLogHint": "سجّل صيامك اليوم؛ الإفطار بعذر يظل يومًا غير مصوم.",
+  "@ramadanFastingLogHint": {
+    "description": "Hint under the Ramadan tracker's fasting log; explains that makruh (excused) does not count toward 30/30"
   },
   "ramadanProgressStripTitle": "متابعة أيام رمضان",
   "@ramadanProgressStripTitle": {
@@ -2791,6 +2788,18 @@
   "zakatGoldPriceLabel": "سعر جرام الذهب اليوم",
   "@zakatGoldPriceLabel": {
     "description": "Input label: user-supplied current gold price per gram"
+  },
+  "zakatGoldValueLabel": "قيمة الذهب (إن لم تعرف الوزن)",
+  "@zakatGoldValueLabel": {
+    "description": "Input label: direct money value of gold holdings, an alternative to weight x price"
+  },
+  "zakatSilverValueLabel": "قيمة الفضة (إن لم تعرف الوزن)",
+  "@zakatSilverValueLabel": {
+    "description": "Input label: direct money value of silver holdings, an alternative to weight x price"
+  },
+  "zakatMetalValueHelperText": "يُستخدم الوزن × السعر عند تعبئتهما معًا، وإلا تُحتسب هذه القيمة كممتلكاتك.",
+  "@zakatMetalValueHelperText": {
+    "description": "Helper text explaining precedence between weight x price and direct value"
   },
   "zakatSilverGramsLabel": "وزن الفضة (جرام)",
   "@zakatSilverGramsLabel": {
@@ -3237,6 +3246,22 @@
   "sadaqahLoggedNoAmount": "صدقة (بدون مبلغ)",
   "@sadaqahLoggedNoAmount": {
     "description": "Shown for a history entry logged without an amount, distinct from a real zero"
+  },
+  "sadaqahCurrencyNotSet": "حدّد العملة",
+  "@sadaqahCurrencyNotSet": {
+    "description": "Label on the Sadaqah tracker's currency button before the user has picked one"
+  },
+  "sadaqahCurrencyDialogTitle": "العملة",
+  "@sadaqahCurrencyDialogTitle": {
+    "description": "Title of the Sadaqah tracker's currency dialog"
+  },
+  "sadaqahCurrencyFieldHint": "مثال: دج، €، $ (اختياري)",
+  "@sadaqahCurrencyFieldHint": {
+    "description": "Hint for the free-text currency field on the Sadaqah tracker"
+  },
+  "sadaqahCurrencyNote": "للعرض فقط — لا تُحوَّل المبالغ بين العملات.",
+  "@sadaqahCurrencyNote": {
+    "description": "Note under the Sadaqah currency field: the label is display-only, no conversion happens"
   },
   "homeFeatureOccasions": "مناسبات\nإسلامية",
   "@homeFeatureOccasions": {

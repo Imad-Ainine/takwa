@@ -121,6 +121,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'You joined your first accountability circle';
 
   @override
+  String get achievementCircleStreakMatchTitle => 'Streak Match';
+
+  @override
+  String get achievementCircleStreakMatchDesc =>
+      'You matched a circle member\'s current streak';
+
+  @override
   String get achievementPoints100Title => 'A Hundred Steps';
 
   @override
@@ -350,6 +357,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fastingTypeNafl => 'Voluntary';
+
+  @override
+  String get fastingTypeMakruh => 'Excused';
 
   @override
   String get fastingTypeNone => 'Not fasting';
@@ -4815,16 +4825,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ramadanFastingStatusTitle => 'Today\'s Fast';
 
   @override
-  String get ramadanFastingDoneFard => 'You fasted today (obligatory) ✅';
-
-  @override
-  String get ramadanFastingDoneNafl => 'You fasted today (voluntary) ✅';
-
-  @override
-  String get ramadanFastingNotLogged => 'You haven\'t logged today\'s fast yet';
-
-  @override
-  String get ramadanLogFastingButton => 'Log your fast';
+  String get ramadanFastingLogHint =>
+      'Log today\'s fast — an excused break still counts as a day not fasted.';
 
   @override
   String get ramadanProgressStripTitle => 'Ramadan Days Progress';
@@ -4853,6 +4855,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get zakatGoldPriceLabel => 'Today\'s Gold Price per Gram';
+
+  @override
+  String get zakatGoldValueLabel => 'Gold Value (if weight unknown)';
+
+  @override
+  String get zakatSilverValueLabel => 'Silver Value (if weight unknown)';
+
+  @override
+  String get zakatMetalValueHelperText =>
+      'Weight × price is used when both are filled in; otherwise this value counts as your holding.';
 
   @override
   String get zakatSilverGramsLabel => 'Silver Weight (grams)';
@@ -5191,6 +5203,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sadaqahLoggedNoAmount => 'Sadaqah (no amount)';
+
+  @override
+  String get sadaqahCurrencyNotSet => 'Set currency';
+
+  @override
+  String get sadaqahCurrencyDialogTitle => 'Currency';
+
+  @override
+  String get sadaqahCurrencyFieldHint => 'e.g. DZD, €, \$ (optional)';
+
+  @override
+  String get sadaqahCurrencyNote =>
+      'For display only — amounts are never converted.';
 
   @override
   String get homeFeatureOccasions => 'Islamic\nOccasions';

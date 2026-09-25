@@ -6959,6 +6959,18 @@ class $ZakatCalculationsTable extends ZakatCalculations
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _goldValueMeta = const VerificationMeta(
+    'goldValue',
+  );
+  @override
+  late final GeneratedColumn<double> goldValue = GeneratedColumn<double>(
+    'gold_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _silverGramsMeta = const VerificationMeta(
     'silverGrams',
   );
@@ -6983,6 +6995,18 @@ class $ZakatCalculationsTable extends ZakatCalculations
         requiredDuringInsert: false,
         defaultValue: const Constant(0.0),
       );
+  static const VerificationMeta _silverValueMeta = const VerificationMeta(
+    'silverValue',
+  );
+  @override
+  late final GeneratedColumn<double> silverValue = GeneratedColumn<double>(
+    'silver_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _tradeGoodsValueMeta = const VerificationMeta(
     'tradeGoodsValue',
   );
@@ -7067,8 +7091,10 @@ class $ZakatCalculationsTable extends ZakatCalculations
     bankAmount,
     goldGrams,
     goldPricePerGram,
+    goldValue,
     silverGrams,
     silverPricePerGram,
+    silverValue,
     tradeGoodsValue,
     debtAmount,
     nisabStandard,
@@ -7124,6 +7150,12 @@ class $ZakatCalculationsTable extends ZakatCalculations
         ),
       );
     }
+    if (data.containsKey('gold_value')) {
+      context.handle(
+        _goldValueMeta,
+        goldValue.isAcceptableOrUnknown(data['gold_value']!, _goldValueMeta),
+      );
+    }
     if (data.containsKey('silver_grams')) {
       context.handle(
         _silverGramsMeta,
@@ -7139,6 +7171,15 @@ class $ZakatCalculationsTable extends ZakatCalculations
         silverPricePerGram.isAcceptableOrUnknown(
           data['silver_price_per_gram']!,
           _silverPricePerGramMeta,
+        ),
+      );
+    }
+    if (data.containsKey('silver_value')) {
+      context.handle(
+        _silverValueMeta,
+        silverValue.isAcceptableOrUnknown(
+          data['silver_value']!,
+          _silverValueMeta,
         ),
       );
     }
@@ -7214,6 +7255,10 @@ class $ZakatCalculationsTable extends ZakatCalculations
         DriftSqlType.double,
         data['${effectivePrefix}gold_price_per_gram'],
       )!,
+      goldValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gold_value'],
+      )!,
       silverGrams: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}silver_grams'],
@@ -7221,6 +7266,10 @@ class $ZakatCalculationsTable extends ZakatCalculations
       silverPricePerGram: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}silver_price_per_gram'],
+      )!,
+      silverValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}silver_value'],
       )!,
       tradeGoodsValue: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
@@ -7268,8 +7317,14 @@ class ZakatCalculation extends DataClass
   final double bankAmount;
   final double goldGrams;
   final double goldPricePerGram;
+
+  /// Direct money value entered instead of weight × price, for users who
+  /// know what their gold is worth but not what it weighs. See R1 in
+  /// docs/specs/zakat-calculator.md.
+  final double goldValue;
   final double silverGrams;
   final double silverPricePerGram;
+  final double silverValue;
   final double tradeGoodsValue;
   final double debtAmount;
   final NisabStandard nisabStandard;
@@ -7286,8 +7341,10 @@ class ZakatCalculation extends DataClass
     required this.bankAmount,
     required this.goldGrams,
     required this.goldPricePerGram,
+    required this.goldValue,
     required this.silverGrams,
     required this.silverPricePerGram,
+    required this.silverValue,
     required this.tradeGoodsValue,
     required this.debtAmount,
     required this.nisabStandard,
@@ -7304,8 +7361,10 @@ class ZakatCalculation extends DataClass
     map['bank_amount'] = Variable<double>(bankAmount);
     map['gold_grams'] = Variable<double>(goldGrams);
     map['gold_price_per_gram'] = Variable<double>(goldPricePerGram);
+    map['gold_value'] = Variable<double>(goldValue);
     map['silver_grams'] = Variable<double>(silverGrams);
     map['silver_price_per_gram'] = Variable<double>(silverPricePerGram);
+    map['silver_value'] = Variable<double>(silverValue);
     map['trade_goods_value'] = Variable<double>(tradeGoodsValue);
     map['debt_amount'] = Variable<double>(debtAmount);
     {
@@ -7327,8 +7386,10 @@ class ZakatCalculation extends DataClass
       bankAmount: Value(bankAmount),
       goldGrams: Value(goldGrams),
       goldPricePerGram: Value(goldPricePerGram),
+      goldValue: Value(goldValue),
       silverGrams: Value(silverGrams),
       silverPricePerGram: Value(silverPricePerGram),
+      silverValue: Value(silverValue),
       tradeGoodsValue: Value(tradeGoodsValue),
       debtAmount: Value(debtAmount),
       nisabStandard: Value(nisabStandard),
@@ -7350,10 +7411,12 @@ class ZakatCalculation extends DataClass
       bankAmount: serializer.fromJson<double>(json['bankAmount']),
       goldGrams: serializer.fromJson<double>(json['goldGrams']),
       goldPricePerGram: serializer.fromJson<double>(json['goldPricePerGram']),
+      goldValue: serializer.fromJson<double>(json['goldValue']),
       silverGrams: serializer.fromJson<double>(json['silverGrams']),
       silverPricePerGram: serializer.fromJson<double>(
         json['silverPricePerGram'],
       ),
+      silverValue: serializer.fromJson<double>(json['silverValue']),
       tradeGoodsValue: serializer.fromJson<double>(json['tradeGoodsValue']),
       debtAmount: serializer.fromJson<double>(json['debtAmount']),
       nisabStandard: $ZakatCalculationsTable.$converternisabStandard.fromJson(
@@ -7374,8 +7437,10 @@ class ZakatCalculation extends DataClass
       'bankAmount': serializer.toJson<double>(bankAmount),
       'goldGrams': serializer.toJson<double>(goldGrams),
       'goldPricePerGram': serializer.toJson<double>(goldPricePerGram),
+      'goldValue': serializer.toJson<double>(goldValue),
       'silverGrams': serializer.toJson<double>(silverGrams),
       'silverPricePerGram': serializer.toJson<double>(silverPricePerGram),
+      'silverValue': serializer.toJson<double>(silverValue),
       'tradeGoodsValue': serializer.toJson<double>(tradeGoodsValue),
       'debtAmount': serializer.toJson<double>(debtAmount),
       'nisabStandard': serializer.toJson<int>(
@@ -7394,8 +7459,10 @@ class ZakatCalculation extends DataClass
     double? bankAmount,
     double? goldGrams,
     double? goldPricePerGram,
+    double? goldValue,
     double? silverGrams,
     double? silverPricePerGram,
+    double? silverValue,
     double? tradeGoodsValue,
     double? debtAmount,
     NisabStandard? nisabStandard,
@@ -7409,8 +7476,10 @@ class ZakatCalculation extends DataClass
     bankAmount: bankAmount ?? this.bankAmount,
     goldGrams: goldGrams ?? this.goldGrams,
     goldPricePerGram: goldPricePerGram ?? this.goldPricePerGram,
+    goldValue: goldValue ?? this.goldValue,
     silverGrams: silverGrams ?? this.silverGrams,
     silverPricePerGram: silverPricePerGram ?? this.silverPricePerGram,
+    silverValue: silverValue ?? this.silverValue,
     tradeGoodsValue: tradeGoodsValue ?? this.tradeGoodsValue,
     debtAmount: debtAmount ?? this.debtAmount,
     nisabStandard: nisabStandard ?? this.nisabStandard,
@@ -7434,12 +7503,16 @@ class ZakatCalculation extends DataClass
       goldPricePerGram: data.goldPricePerGram.present
           ? data.goldPricePerGram.value
           : this.goldPricePerGram,
+      goldValue: data.goldValue.present ? data.goldValue.value : this.goldValue,
       silverGrams: data.silverGrams.present
           ? data.silverGrams.value
           : this.silverGrams,
       silverPricePerGram: data.silverPricePerGram.present
           ? data.silverPricePerGram.value
           : this.silverPricePerGram,
+      silverValue: data.silverValue.present
+          ? data.silverValue.value
+          : this.silverValue,
       tradeGoodsValue: data.tradeGoodsValue.present
           ? data.tradeGoodsValue.value
           : this.tradeGoodsValue,
@@ -7468,8 +7541,10 @@ class ZakatCalculation extends DataClass
           ..write('bankAmount: $bankAmount, ')
           ..write('goldGrams: $goldGrams, ')
           ..write('goldPricePerGram: $goldPricePerGram, ')
+          ..write('goldValue: $goldValue, ')
           ..write('silverGrams: $silverGrams, ')
           ..write('silverPricePerGram: $silverPricePerGram, ')
+          ..write('silverValue: $silverValue, ')
           ..write('tradeGoodsValue: $tradeGoodsValue, ')
           ..write('debtAmount: $debtAmount, ')
           ..write('nisabStandard: $nisabStandard, ')
@@ -7488,8 +7563,10 @@ class ZakatCalculation extends DataClass
     bankAmount,
     goldGrams,
     goldPricePerGram,
+    goldValue,
     silverGrams,
     silverPricePerGram,
+    silverValue,
     tradeGoodsValue,
     debtAmount,
     nisabStandard,
@@ -7507,8 +7584,10 @@ class ZakatCalculation extends DataClass
           other.bankAmount == this.bankAmount &&
           other.goldGrams == this.goldGrams &&
           other.goldPricePerGram == this.goldPricePerGram &&
+          other.goldValue == this.goldValue &&
           other.silverGrams == this.silverGrams &&
           other.silverPricePerGram == this.silverPricePerGram &&
+          other.silverValue == this.silverValue &&
           other.tradeGoodsValue == this.tradeGoodsValue &&
           other.debtAmount == this.debtAmount &&
           other.nisabStandard == this.nisabStandard &&
@@ -7524,8 +7603,10 @@ class ZakatCalculationsCompanion extends UpdateCompanion<ZakatCalculation> {
   final Value<double> bankAmount;
   final Value<double> goldGrams;
   final Value<double> goldPricePerGram;
+  final Value<double> goldValue;
   final Value<double> silverGrams;
   final Value<double> silverPricePerGram;
+  final Value<double> silverValue;
   final Value<double> tradeGoodsValue;
   final Value<double> debtAmount;
   final Value<NisabStandard> nisabStandard;
@@ -7539,8 +7620,10 @@ class ZakatCalculationsCompanion extends UpdateCompanion<ZakatCalculation> {
     this.bankAmount = const Value.absent(),
     this.goldGrams = const Value.absent(),
     this.goldPricePerGram = const Value.absent(),
+    this.goldValue = const Value.absent(),
     this.silverGrams = const Value.absent(),
     this.silverPricePerGram = const Value.absent(),
+    this.silverValue = const Value.absent(),
     this.tradeGoodsValue = const Value.absent(),
     this.debtAmount = const Value.absent(),
     this.nisabStandard = const Value.absent(),
@@ -7555,8 +7638,10 @@ class ZakatCalculationsCompanion extends UpdateCompanion<ZakatCalculation> {
     this.bankAmount = const Value.absent(),
     this.goldGrams = const Value.absent(),
     this.goldPricePerGram = const Value.absent(),
+    this.goldValue = const Value.absent(),
     this.silverGrams = const Value.absent(),
     this.silverPricePerGram = const Value.absent(),
+    this.silverValue = const Value.absent(),
     this.tradeGoodsValue = const Value.absent(),
     this.debtAmount = const Value.absent(),
     this.nisabStandard = const Value.absent(),
@@ -7571,8 +7656,10 @@ class ZakatCalculationsCompanion extends UpdateCompanion<ZakatCalculation> {
     Expression<double>? bankAmount,
     Expression<double>? goldGrams,
     Expression<double>? goldPricePerGram,
+    Expression<double>? goldValue,
     Expression<double>? silverGrams,
     Expression<double>? silverPricePerGram,
+    Expression<double>? silverValue,
     Expression<double>? tradeGoodsValue,
     Expression<double>? debtAmount,
     Expression<int>? nisabStandard,
@@ -7587,9 +7674,11 @@ class ZakatCalculationsCompanion extends UpdateCompanion<ZakatCalculation> {
       if (bankAmount != null) 'bank_amount': bankAmount,
       if (goldGrams != null) 'gold_grams': goldGrams,
       if (goldPricePerGram != null) 'gold_price_per_gram': goldPricePerGram,
+      if (goldValue != null) 'gold_value': goldValue,
       if (silverGrams != null) 'silver_grams': silverGrams,
       if (silverPricePerGram != null)
         'silver_price_per_gram': silverPricePerGram,
+      if (silverValue != null) 'silver_value': silverValue,
       if (tradeGoodsValue != null) 'trade_goods_value': tradeGoodsValue,
       if (debtAmount != null) 'debt_amount': debtAmount,
       if (nisabStandard != null) 'nisab_standard': nisabStandard,
@@ -7606,8 +7695,10 @@ class ZakatCalculationsCompanion extends UpdateCompanion<ZakatCalculation> {
     Value<double>? bankAmount,
     Value<double>? goldGrams,
     Value<double>? goldPricePerGram,
+    Value<double>? goldValue,
     Value<double>? silverGrams,
     Value<double>? silverPricePerGram,
+    Value<double>? silverValue,
     Value<double>? tradeGoodsValue,
     Value<double>? debtAmount,
     Value<NisabStandard>? nisabStandard,
@@ -7622,8 +7713,10 @@ class ZakatCalculationsCompanion extends UpdateCompanion<ZakatCalculation> {
       bankAmount: bankAmount ?? this.bankAmount,
       goldGrams: goldGrams ?? this.goldGrams,
       goldPricePerGram: goldPricePerGram ?? this.goldPricePerGram,
+      goldValue: goldValue ?? this.goldValue,
       silverGrams: silverGrams ?? this.silverGrams,
       silverPricePerGram: silverPricePerGram ?? this.silverPricePerGram,
+      silverValue: silverValue ?? this.silverValue,
       tradeGoodsValue: tradeGoodsValue ?? this.tradeGoodsValue,
       debtAmount: debtAmount ?? this.debtAmount,
       nisabStandard: nisabStandard ?? this.nisabStandard,
@@ -7654,11 +7747,17 @@ class ZakatCalculationsCompanion extends UpdateCompanion<ZakatCalculation> {
     if (goldPricePerGram.present) {
       map['gold_price_per_gram'] = Variable<double>(goldPricePerGram.value);
     }
+    if (goldValue.present) {
+      map['gold_value'] = Variable<double>(goldValue.value);
+    }
     if (silverGrams.present) {
       map['silver_grams'] = Variable<double>(silverGrams.value);
     }
     if (silverPricePerGram.present) {
       map['silver_price_per_gram'] = Variable<double>(silverPricePerGram.value);
+    }
+    if (silverValue.present) {
+      map['silver_value'] = Variable<double>(silverValue.value);
     }
     if (tradeGoodsValue.present) {
       map['trade_goods_value'] = Variable<double>(tradeGoodsValue.value);
@@ -7694,8 +7793,10 @@ class ZakatCalculationsCompanion extends UpdateCompanion<ZakatCalculation> {
           ..write('bankAmount: $bankAmount, ')
           ..write('goldGrams: $goldGrams, ')
           ..write('goldPricePerGram: $goldPricePerGram, ')
+          ..write('goldValue: $goldValue, ')
           ..write('silverGrams: $silverGrams, ')
           ..write('silverPricePerGram: $silverPricePerGram, ')
+          ..write('silverValue: $silverValue, ')
           ..write('tradeGoodsValue: $tradeGoodsValue, ')
           ..write('debtAmount: $debtAmount, ')
           ..write('nisabStandard: $nisabStandard, ')
@@ -12582,8 +12683,10 @@ typedef $$ZakatCalculationsTableCreateCompanionBuilder =
       Value<double> bankAmount,
       Value<double> goldGrams,
       Value<double> goldPricePerGram,
+      Value<double> goldValue,
       Value<double> silverGrams,
       Value<double> silverPricePerGram,
+      Value<double> silverValue,
       Value<double> tradeGoodsValue,
       Value<double> debtAmount,
       Value<NisabStandard> nisabStandard,
@@ -12599,8 +12702,10 @@ typedef $$ZakatCalculationsTableUpdateCompanionBuilder =
       Value<double> bankAmount,
       Value<double> goldGrams,
       Value<double> goldPricePerGram,
+      Value<double> goldValue,
       Value<double> silverGrams,
       Value<double> silverPricePerGram,
+      Value<double> silverValue,
       Value<double> tradeGoodsValue,
       Value<double> debtAmount,
       Value<NisabStandard> nisabStandard,
@@ -12648,6 +12753,11 @@ class $$ZakatCalculationsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<double> get goldValue => $composableBuilder(
+    column: $table.goldValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<double> get silverGrams => $composableBuilder(
     column: $table.silverGrams,
     builder: (column) => ColumnFilters(column),
@@ -12655,6 +12765,11 @@ class $$ZakatCalculationsTableFilterComposer
 
   ColumnFilters<double> get silverPricePerGram => $composableBuilder(
     column: $table.silverPricePerGram,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get silverValue => $composableBuilder(
+    column: $table.silverValue,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12729,6 +12844,11 @@ class $$ZakatCalculationsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get goldValue => $composableBuilder(
+    column: $table.goldValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get silverGrams => $composableBuilder(
     column: $table.silverGrams,
     builder: (column) => ColumnOrderings(column),
@@ -12736,6 +12856,11 @@ class $$ZakatCalculationsTableOrderingComposer
 
   ColumnOrderings<double> get silverPricePerGram => $composableBuilder(
     column: $table.silverPricePerGram,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get silverValue => $composableBuilder(
+    column: $table.silverValue,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -12805,6 +12930,9 @@ class $$ZakatCalculationsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<double> get goldValue =>
+      $composableBuilder(column: $table.goldValue, builder: (column) => column);
+
   GeneratedColumn<double> get silverGrams => $composableBuilder(
     column: $table.silverGrams,
     builder: (column) => column,
@@ -12812,6 +12940,11 @@ class $$ZakatCalculationsTableAnnotationComposer
 
   GeneratedColumn<double> get silverPricePerGram => $composableBuilder(
     column: $table.silverPricePerGram,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get silverValue => $composableBuilder(
+    column: $table.silverValue,
     builder: (column) => column,
   );
 
@@ -12891,8 +13024,10 @@ class $$ZakatCalculationsTableTableManager
                 Value<double> bankAmount = const Value.absent(),
                 Value<double> goldGrams = const Value.absent(),
                 Value<double> goldPricePerGram = const Value.absent(),
+                Value<double> goldValue = const Value.absent(),
                 Value<double> silverGrams = const Value.absent(),
                 Value<double> silverPricePerGram = const Value.absent(),
+                Value<double> silverValue = const Value.absent(),
                 Value<double> tradeGoodsValue = const Value.absent(),
                 Value<double> debtAmount = const Value.absent(),
                 Value<NisabStandard> nisabStandard = const Value.absent(),
@@ -12906,8 +13041,10 @@ class $$ZakatCalculationsTableTableManager
                 bankAmount: bankAmount,
                 goldGrams: goldGrams,
                 goldPricePerGram: goldPricePerGram,
+                goldValue: goldValue,
                 silverGrams: silverGrams,
                 silverPricePerGram: silverPricePerGram,
+                silverValue: silverValue,
                 tradeGoodsValue: tradeGoodsValue,
                 debtAmount: debtAmount,
                 nisabStandard: nisabStandard,
@@ -12923,8 +13060,10 @@ class $$ZakatCalculationsTableTableManager
                 Value<double> bankAmount = const Value.absent(),
                 Value<double> goldGrams = const Value.absent(),
                 Value<double> goldPricePerGram = const Value.absent(),
+                Value<double> goldValue = const Value.absent(),
                 Value<double> silverGrams = const Value.absent(),
                 Value<double> silverPricePerGram = const Value.absent(),
+                Value<double> silverValue = const Value.absent(),
                 Value<double> tradeGoodsValue = const Value.absent(),
                 Value<double> debtAmount = const Value.absent(),
                 Value<NisabStandard> nisabStandard = const Value.absent(),
@@ -12938,8 +13077,10 @@ class $$ZakatCalculationsTableTableManager
                 bankAmount: bankAmount,
                 goldGrams: goldGrams,
                 goldPricePerGram: goldPricePerGram,
+                goldValue: goldValue,
                 silverGrams: silverGrams,
                 silverPricePerGram: silverPricePerGram,
+                silverValue: silverValue,
                 tradeGoodsValue: tradeGoodsValue,
                 debtAmount: debtAmount,
                 nisabStandard: nisabStandard,

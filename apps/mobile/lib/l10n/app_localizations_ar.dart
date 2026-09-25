@@ -108,6 +108,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get achievementCircleJoinedDesc => 'انضممت إلى أول دائرة محاسبة لك';
 
   @override
+  String get achievementCircleStreakMatchTitle => 'مضاهاة السلسلة';
+
+  @override
+  String get achievementCircleStreakMatchDesc =>
+      'ساوت سلسلتك الحالية سلسلة أحد أفراد دائرتك';
+
+  @override
   String get achievementPoints100Title => 'مئة خطوة';
 
   @override
@@ -332,6 +339,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get fastingTypeNafl => 'نافلة';
+
+  @override
+  String get fastingTypeMakruh => 'بعذر';
 
   @override
   String get fastingTypeNone => 'لم أصم';
@@ -4772,16 +4782,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ramadanFastingStatusTitle => 'صيام اليوم';
 
   @override
-  String get ramadanFastingDoneFard => 'صمت اليوم (فرض) ✅';
-
-  @override
-  String get ramadanFastingDoneNafl => 'صمت اليوم (نافلة) ✅';
-
-  @override
-  String get ramadanFastingNotLogged => 'لم تسجل صيامك اليوم بعد';
-
-  @override
-  String get ramadanLogFastingButton => 'سجّل صيامك';
+  String get ramadanFastingLogHint =>
+      'سجّل صيامك اليوم؛ الإفطار بعذر يظل يومًا غير مصوم.';
 
   @override
   String get ramadanProgressStripTitle => 'متابعة أيام رمضان';
@@ -4810,6 +4812,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get zakatGoldPriceLabel => 'سعر جرام الذهب اليوم';
+
+  @override
+  String get zakatGoldValueLabel => 'قيمة الذهب (إن لم تعرف الوزن)';
+
+  @override
+  String get zakatSilverValueLabel => 'قيمة الفضة (إن لم تعرف الوزن)';
+
+  @override
+  String get zakatMetalValueHelperText =>
+      'يُستخدم الوزن × السعر عند تعبئتهما معًا، وإلا تُحتسب هذه القيمة كممتلكاتك.';
 
   @override
   String get zakatSilverGramsLabel => 'وزن الفضة (جرام)';
@@ -5144,6 +5156,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get sadaqahLoggedNoAmount => 'صدقة (بدون مبلغ)';
+
+  @override
+  String get sadaqahCurrencyNotSet => 'حدّد العملة';
+
+  @override
+  String get sadaqahCurrencyDialogTitle => 'العملة';
+
+  @override
+  String get sadaqahCurrencyFieldHint => 'مثال: دج، €، \$ (اختياري)';
+
+  @override
+  String get sadaqahCurrencyNote =>
+      'للعرض فقط — لا تُحوَّل المبالغ بين العملات.';
 
   @override
   String get homeFeatureOccasions => 'مناسبات\nإسلامية';

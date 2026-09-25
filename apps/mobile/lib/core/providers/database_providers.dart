@@ -137,6 +137,17 @@ final settingStreamProvider = StreamProvider.family<String?, String>((
   return ref.watch(settingsDaoProvider).watch(key);
 });
 
+/// Free-text currency label shown next to Sadaqah amounts. Display only —
+/// amounts are never converted (same simplification the Zakat calculator
+/// makes). Not in the sync whitelist, so it stays device-local.
+const String kSadaqahCurrencySettingKey = 'sadaqah_currency';
+
+final sadaqahCurrencyProvider = Provider<String>((ref) {
+  final raw = ref.watch(settingStreamProvider(kSadaqahCurrencySettingKey))
+      .valueOrNull;
+  return raw?.trim() ?? '';
+});
+
 // ── وضع رمضان ──
 final ramadanModeProvider = StreamProvider<bool>((ref) {
   return ref

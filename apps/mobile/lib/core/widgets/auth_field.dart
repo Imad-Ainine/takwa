@@ -212,7 +212,7 @@ class _AuthFieldState extends State<AuthField> {
                         : null,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.lg,
+                      vertical: AppSpacing.xs,
                     ),
                   ),
                 ),
@@ -271,7 +271,7 @@ class PasswordStrengthBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.xs),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
           child: Stack(
             children: [
               Container(

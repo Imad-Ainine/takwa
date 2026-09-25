@@ -1377,6 +1377,7 @@ class _SadaqahAmountFieldState extends ConsumerState<_SadaqahAmountField> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final currency = ref.watch(sadaqahCurrencyProvider);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
@@ -1391,6 +1392,10 @@ class _SadaqahAmountFieldState extends ConsumerState<_SadaqahAmountField> {
         decoration: InputDecoration(
           labelText: l10n.sadaqahAmountFieldLabel,
           errorText: _errorText,
+          suffixText: currency.isEmpty ? null : currency,
+          suffixStyle: context.typography.caption.copyWith(
+            color: context.colors.textSecondary,
+          ),
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,

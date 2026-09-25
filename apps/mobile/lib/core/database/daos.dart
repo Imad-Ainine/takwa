@@ -1223,6 +1223,9 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
     // Ramadan Complete Check — see docs/specs/ramadan-fasting-tracker.md R6.
     // Distinct from the lifetime "10 fard days ever" check above: this one
     // requires every single day of the *current* Ramadan to be fasted.
+    // Only fard/nafl count: `makruh` means "broke the fast with an excuse"
+    // (see FastingType in takwa_core), so an excused day is a day *not*
+    // fasted and must not count toward 30/30.
     final ramadanInfo = computeRamadanInfo(asOfHijri);
     if (ramadanInfo.isRamadan) {
       final fastedThisRamadanExp = dailyRecords.id.count();
@@ -1234,9 +1237,10 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
                         ramadanInfo.gregorianStart,
                         ramadanInfo.gregorianEnd,
                       ) &
-                      dailyRecords.fastingType.isNotValue(
-                        FastingType.none.index,
-                      ),
+                      dailyRecords.fastingType.isInValues([
+                        FastingType.fard,
+                        FastingType.nafl,
+                      ]),
                 ))
               .map((row) => row.read(fastedThisRamadanExp) ?? 0)
               .getSingle();

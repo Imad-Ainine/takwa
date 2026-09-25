@@ -1,7 +1,14 @@
 # Spec: Islamic Occasions & Voluntary Fasting Reminders
 
 ## Status
-Not implemented. Proposed.
+Implemented. `lib/features/occasions/` — an `IslamicOccasionKind` enum of nine fixed
+Hijri-date occasions (Ashura, Isra' & Mi'raj, Ramadan start, Laylat al-Qadr, Eid al-Fitr,
+Mawlid, Eid al-Adha, Islamic New Year, 'Arafah) resolved to their next Gregorian occurrence
+with a days-until countdown, plus this month's three White Days (Ayyam al-Beed) as a
+separate monthly list. `islamic_occasions_screen.dart` is reachable from the home feature
+grid; tapping a tile opens the existing reminder sheet pre-filled for that occasion (R3 —
+`Semantics(button: true)` + `GestureDetector`, with the bell `IconButton` kept for
+keyboard/focus access). No new table: reminders go through the existing `Reminders` feature.
 
 ## Context
 
