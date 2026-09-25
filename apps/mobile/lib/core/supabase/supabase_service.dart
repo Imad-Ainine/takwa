@@ -1231,7 +1231,7 @@ class SupabaseClientService implements SupabaseService {
   Future<void> deleteCircle(String circleId) async {
     try {
       await _safeRequest(
-        () => _db.rpc('delete_circle', params: {'circle_id': circleId}),
+        () => _db.rpc('delete_circle', params: {'p_circle_id': circleId}),
       );
     } on PostgrestException catch (e) {
       throw CircleOperationException(e.message);
@@ -1247,7 +1247,7 @@ class SupabaseClientService implements SupabaseService {
       await _safeRequest(
         () => _db.rpc(
           'remove_circle_member',
-          params: {'circle_id': circleId, 'member_user_id': userId},
+          params: {'p_circle_id': circleId, 'p_member_user_id': userId},
         ),
       );
     } on PostgrestException catch (e) {

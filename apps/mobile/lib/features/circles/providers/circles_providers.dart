@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:takwa/core/providers/auth_providers.dart';
 import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/supabase/supabase_config.dart';
+import 'package:takwa/core/utils/app_logger.dart';
 import 'package:takwa/features/circles/domain/circle_models.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
@@ -59,14 +60,24 @@ class MyCirclesNotifier extends AsyncNotifier<List<CircleSummary>> {
   }
 
   Future<void> rename(String circleId, String newName) async {
-    await ref
-        .read(supabaseServiceProvider)
-        .renameCircle(circleId: circleId, newName: newName);
+    try {
+      await ref
+          .read(supabaseServiceProvider)
+          .renameCircle(circleId: circleId, newName: newName);
+    } catch (e, st) {
+      AppLogger.error('renameCircle failed for $circleId', e, st);
+      rethrow;
+    }
     await refresh();
   }
 
   Future<void> delete(String circleId) async {
-    await ref.read(supabaseServiceProvider).deleteCircle(circleId);
+    try {
+      await ref.read(supabaseServiceProvider).deleteCircle(circleId);
+    } catch (e, st) {
+      AppLogger.error('deleteCircle failed for $circleId', e, st);
+      rethrow;
+    }
     await refresh();
   }
 }
@@ -128,9 +139,18 @@ class CircleLeaderboardNotifier
   }
 
   Future<void> removeMember(String circleId, String userId) async {
-    await ref
-        .read(supabaseServiceProvider)
-        .removeCircleMember(circleId: circleId, userId: userId);
+    try {
+      await ref
+          .read(supabaseServiceProvider)
+          .removeCircleMember(circleId: circleId, userId: userId);
+    } catch (e, st) {
+      AppLogger.error(
+        'removeCircleMember failed for $circleId/$userId',
+        e,
+        st,
+      );
+      rethrow;
+    }
     ref.invalidateSelf();
     await future;
   }

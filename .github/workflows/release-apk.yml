@@ -95,18 +95,33 @@ jobs:
           fi
           # Guard the other silent-401 path: key mode must match the API
           # endpoint the app will call (test_sk_… ↔ CHARGILY_LIVE=false).
+          # ChargilyConfig only treats the exact lowercase string "true" as
+          # live, so normalise before comparing and reject anything else —
+          # a typo'd value would otherwise pick a mode silently.
+          CHARGILY_LIVE="$(printf '%s' "$CHARGILY_LIVE" | tr '[:upper:]' '[:lower:]' | xargs)"
+          case "$CHARGILY_LIVE" in
+            true | false) ;;
+            *)
+              echo "::error::CHARGILY_LIVE must be exactly 'true' or 'false' (got a value that normalises to empty or something else)."
+              exit 1
+              ;;
+          esac
           case "$CHARGILY_SECRET_KEY" in
             test_*)
               if [ "$CHARGILY_LIVE" = "true" ]; then
-                echo "::error::CHARGILY_SECRET_KEY is a test key (test_…) but CHARGILY_LIVE=true — the app would send it to the live endpoint and get Chargily 401. Set CHARGILY_LIVE=false (or unset) for test keys."
+                echo "::error::CHARGILY_SECRET_KEY is a test key (test_…) but CHARGILY_LIVE=true — the app would send it to the live endpoint and get Chargily 401. Set CHARGILY_LIVE=false for test keys, or replace the key with the live sk_… one."
                 exit 1
               fi
               ;;
             sk_*)
               if [ "$CHARGILY_LIVE" != "true" ]; then
-                echo "::error::CHARGILY_SECRET_KEY is a live key (sk_…) but CHARGILY_LIVE is not 'true' — the app would send it to the test endpoint and get Chargily 401. Set CHARGILY_LIVE=true for live keys."
+                echo "::error::CHARGILY_SECRET_KEY is a live key (sk_…) but CHARGILY_LIVE=$CHARGILY_LIVE — the app would send it to the test endpoint and get Chargily 401. Set CHARGILY_LIVE=true for live keys."
                 exit 1
               fi
+              ;;
+            *)
+              echo "::error::CHARGILY_SECRET_KEY has an unrecognised prefix — Chargily secret keys start with 'test_sk_' (sandbox) or 'sk_' (live). Check the value in Settings → Secrets and variables → Actions."
+              exit 1
               ;;
           esac
           # Secrets travel as env vars, not heredoc literals, so no credential
