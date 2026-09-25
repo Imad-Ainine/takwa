@@ -92,7 +92,7 @@ dependencies:
   wakelock_plus: ^1.8.0 # 1.8.0 migrated to built-in Kotlin KGP
   flutter_overlay_window: ^0.5.0
   http: ^1.6.0
-  speech_to_text: ^7.4.0
+  speech_to_text: ^7.5.0
   # flutter_tts: KGP migration not yet released. Track https://github.com/dlutton/flutter_tts/issues/476
   # Bumped to 4.2.5 (latest) in the meantime.
   flutter_tts: ^4.2.5
