@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/routes/app_routes.dart';
+import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/theme/ramadan_theme.dart';
 import 'package:takwa/core/widgets/auth_field.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
@@ -174,11 +174,15 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     return l10n.forgotPasswordGenericError;
   }
 
+  // Legacy AdaptiveStyle slot for AuthField; theming itself now resolves
+  // from the active theme (which already carries Ramadan mode).
+  AdaptiveStyle get s => AdaptiveStyle(context, false);
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isRamadan = ref.watch(ramadanModeProvider).value ?? false;
-    final s = AdaptiveStyle(context, isRamadan);
+    final colors = context.colors;
+    final typography = context.typography;
 
     return Scaffold(
       body: Stack(
@@ -201,7 +205,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         onPressed: () => Navigator.of(context).pop(),
                         icon: Icon(
                           Icons.arrow_back_ios_new_rounded,
-                          color: s.gold,
+                          color: colors.gold,
                         ),
                       ),
                       const Spacer(),
@@ -224,17 +228,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: LinearGradient(
-                                colors: [s.card, s.bg],
+                                colors: [colors.card, colors.background],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               border: Border.all(
-                                color: s.gold.withValues(alpha: 0.5),
+                                color: colors.gold.withValues(alpha: 0.5),
                                 width: 1.5,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: s.gold.withValues(alpha: 0.2),
+                                  color: colors.gold.withValues(alpha: 0.2),
                                   blurRadius: 20,
                                   spreadRadius: 2,
                                 ),
@@ -245,7 +249,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                 _codeSent
                                     ? Icons.mark_email_read_outlined
                                     : Icons.lock_reset_rounded,
-                                color: s.gold,
+                                color: colors.gold,
                                 size: 40,
                               ),
                             ),
@@ -257,7 +261,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             _codeSent
                                 ? l10n.forgotPasswordEnterCodeTitle
                                 : l10n.forgotPasswordRecoverTitle,
-                            style: s.amiri(32, weight: FontWeight.w700),
+                            style: typography.displayLarge,
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: AppSpacing.sm),
@@ -267,7 +271,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             _codeSent
                                 ? l10n.forgotPasswordEnterCodeSubtitle
                                 : l10n.forgotPasswordRecoverSubtitle,
-                            style: s.naskh(13, color: s.textSec),
+                            style: typography.bodyMedium.copyWith(
+                              color: colors.textSecondary,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: AppSpacing.xxxl),
@@ -323,28 +329,25 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             Container(
                               padding: const EdgeInsets.all(AppSpacing.md),
                               decoration: BoxDecoration(
-                                color: Colors.green.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.md,
-                                ),
+                                color: colors.successDim,
+                                borderRadius: AppRadius.card,
                                 border: Border.all(
-                                  color: Colors.greenAccent.withValues(alpha: 0.4),
+                                  color: colors.success.withValues(alpha: 0.4),
                                 ),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.check_circle_outline_rounded,
-                                    color: Colors.greenAccent,
+                                    color: colors.successText,
                                     size: 20,
                                   ),
-                                  const SizedBox(width: 10),
+                                  const SizedBox(width: AppSpacing.sm),
                                   Expanded(
                                     child: Text(
                                       _successMessage!,
-                                      style: s.naskh(
-                                        12,
-                                        color: Colors.greenAccent,
+                                      style: typography.bodySmall.copyWith(
+                                        color: colors.successText,
                                       ),
                                     ),
                                   ),
@@ -359,28 +362,25 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             Container(
                               padding: const EdgeInsets.all(AppSpacing.md),
                               decoration: BoxDecoration(
-                                color: Colors.red.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.md,
-                                ),
+                                color: colors.dangerDim,
+                                borderRadius: AppRadius.card,
                                 border: Border.all(
-                                  color: Colors.redAccent.withValues(alpha: 0.4),
+                                  color: colors.danger.withValues(alpha: 0.4),
                                 ),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.warning_amber_rounded,
-                                    color: Colors.redAccent,
+                                    color: colors.dangerText,
                                     size: 20,
                                   ),
-                                  const SizedBox(width: 10),
+                                  const SizedBox(width: AppSpacing.sm),
                                   Expanded(
                                     child: Text(
                                       _error!,
-                                      style: s.naskh(
-                                        12,
-                                        color: Colors.redAccent,
+                                      style: typography.bodySmall.copyWith(
+                                        color: colors.dangerText,
                                       ),
                                     ),
                                   ),
@@ -389,7 +389,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             ),
                           ],
 
-                          const SizedBox(height: 28),
+                          const SizedBox(height: AppSpacing.xxl),
 
                           // Main Action Button
                           PrimaryButton(
@@ -412,17 +412,18 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                     l10n.forgotPasswordResendCountdown(
                                       _resendCountdown.toString(),
                                     ),
-                                    style: s.naskh(12, color: s.textDim),
+                                    style: typography.bodySmall.copyWith(
+                                      color: colors.textDim,
+                                    ),
                                   )
                                 else
                                   TextButton(
                                     onPressed: _loading ? null : _sendResetCode,
                                     child: Text(
                                       l10n.forgotPasswordResendCode,
-                                      style: s.naskh(
-                                        12,
-                                        color: s.gold,
-                                        weight: FontWeight.bold,
+                                      style: typography.labelMedium.copyWith(
+                                        color: colors.gold,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ),

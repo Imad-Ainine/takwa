@@ -77,25 +77,23 @@ abstract final class AppTheme {
       colorScheme: ColorScheme(
         brightness: brightness,
         primary: colors.gold,
-        onPrimary: const Color(0xFF241B05),
+        onPrimary: colors.onGold,
         secondary: colors.teal,
-        onSecondary: brightness == Brightness.dark
-            ? colors.background
-            : Colors.white,
+        onSecondary: colors.onTeal,
         surface: colors.card,
         onSurface: colors.textPrimary,
         onSurfaceVariant: colors.textSecondary,
         error: brightness == Brightness.dark
             ? colors.danger
             : colors.dangerText,
-        onError: Colors.white,
+        onError: colors.onDanger,
         outline: colors.border,
         primaryContainer: colors.goldDim,
         onPrimaryContainer: colors.goldText,
         secondaryContainer: colors.tealDim,
         onSecondaryContainer: colors.tealText,
         tertiary: colors.success,
-        onTertiary: Colors.white,
+        onTertiary: colors.onSuccess,
         surfaceContainerLowest: colors.background,
         surfaceContainerLow: colors.deep,
         surfaceContainer: colors.card,
@@ -103,9 +101,9 @@ abstract final class AppTheme {
         surfaceContainerHighest: colors.card2,
         outlineVariant: colors.border,
         shadow: Colors.black,
-        scrim: Colors.black,
-        inverseSurface: colors.textPrimary,
-        onInverseSurface: colors.background,
+        scrim: colors.overlay,
+        inverseSurface: colors.surfaceInverse,
+        onInverseSurface: colors.onSurfaceInverse,
         surfaceTint: Colors.transparent,
         errorContainer: colors.dangerDim,
         onErrorContainer: colors.dangerText,
@@ -177,30 +175,87 @@ abstract final class AppTheme {
         }),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: colors.gold,
-          foregroundColor: const Color(0xFF241B05),
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.button),
-          textStyle: typography.labelLarge.copyWith(
-            fontWeight: FontWeight.w700,
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return colors.primaryDisabled;
+            }
+            if (states.contains(WidgetState.pressed)) {
+              return colors.primaryPressed;
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return colors.primaryHover;
+            }
+            return colors.gold;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return colors.onPrimaryDisabled;
+            }
+            return colors.onGold;
+          }),
+          elevation: const WidgetStatePropertyAll(0.0),
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+          ),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: AppRadius.button),
+          ),
+          textStyle: WidgetStatePropertyAll(
+            typography.labelLarge.copyWith(fontWeight: FontWeight.w700),
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: colors.goldText,
-          side: BorderSide(color: colors.goldText, width: 1),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.button),
-          textStyle: typography.labelLarge,
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return colors.onPrimaryDisabled;
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return colors.primaryHover;
+            }
+            if (states.contains(WidgetState.pressed)) {
+              return colors.primaryPressed;
+            }
+            return colors.goldText;
+          }),
+          side: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return BorderSide(color: colors.borderSubdued);
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return BorderSide(color: colors.borderHover, width: 1.5);
+            }
+            if (states.contains(WidgetState.pressed)) {
+              return BorderSide(color: colors.primaryPressed, width: 1.5);
+            }
+            return BorderSide(color: colors.goldText);
+          }),
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: AppRadius.button),
+          ),
+          textStyle: WidgetStatePropertyAll(typography.labelLarge),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: colors.tealText,
-          textStyle: typography.labelMedium.copyWith(color: colors.tealText),
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return colors.disabledContent;
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return colors.secondaryHover;
+            }
+            if (states.contains(WidgetState.pressed)) {
+              return colors.secondaryPressed;
+            }
+            return colors.tealText;
+          }),
+          textStyle: WidgetStatePropertyAll(typography.labelMedium),
         ),
       ),
       checkboxTheme: CheckboxThemeData(
@@ -241,7 +296,15 @@ abstract final class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppRadius.input,
-          borderSide: BorderSide(color: colors.goldText, width: 1.5),
+          borderSide: BorderSide(color: colors.focusRing, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: AppRadius.input,
+          borderSide: BorderSide(color: colors.danger),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: AppRadius.input,
+          borderSide: BorderSide(color: colors.danger, width: 2),
         ),
         hintStyle: typography.bodyMedium.copyWith(color: colors.textDim),
         labelStyle: typography.labelMedium,
@@ -257,6 +320,8 @@ abstract final class AppTheme {
         labelStyle: typography.labelMedium,
         padding: AppSpacing.chipPadding,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.chip),
+        selectedColor: colors.goldDim,
+        checkmarkColor: colors.goldText,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: colors.goldText,

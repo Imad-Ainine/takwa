@@ -12,6 +12,8 @@ class EmailConfirmationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
+    final typography = context.typography;
     return Scaffold(
       body: Stack(
         children: [
@@ -29,13 +31,21 @@ class EmailConfirmationScreen extends StatelessWidget {
                     height: 100,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: context.colors.goldDim,
-                      border: Border.all(color: context.colors.gold, width: 2),
+                      gradient: LinearGradient(
+                        colors: [
+                          colors.card,
+                          colors.goldDim,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      border: Border.all(color: colors.gold, width: 2),
+                      boxShadow: AppShadows.goldGlow,
                     ),
                     child: Icon(
                       Icons.mark_email_read_outlined,
                       size: 50,
-                      color: context.colors.gold,
+                      color: colors.gold,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xxxl),
@@ -60,7 +70,7 @@ class EmailConfirmationScreen extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: AppSpacing.huge),
                   PrimaryButton(
                     onTap: () =>
                         Navigator.pushReplacementNamed(context, '/auth'),

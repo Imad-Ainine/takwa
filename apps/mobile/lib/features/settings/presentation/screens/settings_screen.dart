@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -268,6 +269,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                                       .setLocale(Locale(v));
                                 },
                               ),
+                              if (kDebugMode) ...[
+                                const SettingsDivider(),
+                                ActionSetting(
+                                  icon: '🎨',
+                                  label: l10n.settingsDesignSystemLabel,
+                                  sublabel: l10n.settingsDesignSystemSublabel,
+                                  onTap: () => Navigator.pushNamed(
+                                    context,
+                                    Routes.designSystem,
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                           const SizedBox(height: AppSpacing.lg),

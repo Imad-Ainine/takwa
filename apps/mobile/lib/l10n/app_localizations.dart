@@ -902,6 +902,18 @@ abstract class AppLocalizations {
   /// **'وضع المظهر'**
   String get settingsThemeModeLabel;
 
+  /// No description provided for @settingsDesignSystemLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'نظام التصميم'**
+  String get settingsDesignSystemLabel;
+
+  /// No description provided for @settingsDesignSystemSublabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'لوحة الألوان والمكوّنات'**
+  String get settingsDesignSystemSublabel;
+
   /// No description provided for @themeModeSystem.
   ///
   /// In ar, this message translates to:

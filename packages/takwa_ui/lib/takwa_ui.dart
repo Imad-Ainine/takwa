@@ -14,3 +14,4 @@ export 'src/widgets/feedback/takwa_bottom_sheet.dart';
 export 'src/widgets/feedback/takwa_dialog.dart';
 export 'src/widgets/display/ayah_text.dart';
 export 'src/widgets/display/takwa_badges.dart';
+export 'src/showcase/design_system_showcase.dart';

@@ -91,7 +91,8 @@ class TakwaTextField extends StatelessWidget {
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: colors.card2,
+            fillColor: readOnly ? colors.disabledBackground : colors.card2,
+            hoverColor: colors.surfaceHovered,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16.0,
               vertical: 14.0,
@@ -100,7 +101,7 @@ class TakwaTextField extends StatelessWidget {
             enabledBorder: borderShape,
             focusedBorder: OutlineInputBorder(
               borderRadius: AppRadius.input,
-              borderSide: BorderSide(color: colors.goldText, width: 1.5),
+              borderSide: BorderSide(color: colors.focusRing, width: 2.0),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: AppRadius.input,

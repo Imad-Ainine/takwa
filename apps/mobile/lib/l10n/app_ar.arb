@@ -302,6 +302,8 @@
   "settingsMuhasabaTimeLabel": "وقت المحاسبة",
   "settingsAppearanceSectionTitle": "المظهر",
   "settingsThemeModeLabel": "وضع المظهر",
+  "settingsDesignSystemLabel": "نظام التصميم",
+  "settingsDesignSystemSublabel": "لوحة الألوان والمكوّنات",
   "themeModeSystem": "تلقائي (حسب النظام)",
   "themeModeLight": "الوضع الفاتح",
   "themeModeDark": "الوضع الداكن",

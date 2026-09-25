@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:takwa/core/providers/database_providers.dart';
+import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/theme/ramadan_theme.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
@@ -80,19 +80,28 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
       );
 
       if (mounted) {
+        final colors = context.colors;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.check_circle_rounded, color: Colors.white),
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: colors.onSuccess,
+                ),
                 const SizedBox(width: AppSpacing.sm),
-                Text(l10n.updatePasswordSuccessMessage),
+                Text(
+                  l10n.updatePasswordSuccessMessage,
+                  style: context.typography.bodyMedium.copyWith(
+                    color: colors.onSuccess,
+                  ),
+                ),
               ],
             ),
-            backgroundColor: const Color(0xFF10B981),
+            backgroundColor: colors.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.md),
+              borderRadius: AppRadius.card,
             ),
           ),
         );
@@ -131,11 +140,15 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
     return l10n.updatePasswordGenericFailure;
   }
 
+  // Legacy AdaptiveStyle slot for AuthField; theming itself now resolves
+  // from the active theme (which already carries Ramadan mode).
+  AdaptiveStyle get s => AdaptiveStyle(context, false);
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isRamadan = ref.watch(ramadanModeProvider).value ?? false;
-    final s = AdaptiveStyle(context, isRamadan);
+    final colors = context.colors;
+    final typography = context.typography;
 
     return Scaffold(
       body: Stack(
@@ -157,17 +170,17 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: LinearGradient(
-                          colors: [s.card, s.bg],
+                          colors: [colors.card, colors.background],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         border: Border.all(
-                          color: s.gold.withValues(alpha: 0.5),
+                          color: colors.gold.withValues(alpha: 0.5),
                           width: 1.5,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: s.gold.withValues(alpha: 0.2),
+                            color: colors.gold.withValues(alpha: 0.2),
                             blurRadius: 20,
                             spreadRadius: 2,
                           ),
@@ -176,7 +189,7 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
                       child: Center(
                         child: Icon(
                           Icons.lock_reset_rounded,
-                          color: s.gold,
+                          color: colors.gold,
                           size: 40,
                         ),
                       ),
@@ -186,7 +199,7 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
                     // Title
                     Text(
                       l10n.updatePasswordTitle,
-                      style: s.amiri(32, weight: FontWeight.w700),
+                      style: typography.displayLarge,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.sm),
@@ -194,7 +207,9 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
                     // Subtitle
                     Text(
                       l10n.updatePasswordSubtitle,
-                      style: s.naskh(13, color: s.textSec),
+                      style: typography.bodyMedium.copyWith(
+                        color: colors.textSecondary,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.xxxl),
@@ -259,24 +274,26 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.md),
                         decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          color: colors.dangerDim,
+                          borderRadius: AppRadius.card,
                           border: Border.all(
-                            color: Colors.redAccent.withValues(alpha: 0.4),
+                            color: colors.danger.withValues(alpha: 0.4),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.warning_amber_rounded,
-                              color: Colors.redAccent,
+                              color: colors.dangerText,
                               size: 20,
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: AppSpacing.sm),
                             Expanded(
                               child: Text(
                                 _error!,
-                                style: s.naskh(12, color: Colors.redAccent),
+                                style: typography.bodySmall.copyWith(
+                                  color: colors.dangerText,
+                                ),
                               ),
                             ),
                           ],

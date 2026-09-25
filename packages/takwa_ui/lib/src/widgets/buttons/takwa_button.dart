@@ -57,7 +57,7 @@ class TakwaButton extends StatelessWidget {
       case TakwaButtonVariant.primary:
         gradient = colors.goldGradient;
         bg = colors.gold;
-        fg = const Color(0xFF241B05); // High contrast on gold
+        fg = colors.onGold; // High contrast on gold
         break;
       case TakwaButtonVariant.secondary:
         bg = colors.tealDim;

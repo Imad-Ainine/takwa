@@ -445,6 +445,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsThemeModeLabel => 'Theme mode';
 
   @override
+  String get settingsDesignSystemLabel => 'Design system';
+
+  @override
+  String get settingsDesignSystemSublabel =>
+      'Color palette and component gallery';
+
+  @override
   String get themeModeSystem => 'Automatic (system)';
 
   @override

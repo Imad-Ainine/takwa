@@ -302,6 +302,8 @@
   "settingsMuhasabaTimeLabel": "Accountability time",
   "settingsAppearanceSectionTitle": "Appearance",
   "settingsThemeModeLabel": "Theme mode",
+  "settingsDesignSystemLabel": "Design system",
+  "settingsDesignSystemSublabel": "Color palette and component gallery",
   "themeModeSystem": "Automatic (system)",
   "themeModeLight": "Light mode",
   "themeModeDark": "Dark mode",

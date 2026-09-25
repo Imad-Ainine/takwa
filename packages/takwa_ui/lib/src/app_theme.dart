@@ -9,6 +9,7 @@ export 'tokens/app_spacing.dart';
 
 export 'theme/app_colors.dart';
 export 'theme/app_decorations.dart';
+export 'theme/app_palettes.dart';
 export 'theme/app_typography.dart';
 export 'theme/context_extensions.dart';
 export 'theme/theme_builder.dart';

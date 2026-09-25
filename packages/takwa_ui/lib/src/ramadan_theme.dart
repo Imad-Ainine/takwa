@@ -91,6 +91,9 @@ class RamadanTheme {
       danger: RamadanColors.rubyLight,
       dangerDim: RamadanColors.rubyLight.withValues(alpha: 0.1),
       warning: RamadanColors.goldenAura,
+      info: const Color(0xFF7FA7D9), // moonlit lapis
+      infoDim: const Color(0x1F7FA7D9),
+      infoText: const Color(0xFF9FC0E8),
       // On-surface accent ramp — see AppColorsExtension. On deep lapis the
       // gold/emerald fills already clear AA as foregrounds; rubyLight does
       // not (2.89:1), so error text gets a lifted tint.
@@ -103,6 +106,30 @@ class RamadanTheme {
       textSecondary: RamadanColors.ivoryDim,
       // 0.5 opacity landed at 3.49:1 on deepLapis; 0.72 clears AA.
       textDim: RamadanColors.ivoryDim.withValues(alpha: 0.72),
+      onGold: const Color(0xFF3A2A05), // 6.3:1 on goldenAura
+      onTeal: const Color(0xFF062B1D), // 4.6:1 on emeraldLight
+      onSuccess: const Color(0xFF062B1D),
+      onDanger: Colors.white, // 6.3:1 on rubyLight
+      onWarning: const Color(0xFF3A2A05),
+      onInfo: const Color(0xFF0B1B30),
+      primaryHover: RamadanColors.goldenLight,
+      primaryPressed: RamadanColors.goldenDeep,
+      primaryDisabled: const Color(0xFF2A3A5C),
+      onPrimaryDisabled: const Color(0xFF6B7A99),
+      secondaryHover: const Color(0xFF3BB488),
+      secondaryPressed: RamadanColors.emerald,
+      surfaceSubdued: const Color(0xFF0C1B3C),
+      surfaceHovered: const Color(0xFF122042),
+      surfacePressed: const Color(0xFF101C38),
+      surfaceInverse: RamadanColors.ivory,
+      onSurfaceInverse: RamadanColors.deepLapis,
+      borderSubdued: const Color(0x24D4A843),
+      borderHover: const Color(0x60D4A843),
+      borderStrong: const Color(0x80D4A843),
+      focusRing: RamadanColors.goldenLight,
+      overlay: const Color(0xB3000000),
+      disabledBackground: const Color(0xFF101A32),
+      disabledContent: const Color(0xFF5A6684),
       backgroundGradient: RamadanColors.nightSky,
       cardGradient: RamadanColors.cardGlow,
       goldGradient: AppColorsExtension.dark.goldGradient,
@@ -153,6 +180,9 @@ class RamadanTheme {
       danger: RamadanColors.ruby,
       dangerDim: RamadanColors.ruby.withValues(alpha: 0.1),
       warning: RamadanColors.goldenAura,
+      info: const Color(0xFF2456A6), // daylit lapis
+      infoDim: const Color(0x1F2456A6),
+      infoText: const Color(0xFF1C3F7A), // 8.9:1 on ivoryLight
       // goldenDeep (#A07820) is only 3.84:1 on the ivory ground, so the
       // on-surface gold is darkened further; emerald and ruby already pass.
       goldText: const Color(0xFF6E5110), // 7.01:1 on ivoryLight
@@ -164,6 +194,30 @@ class RamadanTheme {
       textSecondary: RamadanColors.deepLapis.withValues(alpha: 0.7),
       // 0.4 opacity landed at 2.56:1 on the ivory ground; 0.65 clears AA.
       textDim: RamadanColors.deepLapis.withValues(alpha: 0.65),
+      onGold: const Color(0xFF3A2A05), // 6.3:1 on goldenAura
+      onTeal: Colors.white, // 6.5:1 on emerald
+      onSuccess: Colors.white,
+      onDanger: Colors.white, // 8.7:1 on ruby
+      onWarning: const Color(0xFF3A2A05),
+      onInfo: Colors.white, // 7.1:1 on lapis
+      primaryHover: const Color(0xFFB8922E),
+      primaryPressed: RamadanColors.goldenDeep,
+      primaryDisabled: const Color(0xFFE8DFC8),
+      onPrimaryDisabled: const Color(0xFFA89A78),
+      secondaryHover: const Color(0xFF14563F),
+      secondaryPressed: const Color(0xFF0F4531),
+      surfaceSubdued: const Color(0xFFF8F3E7),
+      surfaceHovered: const Color(0xFFF1EADB),
+      surfacePressed: const Color(0xFFECE2CD),
+      surfaceInverse: RamadanColors.deepLapis,
+      onSurfaceInverse: RamadanColors.ivoryLight,
+      borderSubdued: const Color(0x30D4A843),
+      borderHover: const Color(0x60D4A843),
+      borderStrong: const Color(0x80D4A843),
+      focusRing: RamadanColors.goldenDeep, // 3.8:1 on ivoryLight
+      overlay: const Color(0x80000000),
+      disabledBackground: const Color(0xFFEFE7D2),
+      disabledContent: const Color(0xFFA89A78),
       backgroundGradient: RamadanColors.daySky,
       cardGradient: RamadanColors.cardGlowLight,
       goldGradient: AppColorsExtension.light.goldGradient,

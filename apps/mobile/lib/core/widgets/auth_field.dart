@@ -6,6 +6,9 @@ class AuthField extends StatefulWidget {
   final TextEditingController ctrl;
   final String hint;
   final IconData icon;
+
+  /// Legacy per-render style object; all theming now resolves from the
+  /// active theme via `context.colors` / `context.typography`.
   final AdaptiveStyle style;
   final bool isPassword;
   final TextInputType? keyboardType;
@@ -82,7 +85,8 @@ class _AuthFieldState extends State<AuthField> {
 
   @override
   Widget build(BuildContext context) {
-    final s = widget.style;
+    final colors = context.colors;
+    final typography = context.typography;
     final l10n = AppLocalizations.of(context)!;
 
     // A raw TextField wrapped in our own FormField<String> rather than
@@ -99,21 +103,21 @@ class _AuthFieldState extends State<AuthField> {
       builder: (field) {
         final hasError = field.hasError;
         final borderColor = hasError
-            ? s.danger
-            : (_focused ? s.gold : s.border.withValues(alpha: 0.5));
+            ? colors.dangerText
+            : (_focused ? colors.gold : colors.borderSubdued);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Focus(
               onFocusChange: (val) => setState(() => _focused = val),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutCubic,
+                duration: AppMotion.fast,
+                curve: AppMotion.standard,
                 decoration: BoxDecoration(
                   color: _focused
-                      ? s.card.withValues(alpha: 0.6)
-                      : s.bg.withValues(alpha: 0.55),
-                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                      ? colors.card.withValues(alpha: 0.6)
+                      : colors.background.withValues(alpha: 0.55),
+                  borderRadius: AppRadius.input,
                   border: Border.all(
                     color: borderColor,
                     width: (_focused || hasError) ? 2 : 1.5,
@@ -121,9 +125,10 @@ class _AuthFieldState extends State<AuthField> {
                   boxShadow: _focused
                       ? [
                           BoxShadow(
-                            color: (hasError ? s.danger : s.gold).withValues(
-                              alpha: 0.15,
-                            ),
+                            color: (hasError
+                                    ? colors.danger
+                                    : colors.focusRing)
+                                .withValues(alpha: 0.15),
                             blurRadius: 20,
                             spreadRadius: 2,
                           ),
@@ -155,8 +160,11 @@ class _AuthFieldState extends State<AuthField> {
                       FocusScope.of(context).nextFocus();
                     }
                   },
-                  style: s.naskh(15, weight: FontWeight.w600),
-                  cursorColor: s.gold,
+                  style: typography.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
+                  ),
+                  cursorColor: colors.gold,
                   decoration: InputDecoration(
                     filled: false,
                     border: InputBorder.none,
@@ -170,18 +178,20 @@ class _AuthFieldState extends State<AuthField> {
                     // field. labelText floats above the value once there is
                     // one instead of being replaced by it.
                     labelText: widget.hint,
-                    labelStyle: s.naskh(13, color: s.textDim),
-                    floatingLabelStyle: s.naskh(
-                      12,
+                    labelStyle: typography.labelMedium.copyWith(
+                      color: colors.textDim,
+                    ),
+                    floatingLabelStyle: typography.labelMedium.copyWith(
+                      fontSize: 12,
                       color: hasError
-                          ? s.danger
-                          : (_focused ? s.gold : s.textSec),
+                          ? colors.dangerText
+                          : (_focused ? colors.gold : colors.textSecondary),
                     ),
                     prefixIcon: Icon(
                       widget.icon,
                       color: hasError
-                          ? s.danger
-                          : (_focused ? s.gold : s.textSec),
+                          ? colors.dangerText
+                          : (_focused ? colors.gold : colors.textSecondary),
                       size: 20,
                     ),
                     suffixIcon: widget.isPassword
@@ -195,7 +205,7 @@ class _AuthFieldState extends State<AuthField> {
                               _obscure
                                   ? Icons.visibility_rounded
                                   : Icons.visibility_off_rounded,
-                              color: s.textSec,
+                              color: colors.textSecondary,
                               size: 20,
                             ),
                           )
@@ -212,7 +222,12 @@ class _AuthFieldState extends State<AuthField> {
               const SizedBox(height: AppSpacing.xs),
               Padding(
                 padding: const EdgeInsetsDirectional.only(start: AppSpacing.md),
-                child: Text(field.errorText!, style: s.naskh(12, color: s.danger)),
+                child: Text(
+                  field.errorText!,
+                  style: typography.bodySmall.copyWith(
+                    color: colors.dangerText,
+                  ),
+                ),
               ),
             ],
           ],
@@ -224,6 +239,8 @@ class _AuthFieldState extends State<AuthField> {
 
 class PasswordStrengthBar extends StatelessWidget {
   final double strength; // 0..1
+
+  /// Legacy per-render style object; theming resolves from the theme.
   final AdaptiveStyle style;
   const PasswordStrengthBar({
     super.key,
@@ -233,6 +250,7 @@ class PasswordStrengthBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final l10n = AppLocalizations.of(context)!;
     final label = strength < 0.26
         ? l10n.authPasswordStrengthWeak
@@ -241,40 +259,42 @@ class PasswordStrengthBar extends StatelessWidget {
         : strength < 0.76
         ? l10n.authPasswordStrengthGood
         : l10n.authPasswordStrengthStrong;
-    // Audit §M13: these were the raw Material accents at every brightness,
-    // and "amber on light is ~1.8:1" as *text* (the bar fill itself doesn't
-    // need text-level contrast, but the label painted in the same color
-    // does). Dark mode keeps the original vivid accents — nothing flagged
-    // those — light mode swaps in darkened versions of the same four hues,
-    // each clearing 4.5:1 on a white/near-white surface.
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Semantic `*Text` roles clear WCAG AA at every brightness, so the
+    // label stays readable without dark-mode branching.
     final color = strength < 0.26
-        ? (isDark ? Colors.redAccent : context.colors.dangerText)
-        : strength < 0.51
-        ? (isDark ? Colors.orange : const Color(0xFF9A3412)) // ~5.8:1 on white
+        ? colors.dangerText
         : strength < 0.76
-        ? (isDark ? Colors.amber : context.colors.warningText)
-        : (isDark ? Colors.greenAccent : context.colors.successText);
+        ? colors.warningText
+        : colors.successText;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(AppRadius.xs),
           child: Stack(
             children: [
-              Container(height: 4, color: style.border.withValues(alpha: 0.3)),
+              Container(
+                height: 4,
+                color: colors.borderSubdued.withValues(alpha: 0.5),
+              ),
               AnimatedFractionallySizedBox(
-                duration: const Duration(milliseconds: 300),
+                duration: AppMotion.fast,
+                curve: AppMotion.standard,
                 widthFactor: strength.clamp(0.05, 1.0),
                 alignment: AlignmentDirectional.centerStart,
                 child: Container(
                   height: 4,
                   decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(4),
+                    gradient: LinearGradient(
+                      colors: [color.withValues(alpha: 0.75), color],
+                    ),
+                    borderRadius: BorderRadius.circular(AppRadius.xs),
                     boxShadow: [
-                      BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 6),
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.4),
+                        blurRadius: 6,
+                      ),
                     ],
                   ),
                 ),
@@ -285,7 +305,7 @@ class PasswordStrengthBar extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         Text(
           l10n.authPasswordStrengthLabel(label),
-          style: style.naskh(11, color: color),
+          style: context.typography.caption.copyWith(color: color),
         ),
       ],
     );

@@ -69,6 +69,7 @@ class Routes {
   static const String settings = '/settings';
   static const String accountSettings = '/account-settings';
   static const String aboutMe = '/about-me';
+  static const String designSystem = '/design-system';
   static const String onboarding = '/onboarding';
   static const String prayer = '/prayer';
   static const String adhkar = '/adhkar';
@@ -154,6 +155,11 @@ class AppRoutes {
         return MaterialPageRoute(settings: settings, builder: (_) => const AccountSettingsScreen());
       case Routes.aboutMe:
         return MaterialPageRoute(settings: settings, builder: (_) => const AboutMeScreen());
+      case Routes.designSystem:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const DesignSystemShowcase(),
+        );
       case Routes.onboarding:
         return MaterialPageRoute(settings: settings, builder: (_) => const OnboardingScreen());
       case Routes.prayer:

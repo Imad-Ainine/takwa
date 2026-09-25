@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/providers/auth_providers.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/routes/app_routes.dart';
-import 'package:takwa/core/theme/ramadan_theme.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/l10n/app_localizations.dart';
@@ -18,8 +16,8 @@ class AuthChoiceScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final isRamadan = ref.watch(ramadanModeProvider).value ?? false;
-    final style = AdaptiveStyle(context, isRamadan);
+    final colors = context.colors;
+    final typography = context.typography;
 
     return Scaffold(
       body: Stack(
@@ -40,8 +38,8 @@ class AuthChoiceScreen extends ConsumerWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    style.bg.withValues(alpha: 0.1),
-                    style.bg.withValues(alpha: 0.94),
+                    colors.background.withValues(alpha: 0.1),
+                    colors.background.withValues(alpha: 0.94),
                   ],
                 ),
               ),
@@ -62,17 +60,17 @@ class AuthChoiceScreen extends ConsumerWidget {
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          context.colors.gold.withValues(alpha: 0.16),
-                          context.colors.gold.withValues(alpha: 0.04),
+                          colors.gold.withValues(alpha: 0.16),
+                          colors.gold.withValues(alpha: 0.04),
                         ],
                       ),
                       border: Border.all(
-                        color: context.colors.gold.withValues(alpha: 0.38),
+                        color: colors.gold.withValues(alpha: 0.38),
                         width: 2.2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: context.colors.gold.withValues(alpha: 0.18),
+                          color: colors.gold.withValues(alpha: 0.18),
                           blurRadius: 36,
                           spreadRadius: 6,
                         ),
@@ -82,22 +80,23 @@ class AuthChoiceScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   ShaderMask(
-                    shaderCallback: (bounds) => LinearGradient(
-                      colors: [style.gold, style.gold],
-                    ).createShader(bounds),
+                    shaderCallback: (bounds) =>
+                        colors.goldGradient.createShader(bounds),
                     child: Text(
                       l10n.authChoiceAppName,
-                      style: style
-                          .amiri(48, weight: FontWeight.w800)
-                          .copyWith(color: Colors.white),
+                      style: typography.displayLarge.copyWith(
+                        fontSize: 48,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     l10n.authChoiceTagline,
                     textAlign: TextAlign.center,
-                    style: context.typography.bodyLarge.copyWith(
-                      color: context.colors.textSecondary,
+                    style: typography.bodyLarge.copyWith(
+                      color: colors.textSecondary,
                     ),
                   ),
 
@@ -126,13 +125,13 @@ class AuthChoiceScreen extends ConsumerWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: AppSpacing.huge),
 
                   Text(
                     l10n.authChoiceSyncNote,
                     textAlign: TextAlign.center,
-                    style: context.typography.caption.copyWith(
-                      color: context.colors.textDim,
+                    style: typography.caption.copyWith(
+                      color: colors.textDim,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),

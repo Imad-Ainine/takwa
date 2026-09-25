@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -254,8 +253,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isRamadan = ref.watch(ramadanModeProvider).value ?? false;
-    final s = AdaptiveStyle(context, isRamadan);
+    final colors = context.colors;
 
     return Scaffold(
       body: Stack(
@@ -273,8 +271,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    s.bg.withValues(alpha: 0.15),
-                    s.bg.withValues(alpha: 0.92),
+                    colors.background.withValues(alpha: 0.15),
+                    colors.background.withValues(alpha: 0.92),
                   ],
                 ),
               ),
@@ -291,21 +289,26 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 flexibleSpace: FlexibleSpaceBar(
-                  background: _AuthHeader(style: s, entryCtrl: _entryCtrl),
+                  background: _AuthHeader(entryCtrl: _entryCtrl),
                   collapseMode: CollapseMode.pin,
                 ),
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xxl,
+                    0,
+                    AppSpacing.xxl,
+                    100,
+                  ),
                   child: Column(
                     children: [
-                      _anim(0, _buildGlassCard(s)),
+                      _anim(0, _buildGlassCard()),
                       const SizedBox(height: AppSpacing.xl),
-                      _anim(1, _buildSeparator(s)),
+                      _anim(1, _buildSeparator()),
                       const SizedBox(height: AppSpacing.lg),
-                      _anim(2, _buildGoogleBtn(s)),
-                      const SizedBox(height: 28),
+                      _anim(2, _buildGoogleBtn()),
+                      const SizedBox(height: AppSpacing.xxl),
                       _anim(
                         3,
                         TakwaTappable(
@@ -314,10 +317,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                           minTapSize: null,
                           child: Text(
                             l10n.authContinueAsGuest,
-                            style: s.naskh(
-                              13,
-                              color: s.textSec,
-                              weight: FontWeight.w600,
+                            style: context.typography.labelMedium.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colors.textSecondary,
                             ),
                           ),
                         ),
@@ -334,7 +336,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
             BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
               child: Container(
-                color: Colors.black38,
+                color: colors.overlay,
                 child: const TakwaLoadingIndicator(),
               ),
             ),
@@ -366,33 +368,36 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     );
   }
 
+  // AuthField/PasswordStrengthBar still take a legacy AdaptiveStyle slot;
+  // it reads whichever theme extension is active, so Ramadan styling is
+  // preserved without threading `s` through the builders.
+  AdaptiveStyle get style => AdaptiveStyle(context, false);
+
   // ── Glassmorphism Form Card – Refined Islamic ──────────
-  Widget _buildGlassCard(AdaptiveStyle s) {
+  Widget _buildGlassCard() {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
+    final typography = context.typography;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
+      borderRadius: BorderRadius.circular(AppRadius.xxl),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.xxl),
           decoration: BoxDecoration(
-            color: s.bg.withValues(alpha: 0.78),
-            borderRadius: BorderRadius.circular(28),
+            color: colors.background.withValues(alpha: 0.78),
+            borderRadius: BorderRadius.circular(AppRadius.xxl),
             border: Border.all(
-              color: s.gold.withValues(alpha: 0.28),
+              color: colors.gold.withValues(alpha: 0.28),
               width: 1.4,
             ),
             boxShadow: [
               BoxShadow(
-                color: s.gold.withValues(alpha: 0.09),
+                color: colors.gold.withValues(alpha: 0.09),
                 blurRadius: 36,
                 spreadRadius: 2,
               ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
+              ...AppShadows.card,
             ],
           ),
           child: AutofillGroup(
@@ -401,12 +406,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                 // ── Tab bar – elegant gold gradient ──
                 Container(
                   height: 52,
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(AppSpacing.xs),
                   decoration: BoxDecoration(
-                    color: s.bg.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(26),
+                    color: colors.background.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(AppRadius.xxl),
                     border: Border.all(
-                      color: s.gold.withValues(alpha: 0.18),
+                      color: colors.gold.withValues(alpha: 0.18),
                     ),
                   ),
                   child: TabBar(
@@ -415,22 +420,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                     indicatorPadding: EdgeInsets.zero,
                     controller: _tabs,
                     indicator: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [s.goldDark, s.gold],
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: s.gold.withValues(alpha: 0.35),
-                          blurRadius: 10,
-                        ),
-                      ],
+                      gradient: colors.goldGradient,
+                      borderRadius: BorderRadius.circular(AppRadius.xxl),
+                      boxShadow: AppShadows.goldGlow,
                     ),
                     indicatorSize: TabBarIndicatorSize.tab,
-                    labelColor: Colors.white,
-                    unselectedLabelColor: s.textSec,
+                    labelColor: colors.textPrimary,
+                    unselectedLabelColor: colors.textSecondary,
                     dividerColor: Colors.transparent,
-                    labelStyle: s.naskh(13, weight: FontWeight.bold),
+                    labelStyle: typography.labelLarge.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                     tabs: [
                       Tab(text: l10n.authSignInTab),
                       Tab(text: l10n.authSignUpTab),
@@ -441,7 +441,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
 
                 // ── Username field (sign-up only) ──
                 AnimatedCrossFade(
-                  duration: const Duration(milliseconds: 200),
+                  duration: AppMotion.fast,
                   crossFadeState: _tabs.index == 1
                       ? CrossFadeState.showSecond
                       : CrossFadeState.showFirst,
@@ -452,11 +452,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                         ctrl: _userCtrl,
                         hint: l10n.authUsernameHint,
                         icon: Icons.person_outline_rounded,
-                        style: s,
+                        style: style,
                         focusNode: _userFocus,
                         autofillHints: const [AutofillHints.username],
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: AppSpacing.md),
                     ],
                   ),
                 ),
@@ -466,18 +466,18 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                   ctrl: _emailCtrl,
                   hint: l10n.authEmailHint,
                   icon: Icons.alternate_email_rounded,
-                  style: s,
+                  style: style,
                   keyboardType: TextInputType.emailAddress,
                   focusNode: _emailFocus,
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.md),
 
                 // ── Password ──
                 AuthField(
                   ctrl: _passCtrl,
                   hint: l10n.authPasswordHint,
                   icon: Icons.lock_outline_rounded,
-                  style: s,
+                  style: style,
                   isPassword: true,
                   focusNode: _passFocus,
                   isLast: true,
@@ -486,14 +486,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
 
                 // ── Password strength (sign-up only) ──
                 AnimatedCrossFade(
-                  duration: const Duration(milliseconds: 200),
+                  duration: AppMotion.fast,
                   crossFadeState: _tabs.index == 1 && _passCtrl.text.isNotEmpty
                       ? CrossFadeState.showSecond
                       : CrossFadeState.showFirst,
                   firstChild: const SizedBox.shrink(),
                   secondChild: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: PasswordStrengthBar(strength: _passStrength, style: s),
+                    padding: const EdgeInsets.only(top: AppSpacing.sm),
+                    child: PasswordStrengthBar(
+                      strength: _passStrength,
+                      style: style,
+                    ),
                   ),
                 ),
 
@@ -505,12 +508,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                       onPressed: _openForgotPassword,
                       child: Text(
                         l10n.authForgotPassword,
-                        style: s.naskh(12, color: s.gold),
+                        style: typography.bodySmall.copyWith(
+                          color: colors.goldText,
+                        ),
                       ),
                     ),
                   ),
 
-                if (_error != null) _buildError(s),
+                if (_error != null) _buildError(),
                 const SizedBox(height: AppSpacing.xl),
 
                 // ── Submit ──
@@ -528,27 +533,37 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     );
   }
 
-  Widget _buildError(AdaptiveStyle s) {
+  Widget _buildError() {
+    final colors = context.colors;
     return Padding(
-      padding: const EdgeInsets.only(top: 14),
+      padding: const EdgeInsets.only(top: AppSpacing.md),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        duration: AppMotion.fast,
+        curve: AppMotion.standard,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
         decoration: BoxDecoration(
-          color: Colors.red.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.redAccent.withValues(alpha: 0.28)),
+          color: colors.dangerDim,
+          borderRadius: AppRadius.card,
+          border: Border.all(color: colors.danger.withValues(alpha: 0.4)),
         ),
         child: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.warning_amber_rounded,
-              color: Colors.redAccent,
+              color: colors.dangerText,
               size: 18,
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: Text(_error!, style: s.naskh(12, color: Colors.redAccent)),
+              child: Text(
+                _error!,
+                style: context.typography.bodySmall.copyWith(
+                  color: colors.dangerText,
+                ),
+              ),
             ),
           ],
         ),
@@ -556,13 +571,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     );
   }
 
-  Widget _buildSeparator(AdaptiveStyle s) {
+  Widget _buildSeparator() {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     return Row(
       children: [
         Expanded(
           child: Divider(
-            color: s.gold.withValues(alpha: 0.18),
+            color: colors.gold.withValues(alpha: 0.18),
             thickness: 1,
           ),
         ),
@@ -570,12 +586,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Text(
             l10n.authOrSeparator,
-            style: s.naskh(12, color: s.textDim),
+            style: context.typography.bodySmall.copyWith(
+              color: colors.textDim,
+            ),
           ),
         ),
         Expanded(
           child: Divider(
-            color: s.gold.withValues(alpha: 0.18),
+            color: colors.gold.withValues(alpha: 0.18),
             thickness: 1,
           ),
         ),
@@ -583,126 +601,53 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     );
   }
 
-  Widget _buildGoogleBtn(AdaptiveStyle s) {
+  Widget _buildGoogleBtn() {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(AppRadius.xxl),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
         child: InkWell(
           onTap: _loading ? null : _signInGoogle,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppRadius.xxl),
           child: Container(
             padding: const EdgeInsets.symmetric(
-              vertical: 15,
+              vertical: AppSpacing.xl,
               horizontal: AppSpacing.xxl,
             ),
             decoration: BoxDecoration(
-              color: s.bg.withValues(alpha: 0.72),
-              borderRadius: BorderRadius.circular(24),
+              color: colors.background.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(AppRadius.xxl),
               border: Border.all(
-                color: s.gold.withValues(alpha: 0.22),
+                color: colors.gold.withValues(alpha: 0.22),
                 width: 1.2,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: s.gold.withValues(alpha: 0.06),
-                  blurRadius: 16,
-                ),
-              ],
+              boxShadow: AppShadows.card,
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  l10n.authGoogleSignInButton,
-                  style: s.naskh(14, weight: FontWeight.w600),
+            child: Center(
+              child: Text(
+                l10n.authGoogleSignInButton,
+                style: context.typography.labelLarge.copyWith(
+                  color: colors.textPrimary,
                 ),
-              ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
-}
-
-class _StarFieldBg extends StatelessWidget {
-  final AnimationController controller;
-  final AdaptiveStyle style;
-  const _StarFieldBg({required this.controller, required this.style});
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (_, _) => CustomPaint(
-        painter: _StarsPainter(progress: controller.value, gold: style.gold),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [const Color(0xFF050B2A), style.bg],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StarsPainter extends CustomPainter {
-  final double progress;
-  final Color gold;
-  _StarsPainter({required this.progress, required this.gold});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rng = math.Random(42);
-    final paint = Paint();
-    const count = 60;
-
-    for (int i = 0; i < count; i++) {
-      final x = rng.nextDouble() * size.width;
-      final baseY = rng.nextDouble() * size.height * 0.6;
-      final twinkle = math.sin((progress * math.pi * 2) + i * 0.7);
-      final opacity = (0.2 + 0.5 * ((twinkle + 1) / 2)).clamp(0.0, 0.8);
-      final radius = 1.0 + rng.nextDouble() * 1.4;
-
-      paint.color = (i % 7 == 0 ? gold : Colors.white).withValues(alpha: opacity);
-      canvas.drawCircle(Offset(x, baseY), radius, paint);
-    }
-
-    // Mosque silhouette hint at bottom of header
-    final mPaint = Paint()
-      ..color = gold.withValues(alpha: 0.06)
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-    final w = size.width;
-    final h = size.height * 0.45;
-    path.moveTo(0, h);
-    path.lineTo(w * 0.3, h);
-    path.lineTo(w * 0.3, h * 0.7);
-    path.quadraticBezierTo(w * 0.5, h * 0.3, w * 0.7, h * 0.7);
-    path.lineTo(w * 0.7, h);
-    path.lineTo(w, h);
-    canvas.drawPath(path, mPaint);
-  }
-
-  @override
-  bool shouldRepaint(_StarsPainter old) => old.progress != progress;
 }
 
 class _AuthHeader extends StatelessWidget {
-  final AdaptiveStyle style;
   final AnimationController entryCtrl;
-  const _AuthHeader({required this.style, required this.entryCtrl});
+  const _AuthHeader({required this.entryCtrl});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -710,7 +655,7 @@ class _AuthHeader extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [
             Colors.transparent,
-            style.bg.withValues(alpha: 0.97),
+            colors.background.withValues(alpha: 0.97),
           ],
         ),
       ),
@@ -732,19 +677,21 @@ class _AuthHeader extends StatelessWidget {
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          style.gold.withValues(alpha: 0.18),
-                          style.bg,
+                          colors.gold.withValues(alpha: 0.18),
+                          colors.background,
                         ],
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: style.gold.withValues(alpha: 0.42 * entryCtrl.value),
+                          color: colors.gold.withValues(
+                            alpha: 0.42 * entryCtrl.value,
+                          ),
                           blurRadius: 32,
                           spreadRadius: 5,
                         ),
                       ],
                       border: Border.all(
-                        color: style.gold.withValues(alpha: 0.55),
+                        color: colors.gold.withValues(alpha: 0.55),
                         width: 1.6,
                       ),
                     ),
@@ -757,84 +704,28 @@ class _AuthHeader extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
               ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
-                  colors: [style.gold, style.gold],
-                ).createShader(bounds),
+                shaderCallback: (bounds) =>
+                    colors.goldGradient.createShader(bounds),
                 child: Text(
                   l10n.appName,
-                  style: style
-                      .amiri(48, weight: FontWeight.w800)
-                      .copyWith(color: Colors.white),
+                  style: context.typography.displayLarge.copyWith(
+                    fontSize: 48,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              const SizedBox(height: 7),
+              const SizedBox(height: AppSpacing.md),
               Text(
                 l10n.authTagline,
                 style: context.typography.bodyLarge.copyWith(
-                  color: context.colors.textSecondary,
+                  color: colors.textSecondary,
                 ),
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-// ══════════════════════════════════════════════════════
-//  GLOW PULSE WRAPPER
-// ══════════════════════════════════════════════════════
-class _GlowPulse extends StatefulWidget {
-  final Widget child;
-  const _GlowPulse({required this.child});
-  @override
-  State<_GlowPulse> createState() => _GlowPulseState();
-}
-
-class _GlowPulseState extends State<_GlowPulse>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _ctrl.repeatUnlessReducedMotion(context, reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _ctrl,
-      builder: (_, child) => Container(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.32 * _ctrl.value),
-              blurRadius: 32,
-              spreadRadius: 10,
-            ),
-          ],
-        ),
-        child: child,
-      ),
-      child: widget.child,
     );
   }
 }

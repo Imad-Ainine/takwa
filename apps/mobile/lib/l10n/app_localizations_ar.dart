@@ -424,6 +424,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsThemeModeLabel => 'وضع المظهر';
 
   @override
+  String get settingsDesignSystemLabel => 'نظام التصميم';
+
+  @override
+  String get settingsDesignSystemSublabel => 'لوحة الألوان والمكوّنات';
+
+  @override
   String get themeModeSystem => 'تلقائي (حسب النظام)';
 
   @override
