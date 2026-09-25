@@ -117,4 +117,26 @@ class QuranPrefsRepository {
     });
     await _prefs.setStringList(_kKhatmaHistory, list);
   }
+
+  // ── Account ownership ─────────────────────────────────────
+  // Everything above is stored under global keys, so a second account
+  // signing in on the same device would otherwise see (and, via the
+  // best-effort pushes, upload into its own Supabase rows) the first
+  // account's Khatma sessions, bookmarks and reading position.
+  // SyncManager compares this against the signed-in uid and wipes the
+  // user-scoped data whenever it changes.
+  static const _kDataOwner = 'quran_data_owner';
+
+  String? getDataOwner() => _prefs.getString(_kDataOwner);
+  Future<void> setDataOwner(String uid) => _prefs.setString(_kDataOwner, uid);
+
+  /// Drops every synced, per-account key (Khatma active + history,
+  /// last-read, saved bookmarks) — but keeps reader prefs (theme/font),
+  /// which are device-level rather than user data.
+  Future<void> clearUserScopedData() async {
+    await _prefs.remove(_kKhatmaActive);
+    await _prefs.remove(_kKhatmaHistory);
+    await _prefs.remove(_kLastRead);
+    await _prefs.remove(_kBookmarks);
+  }
 }

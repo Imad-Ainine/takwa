@@ -611,12 +611,40 @@ class SyncManager {
     }
   }
 
-  /// Pulls Quran bookmarks, the last-read position, and Khatma sessions
-  /// from Supabase. Pushing local changes back happens as they occur (see
-  /// quran_providers.dart's notifiers), so this side only needs to pull —
-  /// same split as _syncBookProgress/readingProgressProvider.
+  /// Two-way reconcile of Quran bookmarks, the last-read position, and
+  /// Khatma sessions — each notifier's `syncFromRemote` both pulls and
+  /// pushes (including retrying journaled offline changes and deletes).
+  ///
+  /// Before syncing: if the signed-in account is not the one that last
+  /// owned this data on this device, the local Quran/Khatma copies and
+  /// their pending pushes are dropped. Without this, a second account
+  /// signing in on a shared device would inherit the previous user's
+  /// reading data — and then push it into its *own* Supabase rows.
   Future<void> _syncQuran() async {
     try {
+      final uid = _ref.read(currentUserProvider)?.id;
+      final repo = _ref.read(quranPrefsRepositoryProvider);
+      final owner = repo.getDataOwner();
+      if (uid != null && owner != uid) {
+        if (owner != null) {
+          // Only wipe when an owner was recorded before — data on a
+          // first-ever sign-in belongs to this user and should be
+          // adopted (and pushed), not discarded.
+          await repo.clearUserScopedData();
+          final outbox = _ref.read(syncOutboxDaoProvider);
+          for (final table in const [
+            'khatma_sessions',
+            'quran_last_read',
+            'quran_bookmarks',
+          ]) {
+            await outbox.clearPendingTable(table);
+          }
+          _ref.invalidate(khatmaExProvider);
+          _ref.invalidate(quranLastReadProvider);
+          _ref.invalidate(quranBookmarksProvider);
+        }
+        await repo.setDataOwner(uid);
+      }
       await _ref.read(quranLastReadProvider.notifier).syncFromRemote();
       await _ref.read(quranBookmarksProvider.notifier).syncFromRemote();
       await _ref.read(khatmaExProvider.notifier).syncFromRemote();

@@ -77,6 +77,7 @@ class _FreeReadingScreenState extends ConsumerState<FreeReadingScreen>
                     query: _query,
                     lastRead: ref.watch(quranLastReadProvider),
                     onTap: _goToPage,
+                    onResume: _goToLastRead,
                     style: style,
                   ),
                   _JuzTab(onTap: _goToJuz, style: style),
@@ -177,6 +178,23 @@ class _FreeReadingScreenState extends ConsumerState<FreeReadingScreen>
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => QuranReaderScreen(initialPage: page)),
+    );
+  }
+
+  void _goToLastRead(QuranBookmark lastRead) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => QuranReaderScreen(
+          initialPage: lastRead.page,
+          // Resume at the exact verse, not just its page (null-safe for
+          // rows saved by older builds).
+          initialAyahUQNumber: ayahUqNumberFor(
+            lastRead.surahNum,
+            lastRead.ayahNum,
+          ),
+        ),
+      ),
     );
   }
 
@@ -434,11 +452,13 @@ class _IndexTab extends StatelessWidget {
   final String query;
   final QuranBookmark? lastRead;
   final void Function(int) onTap;
+  final void Function(QuranBookmark)? onResume;
   final AdaptiveStyle style;
   const _IndexTab({
     required this.query,
     required this.lastRead,
     required this.onTap,
+    this.onResume,
     required this.style,
   });
 
@@ -455,7 +475,10 @@ class _IndexTab extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
           child: TakwaTappable(
-            onTap: lastRead != null ? () => onTap(lastRead!.page) : null,
+            onTap:
+                lastRead != null && onResume != null
+                    ? () => onResume!(lastRead!)
+                    : null,
             borderRadius: BorderRadius.circular(AppRadius.md),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),

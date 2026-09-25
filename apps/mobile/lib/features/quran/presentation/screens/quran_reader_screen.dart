@@ -90,12 +90,15 @@ class _QuranReaderScreenState extends ConsumerState<QuranReaderScreen>
   // 'ref' after the widget was disposed." Reading the notifier once,
   // early, and calling straight into it in dispose() sidesteps that.
   late final KhatmaExNotifier _khatmaNotifier;
+  late final QuranLastReadNotifier _lastReadNotifier;
 
   @override
   void initState() {
     super.initState();
     _sessionStart = DateTime.now();
     _khatmaNotifier = ref.read(khatmaExProvider.notifier);
+    _lastReadNotifier = ref.read(quranLastReadProvider.notifier);
+    _lastReadNotifier = ref.read(quranLastReadProvider.notifier);
 
     int startPage = 1;
     if (widget.initialPage != null) {
@@ -178,16 +181,20 @@ class _QuranReaderScreenState extends ConsumerState<QuranReaderScreen>
 
   @override
   void dispose() {
-    if (widget.startFromKhatma) {
-      final elapsed = DateTime.now().difference(_sessionStart).inSeconds;
-      // Deferred to the next event-loop tick: Riverpod prohibits modifying
-      // provider state synchronously during widget unmounting / dispose.
-      // Calling via Future(() { ... }) avoids the assertion:
-      // "Tried to modify a provider while the widget tree was building."
-      Future(() {
-        _khatmaNotifier.addReadingTime(elapsed);
-      });
-    }
+    final elapsed = DateTime.now().difference(_sessionStart).inSeconds;
+    // Deferred to the next event-loop tick: Riverpod prohibits modifying
+    // provider state synchronously during widget unmounting / dispose.
+    // Calling via Future(() { ... }) avoids the assertion:
+    // "Tried to modify a provider while the widget tree was building."
+    Future(() {
+      // Reading time is a Khatma-only stat — only tracked when this
+      // session was started from an active Khatma.
+      if (widget.startFromKhatma) _khatmaNotifier.addReadingTime(elapsed);
+      // Flush the throttled progress pushes so pages read in the last
+      // few seconds sync now instead of waiting for the next app start.
+      _khatmaNotifier.flushPendingPush();
+      _lastReadNotifier.flushPendingPush();
+    });
     _transformationController.removeListener(_onTransformationChanged);
     _transformationController.dispose();
     _zoomAnimController?.dispose();
@@ -216,19 +223,48 @@ class _QuranReaderScreenState extends ConsumerState<QuranReaderScreen>
       _khatmaNotifier.advancePage(p);
     }
 
-    final surahNum = _surahForPage(p);
-    final surahName = ql.QuranLibrary.quranCtrl.surahs[surahNum - 1].arabicName;
+    // Record where reading actually stopped. The first ayah listed for
+    // the page (from quran_library's real page data) is the one the
+    // page begins with — previously this always saved ayah 1, which was
+    // only correct when the page happened to start a new surah.
+    final pos = _positionForPage(p);
     ref
         .read(quranLastReadProvider.notifier)
         .save(
           QuranBookmark(
-            surahNum: surahNum,
-            ayahNum: 1,
+            surahNum: pos.$1,
+            ayahNum: pos.$2,
             page: p,
-            surahName: surahName,
+            surahName: pos.$3,
             savedAt: DateTime.now(),
           ),
         );
+  }
+
+  /// (surah number, first ayah on the page, Arabic surah name) for a
+  // page — falls back to the surah boundary from kSurahData + ayah 1 when
+  // the library data isn't available.
+  (int, int, String) _positionForPage(int page) {
+    try {
+      final pageAyahs = ql.QuranLibrary.quranCtrl.getPageAyahsByIndex(
+        page - 1,
+      );
+      if (pageAyahs.isNotEmpty) {
+        final first = pageAyahs.first;
+        final surahNum = (first.surahNumber ?? 1).clamp(1, kSurahData.length);
+        return (
+          surahNum,
+          first.ayahNumber,
+          ql.QuranLibrary.quranCtrl.surahs[surahNum - 1].arabicName,
+        );
+      }
+    } catch (_) {}
+    final surahNum = _surahForPage(page);
+    return (
+      surahNum,
+      1,
+      ql.QuranLibrary.quranCtrl.surahs[surahNum - 1].arabicName,
+    );
   }
 
   void _toggleToolbar() {

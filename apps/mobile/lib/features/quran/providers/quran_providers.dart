@@ -273,61 +273,151 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 // ─────────────────────────────────────────────────────────────
 // Last Read / Bookmarks
 // ─────────────────────────────────────────────────────────────
+
+/// Coalesces high-frequency remote writes (a Supabase upsert per page
+/// swipe was one per second of reading) into at most one request per
+/// [window]: the first change pushes immediately, later ones fold into a
+/// single push when the window closes, and [flush] forces whatever is
+/// queued to go out now (reader dispose, terminal state changes).
+class _ThrottledPush {
+  _ThrottledPush(this.window);
+
+  final Duration window;
+  Timer? _timer;
+  DateTime? _lastRun;
+  Future<void> Function()? _queued;
+
+  /// Records that a push happened outside [schedule] (create/cancel/
+  /// finish push immediately), so the coalescing window applies to it too.
+  void note() => _lastRun = DateTime.now();
+
+  void schedule(Future<void> Function() task) {
+    final last = _lastRun;
+    final now = DateTime.now();
+    if (last == null || now.difference(last) >= window) {
+      _run(task);
+      return;
+    }
+    _queued = task;
+    _timer ??= Timer(window - now.difference(last), () {
+      _timer = null;
+      final q = _queued;
+      _queued = null;
+      if (q != null) _run(q);
+    });
+  }
+
+  /// Drops the queued task — used when a newer authoritative push (or a
+  /// deletion) makes it stale.
+  void cancel() {
+    _timer?.cancel();
+    _timer = null;
+    _queued = null;
+  }
+
+  Future<void> flush() async {
+    _timer?.cancel();
+    _timer = null;
+    final q = _queued;
+    _queued = null;
+    if (q != null) await _run(q);
+  }
+
+  Future<void> _run(Future<void> Function() task) async {
+    _lastRun = DateTime.now();
+    await task();
+  }
+}
+
 final quranLastReadProvider =
-    StateNotifierProvider<_LastReadNotifier, QuranBookmark?>(
-      (ref) => _LastReadNotifier(ref, ref.watch(quranPrefsRepositoryProvider)),
+    StateNotifierProvider<QuranLastReadNotifier, QuranBookmark?>(
+      (ref) => QuranLastReadNotifier(
+        ref,
+        ref.watch(quranPrefsRepositoryProvider),
+      ),
     );
 
-class _LastReadNotifier extends StateNotifier<QuranBookmark?> {
-  _LastReadNotifier(this._ref, this._repo) : super(_repo.getLastRead());
+class QuranLastReadNotifier extends StateNotifier<QuranBookmark?> {
+  QuranLastReadNotifier(this._ref, this._repo) : super(_repo.getLastRead());
 
   final Ref _ref;
   final QuranPrefsRepository _repo;
 
-  Future<void> save(QuranBookmark b) async {
-    state = b;
-    await _repo.setLastRead(b);
-    // Best-effort push to Supabase (silently no-ops offline/signed-out,
-    // same as ReadingProgressNotifier's book-progress sync) so "continue
-    // reading" carries over to a user's other devices.
+  static const _kOutboxTable = 'quran_last_read';
+  static const _kOutboxKey = 'current';
+
+  final _push = _ThrottledPush(const Duration(seconds: 60));
+
+  Map<String, dynamic> _remoteRow(QuranBookmark b) => {
+    'surah_num': b.surahNum,
+    'ayah_num': b.ayahNum,
+    'page': b.page,
+    'surah_name': b.surahName,
+    'saved_at': (b.savedAt ?? DateTime.now()).toIso8601String(),
+  };
+
+  Future<void> _pushNow(QuranBookmark b) async {
+    final outbox = _ref.read(syncOutboxDaoProvider);
     try {
-      await _ref.read(supabaseServiceProvider).upsertQuranLastRead({
-        'surah_num': b.surahNum,
-        'ayah_num': b.ayahNum,
-        'page': b.page,
-        'surah_name': b.surahName,
-        'saved_at': (b.savedAt ?? DateTime.now()).toIso8601String(),
-      });
+      await _ref
+          .read(supabaseServiceProvider)
+          .upsertQuranLastRead(_remoteRow(b));
+      await outbox.clearPending(_kOutboxTable, _kOutboxKey);
     } catch (e) {
+      // Queued for the next fullSync retry — before this, a push that
+      // failed offline was lost forever because the pull side never has
+      // anything to send this position back with.
+      await outbox.markPending(_kOutboxTable, _kOutboxKey, '$e');
       developer.log(
-        'Offline quran last-read sync skipped: $e',
+        'Failed to sync quran last-read, queued for retry: $e',
         name: 'QuranProviders',
       );
     }
   }
 
+  Future<void> save(QuranBookmark b) async {
+    state = b;
+    await _repo.setLastRead(b);
+    _push.schedule(() => _pushNow(b));
+  }
+
+  /// Called when the reader closes so the last few pages read inside the
+  /// throttle window reach Supabase without waiting for the next app start.
+  Future<void> flushPendingPush() => _push.flush();
+
   Future<void> clear() async {
     state = null;
+    _push.cancel();
     await _repo.clearLastRead();
   }
 
-  /// Pulls the remote last-read position (called from SyncManager on app
-  /// start) and adopts it locally unless the local one is already the same
-  /// position or further along — so switching devices doesn't silently
-  /// discard progress this device already made but hasn't pushed yet.
+  @override
+  void dispose() {
+    _push.cancel();
+    super.dispose();
+  }
+
+  /// Two-way newest-wins sync (called from SyncManager): whichever side
+  /// has the newer `saved_at` keeps its position, and the other side gets
+  /// pushed — so a position saved while offline still reaches Supabase
+  /// instead of being overwritten by the remote row.
   Future<void> syncFromRemote() async {
     try {
       final remote = await _ref
           .read(supabaseServiceProvider)
           .getQuranLastRead();
-      if (remote == null) return;
+      final local = state;
+      if (remote == null) {
+        if (local != null) await _pushNow(local);
+        return;
+      }
       final remoteSavedAt = DateTime.tryParse(
         remote['saved_at']?.toString() ?? '',
       );
-      final local = state;
-      if (local?.savedAt != null &&
-          remoteSavedAt != null &&
-          !remoteSavedAt.isAfter(local!.savedAt!)) {
+      if (local != null &&
+          local.savedAt != null &&
+          (remoteSavedAt == null || !remoteSavedAt.isAfter(local.savedAt!))) {
+        if (!_samePosition(local, remote)) await _pushNow(local);
         return;
       }
       final bookmark = QuranBookmark(
@@ -346,6 +436,11 @@ class _LastReadNotifier extends StateNotifier<QuranBookmark?> {
       );
     }
   }
+
+  bool _samePosition(QuranBookmark local, Map<String, dynamic> remote) =>
+      remote['surah_num'] == local.surahNum &&
+      remote['ayah_num'] == local.ayahNum &&
+      remote['page'] == local.page;
 }
 
 final quranBookmarksProvider =
@@ -359,26 +454,46 @@ class _BookmarksNotifier extends StateNotifier<List<QuranBookmark>> {
   final Ref _ref;
   final QuranPrefsRepository _repo;
 
+  static const _kOutboxTable = 'quran_bookmarks';
+  static const _kDeletePrefix = 'del:';
+
+  String _key(int surah, int ayah) => '$surah:$ayah';
+
+  Map<String, dynamic> _remoteRow(QuranBookmark b) => {
+    'surah_num': b.surahNum,
+    'ayah_num': b.ayahNum,
+    'page': b.page,
+    'surah_name': b.surahName,
+    'saved_at': (b.savedAt ?? DateTime.now()).toIso8601String(),
+  };
+
+  Future<void> _pushAdd(QuranBookmark b) async {
+    final outbox = _ref.read(syncOutboxDaoProvider);
+    try {
+      await _ref
+          .read(supabaseServiceProvider)
+          .upsertQuranBookmark(_remoteRow(b));
+      await outbox.clearPending(_kOutboxTable, _key(b.surahNum, b.ayahNum));
+    } catch (e) {
+      await outbox.markPending(
+        _kOutboxTable,
+        _key(b.surahNum, b.ayahNum),
+        '$e',
+      );
+      developer.log(
+        'Failed to sync quran bookmark, queued for retry: $e',
+        name: 'QuranProviders',
+      );
+    }
+  }
+
   Future<void> add(QuranBookmark b) async {
     if (state.any((x) => x.surahNum == b.surahNum && x.ayahNum == b.ayahNum)) {
       return;
     }
     state = [...state, b];
     await _repo.setBookmarks(state);
-    try {
-      await _ref.read(supabaseServiceProvider).upsertQuranBookmark({
-        'surah_num': b.surahNum,
-        'ayah_num': b.ayahNum,
-        'page': b.page,
-        'surah_name': b.surahName,
-        'saved_at': (b.savedAt ?? DateTime.now()).toIso8601String(),
-      });
-    } catch (e) {
-      developer.log(
-        'Offline quran bookmark sync skipped: $e',
-        name: 'QuranProviders',
-      );
-    }
+    await _pushAdd(b);
   }
 
   Future<void> remove(int surah, int ayah) async {
@@ -386,32 +501,98 @@ class _BookmarksNotifier extends StateNotifier<List<QuranBookmark>> {
         .where((x) => !(x.surahNum == surah && x.ayahNum == ayah))
         .toList();
     await _repo.setBookmarks(state);
+    final outbox = _ref.read(syncOutboxDaoProvider);
     try {
       await _ref.read(supabaseServiceProvider).deleteQuranBookmark(surah, ayah);
+      // Also drop a queued add push for the same ayah — the bookmark is
+      // gone now, re-adding it on the next sync would resurrect it.
+      await outbox.clearPending(_kOutboxTable, _key(surah, ayah));
     } catch (e) {
+      // Journal the delete: without it an offline-removed bookmark comes
+      // back on the next pull, since the remote row still exists.
+      await outbox.markPending(
+        _kOutboxTable,
+        '$_kDeletePrefix${_key(surah, ayah)}',
+        '$e',
+      );
       developer.log(
-        'Offline quran bookmark delete sync skipped: $e',
+        'Failed to sync quran bookmark delete, queued for retry: $e',
         name: 'QuranProviders',
       );
     }
   }
 
-  /// Pulls remote bookmarks (called from SyncManager) and merges them into
-  /// local storage — additive only: a bookmark saved on another device is
-  /// added here, but nothing already local is ever removed by a pull.
+  /// Two-way merge (called from SyncManager): remote-only bookmarks are
+  /// added locally, local-only ones (saved while offline) are pushed, and
+  /// journaled deletions are retried — so a bookmark removed on one device
+  /// stays removed everywhere.
   Future<void> syncFromRemote() async {
     try {
+      final outbox = _ref.read(syncOutboxDaoProvider);
+      final pending = await outbox.getPendingKeys(_kOutboxTable);
+
+      final deletedKeys = <String>{};
+      for (final key in pending.where((k) => k.startsWith(_kDeletePrefix))) {
+        final parts = key.substring(_kDeletePrefix.length).split(':');
+        final surah = int.tryParse(parts.isNotEmpty ? parts[0] : '');
+        final ayah = int.tryParse(parts.length > 1 ? parts[1] : '');
+        if (surah == null || ayah == null) {
+          await outbox.clearPending(_kOutboxTable, key);
+          continue;
+        }
+        final bookmarkKey = _key(surah, ayah);
+        deletedKeys.add(bookmarkKey);
+        try {
+          await _ref
+              .read(supabaseServiceProvider)
+              .deleteQuranBookmark(surah, ayah);
+          await outbox.clearPending(_kOutboxTable, key);
+          deletedKeys.remove(bookmarkKey);
+        } catch (e) {
+          developer.log(
+            'Bookmark delete retry deferred to next sync: $e',
+            name: 'QuranProviders',
+          );
+        }
+      }
+
       final remote = await _ref
           .read(supabaseServiceProvider)
           .getQuranBookmarks();
-      if (remote.isEmpty) return;
+      final remoteKeys = <String>{
+        for (final r in remote)
+          _key(r['surah_num'] as int, r['ayah_num'] as int),
+      }..removeAll(deletedKeys);
+
+      // Push bookmarks this device added while offline (they never reached
+      // the remote, and nothing else in the app would ever send them).
+      for (final b in state) {
+        final key = _key(b.surahNum, b.ayahNum);
+        if (!remoteKeys.contains(key) && !deletedKeys.contains(key)) {
+          await _pushAdd(b);
+        }
+      }
+
+      // Retry previously-failed add pushes for bookmarks still saved here.
+      for (final key in pending.where((k) => !k.startsWith(_kDeletePrefix))) {
+        final bookmark = state.cast<QuranBookmark?>().firstWhere(
+          (b) => _key(b!.surahNum, b.ayahNum) == key,
+          orElse: () => null,
+        );
+        if (bookmark == null) {
+          await outbox.clearPending(_kOutboxTable, key);
+        } else {
+          await _pushAdd(bookmark);
+        }
+      }
+
       final merged = [...state];
       for (final r in remote) {
         final surahNum = r['surah_num'] as int;
         final ayahNum = r['ayah_num'] as int;
-        if (merged.any(
-          (x) => x.surahNum == surahNum && x.ayahNum == ayahNum,
-        )) {
+        final key = _key(surahNum, ayahNum);
+        if (deletedKeys.contains(key) ||
+            merged.any((x) => _key(x.surahNum, x.ayahNum) == key)) {
           continue;
         }
         merged.add(
@@ -451,31 +632,39 @@ class KhatmaExNotifier extends StateNotifier<KhatmaSessionEx?> {
   final Ref _ref;
   final QuranPrefsRepository _repo;
 
-  Future<void> _pushToRemote(KhatmaSessionEx session) async {
+  /// Outbox rows under this table: a bare session id is a failed progress
+  /// push awaiting retry; `del:<id>` journals a session deleted while
+  /// offline, so the next sync removes the remote row (and reconciles
+  /// don't resurrect the local one) instead of silently losing the delete.
+  static const _kOutboxTable = 'khatma_sessions';
+  static const _kDeletePrefix = 'del:';
+
+  final _push = _ThrottledPush(const Duration(seconds: 45));
+
+  Future<void> _pushNow(KhatmaSessionEx session) async {
+    _push.note();
+    final outbox = _ref.read(syncOutboxDaoProvider);
     try {
-      await _ref.read(supabaseServiceProvider).upsertKhatmaSession({
-        'id': session.id,
-        'label': session.label,
-        'type': session.type.name,
-        'start_date': session.startDate.toIso8601String(),
-        'end_date': session.endDate?.toIso8601String(),
-        'completed_date': session.completedDate?.toIso8601String(),
-        'cancelled_date': session.cancelledDate?.toIso8601String(),
-        'start_page': session.startPage,
-        'current_page': session.currentPage,
-        'pages_read': session.pagesRead,
-        'notifications_enabled': session.notificationsEnabled,
-        'daily_pages': session.dailyPages,
-        'total_reading_seconds': session.totalReadingSeconds,
-        'reading_sessions_count': session.readingSessionsCount,
-      });
+      await _ref
+          .read(supabaseServiceProvider)
+          .upsertKhatmaSession(session.toRemoteRow());
+      await outbox.clearPending(_kOutboxTable, session.id);
     } catch (e) {
+      await outbox.markPending(_kOutboxTable, session.id, '$e');
       developer.log(
-        'Offline khatma session sync skipped: $e',
+        'Khatma push failed, queued for retry: $e',
         name: 'QuranProviders',
       );
     }
   }
+
+  void _queuePush(KhatmaSessionEx session) {
+    _push.schedule(() => _pushNow(session));
+  }
+
+  /// Called when the reader closes so progress made inside the throttle
+  /// window reaches Supabase without waiting for the next app start.
+  Future<void> flushPendingPush() => _push.flush();
 
   Future<void> createNew({
     required String label,
@@ -485,7 +674,11 @@ class KhatmaExNotifier extends StateNotifier<KhatmaSessionEx?> {
     int? dailyPages,
     DateTime? endDate,
   }) async {
-    if (state != null && state!.isActive) await _repo.archiveKhatma(state!);
+    KhatmaSessionEx? superseded;
+    if (state != null && state!.isActive) {
+      superseded = state;
+      await _repo.archiveKhatma(superseded!);
+    }
     final session = KhatmaSessionEx(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       label: label,
@@ -499,7 +692,9 @@ class KhatmaExNotifier extends StateNotifier<KhatmaSessionEx?> {
     );
     state = session;
     await _repo.setActiveKhatma(session);
-    await _pushToRemote(session);
+    if (superseded != null) await _pushNow(superseded);
+    _push.cancel();
+    await _pushNow(session);
   }
 
   Future<void> advancePage(int page) async {
@@ -516,8 +711,13 @@ class KhatmaExNotifier extends StateNotifier<KhatmaSessionEx?> {
     );
     state = updated;
     await _repo.setActiveKhatma(updated);
-    if (updated.isCompleted) await _repo.archiveKhatma(updated);
-    await _pushToRemote(updated);
+    if (updated.isCompleted) {
+      await _repo.archiveKhatma(updated);
+      _push.cancel();
+      await _pushNow(updated);
+    } else {
+      _queuePush(updated);
+    }
   }
 
   Future<void> cancel() async {
@@ -526,7 +726,8 @@ class KhatmaExNotifier extends StateNotifier<KhatmaSessionEx?> {
     await _repo.archiveKhatma(cancelled);
     state = null;
     await _repo.clearActiveKhatma();
-    await _pushToRemote(cancelled);
+    _push.cancel();
+    await _pushNow(cancelled);
   }
 
   /// Marks the active Khatma as finished regardless of pagesRead —
@@ -540,7 +741,8 @@ class KhatmaExNotifier extends StateNotifier<KhatmaSessionEx?> {
     await _repo.archiveKhatma(finished);
     state = null;
     await _repo.clearActiveKhatma();
-    await _pushToRemote(finished);
+    _push.cancel();
+    await _pushNow(finished);
   }
 
   /// Accumulates time spent actively reading toward this Khatma. Called
@@ -555,61 +757,172 @@ class KhatmaExNotifier extends StateNotifier<KhatmaSessionEx?> {
     );
     state = updated;
     await _repo.setActiveKhatma(updated);
-    await _pushToRemote(updated);
+    _queuePush(updated);
   }
 
-  /// Pulls remote Khatma sessions (called from SyncManager on app start).
-  /// A finished/cancelled remote session is merged straight into local
-  /// history (archiveKhatma is already an upsert-by-id). A remote *active*
-  /// session is only adopted when there's no local active session, or it's
-  /// the same session further along than what's stored locally — never
-  /// overwrites a different, still-active local session with a stale or
-  /// unrelated remote one.
+  @override
+  void dispose() {
+    _push.cancel();
+    super.dispose();
+  }
+
+  /// Permanently removes a Khatma (usually a finished/cancelled history
+  /// entry) from local storage and Supabase. Offline deletes are journaled
+  /// so the row can't reappear on a later pull.
+  Future<void> deleteSession(String id) async {
+    await _repo.deleteFromHistory(id);
+    if (state?.id == id) {
+      state = null;
+      await _repo.clearActiveKhatma();
+    }
+    // Discard a queued progress push first — pushing after the delete
+    // would re-create the remote row through the upsert.
+    _push.cancel();
+    final outbox = _ref.read(syncOutboxDaoProvider);
+    try {
+      await _ref.read(supabaseServiceProvider).deleteKhatmaSession(id);
+      await outbox.clearPending(_kOutboxTable, id);
+    } catch (e) {
+      await outbox.markPending(_kOutboxTable, '$_kDeletePrefix$id', '$e');
+      developer.log(
+        'Khatma delete deferred to next sync: $e',
+        name: 'QuranProviders',
+      );
+    }
+  }
+
+  static bool _isMoreAdvanced(KhatmaSessionEx a, KhatmaSessionEx b) =>
+      a.pagesRead > b.pagesRead ||
+      (a.pagesRead == b.pagesRead && a.startDate.isAfter(b.startDate));
+
+  /// Full two-way reconcile with `khatma_sessions` (called from
+  /// SyncManager), so the merge converges no matter which device was
+  /// offline:
+  ///
+  /// * journaled deletes are retried first and suppress their ids for the
+  ///   rest of the pass (a row whose delete failed offline must not be
+  ///   re-adopted from the pull);
+  /// * sessions that exist only locally (created or archived while
+  ///   offline) are pushed — this is what makes data survive a reinstall
+  ///   or device switch even when the creating device never had a
+  ///   successful live push;
+  /// * failed progress pushes are retried from the latest local state;
+  /// * finished/cancelled remote sessions go into local history, and a
+  ///   session that ended on *this* device while offline is pushed
+  ///   instead of being resurrected by its stale remote row;
+  /// * at most one session stays active: when two devices both have one,
+  ///   the furthest along wins and the other is archived as cancelled
+  ///   (visible in history rather than an invisible zombie).
   Future<void> syncFromRemote() async {
     try {
-      final rows = await _ref.read(supabaseServiceProvider).getKhatmaSessions();
-      if (rows.isEmpty) return;
-      for (final r in rows) {
-        final session = KhatmaSessionEx(
-          id: r['id'] as String,
-          label: r['label'] as String? ?? 'ختمة',
-          type: KhatmaType.values.firstWhere(
-            (t) => t.name == r['type'],
-            orElse: () => KhatmaType.muyassara,
-          ),
-          startDate:
-              DateTime.tryParse(r['start_date']?.toString() ?? '') ??
-              DateTime.now(),
-          endDate: r['end_date'] != null
-              ? DateTime.tryParse(r['end_date'].toString())
-              : null,
-          completedDate: r['completed_date'] != null
-              ? DateTime.tryParse(r['completed_date'].toString())
-              : null,
-          cancelledDate: r['cancelled_date'] != null
-              ? DateTime.tryParse(r['cancelled_date'].toString())
-              : null,
-          startPage: r['start_page'] as int? ?? 1,
-          currentPage: r['current_page'] as int? ?? 1,
-          pagesRead: r['pages_read'] as int? ?? 0,
-          notificationsEnabled: r['notifications_enabled'] as bool? ?? false,
-          dailyPages: r['daily_pages'] as int?,
-          totalReadingSeconds: r['total_reading_seconds'] as int? ?? 0,
-          readingSessionsCount: r['reading_sessions_count'] as int? ?? 0,
-        );
+      final outbox = _ref.read(syncOutboxDaoProvider);
+      final pending = await outbox.getPendingKeys(_kOutboxTable);
 
-        if (!session.isActive) {
-          await _repo.archiveKhatma(session);
+      final deletedIds = <String>{};
+      for (final key in pending.where((k) => k.startsWith(_kDeletePrefix))) {
+        final id = key.substring(_kDeletePrefix.length);
+        deletedIds.add(id);
+        try {
+          await _ref.read(supabaseServiceProvider).deleteKhatmaSession(id);
+          await outbox.clearPending(_kOutboxTable, key);
+          deletedIds.remove(id);
+        } catch (e) {
+          developer.log(
+            'Khatma delete retry deferred to next sync: $e',
+            name: 'QuranProviders',
+          );
+        }
+      }
+
+      final rows = await _ref.read(supabaseServiceProvider).getKhatmaSessions();
+      final remote = <String, KhatmaSessionEx>{};
+      for (final r in rows) {
+        final id = r['id'];
+        if (id is! String || deletedIds.contains(id)) continue;
+        remote[id] = KhatmaSessionEx.fromRemoteRow(r);
+      }
+
+      final localHistory = _repo.getKhatmaHistory();
+      final localById = <String, KhatmaSessionEx>{
+        for (final s in localHistory) s.id: s,
+      };
+      final localActive = state;
+      if (localActive != null) localById[localActive.id] = localActive;
+
+      for (final entry in localById.entries) {
+        if (!remote.containsKey(entry.key)) await _pushNow(entry.value);
+      }
+
+      for (final key in pending.where((k) => !k.startsWith(_kDeletePrefix))) {
+        final session = localById[key];
+        if (session == null) {
+          await outbox.clearPending(_kOutboxTable, key);
+        } else {
+          await _pushNow(session);
+        }
+      }
+
+      final activeCandidates = <String, KhatmaSessionEx>{};
+      void consider(KhatmaSessionEx s) {
+        final current = activeCandidates[s.id];
+        if (current == null || _isMoreAdvanced(s, current)) {
+          activeCandidates[s.id] = s;
+        }
+      }
+
+      for (final s in remote.values) {
+        if (!s.isActive) {
+          await _repo.archiveKhatma(s);
           continue;
         }
-        final local = state;
-        final shouldAdopt =
-            local == null ||
-            (local.id == session.id && session.pagesRead > local.pagesRead);
-        if (shouldAdopt) {
-          state = session;
-          await _repo.setActiveKhatma(session);
+        final localCopy = localById[s.id];
+        if (localCopy != null && !localCopy.isActive) {
+          // This session completed/was cancelled here while offline — the
+          // local outcome is newer than the still-active remote row.
+          await _pushNow(localCopy);
+          continue;
         }
+        consider(s);
+      }
+      if (localActive != null) {
+        final remoteTwin = remote[localActive.id];
+        if (remoteTwin == null || remoteTwin.isActive) consider(localActive);
+        // A non-active remote twin was already archived above; the local
+        // active copy is dropped after the reconcile below.
+      }
+
+      if (activeCandidates.isEmpty) {
+        if (localActive != null &&
+            remote.containsKey(localActive.id) &&
+            !remote[localActive.id]!.isActive) {
+          state = null;
+          await _repo.clearActiveKhatma();
+        }
+        return;
+      }
+
+      var winner = activeCandidates.values.first;
+      for (final candidate in activeCandidates.values) {
+        if (_isMoreAdvanced(candidate, winner)) winner = candidate;
+      }
+      for (final entry in activeCandidates.entries) {
+        if (entry.key == winner.id) continue;
+        final loser = entry.value.copyWith(cancelledDate: DateTime.now());
+        await _repo.archiveKhatma(loser);
+        await _pushNow(loser);
+        if (localActive?.id == loser.id) {
+          state = null;
+          await _repo.clearActiveKhatma();
+        }
+      }
+      final needsAdopt =
+          localActive == null ||
+          localActive.id != winner.id ||
+          localActive.pagesRead != winner.pagesRead ||
+          localActive.currentPage != winner.currentPage;
+      if (needsAdopt) {
+        state = winner;
+        await _repo.setActiveKhatma(winner);
       }
     } catch (e) {
       developer.log(
@@ -635,13 +948,13 @@ final khatmaCancelledProvider = FutureProvider<List<KhatmaSessionEx>>((
   return history.where((s) => s.isCancelled).toList().reversed.toList();
 });
 
-/// Permanently deletes one history entry (completed or cancelled) by id.
-/// Callers must invalidate khatmaCompletedProvider/khatmaCancelledProvider
-/// themselves afterward to see the change — this is a plain repository
-/// call, not a StateNotifier, since history entries aren't the "current
-/// state" of anything.
+/// Permanently deletes one history entry (completed or cancelled) by id,
+/// locally *and* in Supabase (journaling offline deletes) — deleting only
+/// locally would let the entry reappear on the next pull or after a
+/// reinstall. Callers must invalidate
+/// khatmaCompletedProvider/khatmaCancelledProvider afterward.
 final khatmaDeleteHistoryProvider = Provider<Future<void> Function(String)>(
-  (ref) => (id) => ref.read(quranPrefsRepositoryProvider).deleteFromHistory(id),
+  (ref) => (id) => ref.read(khatmaExProvider.notifier).deleteSession(id),
 );
 
 // ─────────────────────────────────────────────────────────────

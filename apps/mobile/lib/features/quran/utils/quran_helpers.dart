@@ -38,6 +38,23 @@ Color surahColor(int n) {
   return colors[n % colors.length];
 }
 
+// ─── Continue-reading deep link ───────────────────────────────
+/// Converts a (surah, ayah) pair into the quran-wide unique ayah number
+/// (`AyahModel.ayahUQNumber` in quran_library, what the reader's
+/// jump-to-ayah API takes), so "Continue reading" can highlight the exact
+/// verse the user stopped at. Returns null for out-of-range numbers —
+/// e.g. rows saved by older builds, where the ayah was always stored as
+/// the page's first verse without a lookup.
+int? ayahUqNumberFor(int surahNum, int ayahNum) {
+  if (surahNum < 1 || surahNum > kSurahData.length) return null;
+  if (ayahNum < 1 || ayahNum > kSurahData[surahNum - 1].ayahCount) return null;
+  var uq = 0;
+  for (var i = 0; i < surahNum - 1; i++) {
+    uq += kSurahData[i].ayahCount;
+  }
+  return uq + ayahNum;
+}
+
 // ─── Quran Page → Juz Lookup ──────────────────────────────────
 // Approximate Juz boundaries (page numbers, 1-indexed, Medina mushaf)
 const _juzPageStarts = [

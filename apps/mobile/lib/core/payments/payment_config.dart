@@ -36,13 +36,22 @@ class ChargilyConfig {
 
   /// Secret bearer token from the Chargily dashboard (Developers corner).
   /// Used only for server-to-server calls ([ChargilyService]); never shown
-  /// to the user.
-  static String get secretKey =>
-      dotenv.env['CHARGILY_SECRET_KEY'] ??
-      (throw StateError(
-        'CHARGILY_SECRET_KEY is missing — add it to apps/mobile/.env to '
-        'enable CIB/Edahabia payments (see README "Environment variables").',
-      ));
+  /// to the user. An empty value throws like a missing one — CI writes
+  /// `CHARGILY_SECRET_KEY=` into the bundled .env when the GitHub secret
+  /// is absent, and an empty Bearer token only surfaces as a confusing
+  /// Chargily 401 at payment time.
+  static String get secretKey {
+    final key = dotenv.env['CHARGILY_SECRET_KEY'];
+    if (key == null || key.isEmpty) {
+      throw StateError(
+        'CHARGILY_SECRET_KEY is missing or empty — add it to '
+        'apps/mobile/.env (and to the GitHub Actions secrets for release '
+        'builds) to enable CIB/Edahabia payments; see README '
+        '"Environment variables".',
+      );
+    }
+    return key;
+  }
 
   /// Public (publishable) key from the same dashboard page. Kept available
   /// for client-side identification and widget-based checkout flows.
@@ -77,8 +86,13 @@ class ChargilyConfig {
 
   /// The secret key is what actually gates API access; the public key
   /// should be set alongside it but does not block the flow.
-  static bool get isConfigured =>
-      (dotenv.env['CHARGILY_SECRET_KEY'] ?? '').isNotEmpty;
+  static bool get isConfigured {
+    try {
+      return secretKey.isNotEmpty;
+    } on StateError {
+      return false;
+    }
+  }
 }
 
 /// Wise account details for the Visa/Mastercard path. The app never touches

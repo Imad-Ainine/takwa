@@ -130,5 +130,20 @@ void main() {
       dotenv.loadFromString(envString: 'CHARGILY_LIVE=true');
       expect(ChargilyConfig.apiBase, 'https://pay.chargily.net/api/v2');
     });
+
+    test('an empty secret key throws like a missing one', () {
+      // The release workflow writes `CHARGILY_SECRET_KEY=` (empty) when the
+      // GitHub secret is absent — shipping that produced a confusing
+      // Chargily 401 instead of a clear configuration error.
+      dotenv.loadFromString(envString: 'CHARGILY_SECRET_KEY=');
+      expect(() => ChargilyConfig.secretKey, throwsStateError);
+      expect(ChargilyConfig.isConfigured, isFalse);
+    });
+
+    test('a non-empty secret key is accepted', () {
+      dotenv.loadFromString(envString: 'CHARGILY_SECRET_KEY=test_sk_x');
+      expect(ChargilyConfig.secretKey, 'test_sk_x');
+      expect(ChargilyConfig.isConfigured, isTrue);
+    });
   });
 }

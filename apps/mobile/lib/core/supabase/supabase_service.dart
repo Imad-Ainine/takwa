@@ -165,6 +165,8 @@ abstract class SupabaseService {
 
   Future<void> upsertKhatmaSession(Map<String, dynamic> session);
 
+  Future<void> deleteKhatmaSession(String id);
+
   Future<List<Map<String, dynamic>>> getKhatmaSessions();
 
   // ─────────────── FAMILY / COMMUNITY CIRCLES ───────────────
@@ -1069,25 +1071,28 @@ class SupabaseClientService implements SupabaseService {
     final userId = _uid;
     if (userId == null) return;
 
+    // `session` is a KhatmaSessionEx.toRemoteRow() — the model owns the
+    // column mapping, so the payload's keys can't drift from the table.
     await _safeRequest(
       () async => await _db.from('khatma_sessions').upsert({
         'user_id': userId,
-        'id': session['id'],
-        'label': session['label'],
-        'type': session['type'],
-        'start_date': session['start_date'],
-        'end_date': session['end_date'],
-        'completed_date': session['completed_date'],
-        'cancelled_date': session['cancelled_date'],
-        'start_page': session['start_page'],
-        'current_page': session['current_page'],
-        'pages_read': session['pages_read'],
-        'notifications_enabled': session['notifications_enabled'],
-        'daily_pages': session['daily_pages'],
-        'total_reading_seconds': session['total_reading_seconds'],
-        'reading_sessions_count': session['reading_sessions_count'],
+        ...session,
         'updated_at': DateTime.now().toIso8601String(),
       }, onConflict: 'user_id,id'),
+    );
+  }
+
+  @override
+  Future<void> deleteKhatmaSession(String id) async {
+    final userId = _uid;
+    if (userId == null) return;
+
+    await _safeRequest(
+      () async => await _db
+          .from('khatma_sessions')
+          .delete()
+          .eq('user_id', userId)
+          .eq('id', id),
     );
   }
 

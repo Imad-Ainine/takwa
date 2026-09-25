@@ -649,7 +649,17 @@ class _QuranScreenState extends ConsumerState<QuranScreen>
       );
       return;
     }
-    _push(QuranReaderScreen(initialPage: lastRead.page));
+    _push(
+      QuranReaderScreen(
+        initialPage: lastRead.page,
+        // Highlight the exact verse reading stopped at, not just its page
+        // (null-safe: rows saved by older builds may lack a real ayah).
+        initialAyahUQNumber: ayahUqNumberFor(
+          lastRead.surahNum,
+          lastRead.ayahNum,
+        ),
+      ),
+    );
   }
 
   void _shareVerse(Map<String, dynamic> verse) {

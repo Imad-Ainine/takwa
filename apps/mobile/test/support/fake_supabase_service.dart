@@ -36,6 +36,15 @@ class FakeSupabaseService implements SupabaseService {
   /// called for 2026-01-01 with fajr_status performed?").
   final List<String> callLog = [];
 
+  /// When true, the Quran/Khatma *push* methods throw instead of storing,
+  /// simulating an offline or failing backend so the callers' outbox
+  /// retry/delete-journal paths can be exercised.
+  bool failQuranPushes = false;
+
+  void _maybeFailQuranPush() {
+    if (failQuranPushes) throw Exception('fake offline');
+  }
+
   static String _dateStr(DateTime dt) =>
       '${dt.year.toString().padLeft(4, '0')}-'
       '${dt.month.toString().padLeft(2, '0')}-'
@@ -330,6 +339,7 @@ class FakeSupabaseService implements SupabaseService {
   // ─────────────── QURAN (bookmarks, last read, khatma sessions) ───────────────
   @override
   Future<void> upsertQuranBookmark(Map<String, dynamic> bookmark) async {
+    _maybeFailQuranPush();
     callLog.add('upsertQuranBookmark');
     final key = '${bookmark['surah_num']}:${bookmark['ayah_num']}';
     quranBookmarksByKey[key] = Map.of(bookmark);
@@ -337,6 +347,7 @@ class FakeSupabaseService implements SupabaseService {
 
   @override
   Future<void> deleteQuranBookmark(int surahNum, int ayahNum) async {
+    _maybeFailQuranPush();
     callLog.add('deleteQuranBookmark');
     quranBookmarksByKey.remove('$surahNum:$ayahNum');
   }
@@ -347,6 +358,7 @@ class FakeSupabaseService implements SupabaseService {
 
   @override
   Future<void> upsertQuranLastRead(Map<String, dynamic> lastRead) async {
+    _maybeFailQuranPush();
     callLog.add('upsertQuranLastRead');
     quranLastRead = Map.of(lastRead);
   }
@@ -356,8 +368,16 @@ class FakeSupabaseService implements SupabaseService {
 
   @override
   Future<void> upsertKhatmaSession(Map<String, dynamic> session) async {
+    _maybeFailQuranPush();
     callLog.add('upsertKhatmaSession:${session['id']}');
     khatmaSessionsById[session['id'] as String] = Map.of(session);
+  }
+
+  @override
+  Future<void> deleteKhatmaSession(String id) async {
+    _maybeFailQuranPush();
+    callLog.add('deleteKhatmaSession:$id');
+    khatmaSessionsById.remove(id);
   }
 
   @override

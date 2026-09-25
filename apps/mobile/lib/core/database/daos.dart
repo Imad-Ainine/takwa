@@ -666,6 +666,17 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase>
         .go();
   }
 
+  /// Drop every pending entry for a table — used when the data they
+  /// referred to is gone (e.g. the local store was wiped after the account
+  /// signed in on this device changed, so retrying those pushes would just
+  /// re-upload the previous account's data).
+  Future<void> clearPendingTable(String entityTable) async {
+    await (delete(syncOutbox)..where(
+          (o) => o.entityTable.equals(entityTable),
+        ))
+        .go();
+  }
+
   /// All keys currently pending push for [entityTable] (e.g. the ISO date
   /// strings of `daily_records` rows whose last push failed).
   Future<List<String>> getPendingKeys(String entityTable) async {

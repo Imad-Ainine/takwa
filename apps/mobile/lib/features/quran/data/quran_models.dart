@@ -304,6 +304,56 @@ class KhatmaSessionEx {
     totalReadingSeconds: j['totalReadingSeconds'] as int? ?? 0,
     readingSessionsCount: j['readingSessionsCount'] as int? ?? 0,
   );
+
+  /// The `khatma_sessions` Supabase row shape (snake_case, with the
+  /// client-generated [id] kept stable across devices). Single source of
+  /// truth for the push side and the field names `fromRemoteRow` reads
+  /// back on the pull side, so the two can't drift apart.
+  Map<String, dynamic> toRemoteRow() => {
+    'id': id,
+    'label': label,
+    'type': type.name,
+    'start_date': startDate.toIso8601String(),
+    'end_date': endDate?.toIso8601String(),
+    'completed_date': completedDate?.toIso8601String(),
+    'cancelled_date': cancelledDate?.toIso8601String(),
+    'start_page': startPage,
+    'current_page': currentPage,
+    'pages_read': pagesRead,
+    'notifications_enabled': notificationsEnabled,
+    'daily_pages': dailyPages,
+    'total_reading_seconds': totalReadingSeconds,
+    'reading_sessions_count': readingSessionsCount,
+  };
+
+  factory KhatmaSessionEx.fromRemoteRow(Map<String, dynamic> r) =>
+      KhatmaSessionEx(
+        id: r['id'] as String,
+        label: r['label'] as String? ?? 'ختمة',
+        type: KhatmaType.values.firstWhere(
+          (t) => t.name == r['type'],
+          orElse: () => KhatmaType.muyassara,
+        ),
+        startDate:
+            DateTime.tryParse(r['start_date']?.toString() ?? '') ??
+            DateTime.now(),
+        endDate: r['end_date'] != null
+            ? DateTime.tryParse(r['end_date'].toString())
+            : null,
+        completedDate: r['completed_date'] != null
+            ? DateTime.tryParse(r['completed_date'].toString())
+            : null,
+        cancelledDate: r['cancelled_date'] != null
+            ? DateTime.tryParse(r['cancelled_date'].toString())
+            : null,
+        startPage: r['start_page'] as int? ?? 1,
+        currentPage: r['current_page'] as int? ?? 1,
+        pagesRead: r['pages_read'] as int? ?? 0,
+        notificationsEnabled: r['notifications_enabled'] as bool? ?? false,
+        dailyPages: r['daily_pages'] as int?,
+        totalReadingSeconds: r['total_reading_seconds'] as int? ?? 0,
+        readingSessionsCount: r['reading_sessions_count'] as int? ?? 0,
+      );
 }
 
 // ─── Daily Reading Log ───────────────────────────────────────
