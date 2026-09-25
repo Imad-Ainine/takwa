@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/book_prefs_repository.dart';
 import '../../../core/supabase/supabase_config.dart';
 import '../../../core/providers/database_providers.dart';
+import '../../../core/utils/app_logger.dart';
 import 'books_reading_provider.dart' show bookPrefsRepositoryProvider;
 
 // ─────────────────────────────────────────
@@ -176,8 +177,10 @@ class PdfSessionNotifier extends StateNotifier<PdfSessionState> {
       await _ref
           .read(supabaseServiceProvider)
           .upsertPdfSession(bookId, page, total, secs);
-    } catch (_) {
-      // Offline fallback — local already saved
+    } catch (e, st) {
+      // Local progress is saved, so the reader notices nothing — but the row
+      // never reaches Supabase and another device keeps the old position.
+      AppLogger.error('upsertPdfSession failed for $bookId', e, st);
     }
   }
 

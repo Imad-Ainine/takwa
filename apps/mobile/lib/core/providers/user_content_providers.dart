@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:takwa/core/supabase/supabase_config.dart';
 import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/database/app_database.dart';
+import 'package:takwa/core/utils/app_logger.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'dart:math';
 
@@ -183,7 +184,12 @@ class UserAdhkarNotifier extends AsyncNotifier<List<UserAdhkarItem>> {
           count: count,
           categoryHint: categoryHint,
         )
-        .catchError((_) {});
+        .catchError((Object e, StackTrace st) {
+          // The local Drift row is authoritative, but a failed remote write is
+          // not harmless: _syncUserAdhkar pulls the stale row back from
+          // Supabase, so an item whose delete never landed reappears later.
+          AppLogger.error('user_adhkar remote add failed for $id', e, st);
+        });
 
     ref.invalidateSelf();
   }
@@ -192,7 +198,17 @@ class UserAdhkarNotifier extends AsyncNotifier<List<UserAdhkarItem>> {
     final dao = ref.read(userAdhkarDaoProvider);
     await dao.deleteItem(id);
 
-    ref.read(supabaseServiceProvider).deleteUserAdhkar(id).catchError((_) {});
+    ref
+        .read(supabaseServiceProvider)
+        .deleteUserAdhkar(id)
+        .catchError((Object e, StackTrace st) {
+          AppLogger.error(
+            'user_adhkar remote delete failed for $id — the row will be '
+            'pulled back on the next sync',
+            e,
+            st,
+          );
+        });
 
     state = AsyncData((state.value ?? []).where((e) => e.id != id).toList());
   }
@@ -269,7 +285,9 @@ class UserDuasNotifier extends AsyncNotifier<List<UserDuaItem>> {
           source: source,
           emoji: emoji,
         )
-        .catchError((_) {});
+        .catchError((Object e, StackTrace st) {
+          AppLogger.error('user_duas remote add failed for $id', e, st);
+        });
 
     ref.invalidateSelf();
   }
@@ -278,7 +296,17 @@ class UserDuasNotifier extends AsyncNotifier<List<UserDuaItem>> {
     final dao = ref.read(userDuasDaoProvider);
     await dao.deleteItem(id);
 
-    ref.read(supabaseServiceProvider).deleteUserDua(id).catchError((_) {});
+    ref
+        .read(supabaseServiceProvider)
+        .deleteUserDua(id)
+        .catchError((Object e, StackTrace st) {
+          AppLogger.error(
+            'user_duas remote delete failed for $id — the row will be '
+            'pulled back on the next sync',
+            e,
+            st,
+          );
+        });
 
     state = AsyncData((state.value ?? []).where((e) => e.id != id).toList());
   }

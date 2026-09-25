@@ -8,6 +8,19 @@ import 'package:takwa/features/circles/domain/circle_models.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 // ── My circles ──────────────────────────────────────────────────
+/// Every circles screen answers a failure with the same generic Arabic
+/// snackbar, so a server-side rejection is otherwise invisible: this is how
+/// `remove_circle_member` shipped failing on every call. Logs, then rethrows
+/// so the UI keeps its (correct) generic message.
+Future<T> _orLog<T>(String operation, Future<T> Function() body) async {
+  try {
+    return await body();
+  } catch (e, st) {
+    AppLogger.error('$operation failed', e, st);
+    rethrow;
+  }
+}
+
 class MyCirclesNotifier extends AsyncNotifier<List<CircleSummary>> {
   @override
   Future<List<CircleSummary>> build() async {
@@ -39,45 +52,48 @@ class MyCirclesNotifier extends AsyncNotifier<List<CircleSummary>> {
   }
 
   Future<CircleSummary> create(String name) async {
-    final map = await ref.read(supabaseServiceProvider).createCircle(name);
+    final map = await _orLog(
+      'createCircle',
+      () => ref.read(supabaseServiceProvider).createCircle(name),
+    );
     await refresh();
     await _grantCircleJoinedAchievement();
     return CircleSummary.fromMap(map);
   }
 
   Future<CircleSummary> join(String inviteCode) async {
-    final map = await ref
-        .read(supabaseServiceProvider)
-        .joinCircleByCode(inviteCode);
+    final map = await _orLog(
+      'joinCircleByCode',
+      () => ref.read(supabaseServiceProvider).joinCircleByCode(inviteCode),
+    );
     await refresh();
     await _grantCircleJoinedAchievement();
     return CircleSummary.fromMap(map);
   }
 
   Future<void> leave(String circleId) async {
-    await ref.read(supabaseServiceProvider).leaveCircle(circleId);
+    await _orLog(
+      'leaveCircle',
+      () => ref.read(supabaseServiceProvider).leaveCircle(circleId),
+    );
     await refresh();
   }
 
   Future<void> rename(String circleId, String newName) async {
-    try {
-      await ref
+    await _orLog(
+      'renameCircle',
+      () => ref
           .read(supabaseServiceProvider)
-          .renameCircle(circleId: circleId, newName: newName);
-    } catch (e, st) {
-      AppLogger.error('renameCircle failed for $circleId', e, st);
-      rethrow;
-    }
+          .renameCircle(circleId: circleId, newName: newName),
+    );
     await refresh();
   }
 
   Future<void> delete(String circleId) async {
-    try {
-      await ref.read(supabaseServiceProvider).deleteCircle(circleId);
-    } catch (e, st) {
-      AppLogger.error('deleteCircle failed for $circleId', e, st);
-      rethrow;
-    }
+    await _orLog(
+      'deleteCircle',
+      () => ref.read(supabaseServiceProvider).deleteCircle(circleId),
+    );
     await refresh();
   }
 }
@@ -139,18 +155,12 @@ class CircleLeaderboardNotifier
   }
 
   Future<void> removeMember(String circleId, String userId) async {
-    try {
-      await ref
+    await _orLog(
+      'removeCircleMember',
+      () => ref
           .read(supabaseServiceProvider)
-          .removeCircleMember(circleId: circleId, userId: userId);
-    } catch (e, st) {
-      AppLogger.error(
-        'removeCircleMember failed for $circleId/$userId',
-        e,
-        st,
-      );
-      rethrow;
-    }
+          .removeCircleMember(circleId: circleId, userId: userId),
+    );
     ref.invalidateSelf();
     await future;
   }

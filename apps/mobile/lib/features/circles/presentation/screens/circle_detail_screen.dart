@@ -7,6 +7,7 @@ import 'package:takwa/core/providers/auth_providers.dart';
 import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/supabase/supabase_config.dart';
 import 'package:takwa/core/theme/app_theme.dart';
+import 'package:takwa/core/utils/app_logger.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/islamic_glyph.dart';
@@ -734,7 +735,12 @@ class _MemberTile extends ConsumerWidget {
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.circleReactionSentMessage)));
       }
-    } catch (_) {
+    } catch (e, st) {
+      AppLogger.error(
+        'sendCircleReaction failed for $circleId/${row.userId}',
+        e,
+        st,
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
