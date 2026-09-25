@@ -41,9 +41,26 @@ class ChargilyConfig {
   /// for client-side identification and widget-based checkout flows.
   static String get publicKey => dotenv.env['CHARGILY_PUBLIC_KEY'] ?? '';
 
-  /// Optional override; defaults to 10000 centime = 100.00 DZD.
+  /// Optional override; defaults to 200 centime = 200.00 DZD.
   static int get subscriptionAmountCentime =>
-      int.tryParse(dotenv.env['CHARGILY_SUBSCRIPTION_AMOUNT'] ?? '') ?? 10000;
+      int.tryParse(dotenv.env['CHARGILY_SUBSCRIPTION_AMOUNT'] ?? '') ?? 200;
+
+  /// Base URL of the deployed web app. Chargily only accepts http(s)
+  /// success/failure URLs, so checkouts redirect to the web app's
+  /// `/payment-redirect` hop, which forwards the browser to the app's
+  /// custom scheme (see apps/web src/app/[locale]/payment-redirect).
+  static String get webBaseUrl =>
+      dotenv.env['TAKWA_WEB_BASE_URL'] ?? 'https://takwa-web.vercel.app';
+
+  /// Builds the https callback URL that bounces [appSchemeUrl] back into
+  /// the app, localized to the web app's supported locales.
+  static String webRedirectUrl(String appSchemeUrl, {required String locale}) {
+    const supported = {'ar', 'en', 'fr'};
+    final loc = supported.contains(locale) ? locale : 'en';
+    return Uri.parse('$webBaseUrl/$loc/payment-redirect').replace(
+      queryParameters: {'to': appSchemeUrl},
+    ).toString();
+  }
 
   /// The secret key is what actually gates API access; the public key
   /// should be set alongside it but does not block the flow.

@@ -47,6 +47,9 @@ jobs:
           SUPABASE_ANON_KEY=placeholder-anon-key
           SUPABASE_IOS_CLIENT_ID=placeholder-ios-client-id
           SUPABASE_WEB_CLIENT_ID=placeholder-web-client-id
+          CHARGILY_PUBLIC_KEY=${{ secrets.CHARGILY_PUBLIC_KEY }}
+          CHARGILY_SECRET_KEY=${{ secrets.CHARGILY_SECRET_KEY }}
+          CHARGILY_LIVE=${{ secrets.CHARGILY_LIVE }}
           EOF
 
       - name: Analyze
@@ -101,6 +104,9 @@ jobs:
           SUPABASE_ANON_KEY=placeholder-anon-key
           SUPABASE_IOS_CLIENT_ID=placeholder-ios-client-id
           SUPABASE_WEB_CLIENT_ID=placeholder-web-client-id
+          CHARGILY_PUBLIC_KEY=${{ secrets.CHARGILY_PUBLIC_KEY }}
+          CHARGILY_SECRET_KEY=${{ secrets.CHARGILY_SECRET_KEY }}
+          CHARGILY_LIVE=${{ secrets.CHARGILY_LIVE }}
           EOF
 
       - name: Build iOS (unsigned)

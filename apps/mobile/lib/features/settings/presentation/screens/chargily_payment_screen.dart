@@ -78,12 +78,21 @@ class _ChargilyPaymentScreenState extends ConsumerState<ChargilyPaymentScreen>
       _errorMessage = null;
     });
     try {
+      final locale = Localizations.localeOf(context).languageCode;
       final checkout = await ChargilyService().createCheckout(
         paymentMethod: widget.paymentMethod,
         description: l10n.paymentChargilyDescription,
-        successUrl: 'takwa://payment-success',
-        failureUrl: 'takwa://payment-failure',
-        locale: Localizations.localeOf(context).languageCode,
+        // Chargily rejects custom-scheme callbacks; the web hop bounces
+        // the browser back into the app after the card attempt.
+        successUrl: ChargilyConfig.webRedirectUrl(
+          'takwa://payment-success',
+          locale: locale,
+        ),
+        failureUrl: ChargilyConfig.webRedirectUrl(
+          'takwa://payment-failure',
+          locale: locale,
+        ),
+        locale: locale,
       );
       if (!mounted) return;
       setState(() {

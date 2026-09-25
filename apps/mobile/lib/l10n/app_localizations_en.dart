@@ -4126,7 +4126,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paymentSupportMessage =>
-      'With your small contribution, you help make \"Takwa\" available to millions of Muslims as an ongoing charity (sadaqah jariyah) on your behalf and your parents\'. 100 DZD or €10 a month ensures this work continues and keeps improving.';
+      'With your small contribution, you help make \"Takwa\" available to millions of Muslims as an ongoing charity (sadaqah jariyah) on your behalf and your parents\'. 200 DZD or €10 a month ensures this work continues and keeps improving.';
 
   @override
   String get paymentContinueButton => 'Continue to Payment';

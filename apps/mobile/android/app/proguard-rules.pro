@@ -41,3 +41,10 @@
 # Flutter Local Notifications
 -keep class com.dexterous.flutterlocalnotifications.** { *; }
 
+# Gson TypeToken relies on generic superclass signatures at runtime; R8
+# minification of gson itself crashed the plugin's boot receiver
+# (ScheduledNotificationBootReceiver -> TypeToken.getSuperclassTypeParameter)
+# after package updates, silently dropping rescheduled notifications.
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken { *; }
+

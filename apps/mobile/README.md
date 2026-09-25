@@ -175,7 +175,7 @@ Create `apps/mobile/.env` (not committed) with:
 | `CHARGILY_SECRET_KEY`    | No       | Chargily Pay V2 secret key (`test_sk_…` / `sk_…`) — Bearer token for the CIB/Edahabia checkout API. Unset, the Chargily flow shows an error. |
 | `CHARGILY_PUBLIC_KEY`    | No       | Chargily publishable key (`test_pk_…` / `pk_…`) — client-side identifier, kept for the widget-based flow. |
 | `CHARGILY_LIVE`          | No       | `true` switches the API base URL to live mode; anything else stays on the test endpoints. |
-| `CHARGILY_SUBSCRIPTION_AMOUNT` | No | Checkout amount in centime (minor units). Defaults to `10000` = 100.00 DZD. |
+| `CHARGILY_SUBSCRIPTION_AMOUNT` | No | Checkout amount in centime (minor units). Defaults to `200` = 200.00 DZD. |
 | `WISE_IBAN` / `WISE_ACCOUNT_NUMBER` / `WISE_SORT_CODE` / `WISE_HOLDER_NAME` / `WISE_BANK_NAME` | No | Visa/Mastercard path: recipient details of the Wise account, shown on the Wise screen for the user to transfer from. Unset, that screen shows "coming soon". |
 | `WISE_PROFILE_LINK`      | No       | `wise.com/pay/me/…` profile link opened by the "Open Wise" button (falls back to `https://app.wise.com`). |
 | `WISE_MONTHLY_EUR`       | No       | Monthly amount in euro displayed on the Wise screen. Defaults to `10`. |

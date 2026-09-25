@@ -54,7 +54,7 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
                         _buildMethodCard(
                           index: 0,
                           title: l10n.paymentMethodEdahabiaTitle,
-                          subtitle: '100.00 DZD',
+                          subtitle: '200.00 DZD',
                           icon: Image.asset(
                             'assets/images/edahabia.png',
                             fit: BoxFit.contain,

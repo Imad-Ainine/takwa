@@ -86,6 +86,9 @@ jobs:
           SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_WEB_CLIENT_ID=${{ secrets.SUPABASE_WEB_CLIENT_ID }}
           SUPABASE_IOS_CLIENT_ID=${{ secrets.SUPABASE_IOS_CLIENT_ID }}
+          CHARGILY_PUBLIC_KEY=${{ secrets.CHARGILY_PUBLIC_KEY }}
+          CHARGILY_SECRET_KEY=${{ secrets.CHARGILY_SECRET_KEY }}
+          CHARGILY_LIVE=${{ secrets.CHARGILY_LIVE }}
           EOF
 
       # ── Signing keystore ──────────────────────────────────────────────
