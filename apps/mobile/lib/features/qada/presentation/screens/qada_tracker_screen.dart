@@ -9,6 +9,7 @@ import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 /// Lifetime "missed prayers owed" counter, per prayer. See
@@ -201,7 +202,7 @@ class _PrayerCounterCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Text(prayerEmoji(prayerName), style: const TextStyle(fontSize: 26)),
+              IslamicGlyph(prayerEmoji(prayerName), size: 26),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(

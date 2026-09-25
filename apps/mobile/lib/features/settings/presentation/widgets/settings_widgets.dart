@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:takwa/core/theme/app_theme.dart';
-import 'package:takwa/core/widgets/primary_switch.dart';
 import 'package:takwa/core/widgets/custom_time_picker.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
+import 'package:takwa/core/widgets/primary_switch.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 class SectionHeader extends StatelessWidget {
@@ -16,7 +17,7 @@ class SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4, 16, 4, 12),
       child: Row(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 14)),
+          IslamicGlyph(icon, size: 14),
           const SizedBox(width: AppSpacing.sm),
           Text(
             title,
@@ -155,9 +156,7 @@ class ToggleSetting extends StatelessWidget {
                     width: 1,
                   ),
                 ),
-                child: Center(
-                  child: Text(icon, style: const TextStyle(fontSize: 18)),
-                ),
+                child: Center(child: IslamicGlyph(icon, size: 18)),
               ),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -251,9 +250,7 @@ class ActionSetting extends StatelessWidget {
                         .withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Center(
-                child: Text(icon, style: const TextStyle(fontSize: 18)),
-              ),
+              child: Center(child: IslamicGlyph(icon, size: 18)),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -331,9 +328,7 @@ class SelectSetting extends StatelessWidget {
                 color: context.colors.teal.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Center(
-                child: Text(icon, style: const TextStyle(fontSize: 18)),
-              ),
+              child: Center(child: IslamicGlyph(icon, size: 18)),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -712,9 +707,7 @@ class TimeSetting extends StatelessWidget {
                 color: context.colors.gold.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Center(
-                child: Text(icon, style: const TextStyle(fontSize: 18)),
-              ),
+              child: Center(child: IslamicGlyph(icon, size: 18)),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -791,7 +784,7 @@ class SliderSetting extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(icon, style: const TextStyle(fontSize: 18)),
+              IslamicGlyph(icon, size: 18),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(

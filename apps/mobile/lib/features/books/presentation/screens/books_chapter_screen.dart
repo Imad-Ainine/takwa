@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/app_bar_widget.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/features/books/data/books_data.dart';
 import 'package:takwa/features/books/providers/books_reading_provider.dart';
 import 'package:takwa/features/books/presentation/screens/book_reader_screen.dart';
@@ -103,10 +104,7 @@ class BooksChapterScreen extends ConsumerWidget {
                   const SizedBox(width: AppSpacing.md),
                   Hero(
                     tag: 'book-emoji-${book.id}',
-                    child: Text(
-                      book.emoji,
-                      style: const TextStyle(fontSize: 44),
-                    ),
+                    child: IslamicGlyph(book.emoji, size: 44),
                   ),
                 ],
               ),

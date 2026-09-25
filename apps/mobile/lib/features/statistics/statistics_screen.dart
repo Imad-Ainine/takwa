@@ -12,6 +12,7 @@ import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/utils/taqwa_level_display.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/guest_mode_guard.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/takwa_error_state.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
@@ -1163,7 +1164,7 @@ class _StatCardState extends State<_StatCard>
           children: [
             Row(
               children: [
-                Text(widget.data.emoji, style: const TextStyle(fontSize: 18)),
+                IslamicGlyph(widget.data.emoji, size: 18),
                 const Spacer(),
                 Container(
                   width: 6,
@@ -1303,7 +1304,7 @@ class _PrayerRateRowState extends State<_PrayerRateRow>
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          Text(widget.emoji, style: const TextStyle(fontSize: 16)),
+          IslamicGlyph(widget.emoji, size: 16),
           const SizedBox(width: AppSpacing.sm),
           SizedBox(
             width: 44,
@@ -1467,7 +1468,7 @@ class _AchievementBadge extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(achievement.emoji, style: const TextStyle(fontSize: 18)),
+            IslamicGlyph(achievement.emoji, size: 18),
             const SizedBox(width: 6),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1529,7 +1530,7 @@ class _AchievementDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(achievement.emoji, style: const TextStyle(fontSize: 48)),
+            IslamicGlyph(achievement.emoji, size: 48),
             const SizedBox(height: AppSpacing.md),
             Text(
               achievement.titleAr,
@@ -1795,10 +1796,7 @@ class _AchievementToastState extends ConsumerState<_AchievementToast>
             ),
             child: Row(
               children: [
-                Text(
-                  widget.achievement.emoji,
-                  style: const TextStyle(fontSize: 28),
-                ),
+                IslamicGlyph(widget.achievement.emoji, size: 28),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(

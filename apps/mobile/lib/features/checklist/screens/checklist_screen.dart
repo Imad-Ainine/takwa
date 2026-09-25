@@ -7,13 +7,14 @@ import 'package:hijri/hijri_calendar.dart';
 
 import 'package:takwa/l10n/app_localizations.dart';
 import 'package:takwa/core/theme/app_theme.dart';
-import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/app/animated_drawer.dart';
 import 'package:takwa/core/database/app_database.dart';
 import 'package:takwa/core/providers/database_providers.dart';
-import 'package:takwa/core/widgets/primary_button.dart';
-import 'package:takwa/app/animated_drawer.dart';
-import 'package:takwa/core/widgets/guest_mode_guard.dart';
 import 'package:takwa/core/supabase/sync_manager.dart';
+import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/guest_mode_guard.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
+import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/features/checklist/widgets/custom_ibadah_group.dart';
 
@@ -745,7 +746,7 @@ class _PrayerRow extends StatelessWidget {
                     : null,
               ),
               const SizedBox(width: 10),
-              Text(emoji, style: const TextStyle(fontSize: 18)),
+              IslamicGlyph(emoji, size: 18),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
@@ -927,7 +928,7 @@ class _StatusOption extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 18)),
+            IslamicGlyph(emoji, size: 18),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
@@ -1092,7 +1093,7 @@ class _QuranInput extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          const Text('📖', style: TextStyle(fontSize: 18)),
+          const IslamicGlyph('📖', size: 18),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -1263,7 +1264,7 @@ class _ToggleRow extends StatelessWidget {
                     : null,
               ),
               const SizedBox(width: 10),
-              Text(emoji, style: const TextStyle(fontSize: 18)),
+              IslamicGlyph(emoji, size: 18),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
@@ -1407,10 +1408,7 @@ class _SadaqahAmountFieldState extends ConsumerState<_SadaqahAmountField> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
-            borderSide: BorderSide(
-              color: context.colors.teal,
-              width: 1.5,
-            ),
+            borderSide: BorderSide(color: context.colors.teal, width: 1.5),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
@@ -1457,7 +1455,7 @@ class _FastingSelector extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Text('🌙', style: TextStyle(fontSize: 18)),
+              const IslamicGlyph('🌙', size: 18),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
@@ -1783,7 +1781,7 @@ class _ProhibitionRowState extends ConsumerState<_ProhibitionRow> {
             ),
           ),
           const SizedBox(width: 10),
-          Text(widget.emoji, style: const TextStyle(fontSize: 18)),
+          IslamicGlyph(widget.emoji, size: 18),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
@@ -2014,7 +2012,7 @@ class _GroupCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(icon, style: const TextStyle(fontSize: 16)),
+              IslamicGlyph(icon, size: 16),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 title,

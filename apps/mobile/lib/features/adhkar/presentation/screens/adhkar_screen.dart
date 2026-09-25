@@ -8,9 +8,11 @@ import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/theme/ramadan_theme.dart';
 // import 'package:takwa/core/utils/overlay_helper.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
-import 'package:takwa/core/widgets/custom_time_picker.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/custom_time_picker.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
+import 'package:takwa/features/adhkar/presentation/adhkar_labels.dart';
 import 'package:takwa/features/adhkar/presentation/screens/_user_community_adhkar_views.dart';
 import 'package:takwa/core/providers/favorites_providers.dart';
 import 'package:takwa/core/routes/app_routes.dart';
@@ -28,16 +30,11 @@ class _AdhkarScreenState extends ConsumerState<AdhkarScreen>
     with TickerProviderStateMixin {
   late final AnimationController _entryCtrl;
   late final TabController _tabCtrl;
-  static final _tabCount = AdhkarCategory.values.length + 2; // + mine + community
+  static final _tabCount =
+      AdhkarCategory.values.length + 2; // + mine + community
 
   List<(String, String)> _tabs(AppLocalizations l10n) => [
-    ('🌅', l10n.adhkarTabMorning),
-    ('🌆', l10n.adhkarTabEvening),
-    ('🕌', l10n.adhkarTabAfterPrayer),
-    ('🌙', l10n.adhkarTabSleep),
-    ('📿', l10n.adhkarTabWakingUp),
-    ('📿', l10n.adhkarTabFood),
-    ('📿', l10n.adhkarTabMisc),
+    ...adhkarTabs(l10n),
     ('✨', l10n.adhkarTabMine),
     ('🌍', l10n.adhkarTabCommunity),
   ];
@@ -126,7 +123,10 @@ class _AdhkarTopBar extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [context.colors.gold.withValues(alpha: 0.1), Colors.transparent],
+          colors: [
+            context.colors.gold.withValues(alpha: 0.1),
+            Colors.transparent,
+          ],
         ),
       ),
       child: SafeArea(
@@ -151,7 +151,9 @@ class _AdhkarTopBar extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             shadows: [
                               Shadow(
-                                color: context.colors.gold.withValues(alpha: 0.3),
+                                color: context.colors.gold.withValues(
+                                  alpha: 0.3,
+                                ),
                                 blurRadius: 12,
                               ),
                             ],
@@ -371,7 +373,10 @@ class _CategoryProgressBar extends StatelessWidget {
               Text(
                 isDone
                     ? l10n.adhkarProgressComplete
-                    : l10n.adhkarProgressCount(done.toString(), total.toString()),
+                    : l10n.adhkarProgressCount(
+                        done.toString(),
+                        total.toString(),
+                      ),
                 style: context.typography.bodySmall.copyWith(
                   color: isDone
                       ? context.colors.success
@@ -588,10 +593,14 @@ class _DhikrCardState extends ConsumerState<_DhikrCard>
                                 vertical: 7,
                               ),
                               decoration: BoxDecoration(
-                                color: context.colors.gold.withValues(alpha: 0.1),
+                                color: context.colors.gold.withValues(
+                                  alpha: 0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                  color: context.colors.gold.withValues(alpha: 0.15),
+                                  color: context.colors.gold.withValues(
+                                    alpha: 0.15,
+                                  ),
                                 ),
                               ),
                               child: Row(
@@ -653,10 +662,14 @@ class _DhikrCardState extends ConsumerState<_DhikrCard>
                               vertical: 5,
                             ),
                             decoration: BoxDecoration(
-                              color: context.colors.success.withValues(alpha: 0.15),
+                              color: context.colors.success.withValues(
+                                alpha: 0.15,
+                              ),
                               borderRadius: BorderRadius.circular(AppRadius.xl),
                               border: Border.all(
-                                color: context.colors.success.withValues(alpha: 0.3),
+                                color: context.colors.success.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                             ),
                             child: Row(
@@ -869,8 +882,12 @@ class _AdhkarNotifSheet extends ConsumerWidget {
         prefs?.eveningAdhkarTime ?? const TimeOfDay(hour: 17, minute: 0);
     final sleepTime =
         prefs?.sleepAdhkarTime ?? const TimeOfDay(hour: 22, minute: 0);
+    final morningOn = prefs?.morningAdhkarReminder ?? true;
+    final eveningOn = prefs?.eveningAdhkarReminder ?? true;
+    final sleepOn = prefs?.sleepAdhkarReminder ?? true;
     final afterFajr = prefs?.afterFajrAdhkar ?? true;
     final afterAsr = prefs?.afterAsrAdhkar ?? true;
+    final delayMins = prefs?.adhkarAfterPrayerMinutes ?? 15;
 
     return Container(
       decoration: BoxDecoration(
@@ -947,102 +964,97 @@ class _AdhkarNotifSheet extends ConsumerWidget {
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
               children: [
-                _NotifRow(
+                _NotifSectionLabel(l10n.adhkarNotifDailySection),
+                _AdhkarReminderRow(
                   icon: '🌅',
                   label: l10n.adhkarNotifMorningLabel,
-                  time: morningTime,
-                  onTimeTap: () async {
-                    final t = await _pickTime(context, morningTime);
-                    if (t != null) {
-                      ref
-                          .read(userPreferencesProvider.notifier)
-                          .updatePref(
-                            'morning_adhkar_time',
-                            '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}',
-                          );
-                    }
-                  },
+                  on: morningOn,
+                  onToggle: (v) => _update(ref, 'morning_adhkar_reminder', v),
+                  time: afterFajr ? null : morningTime,
+                  anchoredHint: afterFajr
+                      ? l10n.adhkarNotifAfterPrayerHint(delayMins)
+                      : null,
+                  onTimeTap: () => _pickTimeAndSave(
+                    context,
+                    ref,
+                    'morning_adhkar_time',
+                    morningTime,
+                  ),
                 ),
-                _NotifRow(
+                _AdhkarReminderRow(
                   icon: '🌆',
                   label: l10n.adhkarNotifEveningLabel,
-                  time: eveningTime,
-                  onTimeTap: () async {
-                    final t = await _pickTime(context, eveningTime);
-                    if (t != null) {
-                      ref
-                          .read(userPreferencesProvider.notifier)
-                          .updatePref(
-                            'evening_adhkar_time',
-                            '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}',
-                          );
-                    }
-                  },
+                  on: eveningOn,
+                  onToggle: (v) => _update(ref, 'evening_adhkar_reminder', v),
+                  time: afterAsr ? null : eveningTime,
+                  anchoredHint: afterAsr
+                      ? l10n.adhkarNotifAfterPrayerHint(delayMins)
+                      : null,
+                  onTimeTap: () => _pickTimeAndSave(
+                    context,
+                    ref,
+                    'evening_adhkar_time',
+                    eveningTime,
+                  ),
                 ),
-                _NotifRow(
+                _AdhkarReminderRow(
                   icon: '🌙',
                   label: l10n.adhkarNotifSleepLabel,
+                  on: sleepOn,
+                  onToggle: (v) => _update(ref, 'sleep_adhkar_reminder', v),
                   time: sleepTime,
-                  onTimeTap: () async {
-                    final t = await _pickTime(context, sleepTime);
-                    if (t != null) {
-                      ref
-                          .read(userPreferencesProvider.notifier)
-                          .updatePref(
-                            'sleep_adhkar_time',
-                            '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}',
-                          );
-                    }
-                  },
+                  onTimeTap: () => _pickTimeAndSave(
+                    context,
+                    ref,
+                    'sleep_adhkar_time',
+                    sleepTime,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.md),
-                const Divider(),
-                const SizedBox(height: AppSpacing.md),
+                _NotifSectionLabel(l10n.adhkarNotifPrayerSection),
                 _ToggleRow(
-                  icon: '🌅',
+                  icon: '🕌',
                   label: l10n.adhkarNotifAfterFajrLabel,
                   value: afterFajr,
-                  onChanged: (v) => ref
-                      .read(userPreferencesProvider.notifier)
-                      .updatePref('after_fajr_adhkar', v),
+                  onChanged: (v) => _update(ref, 'after_fajr_adhkar', v),
                 ),
                 _ToggleRow(
-                  icon: '🌇',
+                  icon: '🕌',
                   label: l10n.adhkarNotifAfterAsrLabel,
                   value: afterAsr,
-                  onChanged: (v) => ref
-                      .read(userPreferencesProvider.notifier)
-                      .updatePref('after_asr_adhkar', v),
+                  onChanged: (v) => _update(ref, 'after_asr_adhkar', v),
                 ),
-                const SizedBox(height: 14),
-
-                // SizedBox(
-                //   width: double.infinity,
-                //   child: PrimaryButton(
-                //     onTap: () async {
-                //       final dhikr = (kAdhkarData[AdhkarCategory.morning]!)[0];
-                //       await AdhkarNotificationService.showDhikrNow(dhikr);
-                //       if (context.mounted) Navigator.pop(context);
-                //     },
-                //     icon: Icons.notifications_active_outlined,
-                //     label: 'اختبار إشعار ذكر الآن',
-                //     isOutline: true,
-                //     baseColor: context.colors.gold,
-                //   ),
-                // ),
-                // const SizedBox(height: AppSpacing.md),
-                // SizedBox(
-                //   width: double.infinity,
-                //   child: PrimaryButton(
-                //     onTap: () async {
-                //       OverlayHelper.show(type: 'adhkar');
-                //     },
-                //     icon: Icons.star_rounded,
-                //     label: 'اختبار الـ Overlay',
-                //     isOutline: false,
-                //     baseColor: context.colors.teal,
-                //   ),
-                // ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    children: [
+                      const IslamicGlyph('⏱', size: 18),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          l10n.adhkarNotifDelayLabel,
+                          style: context.typography.bodyMedium.copyWith(
+                            color: context.colors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      _TimeChip(
+                        text: l10n.adhkarNotifDelayMinutes(delayMins),
+                        onTap: () => _pickDelay(context, ref, delayMins),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    l10n.adhkarNotifAnchorNote,
+                    style: context.typography.bodySmall.copyWith(
+                      color: context.colors.textDim,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -1051,61 +1063,173 @@ class _AdhkarNotifSheet extends ConsumerWidget {
     );
   }
 
-  Future<TimeOfDay?> _pickTime(BuildContext context, TimeOfDay current) =>
-      showCustomTimePicker(context: context, initialTime: current);
+  /// Adhkar pref writes reschedule the adhkar alarms only — `all` would tear
+  /// down and rebuild the prayer horizon on every toggle.
+  void _update(WidgetRef ref, String key, dynamic value) => ref
+      .read(userPreferencesProvider.notifier)
+      .updatePref(key, value, category: NotificationCategory.adhkar);
+
+  Future<void> _pickTimeAndSave(
+    BuildContext context,
+    WidgetRef ref,
+    String key,
+    TimeOfDay current,
+  ) async {
+    final t = await showCustomTimePicker(
+      context: context,
+      initialTime: current,
+    );
+    if (t == null) return;
+    _update(
+      ref,
+      key,
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}',
+    );
+  }
+
+  Future<void> _pickDelay(
+    BuildContext context,
+    WidgetRef ref,
+    int current,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final chosen = await showDialog<int>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(l10n.adhkarNotifDelayLabel),
+        children: [
+          for (final mins in const [5, 10, 15, 20, 30])
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(ctx, mins),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Text(
+                  l10n.adhkarNotifDelayMinutes(mins),
+                  style: TextStyle(
+                    fontWeight: mins == current
+                        ? FontWeight.w700
+                        : FontWeight.w400,
+                    color: mins == current ? ctx.colors.gold : null,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+    if (chosen != null) _update(ref, 'adhkar_after_prayer_minutes', chosen);
+  }
 }
 
-class _NotifRow extends StatelessWidget {
+class _NotifSectionLabel extends StatelessWidget {
+  final String text;
+  const _NotifSectionLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Text(
+      text,
+      style: context.typography.bodySmall.copyWith(
+        color: context.colors.gold,
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+  );
+}
+
+class _TimeChip extends StatelessWidget {
+  final String text;
+  final VoidCallback onTap;
+
+  const _TimeChip({required this.text, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+      decoration: BoxDecoration(
+        color: context.colors.gold.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: context.colors.gold.withValues(alpha: 0.25)),
+      ),
+      child: Text(
+        text,
+        style: context.typography.bodyLarge.copyWith(
+          color: context.colors.gold,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    ),
+  );
+}
+
+/// One adhkar reminder: its switch, then either the clock time it fires on or
+/// the after-prayer hint that replaced that clock.
+class _AdhkarReminderRow extends StatelessWidget {
   final String icon, label;
-  final TimeOfDay time;
+  final bool on;
+  final void Function(bool) onToggle;
+  final TimeOfDay? time;
+  final String? anchoredHint;
   final VoidCallback onTimeTap;
 
-  const _NotifRow({
+  const _AdhkarReminderRow({
     required this.icon,
     required this.label,
-    required this.time,
+    required this.on,
+    required this.onToggle,
     required this.onTimeTap,
+    this.time,
+    this.anchoredHint,
   });
 
   @override
   Widget build(BuildContext context) {
-    final h = time.hour.toString().padLeft(2, '0');
-    final m = time.minute.toString().padLeft(2, '0');
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 18)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              label,
-              style: context.typography.bodyMedium.copyWith(
-                color: context.colors.textPrimary,
-              ),
+    final trailing = anchoredHint != null
+        ? Text(
+            anchoredHint!,
+            style: context.typography.bodySmall.copyWith(
+              color: context.colors.textDim,
             ),
-          ),
-          GestureDetector(
+            textAlign: TextAlign.end,
+          )
+        : time == null
+        ? const SizedBox.shrink()
+        : _TimeChip(
+            text:
+                '${time!.hour.toString().padLeft(2, '0')}:${time!.minute.toString().padLeft(2, '0')}',
             onTap: onTimeTap,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-              decoration: BoxDecoration(
-                color: context.colors.gold.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: context.colors.gold.withValues(alpha: 0.25),
-                ),
-              ),
+          );
+    return Opacity(
+      // A switched-off reminder still shows where it would fire, dimmed.
+      opacity: on ? 1 : 0.45,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Row(
+          children: [
+            IslamicGlyph(icon, size: 18),
+            const SizedBox(width: 10),
+            Expanded(
               child: Text(
-                '$h:$m',
-                style: context.typography.bodyLarge.copyWith(
-                  color: context.colors.gold,
-                  fontWeight: FontWeight.w700,
+                label,
+                style: context.typography.bodyMedium.copyWith(
+                  color: context.colors.textPrimary,
                 ),
               ),
             ),
-          ),
-        ],
+            trailing,
+            Switch(
+              value: on,
+              onChanged: onToggle,
+              activeThumbColor: context.colors.teal,
+              activeTrackColor: context.colors.teal.withValues(alpha: 0.3),
+              inactiveTrackColor: context.colors.border,
+              inactiveThumbColor: context.colors.textDim,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1128,7 +1252,7 @@ class _ToggleRow extends StatelessWidget {
     padding: const EdgeInsets.only(bottom: 8),
     child: Row(
       children: [
-        Text(icon, style: const TextStyle(fontSize: 18)),
+        IslamicGlyph(icon, size: 18),
         const SizedBox(width: 10),
         Expanded(
           child: Text(

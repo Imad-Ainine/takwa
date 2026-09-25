@@ -14,6 +14,7 @@ import 'package:takwa/core/notifications/adhan_auto_trigger.dart';
 import 'package:takwa/core/routes/app_routes.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/features/settings/data/user_preferences.dart';
 import 'package:takwa/features/settings/providers/user_preferences_provider.dart';
 import 'package:takwa/l10n/app_localizations.dart';
@@ -536,7 +537,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Text('🕌', style: TextStyle(fontSize: 13)),
+                                  const IslamicGlyph('🕌', size: 13),
                                   const SizedBox(width: 6),
                                   Text(
                                     widget.prayerName ?? l10n.prayerGenericLabel,
@@ -877,7 +878,7 @@ class _AdhanOverlayScreenState extends ConsumerState<AdhanOverlayScreen>
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text('🤲', style: TextStyle(fontSize: 13)),
+                                const IslamicGlyph('🤲', size: 13),
                                 const SizedBox(width: 6),
                                 Text(
                                   l10n.adhanOverlayDuaSectionLabel,

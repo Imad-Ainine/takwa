@@ -12,6 +12,7 @@ import '../../../../core/providers/database_providers.dart';
 import '../../../../core/database/daos.dart';
 import '../../../../core/supabase/supabase_providers.dart';
 import '../../../../core/supabase/supabase_config.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -86,9 +87,8 @@ class ProfileScreen extends ConsumerWidget {
   ) {
     return profileAsync.when(
       loading: () => const Center(child: TakwaLoadingIndicator()),
-      error: (e, _) => TakwaErrorState(
-        onRetry: () => ref.invalidate(userProfileProvider),
-      ),
+      error: (e, _) =>
+          TakwaErrorState(onRetry: () => ref.invalidate(userProfileProvider)),
       data: (profile) {
         final l10n = AppLocalizations.of(context)!;
         final username = profile?['username'] ?? l10n.profileDefaultUsername;
@@ -300,7 +300,7 @@ class _StatCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 24)),
+          IslamicGlyph(icon, size: 24),
           const SizedBox(height: AppSpacing.sm),
           Text(
             value,

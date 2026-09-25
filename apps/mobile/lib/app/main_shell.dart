@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_islamic_icons/flutter_islamic_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:takwa/features/checklist/screens/checklist_screen.dart';
 import 'package:takwa/l10n/app_localizations.dart';
@@ -17,6 +18,7 @@ import '../app/animated_drawer.dart';
 import '../core/providers/auth_providers.dart';
 import '../features/auth/presentation/pages/auth_choice_screen.dart';
 import '../core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import '../core/notifications/overlay_background_service.dart';
 
 // ─────────────────────────────────────────
@@ -51,17 +53,28 @@ class _MainShellState extends ConsumerState<MainShell>
   // platform/OS version. Outlined for unselected, filled for selected —
   // the standard Material way to show selection without relying on color
   // in the (rare but real) case an icon renders in grayscale.
+  // Home/Qiyam/Muhasaba take that same outline→solid convention from
+  // flutter_islamic_icons: a mosque for the prayer-times dashboard and a
+  // crescent for night prayer say what the tab is, where Material's
+  // home/nightlight were generic. The package has no chart or gear glyph, so
+  // Statistics and Settings stay Material rather than stretch a religious
+  // icon over a utility screen.
   static List<_TabInfo> _getTabs(AppLocalizations l10n) => [
-    _TabInfo(Icons.home_outlined, Icons.home_rounded, l10n.bottomNavHome, 0),
     _TabInfo(
-      Icons.nightlight_outlined,
-      Icons.nightlight_rounded,
+      FlutterIslamicIcons.mosque,
+      FlutterIslamicIcons.solidMosque,
+      l10n.bottomNavHome,
+      0,
+    ),
+    _TabInfo(
+      FlutterIslamicIcons.crescentMoon,
+      FlutterIslamicIcons.solidCrescentMoon,
       l10n.bottomNavQiyam,
       1,
     ),
     _TabInfo(
-      Icons.checklist_outlined,
-      Icons.checklist_rounded,
+      FlutterIslamicIcons.prayer,
+      FlutterIslamicIcons.solidPrayer,
       l10n.bottomNavMuhasaba,
       2,
     ),
@@ -274,142 +287,166 @@ class _BottomNav extends StatelessWidget {
     required this.tabAnims,
   });
 
+  static const double _barHeight = 64;
+  static const double _pillInset = 5;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.colors.card.withValues(alpha: 0.95),
-        border: Border(
-          top: BorderSide(color: context.colors.border, width: 0.5),
+    final colors = context.colors;
+    final radius = BorderRadius.circular(AppRadius.xxl);
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          0,
+          AppSpacing.lg,
+          AppSpacing.md,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.card.withValues(alpha: 0.95),
+            borderRadius: radius,
+            border: Border.all(color: colors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.28),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Subtle pattern background for BottomNav
-          const Positioned.fill(
-            child: ClipRect(
-              child: CustomPatternBackground(pattern: BackgroundPattern.adhkar),
-            ),
-          ),
-
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-              child: Row(
-                children: List.generate(tabs.length, (i) {
-                  final tab = tabs[i];
-                  final isActive = currentIndex == i;
-                  return Expanded(
-                    // One coherent "button, label, selected" stop for a
-                    // screen reader instead of the animated indicator,
-                    // emoji, and label each being a separate stop.
-                    child: Semantics(
-                      label: tab.label,
-                      button: true,
-                      selected: isActive,
-                      onTap: () => onTap(i),
-                      excludeSemantics: true,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () => onTap(i),
-                        child: AnimatedBuilder(
-                          animation: tabAnims[i],
-                          builder: (_, _) {
-                            final t = tabAnims[i].value;
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Improved Active indicator with glow
-                                AnimatedContainer(
-                                  duration: const Duration(milliseconds: 250),
-                                  width: isActive ? 24 : 0,
-                                  height: 3,
-                                  margin: const EdgeInsets.only(bottom: 4),
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        context.colors.gold,
-                                        context.colors.teal,
-                                      ],
-                                    ),
-                                    borderRadius: BorderRadius.circular(1.5),
-                                    boxShadow: isActive
-                                        ? [
-                                            BoxShadow(
-                                              color: context.colors.gold
-                                                  .withValues(alpha: 0.3),
-                                              blurRadius: 8,
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
-                                ),
-
-                                // Icon with scale bounce
-                                Transform.scale(
-                                  scale: isActive ? 1.0 + 0.15 * t : 1.0,
-                                  child: Icon(
-                                    isActive ? tab.activeIcon : tab.icon,
-                                    size: 22,
-                                    color: isActive
-                                        ? context.colors.gold
-                                        : context.colors.textDim,
-                                    shadows: isActive
-                                        ? [
-                                            Shadow(
-                                              color: context.colors.gold
-                                                  .withValues(alpha: 0.6 * t),
-                                              blurRadius: 10,
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-
-                                // Label
-                                AnimatedDefaultTextStyle(
-                                  duration: const Duration(milliseconds: 200),
-                                  style: context.typography.caption.copyWith(
-                                    // 11 is Material's smallest label size /
-                                    // the iOS HIG floor — this used to be
-                                    // 9.5, below both platforms' minimums.
-                                    fontSize: 11,
-                                    color: isActive
-                                        ? context.colors.gold
-                                        : context.colors.textDim,
-                                    fontWeight: isActive
-                                        ? FontWeight.w700
-                                        : FontWeight.w400,
-                                    letterSpacing: isActive ? 0.2 : 0,
-                                  ),
-                                  child: Text(
-                                    tab.label,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
+          // The clip also contains the pill's easeOutBack overshoot at the
+          // two end tabs, which would otherwise poke past the capsule.
+          child: ClipRRect(
+            key: const Key('bottomNavCapsule'),
+            borderRadius: radius,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final cellWidth = constraints.maxWidth / tabs.length;
+                return Stack(
+                  children: [
+                    const Positioned.fill(
+                      child: CustomPatternBackground(
+                        pattern: BackgroundPattern.adhkar,
+                      ),
+                    ),
+                    // Directional rather than Positioned: the Row below lays
+                    // out right-to-left under Arabic, so `start` is the only
+                    // offset that tracks the active cell in both directions.
+                    AnimatedPositionedDirectional(
+                      duration: AppMotion.base,
+                      curve: Curves.easeOutBack,
+                      start: cellWidth * currentIndex + _pillInset,
+                      top: _pillInset,
+                      width: cellWidth - (_pillInset * 2),
+                      height: _barHeight - (_pillInset * 2),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [colors.goldLight, colors.gold],
+                          ),
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
+                          boxShadow: [
+                            BoxShadow(
+                              color: colors.gold.withValues(alpha: 0.35),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  );
-                }),
-              ),
+                    SizedBox(
+                      height: _barHeight,
+                      child: Row(
+                        children: List.generate(tabs.length, (i) {
+                          final tab = tabs[i];
+                          final isActive = currentIndex == i;
+                          // onGold is 7.6:1 on gold and higher on goldLight,
+                          // so the pill carries the contrast rather than the
+                          // old gold-on-card tint.
+                          final foreground = isActive
+                              ? colors.onGold
+                              : colors.textDim;
+                          return Expanded(
+                            // One coherent "button, label, selected" stop for
+                            // a screen reader instead of the pill, icon and
+                            // label each being a separate stop.
+                            child: Semantics(
+                              label: tab.label,
+                              button: true,
+                              selected: isActive,
+                              onTap: () => onTap(i),
+                              excludeSemantics: true,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => onTap(i),
+                                child: AnimatedBuilder(
+                                  animation: tabAnims[i],
+                                  builder: (_, _) {
+                                    final t = tabAnims[i].value;
+                                    return Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Transform.scale(
+                                          scale: isActive
+                                              ? 1.0 + 0.12 * t
+                                              : 1.0,
+                                          child: Icon(
+                                            isActive
+                                                ? tab.activeIcon
+                                                : tab.icon,
+                                            size: 22,
+                                            color: foreground,
+                                          ),
+                                        ),
+                                        const SizedBox(height: AppSpacing.xxs),
+                                        AnimatedDefaultTextStyle(
+                                          duration: AppMotion.fast,
+                                          style: context.typography.caption
+                                              .copyWith(
+                                                // 11 is Material's smallest
+                                                // label size / the iOS HIG
+                                                // floor — this used to be
+                                                // 9.5, below both platforms'
+                                                // minimums.
+                                                fontSize: 11,
+                                                color: foreground,
+                                                fontWeight: isActive
+                                                    ? FontWeight.w700
+                                                    : FontWeight.w500,
+                                                letterSpacing: isActive
+                                                    ? 0.2
+                                                    : 0,
+                                              ),
+                                          child: Text(
+                                            tab.label,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -501,13 +538,15 @@ class _SplashScreenState extends State<_SplashScreen>
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: context.colors.gold.withValues(alpha: 0.3 - i * 0.08),
+                              color: context.colors.gold.withValues(
+                                alpha: 0.3 - i * 0.08,
+                              ),
                               width: 1,
                             ),
                           ),
                         ),
                       ),
-                      const Text('🌙', style: TextStyle(fontSize: 32)),
+                      const IslamicGlyph('🌙', size: 32),
                     ],
                   ),
                 ),

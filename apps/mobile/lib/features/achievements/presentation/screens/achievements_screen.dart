@@ -4,8 +4,9 @@ import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/features/achievements/domain/models/achievement_definition.dart';
 import 'package:takwa/features/achievements/presentation/widgets/achievement_card.dart';
 import 'package:takwa/features/achievements/providers/achievements_providers.dart';
-import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/app/animated_drawer.dart';
+import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/l10n/app_localizations.dart';
@@ -354,7 +355,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen>
                 shape: BoxShape.circle,
                 boxShadow: context.shadows.goldGlow,
               ),
-              child: Text(def.emoji, style: const TextStyle(fontSize: 64)),
+              child: IslamicGlyph(def.emoji, size: 64),
             ),
             const SizedBox(height: AppSpacing.xxl),
             Text(

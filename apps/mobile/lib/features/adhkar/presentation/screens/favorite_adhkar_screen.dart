@@ -7,6 +7,7 @@ import 'package:takwa/core/providers/favorites_providers.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/features/adhkar/presentation/adhkar_labels.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 class FavoriteAdhkarScreen extends ConsumerWidget {
@@ -43,11 +44,10 @@ class FavoriteAdhkarScreen extends ConsumerWidget {
                           children: [
                             Text(
                               l10n.favoriteAdhkarScreenTitle,
-                              style: context.typography.headingMedium
-                                  .copyWith(
-                                    fontSize: 20,
-                                    color: context.colors.gold,
-                                  ),
+                              style: context.typography.headingMedium.copyWith(
+                                fontSize: 20,
+                                color: context.colors.gold,
+                              ),
                             ),
                             Text(
                               l10n.favoriteAdhkarCountLabel(favDhikr.length),
@@ -387,14 +387,6 @@ class _FavDhikrCardState extends ConsumerState<_FavDhikrCard> {
   }
 
   String _categoryLabel(AppLocalizations l10n, AdhkarCategory cat) {
-    return switch (cat) {
-      AdhkarCategory.morning => '🌅 ${l10n.ibadahMorningAdhkarLabel}',
-      AdhkarCategory.evening => '🌆 ${l10n.ibadahEveningAdhkarLabel}',
-      AdhkarCategory.afterPrayer => '🕌 ${l10n.duaCategoryAfterPrayer}',
-      AdhkarCategory.sleep => '🌙 ${l10n.adhkarNotifSleepLabel}',
-      AdhkarCategory.misc => '📿 ${l10n.adhkarTabMisc}',
-      AdhkarCategory.wakingUp => '📿 ${l10n.adhkarTabWakingUp}',
-      AdhkarCategory.food => '📿 ${l10n.adhkarTabFood}',
-    };
+    return '${cat.emoji} ${adhkarTabLabel(l10n, cat)}';
   }
 }

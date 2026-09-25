@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:takwa/core/theme/app_theme.dart';
-import 'package:takwa/core/widgets/custom_leading_button.dart';
-import 'package:takwa/features/books/data/books_data.dart';
-import 'package:takwa/features/books/providers/books_reading_provider.dart';
-import 'package:takwa/features/books/presentation/screens/books_chapter_screen.dart';
 import 'package:takwa/core/widgets/app_bar_widget.dart';
+import 'package:takwa/core/widgets/custom_leading_button.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/core/widgets/takwa_refresh_indicator.dart';
+import 'package:takwa/features/books/data/books_data.dart';
+import 'package:takwa/features/books/presentation/screens/books_chapter_screen.dart';
+import 'package:takwa/features/books/providers/books_reading_provider.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 class BooksLibraryScreen extends ConsumerStatefulWidget {
@@ -523,19 +524,11 @@ class _BookCard extends ConsumerWidget {
                             imageUrl: book.coverUrl!,
                             fit: BoxFit.cover,
                             errorWidget: (context, url, error) => Center(
-                              child: Text(
-                                book.emoji,
-                                style: const TextStyle(fontSize: 40),
-                              ),
+                              child: IslamicGlyph(book.emoji, size: 40),
                             ),
                           )
                         else
-                          Center(
-                            child: Text(
-                              book.emoji,
-                              style: const TextStyle(fontSize: 40),
-                            ),
-                          ),
+                          Center(child: IslamicGlyph(book.emoji, size: 40)),
                         // Overlay shine
                         Container(
                           decoration: BoxDecoration(
@@ -627,20 +620,11 @@ class _BookGridCard extends StatelessWidget {
                       CachedNetworkImage(
                         imageUrl: book.coverUrl!,
                         fit: BoxFit.cover,
-                        errorWidget: (context, url, error) => Center(
-                          child: Text(
-                            book.emoji,
-                            style: const TextStyle(fontSize: 30),
-                          ),
-                        ),
+                        errorWidget: (context, url, error) =>
+                            Center(child: IslamicGlyph(book.emoji, size: 30)),
                       )
                     else
-                      Center(
-                        child: Text(
-                          book.emoji,
-                          style: const TextStyle(fontSize: 30),
-                        ),
-                      ),
+                      Center(child: IslamicGlyph(book.emoji, size: 30)),
                   ],
                 ),
               ),

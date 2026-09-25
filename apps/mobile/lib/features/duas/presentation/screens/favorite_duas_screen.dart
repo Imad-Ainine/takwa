@@ -6,6 +6,7 @@ import 'package:takwa/core/providers/favorites_providers.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/features/duas/data/duas_data.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
@@ -43,8 +44,7 @@ class FavoriteDuasScreen extends ConsumerWidget {
                           children: [
                             Text(
                               l10n.favoriteDuasScreenTitle,
-                              style: context.typography.headingMedium
-                                  .copyWith(
+                              style: context.typography.headingMedium.copyWith(
                                     fontSize: 20,
                                     color: context.colors.gold,
                                   ),
@@ -198,7 +198,7 @@ class _FavDuaCardState extends ConsumerState<_FavDuaCard> {
             children: [
               Row(
                 children: [
-                  Text(widget.dua.emoji, style: const TextStyle(fontSize: 22)),
+                  IslamicGlyph(widget.dua.emoji, size: 22),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(

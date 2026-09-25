@@ -8,9 +8,9 @@ import 'package:takwa/core/providers/locale_provider.dart';
 import 'package:takwa/core/providers/app_info_provider.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 import 'package:takwa/core/notifications/notifications_service.dart';
+import 'package:takwa/app/animated_drawer.dart';
 import 'package:takwa/core/widgets/app_bar_widget.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
-import 'package:takwa/app/animated_drawer.dart';
 import 'package:takwa/core/widgets/takwa_error_state.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/core/notifications/overlays/adhan_overlay_screen.dart';
@@ -60,7 +60,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       // AppBarWidget instead of a one-off SliverAppBar — consistent with
       // the rest of the app's app bars (audit item 29).
       appBar: AppBarWidget(
-        leading: const DrawerMenuButton(),
+        // The bar sits on its own gradient, so the button must contrast
+        // with that surface rather than the screen background.
+        leading: DrawerMenuButton(
+          foregroundColor: AppBarWidget.foregroundColorFor(context),
+        ),
         title: l10n.settingsScreenTitle,
         actions: [
           Center(
@@ -157,8 +161,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                                 label: l10n.settingsMorningAdhkarLabel,
                                 sublabel: l10n.settingsMorningAdhkarSublabel,
                                 value: prefs.morningAdhkarReminder,
-                                onChanged: (v) =>
-                                    _updatePref('morning_adhkar_reminder', v),
+                                onChanged: (v) => _updatePref(
+                                  'morning_adhkar_reminder',
+                                  v,
+                                  category: NotificationCategory.adhkar,
+                                ),
                               ),
                               const SettingsDivider(),
                               ToggleSetting(
@@ -166,8 +173,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                                 label: l10n.settingsEveningAdhkarLabel,
                                 sublabel: l10n.settingsEveningAdhkarSublabel,
                                 value: prefs.eveningAdhkarReminder,
-                                onChanged: (v) =>
-                                    _updatePref('evening_adhkar_reminder', v),
+                                onChanged: (v) => _updatePref(
+                                  'evening_adhkar_reminder',
+                                  v,
+                                  category: NotificationCategory.adhkar,
+                                ),
+                              ),
+                              const SettingsDivider(),
+                              ToggleSetting(
+                                icon: '🌙',
+                                label: l10n.settingsSleepAdhkarLabel,
+                                sublabel: l10n.settingsSleepAdhkarSublabel,
+                                value: prefs.sleepAdhkarReminder,
+                                onChanged: (v) => _updatePref(
+                                  'sleep_adhkar_reminder',
+                                  v,
+                                  category: NotificationCategory.adhkar,
+                                ),
                               ),
                               const SettingsDivider(),
                               ToggleSetting(
@@ -187,8 +209,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                                 label: l10n.settingsDailyDuasLabel,
                                 sublabel: l10n.settingsDailyDuasSublabel,
                                 value: prefs.dailyDuasOn,
-                                onChanged: (v) =>
-                                    _updatePref('daily_duas_on', v),
+                                onChanged: (v) => _updatePref(
+                                  'daily_duas_on',
+                                  v,
+                                  category: NotificationCategory.reminders,
+                                ),
                               ),
                               const SettingsDivider(),
                               ToggleSetting(
@@ -208,6 +233,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                                 onChanged: (v) =>
                                     _updatePref('fasting_reminders_on', v),
                               ),
+                              if (prefs.dailyDuasOn) ...[
+                                const SettingsDivider(),
+                                TimeSetting(
+                                  icon: '🤲',
+                                  label: l10n.settingsDuaTimeLabel,
+                                  time: prefs.duaReminderTime,
+                                  onChanged: (t) async {
+                                    final str =
+                                        '${t.hour.toString().padLeft(2, "0")}:${t.minute.toString().padLeft(2, "0")}';
+                                    await _updatePref(
+                                      'dua_reminder_time',
+                                      str,
+                                      category: NotificationCategory.reminders,
+                                    );
+                                  },
+                                ),
+                              ],
                               if (prefs.muhasabaReminder) ...[
                                 const SettingsDivider(),
                                 TimeSetting(

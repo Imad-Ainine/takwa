@@ -12,8 +12,6 @@ import 'package:sound_mode/sound_mode.dart';
 import 'package:sound_mode/utils/ringer_mode_statuses.dart';
 
 import '../utils/timezone_resolver.dart';
-import '../providers/adhkar_providers.dart';
-import '../../features/duas/data/duas_data.dart';
 import 'notifications_service.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
@@ -35,8 +33,6 @@ const _kCityNameKey = 'cityName';
 const _kTimezoneKey = 'timezone';
 const _kHighLatitudeRuleKey = 'high_latitude_rule';
 const _kLastPopupMsKey = 'last_adhkar_popup_ms';
-const _kLastAdhkarNotifMsKey = 'last_adhkar_notif_ms';
-const _kLastDuaNotifMsKey = 'last_dua_notif_ms';
 const _kOverlayEnabledKey = 'overlay_popups_enabled';
 const _kPreAdhanNotifEnabledKey = 'pre_adhan_notif';
 const _kPopupIntervalMinsKey = 'popup_interval_minutes';
@@ -58,8 +54,6 @@ const _kOngoingNotifEnabledKey = 'ongoing_notif_enabled';
 // ─────────────────────────────────────────
 /// كل 24 دقيقة = 60 مرة يومياً تقريباً
 const _kDefaultPopupIntervalMins = 24;
-const _kAdhkarNotifIntervalMins = 15;
-const _kDuaNotifOffsetMins = 7;
 
 /// نافذة اكتشاف وقت الصلاة: ±90 ثانية
 const _kPrayerWindowSecs = 90;
@@ -206,7 +200,8 @@ class OverlayBackgroundService {
     bool? silentModeEnabled,
     int? silentDurationMins,
     double? adhanVolumeLevel,
-  }) {    final Map<String, dynamic> data = {};
+  }) {
+    final Map<String, dynamic> data = {};
     if (overlayEnabled != null) data['overlay_popups_enabled'] = overlayEnabled;
     if (popupIntervalMins != null) {
       data['popup_interval_minutes'] = popupIntervalMins;
@@ -303,8 +298,6 @@ class _OverlayTaskHandler extends TaskHandler {
     await _checkAndTriggerAdhan();
     await _checkAndApplySilentMode();
     if (_overlayEnabled) await _checkAndShowAdhkarOverlay();
-    await _sendPeriodicAdhkarNotification();
-    await _sendPeriodicDuaNotification();
   }
 
   @override
@@ -629,132 +622,6 @@ class _OverlayTaskHandler extends TaskHandler {
   }
 
   // ──────────────────────────────────────
-  //  PERIODIC ADHKAR NOTIFICATION
-  // ──────────────────────────────────────
-  Future<void> _sendPeriodicAdhkarNotification() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final lastMs = prefs.getInt(_kLastAdhkarNotifMsKey) ?? 0;
-      final now = DateTime.now().millisecondsSinceEpoch;
-      const intervalMs = _kAdhkarNotifIntervalMins * 60 * 1000;
-
-      if (now - lastMs < intervalMs) return;
-
-      final allAdhkar = kAdhkarData.values.expand((e) => e).toList();
-      if (allAdhkar.isEmpty) return;
-
-      // اختر أذكاراً مناسبة للوقت
-      final timeBasedAdhkar = _getTimeBasedAdhkar();
-      final dhikr = timeBasedAdhkar.isNotEmpty
-          ? timeBasedAdhkar[_random.nextInt(timeBasedAdhkar.length)]
-          : allAdhkar[_random.nextInt(allAdhkar.length)];
-
-      final arabic = dhikr.arabic.replaceAll('\n', ' ');
-      final preview = arabic.length > 100
-          ? '${arabic.substring(0, 100)}...'
-          : arabic;
-      final fadl = dhikr.fadl != null ? '\n✨ ${dhikr.fadl}' : '';
-
-      await NotificationsService.showNotification(
-        id: NotifIds.morningAdhkar,
-        title: '📿 ${_adhkarCategoryTitle(dhikr.category)}',
-        body: preview + fadl,
-        payload: 'adhkar:${dhikr.id}',
-        channel: NotifChannels.adhkar,
-      );
-
-      await prefs.setInt(_kLastAdhkarNotifMsKey, now);
-    } catch (e) {
-      debugPrint('OverlayService: Adhkar notif error: $e');
-    }
-  }
-
-  List<DhikrItem> _getTimeBasedAdhkar() {
-    final hour = DateTime.now().hour;
-    if (hour >= 5 && hour <= 9) {
-      return kAdhkarData[AdhkarCategory.morning] ?? [];
-    } else if (hour >= 16 && hour <= 19) {
-      return kAdhkarData[AdhkarCategory.evening] ?? [];
-    } else if (hour >= 21 || hour <= 4) {
-      return kAdhkarData[AdhkarCategory.sleep] ?? [];
-    }
-    return kAdhkarData[AdhkarCategory.misc] ?? [];
-  }
-
-  String _adhkarCategoryTitle(AdhkarCategory cat) => switch (cat) {
-    AdhkarCategory.morning => '🌅 أذكار الصباح',
-    AdhkarCategory.evening => '🌆 أذكار المساء',
-    AdhkarCategory.afterPrayer => '🕌 بعد الصلاة',
-    AdhkarCategory.sleep => '🌙 أذكار النوم',
-    AdhkarCategory.misc => '📿 متنوعة',
-    AdhkarCategory.wakingUp => '📿 الاستيقاظ من النوم',
-    AdhkarCategory.food => '📿 الطعام',
-  };
-
-  // ──────────────────────────────────────
-  //  PERIODIC DUA NOTIFICATION
-  // ──────────────────────────────────────
-  Future<void> _sendPeriodicDuaNotification() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final lastDuaMs = prefs.getInt(_kLastDuaNotifMsKey) ?? 0;
-      final lastAdhkarMs = prefs.getInt(_kLastAdhkarNotifMsKey) ?? 0;
-      final now = DateTime.now().millisecondsSinceEpoch;
-      const intervalMs = _kAdhkarNotifIntervalMins * 60 * 1000;
-      const offsetMs = _kDuaNotifOffsetMins * 60 * 1000;
-
-      if (now - lastDuaMs < intervalMs) return;
-      if (now - lastAdhkarMs < offsetMs) return; // انتظر بعد الأذكار
-
-      final allDuas = kDuasData.values.expand((e) => e).toList();
-      if (allDuas.isEmpty) return;
-
-      // اختر دعاءً مناسباً للوقت
-      final timeBasedDuas = _getTimeBasedDuas();
-      final dua = timeBasedDuas.isNotEmpty
-          ? timeBasedDuas[_random.nextInt(timeBasedDuas.length)]
-          : allDuas[_random.nextInt(allDuas.length)];
-
-      final arabic = dua.arabic;
-      final meaning = '\n💫 ${dua.meaning}';
-      final source = dua.source.isNotEmpty ? '\n— ${dua.source}' : '';
-
-      await NotificationsService.showNotification(
-        id: NotifIds.randomDua,
-        title: '${dua.emoji} دعاء من تقوى',
-        body: arabic + meaning + source,
-        payload: 'dua:${dua.id}',
-        channel: NotifChannels.duas,
-      );
-
-      await prefs.setInt(_kLastDuaNotifMsKey, now);
-    } catch (e) {
-      debugPrint('OverlayService: Dua notif error: $e');
-    }
-  }
-
-  List<DuaItem> _getTimeBasedDuas() {
-    final hour = DateTime.now().hour;
-    if (hour >= 5 && hour <= 9) {
-      return kDuasData[DuaCategory.morning] ?? [];
-    } else if (hour >= 7 && hour <= 22) {
-      // نهاراً: كل أنواع الأدعية
-      final all = <DuaItem>[
-        ...kDuasData[DuaCategory.guidance] ?? [],
-        ...kDuasData[DuaCategory.rizq] ?? [],
-        ...kDuasData[DuaCategory.health] ?? [],
-        ...kDuasData[DuaCategory.general] ?? [],
-      ];
-      return all;
-    } else {
-      return <DuaItem>[
-        ...kDuasData[DuaCategory.forgiveness] ?? [],
-        ...kDuasData[DuaCategory.general] ?? [],
-      ];
-    }
-  }
-
-  // ──────────────────────────────────────
   //  PRAYER TIMES
   // ──────────────────────────────────────
   _PrayerInfo _nextPrayer(DateTime now) {
@@ -783,7 +650,9 @@ class _OverlayTaskHandler extends TaskHandler {
         // times the main isolate had written — someone in Cairo got Algiers
         // alarms until their next location refresh. Leaving the existing
         // schedule alone is strictly better than replacing it with a guess.
-        debugPrint('OverlayService: no saved coordinates, prayer times unchanged');
+        debugPrint(
+          'OverlayService: no saved coordinates, prayer times unchanged',
+        );
         return;
       }
 
@@ -880,7 +749,9 @@ class _OverlayTaskHandler extends TaskHandler {
           }
         } catch (e) {
           // If SoundMode throws, default to scheduling for all prayers.
-          debugPrint('OverlayService: SoundMode check in reschedule failed: $e');
+          debugPrint(
+            'OverlayService: SoundMode check in reschedule failed: $e',
+          );
           onlyPrayers = null;
         }
       }

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
 import 'package:quran_library/quran_library.dart' as ql;
@@ -607,7 +608,11 @@ class _QuranReaderScreenState extends ConsumerState<QuranReaderScreen>
   // Both reuse quran_library's own tafsir bottom sheet (font-size controls,
   // tafsir/translation switcher already built in) — only the initially
   // selected entry differs between the two.
-  void _openTafsirOrTranslation(int surahNum, int ayahNum, {required bool translation}) {
+  void _openTafsirOrTranslation(
+    int surahNum,
+    int ayahNum, {
+    required bool translation,
+  }) {
     final ayah = _findAyah(surahNum, ayahNum);
     if (ayah == null) return;
     final tafsirCtrl = ql.TafsirCtrl.instance;
@@ -2011,7 +2016,7 @@ class _ReadingGuideDialog extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('📖', style: TextStyle(fontSize: 20)),
+                  const IslamicGlyph('📖', size: 20),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     l10n.quranReaderGuideTitle,
@@ -2111,7 +2116,7 @@ class _GuideItem extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(emoji, style: const TextStyle(fontSize: 16)),
+        IslamicGlyph(emoji, size: 16),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
@@ -2479,7 +2484,7 @@ class _OptionRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Text(emoji, style: const TextStyle(fontSize: 18)),
+            IslamicGlyph(emoji, size: 18),
           ],
         ),
       ),

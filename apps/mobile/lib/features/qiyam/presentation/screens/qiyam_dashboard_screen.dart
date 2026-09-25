@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/routes/app_routes.dart';
 import 'package:takwa/features/qiyam/domain/models/qiyam_session.dart';
 import 'package:takwa/features/qiyam/providers/qiyam_providers.dart';
@@ -259,7 +260,9 @@ class _QiyamDashboardScreenState extends ConsumerState<QiyamDashboardScreen>
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: context.colors.gold.withValues(alpha: 0.3),
+                                color: context.colors.gold.withValues(
+                                  alpha: 0.3,
+                                ),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -334,12 +337,15 @@ class _QiyamDashboardScreenState extends ConsumerState<QiyamDashboardScreen>
                 end: Alignment.bottomRight,
                 colors: [context.colors.card, context.colors.night],
               ),
-              border: Border.all(color: stage.color.withValues(alpha: 0.3), width: 2),
+              border: Border.all(
+                color: stage.color.withValues(alpha: 0.3),
+                width: 2,
+              ),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(stage.emoji, style: const TextStyle(fontSize: 40)),
+                IslamicGlyph(stage.emoji, size: 40),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   _formatDuration(
@@ -495,7 +501,9 @@ class _QiyamDashboardScreenState extends ConsumerState<QiyamDashboardScreen>
                 ],
               ),
               borderRadius: BorderRadius.circular(AppRadius.xl),
-              border: Border.all(color: context.colors.gold.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: context.colors.gold.withValues(alpha: 0.3),
+              ),
             ),
             child: Stack(
               children: [
@@ -759,7 +767,9 @@ class _IntroBannerNotificationState extends State<_IntroBannerNotification>
                   ],
                 ),
                 borderRadius: BorderRadius.circular(AppRadius.lg),
-                border: Border.all(color: context.colors.gold.withValues(alpha: 0.4)),
+                border: Border.all(
+                  color: context.colors.gold.withValues(alpha: 0.4),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: context.colors.gold.withValues(alpha: 0.15),
@@ -770,7 +780,7 @@ class _IntroBannerNotificationState extends State<_IntroBannerNotification>
               ),
               child: Row(
                 children: [
-                  const Text('🌙', style: TextStyle(fontSize: 28)),
+                  const IslamicGlyph('🌙', size: 28),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Column(
@@ -794,7 +804,9 @@ class _IntroBannerNotificationState extends State<_IntroBannerNotification>
                           l10n.qiyamDashboardBannerDesc,
                           style: context.typography.bodyMedium.copyWith(
                             fontWeight: FontWeight.w500,
-                            color: context.colors.background.withValues(alpha: 0.8),
+                            color: context.colors.background.withValues(
+                              alpha: 0.8,
+                            ),
                           ),
                         ),
                       ],

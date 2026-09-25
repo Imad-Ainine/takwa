@@ -7,6 +7,7 @@ import 'package:adhan/adhan.dart' as adhan;
 import 'package:takwa/core/theme/ramadan_theme.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/l10n/app_localizations.dart';
@@ -296,7 +297,9 @@ class _QiblaCompassPainter extends CustomPainter {
         c,
         r - i * 18,
         Paint()
-          ..color = (isAligned ? primaryColor : tealColor).withValues(alpha: 0.03 + i * 0.02)
+          ..color = (isAligned ? primaryColor : tealColor).withValues(
+            alpha: 0.03 + i * 0.02,
+          )
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1,
       );
@@ -364,7 +367,9 @@ class _QiblaCompassPainter extends CustomPainter {
         style: TextStyle(
           fontFamily: 'Amiri',
           fontSize: 13,
-          color: d.$1 == north ? primaryColor : primaryColor.withValues(alpha: 0.4),
+          color: d.$1 == north
+              ? primaryColor
+              : primaryColor.withValues(alpha: 0.4),
         ),
       );
       tp.layout();
@@ -483,9 +488,9 @@ class _CompassCenter extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
+          IslamicGlyph(
             isAligned ? '🕋' : '🧭',
-            style: TextStyle(fontSize: isAligned ? 26 : 22),
+            size: isAligned ? 26 : 22,
           ),
           Text(
             '${qiblaDir.round()}°',
@@ -584,7 +589,7 @@ class _InfoCard extends StatelessWidget {
     ),
     child: Column(
       children: [
-        Text(icon, style: const TextStyle(fontSize: 18)),
+        IslamicGlyph(icon, size: 18),
         const SizedBox(height: AppSpacing.xs),
         Text(
           value,
@@ -704,7 +709,7 @@ class _QiblaCompassError extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('🧭', style: TextStyle(fontSize: 40)),
+          const IslamicGlyph('🧭', size: 40),
           const SizedBox(height: AppSpacing.md),
           Text(l10n.qiblaCompassUnavailableTitle, style: style.amiri(16)),
           const SizedBox(height: 6),

@@ -53,15 +53,17 @@ class NotifIds {
   // محاسبة مسائية
   static const eveningMuhasaba = 200;
 
-  // أذكار
-  static const morningAdhkar = 300;
-  static const eveningAdhkar = 301;
-  static const afterPrayerAdhkar = 302;
-  static const sleepAdhkar = 303;
-  static const randomAdhkar = 304;
+  // أذكار — the ids AdhkarNotificationService schedules under; its
+  // prayer-anchored one-shots use the 4000/4100 blocks further below.
+  static const adhkarMorning = 310;
+  static const adhkarEvening = 311;
+  static const adhkarSleep = 314;
 
   // أدعية
-  static const randomDua = 400;
+  static const dailyDua = 404;
+
+  /// Superseded by [dailyDua] — kept so `cancelDailyDuas()` can clear alarms
+  /// a user scheduled under an older build.
   static const dailyDuaMorning = 401;
   static const dailyDuaEvening = 402;
   static const distressDua = 403;
@@ -144,6 +146,22 @@ class NotifIds {
     123,
     124,
   };
+
+  // ── أذكار مرتبطة بوقت الصلاة على مدى عدة أيام ──
+  // After-Fajr and after-Asr adhkar can't repeat on a fixed clock the way the
+  // morning/evening/sleep reminders do: Fajr moves through the year, so a
+  // hardcoded time drifts onto the wrong side of the prayer. They are
+  // therefore one-shot per day across the same horizon as the prayer alerts,
+  // which needs a distinct id per reminder per day.
+
+  static const _afterFajrAdhkarIdBase = 4000;
+  static const _afterAsrAdhkarIdBase = 4100;
+
+  static int afterFajrAdhkarId(int dayOffset) =>
+      _afterFajrAdhkarIdBase + dayOffset;
+
+  static int afterAsrAdhkarId(int dayOffset) =>
+      _afterAsrAdhkarIdBase + dayOffset;
 }
 
 /// How many days of prayer alerts are kept scheduled ahead of time.
@@ -242,6 +260,39 @@ class NotifChannels {
     enableVibration: false,
   );
 
+  /// One channel per litanies category that can be reminded about, so the
+  /// system notification settings let a user silence أذكار النوم without
+  /// silencing أذكار الصباح. The ids must match the `adhkar_<category>` ids
+  /// AdhkarNotificationService posts to: Android drops a notification whose
+  /// channel was never created, and it does so silently — which is how the
+  /// adhkar reminders could be scheduled correctly and still never appear.
+  static List<AndroidNotificationChannel> get adhkarCategories => [
+    AndroidNotificationChannel(
+      'adhkar_morning',
+      _l10n.notifAdhkarMorningChannelName,
+      description: _l10n.notifAdhkarChannelDesc,
+      importance: Importance.defaultImportance,
+      playSound: false,
+      enableVibration: false,
+    ),
+    AndroidNotificationChannel(
+      'adhkar_evening',
+      _l10n.notifAdhkarEveningChannelName,
+      description: _l10n.notifAdhkarChannelDesc,
+      importance: Importance.defaultImportance,
+      playSound: false,
+      enableVibration: false,
+    ),
+    AndroidNotificationChannel(
+      'adhkar_sleep',
+      _l10n.notifAdhkarSleepChannelName,
+      description: _l10n.notifAdhkarChannelDesc,
+      importance: Importance.defaultImportance,
+      playSound: false,
+      enableVibration: false,
+    ),
+  ];
+
   /// قناة الأدعية
   static final AndroidNotificationChannel duas = AndroidNotificationChannel(
     'duas_channel',
@@ -316,6 +367,7 @@ class NotifChannels {
     alert,
     muhasaba,
     adhkar,
+    ...adhkarCategories,
     duas,
     achievement,
     reminders,
@@ -552,8 +604,10 @@ class NotificationsService {
 
     // iOS caps an app at 64 pending local notifications, and the oldest beyond
     // that are dropped silently. A 7-day horizon is up to 105 entries, which
-    // would leave the tail unannounced; 4 days (60 entries) fits.
-    final effectiveDays = Platform.isIOS ? min(days, 4) : days;
+    // would leave the tail unannounced; 3 days (45 entries) leaves room for
+    // the other alarms the same scheduleAll() writes — the adhkar reminders
+    // (up to 3 repeating + 4 anchored) and the daily dua.
+    final effectiveDays = Platform.isIOS ? min(days, 3) : days;
 
     await cancelPrayerNotifications(days: effectiveDays);
 
@@ -757,102 +811,44 @@ class NotificationsService {
     );
   }
 
-  // ── جدولة أذكار الصباح والمساء يومياً ──
-  // Not called from anywhere in the app — AdhkarNotificationService in
-  // adhkar_providers.dart is the notifier actually wired up via
-  // NotificationsManager.scheduleAll(). Left as hardcoded Arabic
-  // (unlike the live methods above) rather than localized, since
-  // spending effort on unreachable code isn't worth the risk of a typo
-  // no one would ever see fire.
-  static Future<void> scheduleAdhkarReminders({
-    required TimeOfDay morningTime,
-    required TimeOfDay eveningTime,
+  // ── جدولة دعاء اليوم ──
+  //
+  // One reminder a day, at the time the user chose, drawing from the category
+  // that fits that hour: a 6 AM ping brings أدعية الصباح and a 10 PM one
+  // brings أدعية النوم. It used to post three fixed clocks (09:00, 12:00 and
+  // 21:00) regardless of the chosen time, and nothing cancelled them when
+  // `dailyDuasOn` was switched off — so the alarms stayed queued.
+  static Future<void> scheduleDailyDuas({
+    required UserPreferences prefs,
+    required AppLocalizations l10n,
   }) async {
-    await _plugin.cancel(NotifIds.morningAdhkar);
-    await _plugin.cancel(NotifIds.eveningAdhkar);
+    await cancelDailyDuas();
+    final time = prefs.duaReminderTime;
+    final now = DateTime.now();
+    var fireAt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+    if (!fireAt.isAfter(now)) fireAt = fireAt.add(const Duration(days: 1));
 
-    // أذكار الصباح
-    final morningDhikr = _randomFromCategory(AdhkarCategory.morning);
-    await _scheduleDailyAt(
-      id: NotifIds.morningAdhkar,
-      title: '🌅 أذكار الصباح',
-      body: morningDhikr != null
-          ? _truncate(morningDhikr.arabic, 120)
-          : 'لا تنس أذكار الصباح — حصنك اليومي',
-      time: morningTime,
-      channelId: NotifChannels.adhkar.id,
-      payload: 'adhkar:morning',
-    );
+    final dua = duaForHour(time.hour, fireAt);
+    if (dua == null) return;
 
-    // أذكار المساء
-    final eveningDhikr = _randomFromCategory(AdhkarCategory.evening);
     await _scheduleDailyAt(
-      id: NotifIds.eveningAdhkar,
-      title: '🌆 أذكار المساء',
-      body: eveningDhikr != null
-          ? _truncate(eveningDhikr.arabic, 120)
-          : 'اللهم بك أمسينا وبك أصبحنا وبك نحيا وبك نموت',
-      time: eveningTime,
-      channelId: NotifChannels.adhkar.id,
-      payload: 'adhkar:evening',
-    );
-
-    // أذكار النوم
-    await _scheduleDailyAt(
-      id: NotifIds.sleepAdhkar,
-      title: '🌙 أذكار النوم',
-      body: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا — حان وقت أذكار النوم',
-      time: const TimeOfDay(hour: 22, minute: 0),
-      channelId: NotifChannels.adhkar.id,
-      payload: 'adhkar:sleep',
+      id: NotifIds.dailyDua,
+      title: '${dua.emoji} ${l10n.notifDuaTodayTitle}',
+      body: _truncate(dua.arabic, 150),
+      time: time,
+      channelId: NotifChannels.duas.id,
+      payload: 'dua:${dua.id}',
     );
   }
 
-  // ── جدولة أدعية يومية ──
-  static Future<void> scheduleDailyDuas({
-    required AppLocalizations l10n,
-  }) async {
-    // دعاء الصباح (9:00)
-    final morningDua = _getTimedDua(DuaCategory.morning);
-    if (morningDua != null) {
-      await _scheduleDailyAt(
-        id: NotifIds.dailyDuaMorning,
-        title: '${morningDua.emoji} ${l10n.notifDuaMorningTitle}',
-        body: _truncate(morningDua.arabic, 150),
-        time: const TimeOfDay(hour: 9, minute: 0),
-        channelId: NotifChannels.duas.id,
-        payload: 'dua:${morningDua.id}',
-      );
-    }
-
-    // دعاء المساء (9:00 م)
-    final eveningDua = _getRandomDua([
-      DuaCategory.forgiveness,
-      DuaCategory.guidance,
-      DuaCategory.general,
-    ]);
-    if (eveningDua != null) {
-      await _scheduleDailyAt(
-        id: NotifIds.dailyDuaEvening,
-        title: '${eveningDua.emoji} ${l10n.notifDuaEveningTitle}',
-        body: _truncate(eveningDua.arabic, 150),
-        time: const TimeOfDay(hour: 21, minute: 0),
-        channelId: NotifChannels.duas.id,
-        payload: 'dua:${eveningDua.id}',
-      );
-    }
-
-    // دعاء الكرب (12:00) — وسط النهار
-    final distressDua = _getTimedDua(DuaCategory.distress);
-    if (distressDua != null) {
-      await _scheduleDailyAt(
-        id: NotifIds.distressDua,
-        title: '${distressDua.emoji} ${l10n.notifDuaTodayTitle}',
-        body: _truncate(distressDua.arabic, 150),
-        time: const TimeOfDay(hour: 12, minute: 0),
-        channelId: NotifChannels.duas.id,
-        payload: 'dua:${distressDua.id}',
-      );
+  static Future<void> cancelDailyDuas() async {
+    for (final id in [
+      NotifIds.dailyDua,
+      NotifIds.dailyDuaMorning,
+      NotifIds.dailyDuaEvening,
+      NotifIds.distressDua,
+    ]) {
+      await _plugin.cancel(id);
     }
   }
 
@@ -1336,27 +1332,43 @@ class NotificationsService {
   }
 
   // ── helpers ──
-  static DhikrItem? _randomFromCategory(AdhkarCategory cat) {
-    final list = kAdhkarData[cat];
-    if (list == null || list.isEmpty) return null;
-    return list[Random(DateTime.now().dayOfYear).nextInt(list.length)];
+  /// The dua categories that fit a wall-clock hour: أدعية الصباح in the
+  /// morning, الاستغفار والرزق around midday, أدعية المساء from Asr onwards,
+  /// أدعية النوم at bedtime, and جوامع الدعاء for the last part of the night.
+  static List<DuaCategory> duaCategoriesForHour(int hour) {
+    if (hour >= 3 && hour < 11) {
+      return [DuaCategory.morning, DuaCategory.guidance];
+    }
+    if (hour >= 11 && hour < 16) {
+      return [DuaCategory.forgiveness, DuaCategory.rizq];
+    }
+    if (hour >= 16 && hour < 20) {
+      return [DuaCategory.evening, DuaCategory.distress];
+    }
+    if (hour >= 20) return [DuaCategory.sleep, DuaCategory.general];
+    // 0–2، آخر الليل: مناجاة عامة ودعاء الكرب.
+    return [DuaCategory.general, DuaCategory.distress];
   }
 
-  static DuaItem? _getTimedDua(DuaCategory cat) {
-    final list = kDuasData[cat];
-    if (list == null || list.isEmpty) return null;
-    return list[Random(DateTime.now().dayOfYear).nextInt(list.length)];
-  }
-
-  static DuaItem? _getRandomDua(List<DuaCategory> cats) {
-    final pool = cats.expand((c) => kDuasData[c] ?? []).toList();
+  /// Rotated by day rather than shuffled, so re-running a schedule for the
+  /// same day cannot change the text under an alarm that is already queued.
+  static DuaItem? duaForHour(int hour, DateTime date) {
+    final pool = [
+      for (final cat in duaCategoriesForHour(hour)) ...?kDuasData[cat],
+    ];
     if (pool.isEmpty) return null;
-    return pool[Random(DateTime.now().dayOfYear).nextInt(pool.length)];
+    return pool[date.dayOfYear % pool.length];
   }
 
+  /// Shortened at a word boundary — the plain `substring` this replaces cut
+  /// Arabic words in half mid-sentence.
   static String _truncate(String text, int maxLen) {
-    final clean = text.replaceAll('\n', ' ');
-    return clean.length > maxLen ? '${clean.substring(0, maxLen)}...' : clean;
+    final clean = text.replaceAll('\n', ' ').trim();
+    if (clean.length <= maxLen) return clean;
+    var cut = clean.substring(0, maxLen);
+    final lastSpace = cut.lastIndexOf(' ');
+    if (lastSpace > maxLen * 3 ~/ 4) cut = cut.substring(0, lastSpace);
+    return '$cut…';
   }
 
   static String _formatTime(DateTime dt) {
@@ -1706,7 +1718,16 @@ class NotificationRouter {
         _goToShellTab(ctx, 2); // المحاسبة
         break;
       case 'adhkar':
-        Navigator.pushNamed(ctx, Routes.adhkar);
+        // `adhkar:<category>` (see AdhkarNotificationService) — land on the
+        // tab the reminder was about, not always the first one.
+        final catIndex = AdhkarCategory.values.indexWhere(
+          (c) => c.name == param,
+        );
+        Navigator.pushNamed(
+          ctx,
+          Routes.adhkar,
+          arguments: catIndex >= 0 ? catIndex : null,
+        );
         break;
       case 'dua':
         Navigator.pushNamed(ctx, Routes.duas);
@@ -1874,11 +1895,13 @@ class NotificationsManager {
     }
 
     // الأذكار
-    await AdhkarNotificationService.rescheduleAll(prefs, l10n: l10n);
+    await _scheduleAdhkar(prefs, l10n);
 
     // الأدعية
     if (prefs.dailyDuasOn) {
-      await NotificationsService.scheduleDailyDuas(l10n: l10n);
+      await NotificationsService.scheduleDailyDuas(prefs: prefs, l10n: l10n);
+    } else {
+      await NotificationsService.cancelDailyDuas();
     }
 
     // التذكيرات الخاصة
@@ -1977,10 +2000,41 @@ class NotificationsManager {
     }
   }
 
+  /// Hands the adhkar reminders their location, so the after-Fajr and
+  /// after-Asr ones can be anchored to the real prayer times instead of a
+  /// clock. Resolving today's prayer times first is what writes a first-run
+  /// user's coordinates back to settings (see [_scheduleUpcomingPrayers]);
+  /// if that fails the reminders still go out on their clock times, which
+  /// needs no location at all.
+  Future<void> _scheduleAdhkar(
+    UserPreferences prefs,
+    AppLocalizations l10n,
+  ) async {
+    double? latitude;
+    double? longitude;
+    String? timezone;
+    try {
+      await _ref.read(prayerTimesProvider.future);
+      final settings = _ref.read(settingsDaoProvider);
+      latitude = double.tryParse(await settings.get('latitude') ?? '');
+      longitude = double.tryParse(await settings.get('longitude') ?? '');
+      timezone = await settings.get('timezone');
+    } catch (e) {
+      debugPrint('NotificationsManager: location unavailable for adhkar: $e');
+    }
+    await AdhkarNotificationService.rescheduleAll(
+      prefs,
+      l10n: l10n,
+      latitude: latitude,
+      longitude: longitude,
+      timezone: timezone,
+    );
+  }
+
   Future<void> _rescheduleAdhkar() async {
-    // Adhkar IDs are handled internally by AdhkarNotificationService.rescheduleAll
+    // Adhkar ids are handled internally by AdhkarNotificationService.rescheduleAll
     final prefs = await _ref.read(userPreferencesProvider.future);
-    await AdhkarNotificationService.rescheduleAll(prefs, l10n: _currentL10n());
+    await _scheduleAdhkar(prefs, _currentL10n());
   }
 
   Future<void> _rescheduleReminders() async {
@@ -2008,7 +2062,9 @@ class NotificationsManager {
     }
 
     if (prefs.dailyDuasOn) {
-      await NotificationsService.scheduleDailyDuas(l10n: l10n);
+      await NotificationsService.scheduleDailyDuas(prefs: prefs, l10n: l10n);
+    } else {
+      await NotificationsService.cancelDailyDuas();
     }
 
     await NotificationsService.scheduleSpecialReminders(

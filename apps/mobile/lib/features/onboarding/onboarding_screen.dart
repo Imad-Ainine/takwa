@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/primary_button.dart';
@@ -347,11 +348,7 @@ class _IntroStep extends StatelessWidget {
       child: Column(
         children: [
           const SizedBox(height: 60),
-          Expanded(
-            child: Center(
-              child: Text(data.emoji, style: const TextStyle(fontSize: 100)),
-            ),
-          ),
+          Expanded(child: Center(child: IslamicGlyph(data.emoji, size: 100))),
           _InfoCard(
             title: data.title(l10n),
             titleColor: context.colors.gold,
@@ -732,12 +729,7 @@ class _GenderCardState extends State<_GenderCard>
                     width: widget.selected ? 2.5 : 1.5,
                   ),
                 ),
-                child: Center(
-                  child: Text(
-                    widget.emoji,
-                    style: const TextStyle(fontSize: 36),
-                  ),
-                ),
+                child: Center(child: IslamicGlyph(widget.emoji, size: 36)),
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
@@ -875,9 +867,7 @@ class _AuthStepState extends State<_AuthStep>
                       ),
                     ],
                   ),
-                  child: const Center(
-                    child: Text('🌙', style: TextStyle(fontSize: 38)),
-                  ),
+                  child: const Center(child: IslamicGlyph('🌙', size: 38)),
                 ),
               ),
             ),
@@ -963,7 +953,7 @@ class _BenefitRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      Text(icon, style: const TextStyle(fontSize: 16)),
+      IslamicGlyph(icon, size: 16),
       const SizedBox(width: 10),
       Text(
         label,
@@ -974,11 +964,7 @@ class _BenefitRow extends StatelessWidget {
         ),
       ),
       const Spacer(),
-      Icon(
-        Icons.check_circle_rounded,
-        size: 16,
-        color: context.colors.success,
-      ),
+      Icon(Icons.check_circle_rounded, size: 16, color: context.colors.success),
     ],
   );
 }
@@ -1199,7 +1185,9 @@ class _PlanCard extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: selected ? context.colors.gold : Colors.transparent,
                     border: Border.all(
-                      color: selected ? context.colors.gold : context.colors.border,
+                      color: selected
+                          ? context.colors.gold
+                          : context.colors.border,
                       width: 2,
                     ),
                   ),
@@ -1232,10 +1220,14 @@ class _PlanCard extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: (badgeColor ?? context.colors.gold).withValues(alpha: 0.15),
+                      color: (badgeColor ?? context.colors.gold).withValues(
+                        alpha: 0.15,
+                      ),
                       borderRadius: BorderRadius.circular(AppRadius.md),
                       border: Border.all(
-                        color: (badgeColor ?? context.colors.gold).withValues(alpha: 0.3),
+                        color: (badgeColor ?? context.colors.gold).withValues(
+                          alpha: 0.3,
+                        ),
                       ),
                     ),
                     child: Text(
@@ -1307,9 +1299,7 @@ class _InfoCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.card.withValues(alpha: 0.95),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border(
-          top: BorderSide(color: context.colors.border, width: 1),
-        ),
+        border: Border(top: BorderSide(color: context.colors.border, width: 1)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.3),
@@ -2048,7 +2038,8 @@ class _BackgroundIllustration extends CustomPainter {
         ),
         const Radius.circular(2),
       ),
-      batteryPaint..color = colors.teal.withValues(alpha: 0.5 + (0.5 * progress)),
+      batteryPaint
+        ..color = colors.teal.withValues(alpha: 0.5 + (0.5 * progress)),
     );
 
     // Gear icons around signifying background services

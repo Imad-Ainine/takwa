@@ -6,6 +6,8 @@ import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
+import 'package:takwa/features/settings/presentation/screens/chargily_payment_screen.dart';
+import 'package:takwa/features/settings/presentation/screens/wise_payment_screen.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 class PaymentMethodsScreen extends ConsumerStatefulWidget {
@@ -53,14 +55,24 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
                           index: 0,
                           title: l10n.paymentMethodEdahabiaTitle,
                           subtitle: '100.00 DZD',
-                          icon: '💳',
+                          icon: Image.asset(
+                            'assets/images/edahabia.png',
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.credit_card, size: 24),
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         _buildMethodCard(
                           index: 1,
                           title: l10n.paymentMethodVisaTitle,
                           subtitle: '€10.00',
-                          icon: '🌍',
+                          icon: Image.asset(
+                            'assets/images/visa_mastercard.webp',
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.credit_card, size: 24),
+                          ),
                         ),
                       ],
                     ),
@@ -76,89 +88,93 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
   }
 
   Widget _buildMethodCard({
-    required int index,
-    required String title,
-    required String subtitle,
-    required String icon,
-  }) {
-    final isSelected = _selectedMethod == index;
-    return TakwaTappable(
-      onTap: () => setState(() => _selectedMethod = index),
-      semanticLabel: '$title. $subtitle',
-      borderRadius: BorderRadius.circular(AppRadius.xl),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? context.colors.gold.withValues(alpha: 0.08)
-              : context.colors.card,
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          border: Border.all(
-            color: isSelected ? context.colors.gold : context.colors.border,
-            width: isSelected ? 2 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: context.colors.gold.withValues(alpha: 0.15),
-                    blurRadius: 12,
-                    spreadRadius: 2,
-                  ),
-                ]
-              : null,
+  required int index,
+  required String title,
+  required String subtitle,
+  required Widget icon, // <-- was: required String icon (fed to IslamicGlyph)
+}) {
+  final isSelected = _selectedMethod == index;
+  return TakwaTappable(
+    onTap: () => setState(() => _selectedMethod = index),
+    semanticLabel: '$title. $subtitle',
+    borderRadius: BorderRadius.circular(AppRadius.xl),
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? context.colors.gold.withValues(alpha: 0.08)
+            : context.colors.card,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(
+          color: isSelected ? context.colors.gold : context.colors.border,
+          width: isSelected ? 2 : 1,
         ),
-        child: Row(
-          children: [
-            _buildRadioIndicator(isSelected),
-            const SizedBox(width: AppSpacing.lg),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: context.typography.labelLarge.copyWith(
-                      color: context.colors.textPrimary,
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w600,
-                      fontSize: 17,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    subtitle,
-                    style: context.typography.caption.copyWith(
-                      color: isSelected
-                          ? context.colors.gold
-                          : context.colors.textDim,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                color: context.colors.background.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                border: Border.all(
-                  color: context.colors.border.withValues(alpha: 0.5),
+        boxShadow: isSelected
+            ? [
+                BoxShadow(
+                  color: context.colors.gold.withValues(alpha: 0.15),
+                  blurRadius: 12,
+                  spreadRadius: 2,
                 ),
-              ),
-              child: Center(
-                child: Text(icon, style: const TextStyle(fontSize: 28)),
+              ]
+            : null,
+      ),
+      child: Row(
+        children: [
+          _buildRadioIndicator(isSelected),
+          const SizedBox(width: AppSpacing.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: context.typography.labelLarge.copyWith(
+                    color: context.colors.textPrimary,
+                    fontWeight:
+                        isSelected ? FontWeight.w700 : FontWeight.w600,
+                    fontSize: 17,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  subtitle,
+                  style: context.typography.caption.copyWith(
+                    color: isSelected
+                        ? context.colors.gold
+                        : context.colors.textDim,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 54,
+            height: 54,
+            padding: const EdgeInsets.all(10), // breathing room for logos
+            decoration: BoxDecoration(
+              // Card logos (Visa/Mastercard/Edahabia) are usually designed
+              // for white backgrounds — keep this white regardless of theme
+              // so they don't look muddy in dark mode.
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(
+                color: context.colors.border.withValues(alpha: 0.5),
               ),
             ),
-          ],
-        ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.md - 4),
+              child: icon,
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildSupportMessage(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -252,12 +268,83 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
       child: PrimaryButton(
         label: l10n.paymentContinueButton,
-        onTap: () {
-          // Implementation for actual payment would go here
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.paymentComingSoonMessage)),
-          );
-        },
+        onTap: _continue,
+      ),
+    );
+  }
+
+  void _continue() {
+    if (_selectedMethod == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const WisePaymentScreen(),
+        ),
+      );
+      return;
+    }
+    _pickChargilyCard();
+  }
+
+  /// Edahabia and CIB both go through the same Chargily hosted checkout;
+  /// the choice only preselects the card network on the payment page.
+  Future<void> _pickChargilyCard() async {
+    final l10n = AppLocalizations.of(context)!;
+    final method = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: context.colors.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxl)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Text(
+                l10n.paymentChooseCardSheetTitle,
+                style: context.typography.labelLarge.copyWith(
+                  color: context.colors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl,
+                vertical: AppSpacing.sm,
+              ),
+              leading: Icon(
+                Icons.credit_card_rounded,
+                color: context.colors.gold,
+              ),
+              title: Text(l10n.paymentMethodEdahabiaOnly),
+              onTap: () => Navigator.pop(sheetContext, 'edahabia'),
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl,
+                vertical: AppSpacing.sm,
+              ),
+              leading: Icon(
+                Icons.account_balance_rounded,
+                color: context.colors.gold,
+              ),
+              title: Text(l10n.paymentChargilyCibTitle),
+              onTap: () => Navigator.pop(sheetContext, 'cib'),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ),
+      ),
+    );
+    if (method == null) return;
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChargilyPaymentScreen(paymentMethod: method),
       ),
     );
   }

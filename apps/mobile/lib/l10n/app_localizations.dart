@@ -821,7 +821,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsMorningAdhkarSublabel.
   ///
   /// In ar, this message translates to:
-  /// **'تذكير يومي الساعة ٦:٣٠ ص'**
+  /// **'تذكير في الوقت المحدد أو بعد الفجر'**
   String get settingsMorningAdhkarSublabel;
 
   /// No description provided for @settingsEveningAdhkarLabel.
@@ -833,8 +833,20 @@ abstract class AppLocalizations {
   /// No description provided for @settingsEveningAdhkarSublabel.
   ///
   /// In ar, this message translates to:
-  /// **'تذكير يومي الساعة ٥:٠٠ م'**
+  /// **'تذكير في الوقت المحدد أو بعد العصر'**
   String get settingsEveningAdhkarSublabel;
+
+  /// No description provided for @settingsSleepAdhkarLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'أذكار النوم'**
+  String get settingsSleepAdhkarLabel;
+
+  /// No description provided for @settingsSleepAdhkarSublabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'تذكير قبل النوم في الوقت المحدد'**
+  String get settingsSleepAdhkarSublabel;
 
   /// No description provided for @settingsMuhasabaLabel.
   ///
@@ -889,6 +901,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'وقت المحاسبة'**
   String get settingsMuhasabaTimeLabel;
+
+  /// No description provided for @settingsDuaTimeLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'وقت دعاء اليوم'**
+  String get settingsDuaTimeLabel;
 
   /// No description provided for @settingsAppearanceSectionTitle.
   ///
@@ -2011,6 +2029,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'بعد الصلاة'**
   String get duaCategoryAfterPrayer;
+
+  /// No description provided for @duaCategoryHome.
+  ///
+  /// In ar, this message translates to:
+  /// **'المنزل'**
+  String get duaCategoryHome;
+
+  /// No description provided for @duaCategoryFood.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطعام'**
+  String get duaCategoryFood;
+
+  /// No description provided for @duaCategoryAnger.
+  ///
+  /// In ar, this message translates to:
+  /// **'الغضب'**
+  String get duaCategoryAnger;
+
+  /// No description provided for @duaCategoryClothing.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللباس'**
+  String get duaCategoryClothing;
 
   /// No description provided for @duaCategoryGeneral.
   ///
@@ -4670,11 +4712,29 @@ abstract class AppLocalizations {
   /// **'الاستيقاظ من النوم'**
   String get adhkarTabWakingUp;
 
+  /// No description provided for @adhkarTabHome.
+  ///
+  /// In ar, this message translates to:
+  /// **'المنزل'**
+  String get adhkarTabHome;
+
+  /// No description provided for @adhkarTabTravel.
+  ///
+  /// In ar, this message translates to:
+  /// **'السفر'**
+  String get adhkarTabTravel;
+
   /// No description provided for @adhkarTabFood.
   ///
   /// In ar, this message translates to:
   /// **'الطعام'**
   String get adhkarTabFood;
+
+  /// No description provided for @adhkarTabGathering.
+  ///
+  /// In ar, this message translates to:
+  /// **'المجلس'**
+  String get adhkarTabGathering;
 
   /// No description provided for @adhkarTabMisc.
   ///
@@ -4789,6 +4849,42 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'بعد صلاة العصر'**
   String get adhkarNotifAfterAsrLabel;
+
+  /// No description provided for @adhkarNotifDailySection.
+  ///
+  /// In ar, this message translates to:
+  /// **'تذكير في وقت محدد'**
+  String get adhkarNotifDailySection;
+
+  /// No description provided for @adhkarNotifPrayerSection.
+  ///
+  /// In ar, this message translates to:
+  /// **'تذكير مرتبط بالصلاة'**
+  String get adhkarNotifPrayerSection;
+
+  /// No description provided for @adhkarNotifDelayLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'التأخير بعد الصلاة'**
+  String get adhkarNotifDelayLabel;
+
+  /// No description provided for @adhkarNotifDelayMinutes.
+  ///
+  /// In ar, this message translates to:
+  /// **'{mins} دقيقة'**
+  String adhkarNotifDelayMinutes(int mins);
+
+  /// No description provided for @adhkarNotifAfterPrayerHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'بعد الصلاة بـ {mins} دقيقة'**
+  String adhkarNotifAfterPrayerHint(int mins);
+
+  /// No description provided for @adhkarNotifAnchorNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'يُرسل التذكير بعد وقت الصلاة في موقعك ويحلّ محل الوقت المحدد، فلا يصلك تنبيهان للأذكار نفسها.'**
+  String get adhkarNotifAnchorNote;
 
   /// No description provided for @qiblaScreenTitle.
   ///
@@ -4981,108 +5077,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تذكير يومي'**
   String get khatmaDailyReminderLabel;
-
-  /// No description provided for @overlayAdhkarMorning.
-  ///
-  /// In ar, this message translates to:
-  /// **'أذكار الصباح'**
-  String get overlayAdhkarMorning;
-
-  /// No description provided for @overlayAdhkarEvening.
-  ///
-  /// In ar, this message translates to:
-  /// **'أذكار المساء'**
-  String get overlayAdhkarEvening;
-
-  /// No description provided for @overlayAdhkarAfterPrayer.
-  ///
-  /// In ar, this message translates to:
-  /// **'أذكار بعد الصلاة'**
-  String get overlayAdhkarAfterPrayer;
-
-  /// No description provided for @overlayAdhkarSleep.
-  ///
-  /// In ar, this message translates to:
-  /// **'أذكار النوم'**
-  String get overlayAdhkarSleep;
-
-  /// No description provided for @overlayAdhkarMisc.
-  ///
-  /// In ar, this message translates to:
-  /// **'أذكار متنوعة'**
-  String get overlayAdhkarMisc;
-
-  /// No description provided for @overlayAdhkarWakingUp.
-  ///
-  /// In ar, this message translates to:
-  /// **'الاستيقاظ من النوم'**
-  String get overlayAdhkarWakingUp;
-
-  /// No description provided for @overlayAdhkarFood.
-  ///
-  /// In ar, this message translates to:
-  /// **'أذكار الطعام'**
-  String get overlayAdhkarFood;
-
-  /// No description provided for @overlayDuaMorning.
-  ///
-  /// In ar, this message translates to:
-  /// **'دعاء الصباح'**
-  String get overlayDuaMorning;
-
-  /// No description provided for @overlayDuaDistress.
-  ///
-  /// In ar, this message translates to:
-  /// **'دعاء الكرب'**
-  String get overlayDuaDistress;
-
-  /// No description provided for @overlayDuaGuidance.
-  ///
-  /// In ar, this message translates to:
-  /// **'دعاء الهداية'**
-  String get overlayDuaGuidance;
-
-  /// No description provided for @overlayDuaForgiveness.
-  ///
-  /// In ar, this message translates to:
-  /// **'دعاء المغفرة'**
-  String get overlayDuaForgiveness;
-
-  /// No description provided for @overlayDuaRizq.
-  ///
-  /// In ar, this message translates to:
-  /// **'دعاء الرزق'**
-  String get overlayDuaRizq;
-
-  /// No description provided for @overlayDuaHealth.
-  ///
-  /// In ar, this message translates to:
-  /// **'دعاء الصحة'**
-  String get overlayDuaHealth;
-
-  /// No description provided for @overlayDuaParents.
-  ///
-  /// In ar, this message translates to:
-  /// **'دعاء الوالدين'**
-  String get overlayDuaParents;
-
-  /// No description provided for @overlayDuaTravel.
-  ///
-  /// In ar, this message translates to:
-  /// **'دعاء السفر'**
-  String get overlayDuaTravel;
-
-  /// No description provided for @overlayDuaRain.
-  ///
-  /// In ar, this message translates to:
-  /// **'دعاء الاستسقاء'**
-  String get overlayDuaRain;
-
-  /// No description provided for @overlayDuaGeneral.
-  ///
-  /// In ar, this message translates to:
-  /// **'دعاء عام'**
-  String get overlayDuaGeneral;
 
   /// No description provided for @overlayTypeDua.
   ///
@@ -6776,6 +6770,18 @@ abstract class AppLocalizations {
   /// **'حان وقت أذكار النوم'**
   String get notifAdhkarSleepTitle;
 
+  /// No description provided for @notifAdhkarAfterFajrTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أذكار الصباح بعد صلاة الفجر'**
+  String get notifAdhkarAfterFajrTitle;
+
+  /// No description provided for @notifAdhkarAfterAsrTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أذكار المساء بعد صلاة العصر'**
+  String get notifAdhkarAfterAsrTitle;
+
   /// No description provided for @notifAdhkarMorningChannelName.
   ///
   /// In ar, this message translates to:
@@ -7429,6 +7435,222 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'سيتم تفعيل الدفع قريباً إن شاء الله'**
   String get paymentComingSoonMessage;
+
+  /// No description provided for @paymentChooseCardSheetTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر شبكة بطاقتك'**
+  String get paymentChooseCardSheetTitle;
+
+  /// No description provided for @paymentMethodEdahabiaOnly.
+  ///
+  /// In ar, this message translates to:
+  /// **'الذهبية'**
+  String get paymentMethodEdahabiaOnly;
+
+  /// No description provided for @paymentChargilyCibTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'CIB'**
+  String get paymentChargilyCibTitle;
+
+  /// No description provided for @paymentChargilyDescription.
+  ///
+  /// In ar, this message translates to:
+  /// **'تقوى — دعم شهري'**
+  String get paymentChargilyDescription;
+
+  /// No description provided for @paymentStillPending.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يتم تأكيد الدفع بعد. نواصل التحقق بينما تُكمّل العملية في المتصفح.'**
+  String get paymentStillPending;
+
+  /// No description provided for @paymentCreatingCheckout.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ تحضير صفحة الدفع…'**
+  String get paymentCreatingCheckout;
+
+  /// No description provided for @paymentCreatingCheckoutSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'إنشاء جلسة دفع آمنة مع Chargily.'**
+  String get paymentCreatingCheckoutSubtitle;
+
+  /// No description provided for @paymentAwaitingTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أكمل عملية الدفع'**
+  String get paymentAwaitingTitle;
+
+  /// No description provided for @paymentAwaitingSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادفع في الصفحة التي فُتحت في المتصفح. نؤكد الدفع هنا تلقائياً بمجرد إشعار Chargily.'**
+  String get paymentAwaitingSubtitle;
+
+  /// No description provided for @paymentVerifyingTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ التحقق من الدفع…'**
+  String get paymentVerifyingTitle;
+
+  /// No description provided for @paymentSuccessTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم استلام الدفع'**
+  String get paymentSuccessTitle;
+
+  /// No description provided for @paymentSuccessSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'جزاكم الله خيراً — دعمكم يبقي تقوى مجانياً للجميع.'**
+  String get paymentSuccessSubtitle;
+
+  /// No description provided for @paymentFailedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'فشل الدفع'**
+  String get paymentFailedTitle;
+
+  /// No description provided for @paymentFailedSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يكتمل الدفع. يمكنك المحاولة مجدداً.'**
+  String get paymentFailedSubtitle;
+
+  /// No description provided for @paymentCanceledTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم إلغاء الدفع'**
+  String get paymentCanceledTitle;
+
+  /// No description provided for @paymentCanceledSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يتم خصم أي مبلغ. عُد متى كنت مستعداً.'**
+  String get paymentCanceledSubtitle;
+
+  /// No description provided for @paymentErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدث خطأ ما'**
+  String get paymentErrorTitle;
+
+  /// No description provided for @paymentErrorSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذر تجهيز جلسة الدفع. حاول مجدداً من فضلك.'**
+  String get paymentErrorSubtitle;
+
+  /// No description provided for @paymentOpenCheckoutAgain.
+  ///
+  /// In ar, this message translates to:
+  /// **'فتح صفحة الدفع مجدداً'**
+  String get paymentOpenCheckoutAgain;
+
+  /// No description provided for @paymentIAmDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لقد أكملت الدفع'**
+  String get paymentIAmDone;
+
+  /// No description provided for @paymentDoneButton.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم'**
+  String get paymentDoneButton;
+
+  /// No description provided for @paymentRetryButton.
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة المحاولة'**
+  String get paymentRetryButton;
+
+  /// No description provided for @wiseScreenTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'فيزا / ماستركارد عبر Wise'**
+  String get wiseScreenTitle;
+
+  /// No description provided for @wiseIntroMessage.
+  ///
+  /// In ar, this message translates to:
+  /// **'أرسل دعمك الشهري مباشرة إلى حساب المطوّر على Wise من تطبيق Wise أو تطبيق بنكك. استخدم المرجع أدناه حتىتمكن معرفة تحويلك.'**
+  String get wiseIntroMessage;
+
+  /// Snack-bar shown after copying a Wise recipient field
+  ///
+  /// In ar, this message translates to:
+  /// **'تم نسخ {label} إلى الحافظة'**
+  String wiseCopiedMessage(String label);
+
+  /// No description provided for @wiseHolderLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'صاحب الحساب'**
+  String get wiseHolderLabel;
+
+  /// No description provided for @wiseIbanLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'الآيبان (IBAN)'**
+  String get wiseIbanLabel;
+
+  /// No description provided for @wiseAccountLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم الحساب'**
+  String get wiseAccountLabel;
+
+  /// No description provided for @wiseSortCodeLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'رمز الترتيب'**
+  String get wiseSortCodeLabel;
+
+  /// No description provided for @wiseBankLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'البنك'**
+  String get wiseBankLabel;
+
+  /// No description provided for @wiseAmountLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'المبلغ'**
+  String get wiseAmountLabel;
+
+  /// No description provided for @wiseReferenceLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'مرجع الدفع'**
+  String get wiseReferenceLabel;
+
+  /// No description provided for @wiseOpenButton.
+  ///
+  /// In ar, this message translates to:
+  /// **'فتح Wise'**
+  String get wiseOpenButton;
+
+  /// No description provided for @wiseSentButton.
+  ///
+  /// In ar, this message translates to:
+  /// **'لقد أرسلت الدفع'**
+  String get wiseSentButton;
+
+  /// No description provided for @wiseThanksTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'جزاكم الله خيراً'**
+  String get wiseThanksTitle;
+
+  /// No description provided for @wiseThanksSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تسجيل تحويلك هنا. يظهر رسمياً بعد مطابقة كشف الحساب.'**
+  String get wiseThanksSubtitle;
 
   /// No description provided for @qiyamOnboardingTitle.
   ///

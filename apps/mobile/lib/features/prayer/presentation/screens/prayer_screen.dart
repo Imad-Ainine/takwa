@@ -9,9 +9,10 @@ import 'package:takwa/core/theme/ramadan_theme.dart';
 import 'package:takwa/core/notifications/notifications_service.dart';
 import 'package:takwa/core/notifications/location_prayer_update.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
-import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
-import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
+import 'package:takwa/core/widgets/primary_button.dart';
+import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
 import 'package:takwa/core/utils/prayer_display.dart';
 import 'package:takwa/l10n/app_localizations.dart';
@@ -961,9 +962,7 @@ class _PrayerNameBadge extends StatelessWidget {
                 ),
               ],
             ),
-            child: Center(
-              child: Text(visual.emoji, style: const TextStyle(fontSize: 30)),
-            ),
+            child: Center(child: IslamicGlyph(visual.emoji, size: 30)),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -1194,11 +1193,7 @@ class _CountdownArcPainter extends CustomPainter {
           endAngle: 3 * math.pi / 2,
           colors: isIqama
               ? [successColor, tealColor, successColor]
-              : [
-                  primaryColor,
-                  goldColor.withValues(alpha: 0.95),
-                  primaryColor,
-                ],
+              : [primaryColor, goldColor.withValues(alpha: 0.95), primaryColor],
         ).createShader(rect)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 17
@@ -1357,7 +1352,7 @@ class _TimeCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 21)),
+          IslamicGlyph(icon, size: 21),
           const SizedBox(height: 6),
           Text(
             label,
@@ -1590,7 +1585,7 @@ class _PrayerTableRow extends StatelessWidget {
             child: Row(
               children: [
                 // أيقونة + اسم
-                Text(prayer.emoji, style: const TextStyle(fontSize: 18)),
+                IslamicGlyph(prayer.emoji, size: 18),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -1988,7 +1983,7 @@ class _SunChip extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(icon, style: const TextStyle(fontSize: 20)),
+          IslamicGlyph(icon, size: 20),
           const SizedBox(height: AppSpacing.xs),
           Text(
             label,
@@ -2117,9 +2112,7 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                 decoration: BoxDecoration(
                   color: style.bg,
                   borderRadius: BorderRadius.circular(36),
-                  border: Border.all(
-                    color: style.gold.withValues(alpha: 0.15),
-                  ),
+                  border: Border.all(color: style.gold.withValues(alpha: 0.15)),
                 ),
                 child: Column(
                   children: [
@@ -2163,9 +2156,7 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                 decoration: BoxDecoration(
                   color: style.bg,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: style.gold.withValues(alpha: 0.12),
-                  ),
+                  border: Border.all(color: style.gold.withValues(alpha: 0.12)),
                 ),
                 child: Column(
                   children: [

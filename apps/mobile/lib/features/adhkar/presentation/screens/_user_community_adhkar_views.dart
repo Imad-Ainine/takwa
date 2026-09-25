@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:takwa/core/providers/user_content_providers.dart';
+import 'package:takwa/core/supabase/supabase_config.dart';
+import 'package:takwa/core/theme/app_theme.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
+import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/core/widgets/takwa_refresh_indicator.dart';
-import 'package:takwa/core/providers/user_content_providers.dart';
-import 'package:takwa/core/theme/app_theme.dart';
-import 'package:takwa/core/supabase/supabase_config.dart';
-import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
@@ -172,9 +173,7 @@ class _UserAdhkarCardState extends ConsumerState<_UserAdhkarCard>
                       color: context.colors.gold.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Center(
-                      child: Text('📿', style: TextStyle(fontSize: 18)),
-                    ),
+                    child: const Center(child: IslamicGlyph('📿', size: 18)),
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
@@ -415,7 +414,9 @@ class _ShareToCommunitySheetState
             decoration: BoxDecoration(
               color: context.colors.gold.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: context.colors.gold.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: context.colors.gold.withValues(alpha: 0.2),
+              ),
             ),
             child: Column(
               children: [
@@ -988,7 +989,9 @@ class _AddAdhkarSheetState extends ConsumerState<AddAdhkarSheet> {
                     value: _shareWithCommunity,
                     onChanged: (v) => setState(() => _shareWithCommunity = v),
                     activeThumbColor: context.colors.teal,
-                    activeTrackColor: context.colors.teal.withValues(alpha: 0.3),
+                    activeTrackColor: context.colors.teal.withValues(
+                      alpha: 0.3,
+                    ),
                     inactiveTrackColor: context.colors.border,
                     inactiveThumbColor: context.colors.textDim,
                   ),

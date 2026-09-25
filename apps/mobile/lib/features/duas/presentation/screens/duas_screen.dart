@@ -4,39 +4,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:takwa/core/theme/ramadan_theme.dart';
 
-import 'package:takwa/core/widgets/custom_pattern_background.dart';
-import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/providers/database_providers.dart';
-import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/providers/favorites_providers.dart';
 import 'package:takwa/core/providers/user_content_providers.dart';
 import 'package:takwa/core/supabase/supabase_config.dart';
+import 'package:takwa/core/widgets/custom_leading_button.dart';
+import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
+import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/core/widgets/takwa_refresh_indicator.dart';
 import 'package:takwa/features/duas/data/duas_data.dart';
 import 'package:takwa/features/duas/presentation/screens/favorite_duas_screen.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
-const _categoryEmoji = {
-  DuaCategory.morning: '🌅',
-  DuaCategory.evening: '🌑',
-  DuaCategory.sleep: '🛌',
-  DuaCategory.wakingUp: '☀️',
-  DuaCategory.distress: '🌊',
-  DuaCategory.guidance: '🌟',
-  DuaCategory.forgiveness: '🌿',
-  DuaCategory.rizq: '🌾',
-  DuaCategory.health: '🫀',
-  DuaCategory.parents: '❤️',
-  DuaCategory.travel: '✈️',
-  DuaCategory.rain: '🌧️',
-  DuaCategory.istikhara: '⚖️',
-  DuaCategory.mosque: '🕌',
-  DuaCategory.knowledge: '📖',
-  DuaCategory.afterPrayer: '📿',
-  DuaCategory.general: '🤲',
-};
-
+/// The short chip label for a category. The name comes from l10n and the icon
+/// from `DuaCategoryLabel` in the data file, which is the only emoji source —
+/// the local `Map<DuaCategory, String>` it replaces had no entry for the newer
+/// categories and silently rendered every one of them as '🤲'.
 String _categoryLabel(AppLocalizations l10n, DuaCategory cat) => switch (cat) {
   DuaCategory.morning => l10n.duaCategoryMorning,
   DuaCategory.evening => l10n.duaCategoryEvening,
@@ -54,6 +39,10 @@ String _categoryLabel(AppLocalizations l10n, DuaCategory cat) => switch (cat) {
   DuaCategory.mosque => l10n.duaCategoryMosque,
   DuaCategory.knowledge => l10n.duaCategoryKnowledge,
   DuaCategory.afterPrayer => l10n.duaCategoryAfterPrayer,
+  DuaCategory.home => l10n.duaCategoryHome,
+  DuaCategory.food => l10n.duaCategoryFood,
+  DuaCategory.anger => l10n.duaCategoryAnger,
+  DuaCategory.clothing => l10n.duaCategoryClothing,
   DuaCategory.general => l10n.duaCategoryGeneral,
 };
 
@@ -347,7 +336,7 @@ class _CategoryFilter extends ConsumerWidget {
             );
           }
           final cat = cats[i - 1];
-          final emoji = _categoryEmoji[cat] ?? '🤲';
+          final emoji = cat.emoji;
           final label = _categoryLabel(l10n, cat);
           return _FilterChip(
             label: '$emoji $label',
@@ -489,7 +478,10 @@ class _DuaCardState extends ConsumerState<_DuaCard> {
         decoration: BoxDecoration(
           gradient: _expanded
               ? LinearGradient(
-                  colors: [s.gold.withValues(alpha: 0.12), s.teal.withValues(alpha: 0.06)],
+                  colors: [
+                    s.gold.withValues(alpha: 0.12),
+                    s.teal.withValues(alpha: 0.06),
+                  ],
                 )
               : null,
           color: _expanded ? null : s.card,
@@ -499,7 +491,12 @@ class _DuaCardState extends ConsumerState<_DuaCard> {
             width: _expanded ? 1.5 : 1,
           ),
           boxShadow: _expanded
-              ? [BoxShadow(color: s.gold.withValues(alpha: 0.1), blurRadius: 12)]
+              ? [
+                  BoxShadow(
+                    color: s.gold.withValues(alpha: 0.1),
+                    blurRadius: 12,
+                  ),
+                ]
               : null,
         ),
         child: Padding(
@@ -510,7 +507,7 @@ class _DuaCardState extends ConsumerState<_DuaCard> {
               // Header
               Row(
                 children: [
-                  Text(widget.dua.emoji, style: const TextStyle(fontSize: 22)),
+                  IslamicGlyph(widget.dua.emoji, size: 22),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
@@ -607,7 +604,9 @@ class _DuaCardState extends ConsumerState<_DuaCard> {
                           decoration: BoxDecoration(
                             color: s.goldDim,
                             borderRadius: BorderRadius.circular(AppRadius.xl),
-                            border: Border.all(color: s.gold.withValues(alpha: 0.2)),
+                            border: Border.all(
+                              color: s.gold.withValues(alpha: 0.2),
+                            ),
                           ),
                           child: Text(
                             widget.dua.source,
@@ -682,7 +681,7 @@ class _UserDuasTabView extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('🤲', style: TextStyle(fontSize: 48)),
+                  const IslamicGlyph('🤲', size: 48),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
                     AppLocalizations.of(context)!.duasNoUserDuasYet,
@@ -737,10 +736,7 @@ class _UserDuaCard extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
             child: Row(
               children: [
-                Text(
-                  dua.emoji.isNotEmpty ? dua.emoji : '🤲',
-                  style: const TextStyle(fontSize: 20),
-                ),
+                IslamicGlyph(dua.emoji.isNotEmpty ? dua.emoji : '🤲', size: 20),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
@@ -1127,10 +1123,7 @@ class _CommunityDuaCardState extends ConsumerState<_CommunityDuaCard>
             padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
             child: Row(
               children: [
-                Text(
-                  dua.emoji.isNotEmpty ? dua.emoji : '🌐',
-                  style: const TextStyle(fontSize: 20),
-                ),
+                IslamicGlyph(dua.emoji.isNotEmpty ? dua.emoji : '🌐', size: 20),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(

@@ -17,6 +17,7 @@ import '../core/utils/taqwa_level_display.dart';
 import '../core/providers/app_info_provider.dart';
 import 'main_shell.dart' show currentTabProvider;
 import 'package:takwa/core/widgets/takwa_error_state.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 // ─────────────────────────────────────────
@@ -467,7 +468,7 @@ class _DrawerHeader extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                const Text('📅', style: TextStyle(fontSize: 14)),
+                const IslamicGlyph('📅', size: 14),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
                   '${hijri.hDay} ${_hijriMonth(l10n, hijri.hMonth)} ${hijri.hYear}',
@@ -593,7 +594,7 @@ class _MiniStatCard extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(icon, style: const TextStyle(fontSize: 16)),
+        IslamicGlyph(icon, size: 16),
         const SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -947,43 +948,71 @@ class _DrawerFooter extends ConsumerWidget {
 
 // ── Drawer Menu Button (للـ AppBar) ──
 class DrawerMenuButton extends ConsumerWidget {
-  const DrawerMenuButton({super.key});
+  /// Optional foreground override for surfaces whose contrast differs from
+  /// the plain screen background (e.g. an app bar sitting on a gradient —
+  /// see `AppBarWidget.foregroundColorFor`).
+  final Color? foregroundColor;
+  const DrawerMenuButton({super.key, this.foregroundColor});
+
+  // The 40x40 visual chip and the 48x48 hit area are fixed here so the
+  // button renders identically in a SliverAppBar leading slot, a nested
+  // AppBar leading slot (which stretches loose-height children), a Row
+  // header, or a bare surface — call sites no longer need wrapper padding.
+  static const double _chipSize = 40;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isOpen = ref.watch(drawerOpenProvider);
+    final colors = context.colors;
+    final fg = foregroundColor ?? colors.textPrimary;
 
-    return GestureDetector(
-      onTap: () => _DrawerScaffoldState.of(context)._toggle(),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: isOpen
-              ? context.colors.goldDim
-              : context.colors.textPrimary.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(
-            color: isOpen
-                ? context.colors.gold.withValues(alpha: 0.3)
-                : context.colors.textPrimary.withValues(alpha: 0.12),
-          ),
-        ),
-        child: Center(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: isOpen
-                ? Icon(
-                    Icons.close_rounded,
-                    key: const ValueKey('close'),
-                    size: 18,
-                    color: context.colors.gold,
-                  )
-                : _HamburgerIcon(
-                    key: const ValueKey('menu'),
-                    color: context.colors.textPrimary,
+    return Semantics(
+      button: true,
+      label: MaterialLocalizations.of(context).openAppDrawerTooltip,
+      child: Tooltip(
+        // Expose the tooltip's semantics to screen readers rather than
+        // waiting on the long-press timer, so the label is always announced.
+        excludeFromSemantics: true,
+        message: MaterialLocalizations.of(context).openAppDrawerTooltip,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _DrawerScaffoldState.of(context)._toggle(),
+          child: Center(
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: Center(
+                child: AnimatedContainer(
+                  duration: AppMotion.fast,
+                  curve: AppMotion.standard,
+                  width: _chipSize,
+                  height: _chipSize,
+                  decoration: BoxDecoration(
+                    color: isOpen ? colors.goldDim : fg.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(
+                      color: isOpen
+                          ? colors.gold.withValues(alpha: 0.3)
+                          : fg.withValues(alpha: 0.12),
+                    ),
                   ),
+                  child: AnimatedSwitcher(
+                    duration: AppMotion.fast,
+                    child: isOpen
+                        ? Icon(
+                            Icons.close_rounded,
+                            key: const ValueKey('close'),
+                            size: 18,
+                            color: colors.gold,
+                          )
+                        : _HamburgerIcon(
+                            key: const ValueKey('menu'),
+                            color: isOpen ? colors.gold : fg,
+                          ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),

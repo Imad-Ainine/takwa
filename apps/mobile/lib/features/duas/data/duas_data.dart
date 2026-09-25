@@ -1,3 +1,11 @@
+/// Duas = supplications asked of Allah for a need or an occasion, each with an
+/// Arabic meaning (`meaning`) — the timed litanies (أذكار الصباح/المساء/النوم/
+/// ما بعد الصلاة) live in `features/adhkar/data/adhkar_data.dart`.
+///
+/// ⚠️ `id` is stable public API: users' favorites persist these ints
+/// (`favorite_duas`). Never renumber or reuse an existing id; new items take
+/// the next free id in their category's 7xx block. Moving an item to a
+/// different category is safe.
 enum DuaCategory {
   morning, // أذكار الصباح
   evening, // أذكار المساء
@@ -15,7 +23,76 @@ enum DuaCategory {
   mosque, // المسجد
   knowledge, // طلب العلم
   afterPrayer, // بعد الصلاة
+  /// Ids 79x — entering and leaving the home.
+  home,
+
+  /// Ids 80x — before and after eating.
+  food,
+
+  /// Id 81x — the remedy for anger.
+  anger,
+
+  /// Ids 82x — wearing new clothes.
+  clothing,
+
+  /// Keep last: the catch-all for jawamiʿ al-duʿāʾ (comprehensive supplications)
+  /// and the pool several callers fall back to.
   general, // جوامع الدعاء
+}
+
+/// Display name and icon for a category. `duas_screen` localizes the name
+/// through `AppLocalizations.duaCategory*`; this is the source used where no
+/// locale is available (the background isolate and the popup window), and the
+/// single source for the emoji — which used to be a `Map<DuaCategory, String>`
+/// literal that silently fell back to '🤲' for any category missing an entry.
+extension DuaCategoryLabel on DuaCategory {
+  String get arabicLabel => switch (this) {
+    DuaCategory.morning => 'أدعية الصباح',
+    DuaCategory.evening => 'أدعية المساء',
+    DuaCategory.sleep => 'أدعية النوم',
+    DuaCategory.wakingUp => 'أدعية الاستيقاظ',
+    DuaCategory.distress => 'أدعية الكرب والهم',
+    DuaCategory.guidance => 'أدعية الهداية',
+    DuaCategory.forgiveness => 'أدعية الاستغفار',
+    DuaCategory.rizq => 'أدعية الرزق',
+    DuaCategory.health => 'أدعية العافية والرقية',
+    DuaCategory.parents => 'أدعية الوالدين',
+    DuaCategory.travel => 'أدعية السفر',
+    DuaCategory.rain => 'أدعية المطر والريح',
+    DuaCategory.istikhara => 'دعاء الاستخارة',
+    DuaCategory.mosque => 'أدعية المسجد',
+    DuaCategory.knowledge => 'أدعية طلب العلم',
+    DuaCategory.afterPrayer => 'أدعية ما بعد الصلاة',
+    DuaCategory.home => 'أدعية المنزل',
+    DuaCategory.food => 'أدعية الطعام',
+    DuaCategory.anger => 'دعاء الغضب',
+    DuaCategory.clothing => 'دعاء اللباس',
+    DuaCategory.general => 'جوامع الدعاء',
+  };
+
+  String get emoji => switch (this) {
+    DuaCategory.morning => '🌅',
+    DuaCategory.evening => '🌑',
+    DuaCategory.sleep => '🛌',
+    DuaCategory.wakingUp => '☀️',
+    DuaCategory.distress => '🌊',
+    DuaCategory.guidance => '🌟',
+    DuaCategory.forgiveness => '🌿',
+    DuaCategory.rizq => '🌾',
+    DuaCategory.health => '🫀',
+    DuaCategory.parents => '❤️',
+    DuaCategory.travel => '✈️',
+    DuaCategory.rain => '🌧️',
+    DuaCategory.istikhara => '⚖️',
+    DuaCategory.mosque => '🕌',
+    DuaCategory.knowledge => '📖',
+    DuaCategory.afterPrayer => '📿',
+    DuaCategory.home => '🏠',
+    DuaCategory.food => '🍽️',
+    DuaCategory.anger => '🕊️',
+    DuaCategory.clothing => '👔',
+    DuaCategory.general => '🤲',
+  };
 }
 
 class DuaItem {
@@ -93,6 +170,16 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       source: 'مسلم',
       category: DuaCategory.morning,
     ),
+    DuaItem(
+      id: 701,
+      emoji: '🛡️',
+      arabic:
+          'رَبِّ أَعُوذُ بِكَ مِنْ هَمَزَاتِ الشَّيَاطِينِ * وَأَعُوذُ بِكَ رَبِّ أَنْ يَحْضُرُونِ',
+      meaning: 'الاستعاذة من وسوسة الشيطان ومن حضوره في المجلس والبيت',
+      occasion: 'أذكار الصباح وعند قراءة القرآن',
+      source: 'مسلم',
+      category: DuaCategory.morning,
+    ),
   ],
 
   // 2. أذكار المساء
@@ -136,6 +223,16 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       source: 'النسائي — صحيح',
       category: DuaCategory.evening,
     ),
+    DuaItem(
+      id: 711,
+      emoji: '🌌',
+      arabic:
+          'اللَّهُمَّ مَا أَمْسَى بِي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ',
+      meaning: 'أداء شكر المساء؛ من قالها فقد أدى شكر ليلته',
+      occasion: 'في المساء',
+      source: 'أبو داود — حسن',
+      category: DuaCategory.evening,
+    ),
   ],
 
   // 3. أذكار النوم
@@ -159,30 +256,10 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       source: 'أبو داود — صحيح',
       category: DuaCategory.sleep,
     ),
-    DuaItem(
-      id: 202,
-      emoji: '🛌',
-      arabic:
-          'الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَكَفَانَا وَآوَانَا، فَكَمْ مِمَّنْ لَا كَافِيَ لَهُ وَلَا مُؤْوِيَ',
-      meaning: 'شكر الله على النعم الأساسية وتذكر المأوى',
-      occasion: 'عند النوم',
-      source: 'مسلم',
-      category: DuaCategory.sleep,
-    ),
   ],
 
   // 4. الاستيقاظ
   DuaCategory.wakingUp: [
-    DuaItem(
-      id: 203,
-      emoji: '☀️',
-      arabic:
-          'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ',
-      meaning: 'شكر الله على نعمة الحياة بعد النوم الذي هو الموتة الصغرى',
-      occasion: 'فور الاستيقاظ من النوم',
-      source: 'البخاري',
-      category: DuaCategory.wakingUp,
-    ),
     DuaItem(
       id: 203,
       emoji: '☀️',
@@ -218,10 +295,10 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       id: 503,
       emoji: '📖',
       arabic:
-          'إِنَّ فِي خَلْقِ السَّمَاوَاتِ وَالْأَرْضِ وَاخْتِلَافِ اللَّيْلِ وَالنَّهَارِ لَآيَاتٍ لِّأُولِي الْأَلْبَابِ...',
-      meaning: 'قراءة العشر آيات الأخيرة من سورة آل عمران',
-      occasion: 'كان النبي ﷺ يقرأها إذا استيقظ وينظر إلى السماء',
-      source: 'آل عمران: ١٩٠ / البخاري ومسلم',
+          'إِنَّ فِي خَلْقِ السَّمَاوَاتِ وَالْأَرْضِ وَاخْتِلَافِ اللَّيْلِ وَالنَّهَارِ لَآيَاتٍ لِأُولِي الْأَلْبَابِ * الَّذِينَ يَذْكُرُونَ اللَّهَ قِيَامًا وَقُعُودًا وَعَلَىٰ جُنُوبِهِمْ وَيَتَفَكَّرُونَ فِي خَلْقِ السَّمَاوَاتِ وَالْأَرْضِ رَبَّنَا مَا خَلَقْتَ هَٰذَا بَاطِلًا سُبْحَانَكَ فَقِنَا عَذَابَ النَّارِ',
+      meaning: 'تلاوة آيات التدبر عند الاستيقاظ، جمعاً بين الذكر والتفكر',
+      occasion: 'كان النبي ﷺ يقرأهما إذا استيقظ ونظر إلى السماء',
+      source: 'آل عمران: ١٩٠-١٩١ — البخاري ومسلم',
       category: DuaCategory.wakingUp,
     ),
     DuaItem(
@@ -231,6 +308,16 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
           'اللَّهُمَّ اجْعَلْ فِي قَلْبِي نُورًا، وَفِي بَصَرِي نُورًا، وَفِي سَمْعِي نُورًا، وَعَنْ يَمِينِي نُورًا، وَعَنْ يَسَارِي نُورًا، وَفَوْقِي نُورًا، وَتَحْتِي نُورًا، وَأَمَامِي نُورًا، وَخَلْفِي نُورًا، وَاجْعَلْ لِي نُورًا',
       meaning: 'دعاء النور الشامل للهداية وحفظ الحواس',
       occasion: 'عند الاستيقاظ والتوجه لصلاة الفجر',
+      source: 'مسلم',
+      category: DuaCategory.wakingUp,
+    ),
+    DuaItem(
+      id: 202,
+      emoji: '🌙',
+      arabic:
+          'الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَكَفَانَا وَآوَانَا، فَكَمْ مِمَّنْ لَا كَافِيَ لَهُ وَلَا مُؤْوِيَ',
+      meaning: 'شكر الله على النعم الأساسية عند الاستيقاظ من الليل',
+      occasion: 'عند التعار من الليل — الاستيقاظ في جوفه',
       source: 'مسلم',
       category: DuaCategory.wakingUp,
     ),
@@ -282,10 +369,31 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       id: 405,
       emoji: '🖤',
       arabic:
-          'اللَّهُمَّ إِنِّي عَبْدُكَ، ابْنُ عَبْدِكَ، ابْنُ أَمَتِكَ، نَاصِيَتِي بِيَدِكَ، مَاضٍ فِيَّ حُكْمُكَ، عَدْلٌ فِيَّ قَضَاؤُكَ، أَسْأَلُكَ بِكُلِّ اسْمٍ هُوَ لَكَ...',
-      meaning: 'دعاء إزالة الهم والحزن وإبداله فرحاً',
+          'اللَّهُمَّ إِنِّي عَبْدُكَ، ابْنُ عَبْدِكَ، ابْنُ أَمَتِكَ، نَاصِيَتِي بِيَدِكَ، مَاضٍ فِيَّ حُكْمُكَ، عَدْلٌ فِيَّ قَضَاؤُكَ، أَسْأَلُكَ بِكُلِّ اسْمٍ هُوَ لَكَ، سَمَّيْتَ بِهِ نَفْسَكَ، أَوْ أَنْزَلْتَهُ فِي كِتَابِكَ، أَوْ عَلَّمْتَهُ أَحَدًا مِنْ خَلْقِكَ، أَوِ اسْتَأْثَرْتَ بِهِ فِي عِلْمِ الْغَيْبِ عِنْدَكَ، أَنْ تَجْعَلَ الْقُرْآنَ رَبِيعَ قَلْبِي، وَنُورَ صَدْرِي، وَجِلَاءَ حُزْنِي، وَذَهَابَ هَمِّي',
+      meaning:
+          'دعاء إزالة الهم والحزن وإبداله فرحاً؛ مضمونه سؤال الله أن يجعل القرآن ربيع القلب',
       occasion: 'عند الحزن والضيق الشديد',
-      source: 'أحمد — صحيح',
+      source: 'مسند أحمد — صحيح',
+      category: DuaCategory.distress,
+    ),
+    DuaItem(
+      id: 721,
+      emoji: '🌊',
+      arabic:
+          'لَا إِلَهَ إِلَّا اللَّهُ الْعَظِيمُ الْحَلِيمُ، سُبْحَانَ اللَّهِ رَبِّ الْعَرْشِ الْعَظِيمِ، الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ',
+      meaning: 'دعوة المكروب التي يُفرَّج بها الكرب',
+      occasion: 'عند الشدة وضيق الحال',
+      source: 'البخاري',
+      category: DuaCategory.distress,
+    ),
+    DuaItem(
+      id: 722,
+      emoji: '🤲',
+      arabic:
+          'اللَّهُمَّ رَحْمَتَكَ أَرْجُو، فَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ، وَأَصْلِحْ لِي شَأْنِي كُلَّهُ، لَا إِلَهَ إِلَّا أَنْتَ',
+      meaning: 'طلب الرحمة وعدم التوكيل للنفس لحظة واحدة',
+      occasion: 'عند القلق والحيرة وثقل الأمر',
+      source: 'أبو داود — صحيح',
       category: DuaCategory.distress,
     ),
   ],
@@ -310,6 +418,16 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       meaning: 'سؤال الله الثبات وتوجيه القلب للطاعة',
       occasion: 'طلب الثبات والهداية',
       source: 'مسلم',
+      category: DuaCategory.guidance,
+    ),
+    DuaItem(
+      id: 831,
+      emoji: '🌟',
+      arabic:
+          'اللَّهُمَّ زَيِّنَّا بِزِينَةِ الْإِيمَانِ، وَاجْعَلْنَا هُدَاةً مَهْدِيِّينَ',
+      meaning: 'طلب التحلي بالإيمان وأن يكون المرشد دالاً على الخير مهتدياً به',
+      occasion: 'دعاء الهداية والثبات',
+      source: 'أبو داود — صحيح',
       category: DuaCategory.guidance,
     ),
   ],
@@ -344,6 +462,28 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       meaning: 'طلب المغفرة والرحمة بعد الاعتراف بظلم النفس',
       occasion: 'في الصلاة (بين التشهد والتسليم) وفي كل وقت',
       source: 'البخاري ومسلم',
+      category: DuaCategory.forgiveness,
+    ),
+    DuaItem(
+      id: 731,
+      emoji: '🌿',
+      arabic:
+          'رَبِّ اغْفِرْ لِي وَتُبْ عَلَيَّ، إِنَّكَ أَنْتَ التَّوَّابُ الرَّحِيمُ',
+      meaning:
+          'الاستغفار مقروناً بالتوبة، وكان النبي ﷺ يلزم هذا القول في المجلس مئة مرة',
+      occasion: 'في المجلس والصباح والمساء',
+      source: 'أبو داود والترمذي — صحيح',
+      category: DuaCategory.forgiveness,
+    ),
+    DuaItem(
+      id: 732,
+      emoji: '🌿',
+      arabic:
+          'أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيَّ الْقَيُّومَ وَأَتُوبُ إِلَيْهِ',
+      meaning:
+          'استغفار يجمع بين طلب المغفرة وتوحيد الله وحياته وقيّوميته، ومن أكثر منه استجابة',
+      occasion: 'كثرة الاستغفار في اليوم',
+      source: 'أبو داود والترمذي — حسن',
       category: DuaCategory.forgiveness,
     ),
   ],
@@ -384,10 +524,20 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       id: 406,
       emoji: '🍞',
       arabic:
-          'اللَّهُمَّ رَبَّ السَّمَاوَاتِ وَرَبَّ الْأَرْضِ وَرَبَّ الْعَرْشِ الْعَظِيمِ، رَبَّنَا وَرَبَّ كُلِّ شَيْءٍ... اقْضِ عَنَّا الدَّيْنَ وَأَغْنِنَا مِنَ الْفَقْرِ',
-      meaning: 'دعاء شامل لسداد الديون والغنى من الفقر',
-      occasion: 'قبل النوم أو عند ضيق الرزق',
+          'اللَّهُمَّ رَبَّ السَّمَاوَاتِ السَّبْعِ وَرَبَّ الْعَرْشِ الْعَظِيمِ، رَبَّنَا وَرَبَّ كُلِّ شَيْءٍ، فَالِقَ الْحَبِّ وَالنَّوَى، وَمُنْزِلَ التَّوْرَاةِ وَالْإِنْجِيلِ وَالْفُرْقَانِ، أَعُوذُ بِكَ مِنْ شَرِّ كُلِّ شَيْءٍ أَنْتَ آخِذٌ بِنَاصِيَتِهِ، اللَّهُمَّ أَنْتَ الْأَوَّلُ فَلَيْسَ قَبْلَكَ شَيْءٌ، وَأَنْتَ الْآخِرُ فَلَيْسَ بَعْدَكَ شَيْءٌ، وَأَنْتَ الظَّاهِرُ فَلَيْسَ فَوْقَكَ شَيْءٌ، وَأَنْتَ الْبَاطِنُ فَلَيْسَ دُونَكَ شَيْءٌ، اقْضِ عَنَّا الدَّيْنَ وَأَغْنِنَا مِنَ الْفَقْرِ',
+      meaning: 'دعاء شامل لسداد الديون والاستغناء عن الفقر',
+      occasion: 'عند الاستيقاظ من النوم، وعند ضيق الرزق والدين',
       source: 'مسلم',
+      category: DuaCategory.rizq,
+    ),
+    DuaItem(
+      id: 741,
+      emoji: '🤲',
+      arabic:
+          'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْفَقْرِ وَالْقِلَّةِ وَالذَّلَّةِ، وَأَنْ أَظْلِمَ أَوْ أُظْلَمَ',
+      meaning: 'الاستعاذة من الفقر ومظاهره ومن الظلم بكل صوره',
+      occasion: 'دعاء جامع لحفظ النعمة والرزق',
+      source: 'سنن أبي داود — صحيح',
       category: DuaCategory.rizq,
     ),
   ],
@@ -415,12 +565,22 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       category: DuaCategory.health,
     ),
     DuaItem(
-      id: 234,
+      id: 751,
+      emoji: '🩹',
+      arabic:
+          'أَعُوذُ بِاللَّهِ الْعَظِيمِ وَبِقُدْرَتِهِ مِنْ شَرِّ مَا أَجِدُ وَأُحَاذِرُ',
+      meaning: 'يُقال عند ألم يجسد أو موضع يجد منه أذى',
+      occasion: 'عند الألم في الجسد — يضع يده عليه ويقولها سبعاً',
+      source: 'مسلم',
+      category: DuaCategory.health,
+    ),
+    DuaItem(
+      id: 752,
       emoji: '🛡️',
       arabic:
-          'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، وَمِنْ عَذَابِ جَهَنَّمَ، وَمِنْ فِتْنَةِ الْمَحْيَا وَالْمَمَاتِ، وَمِنْ شَرِّ فِتْنَةِ الْمَسِيحِ الدَّجَّالِ',
-      meaning: 'الاستعاذة من أربع فتن عظيمة',
-      occasion: 'دبر كل صلاة قبل السلام',
+          'بِسْمِ اللَّهِ أَرْقِيكَ، مِنْ كُلِّ شَيْءٍ يُؤْذِيكَ، مِنْ شَرِّ كُلِّ نَفْسٍ أَوْ عَيْنِ حَاسِدٍ، اللَّهُ يَشْفِيكَ، بِسْمِ اللَّهِ أَغْتَسِلُكَ، مِنَ اللَّهِ يَشْفِيكَ',
+      meaning: 'رقية شرعية كاملة للنفس أو لغيرها بطلب الشفاء من الله',
+      occasion: 'لرقية المريض أو لنفسه',
       source: 'مسلم',
       category: DuaCategory.health,
     ),
@@ -457,6 +617,17 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       source: 'نوح: ٢٨',
       category: DuaCategory.parents,
     ),
+    DuaItem(
+      id: 841,
+      emoji: '🌱',
+      arabic:
+          'رَبِّ أَوْزِعْنِي أَنْ أَشْكُرَ نِعْمَتَكَ الَّتِي أَنْعَمْتَ عَلَيَّ وَعَلَىٰ وَالِدَيَّ وَأَنْ أَعْمَلَ صَالِحًا تَرْضَاهُ وَأَصْلِحْ لِي فِي ذُرِّيَّتِي إِنِّي تُبْتُ إِلَيْكَ وَإِنِّي مِنَ الْمُسْلِمِينَ',
+      meaning:
+          'دعاء سليمان عليه السلام: شكر النعمة، والعمل الصالح، وصلاح الذرية',
+      occasion: 'دعاء للوالدين والذرية الصالحة',
+      source: 'الأحقاف: ١٥',
+      category: DuaCategory.parents,
+    ),
   ],
 
   // 11. السفر
@@ -480,6 +651,16 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       source: 'مسلم',
       category: DuaCategory.travel,
     ),
+    DuaItem(
+      id: 761,
+      emoji: '🏘️',
+      arabic:
+          'اللَّهُمَّ إِنَّا نَسْأَلُكَ خَيْرَهَا وَخَيْرَ أَهْلِهَا وَخَيْرَ مَا فِيهَا، وَنَعُوذُ بِكَ مِنْ شَرِّهَا وَشَرِّ أَهْلِهَا وَشَرِّ مَا فِيهَا',
+      meaning: 'دعاء قدوم الأرض: طلب خيرها وخير أهلها والتحصين من شرها',
+      occasion: 'عند دخول قرية أو مدينة في السفر',
+      source: 'الترمذي والحاكم — حسن',
+      category: DuaCategory.travel,
+    ),
   ],
 
   // 12. المطر والريح
@@ -501,6 +682,36 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       meaning: 'استعاذة من شر الريح وطلب خيرها',
       occasion: 'عند هبوب الريح الشديدة',
       source: 'مسلم',
+      category: DuaCategory.rain,
+    ),
+    DuaItem(
+      id: 771,
+      emoji: '💧',
+      arabic: 'مُطِرْنَا بِفَضْلِ اللَّهِ وَرَحْمَتِهِ',
+      meaning:
+          'شكر الله عند نزول المطر، ونسبة النعمة إلى الله وحده دون الكفر بالنعم',
+      occasion: 'عقب نزول المطر',
+      source: 'البخاري',
+      category: DuaCategory.rain,
+    ),
+    DuaItem(
+      id: 772,
+      emoji: '🌩️',
+      arabic: 'اللَّهُمَّ حَوَالَيْنَا وَلَا عَلَيْنَا',
+      meaning:
+          'سؤال الله أن يجعل المطر في الأراضي المحتاجة ولا يجعله ضرراً على العباد',
+      occasion: 'عند اشتداد المطر وخوف ضرره',
+      source: 'البخاري',
+      category: DuaCategory.rain,
+    ),
+    DuaItem(
+      id: 773,
+      emoji: '🌾',
+      arabic:
+          'اللَّهُمَّ اسْقِنَا غَيْثًا مُغِيثًا مَرِيئًا مَرِيعًا نَافِعًا غَيْرَ ضَارٍّ عَاجِلًا غَيْرَ آجِلٍ',
+      meaning: 'دعاء الاستسقاء: طلب مطر سريع الخير، كثير البركة، لا يصاحبه ضرر',
+      occasion: 'عند الجدب وقلة المطر (بعد صلاة الاستسقاء)',
+      source: 'أبو داود — صحيح',
       category: DuaCategory.rain,
     ),
   ],
@@ -591,6 +802,16 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       source: 'البخاري ومسلم',
       category: DuaCategory.knowledge,
     ),
+    DuaItem(
+      id: 881,
+      emoji: '✍️',
+      arabic:
+          'اللَّهُمَّ لَا سَهْلَ إِلَّا مَا جَعَلْتَهُ سَهْلًا، وَأَنْتَ تَجْعَلُ الْحَزْنَ إِذَا شِئْتَ سَهْلًا',
+      meaning: 'طلب تيسير الله للعسر، وأن بيده وحده أن يجعل الصعب سهلاً',
+      occasion: 'عند المذاكرة والامتحانات وكل أمر صعب',
+      source: 'ابن حبان — صحيح',
+      category: DuaCategory.knowledge,
+    ),
   ],
 
   // 16. بعد الصلاة
@@ -613,6 +834,27 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       meaning: 'طلب العون من الله على أداء العبادات بشكر وإحسان',
       occasion: 'دبر كل صلاة',
       source: 'أبو داود — صحيح',
+      category: DuaCategory.afterPrayer,
+    ),
+    DuaItem(
+      id: 234,
+      emoji: '🛡️',
+      arabic:
+          'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، وَمِنْ عَذَابِ جَهَنَّمَ، وَمِنْ فِتْنَةِ الْمَحْيَا وَالْمَمَاتِ، وَمِنْ شَرِّ فِتْنَةِ الْمَسِيحِ الدَّجَّالِ',
+      meaning: 'الاستعاذة من أربع فتن عظيمة',
+      occasion: 'في التشهد الأخير قبل السلام',
+      source: 'البخاري ومسلم',
+      category: DuaCategory.afterPrayer,
+    ),
+    DuaItem(
+      id: 781,
+      emoji: '🌿',
+      arabic:
+          'اللَّهُمَّ اغْفِرْ لِي مَا قَدَّمْتُ وَمَا أَخَّرْتُ، وَمَا أَسْرَرْتُ وَمَا أَعْلَنْتُ، وَمَا أَسْرَفْتُ وَمَا أَنْتَ أَعْلَمُ بِهِ مِنِّي، أَنْتَ الْمُقَدِّمُ وَأَنْتَ الْمُؤَخِّرُ، لَا إِلَهَ إِلَّا أَنْتَ',
+      meaning:
+          'استغفار شامل يحيط بالذنوب كلها: ما تقدم منها وما تأخر، وما أعلن وما أسر',
+      occasion: 'بعد التسليم من الصلاة',
+      source: 'مسلم',
       category: DuaCategory.afterPrayer,
     ),
   ],
@@ -701,33 +943,130 @@ final kDuasData = <DuaCategory, List<DuaItem>>{
       category: DuaCategory.general,
     ),
     DuaItem(
-      id: 410,
-      emoji: '👔',
+      id: 901,
+      emoji: '🌍',
       arabic:
-          'الْحَمْدُ لِلَّهِ الَّذِي كَسَانِي هَذَا (الثَّوْبَ) وَرَزَقَنِيِهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ',
-      meaning: 'شكر الله على نعمة اللباس؛ غُفر له ما تقدم من ذنبه',
-      occasion: 'عند لبس ثوب جديد أو يومي',
-      source: 'أبو داود — حسن',
+          'اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنَ الْخَيْرِ كُلِّهِ عَاجِلِهِ وَآجِلِهِ، مَا عَلِمْتُ مِنْهُ وَمَا لَمْ أَعْلَمْ، وَأَعُوذُ بِكَ مِنَ الشَّرِّ كُلِّهِ عَاجِلِهِ وَآجِلِهِ، مَا عَلِمْتُ مِنْهُ وَمَا لَمْ أَعْلَمْ',
+      meaning:
+          'دعاء جامع يَستغرق خيري الدنيا والآخرة، ويستعيذ من جميع الشرور، وكان النبي ﷺ يدعو به',
+      occasion: 'دعاء جامع لكل الأوقات',
+      source: 'ابن ماجه — صحيح',
       category: DuaCategory.general,
     ),
     DuaItem(
-      id: 411,
-      emoji: '🍱',
-      arabic: 'اللَّهُمَّ بَارِكْ لَنَا فِيهِ وَأَطْعِمْنَا خَيْرًا مِنْهُ',
-      meaning: 'طلب البركة في الطعام والرزق بما هو أفضل',
-      occasion: 'عند الانتهاء من الطعام',
-      source: 'الترمذي — حسن',
+      id: 902,
+      emoji: '🛡️',
+      arabic: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',
+      meaning:
+          'كفاية الله وحده، كان قول إبراهيم عليه السلام حين أُلقي في النار، وقول النبي ﷺ وأصحابه حين خافوا من الناس',
+      occasion: 'عند الخوف والحاجة إلى الكفاية',
+      source: 'آل عمران: ١٧٣ — البخاري',
       category: DuaCategory.general,
     ),
+  ],
+
+  // 18. المنزل
+  DuaCategory.home: [
     DuaItem(
       id: 412,
       emoji: '🏠',
       arabic:
-          'بِسْمِ اللهِ وَلَجْنَا، وَبِسْمِ اللهِ خَرَجْنَا، وَعَلَى رَبِّنَا تَوَكَّلْنَا',
-      meaning: 'ذكر الله عند دخول البيت لطرد الشيطان وجلب البركة',
+          'بِسْمِ اللَّهِ وَلَجْنَا، وَبِسْمِ اللَّهِ خَرَجْنَا، وَعَلَى اللَّهِ رَبِّنَا تَوَكَّلْنَا',
+      meaning: 'ذكر الله عند دخول البيت؛ يُكفى ويُجمع له ما فرّط الشيطان',
       occasion: 'عند دخول المنزل',
-      source: 'أبو داود',
-      category: DuaCategory.general,
+      source: 'أبو داود — حسن',
+      category: DuaCategory.home,
+    ),
+    DuaItem(
+      id: 791,
+      emoji: '🚪',
+      arabic:
+          'بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
+      meaning: 'تفويض الأمر لله عند الخروج؛ يُكفى ويُقى ويُهادى',
+      occasion: 'عند الخروج من المنزل',
+      source: 'أبو داود والترمذي — حسن',
+      category: DuaCategory.home,
+    ),
+    DuaItem(
+      id: 792,
+      emoji: '🕋',
+      arabic:
+          'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ أَنْ أَضِلَّ، أَوْ أُضَلَّ، أَوْ أَزِلَّ، أَوْ أُزَلَّ، أَوْ أَظْلِمَ، أَوْ أُظْلَمَ، أَوْ أَجْهَلَ، أَوْ يُجْهَلَ عَلَيَّ',
+      meaning: 'الاستعاذة من الزلل والظلم والجهل على النفس وغيره',
+      occasion: 'عند الخروج من المنزل',
+      source: 'أبو داود والترمذي — صحيح',
+      category: DuaCategory.home,
+    ),
+  ],
+
+  // 19. الطعام والشراب
+  DuaCategory.food: [
+    DuaItem(
+      id: 411,
+      emoji: '🍽️',
+      arabic: 'اللَّهُمَّ بَارِكْ لَنَا فِيهِ وَأَطْعِمْنَا خَيْرًا مِنْهُ',
+      meaning: 'طلب البركة في الطعام، وسؤال الله ما هو خير منه',
+      occasion: 'عند أُتي بالطعام أو شرب اللبن',
+      source: 'الترمذي — حسن',
+      category: DuaCategory.food,
+    ),
+    DuaItem(
+      id: 801,
+      emoji: '🥗',
+      arabic:
+          'الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مِنَ الْمُسْلِمِينَ',
+      meaning: 'شكر الله على تمام الطعام وعلى نعمة الإسلام',
+      occasion: 'عند الفراغ من الطعام',
+      source: 'أبو داود والترمذي — صحيح',
+      category: DuaCategory.food,
+    ),
+    DuaItem(
+      id: 802,
+      emoji: '🤲',
+      arabic:
+          'أَكَلَ طَعَامَكُمُ الْأَبْرَارُ، وَشَرِبَ شَرَابَكُمُ الشَّاكِرُونَ، وَصَلَّتْ عَلَيْكُمُ الْمَلَائِكَةُ',
+      meaning: 'الدعاء لصاحب الطعام الذي دعاك وأطعمك',
+      occasion: 'لمن أطعمك طعاماً إذا فرغت من الأكل',
+      source: 'أبو داود والنسائي — حسن',
+      category: DuaCategory.food,
+    ),
+  ],
+
+  // 20. الغضب
+  DuaCategory.anger: [
+    DuaItem(
+      id: 811,
+      emoji: '🕊️',
+      arabic: 'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ',
+      meaning:
+          'الغضب جمرة من الشيطان، والاستعاذة تُذهب ما يجده المرء من حرارته',
+      occasion: 'عند الغضب والشجار',
+      source: 'البخاري',
+      category: DuaCategory.anger,
+    ),
+  ],
+
+  // 21. اللباس
+  DuaCategory.clothing: [
+    DuaItem(
+      id: 410,
+      emoji: '👔',
+      arabic:
+          'الْحَمْدُ لِلَّهِ الَّذِي كَسَانِي هَذَا الثَّوْبَ وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ',
+      meaning: 'شكر الله على نعمة اللباس؛ غُفر له ما تقدم من ذنبه',
+      occasion: 'عند لبس ثوب جديد أو يومي',
+      source: 'أبو داود والترمذي — حسن',
+      category: DuaCategory.clothing,
+    ),
+    DuaItem(
+      id: 821,
+      emoji: '🧥',
+      arabic:
+          'اللَّهُمَّ لَكَ الْحَمْدُ، أَنْتَ كَسَوْتَنِيهِ، أَسْأَلُكَ خَيْرَهُ وَخَيْرَ مَا صُنِعَ لَهُ، وَأَعُوذُ بِكَ مِنْ شَرِّهِ وَشَرِّ مَا صُنِعَ لَهُ',
+      meaning: 'سؤال خير الثوب والاستعاذة من شره وما يُعصى الله به بسببه',
+      occasion: 'عند لبس الثوب الجديد',
+      source: 'أبو داود والترمذي — حسن',
+      category: DuaCategory.clothing,
     ),
   ],
 };

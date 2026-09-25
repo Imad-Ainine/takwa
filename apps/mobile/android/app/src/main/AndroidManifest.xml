@@ -45,6 +45,15 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="io.supabase.takwa" />
             </intent-filter>
+            <!-- Chargily checkout redirects (success_url / failure_url) bring
+                 the user back to the app after the card attempt -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="takwa" android:host="payment-success" />
+                <data android:scheme="takwa" android:host="payment-failure" />
+            </intent-filter>
             <!-- home_widget: lets HomeWidgetLaunchIntent open the app when
                  the prayer-times widget is tapped (PrayerWidgetProvider.kt) -->
             <intent-filter>

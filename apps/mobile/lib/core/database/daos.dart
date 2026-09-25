@@ -1408,8 +1408,10 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
       'morning_adhkar_time': 'morning_adhkar_time',
       'evening_adhkar_time': 'evening_adhkar_time',
       'sleep_adhkar_time': 'sleep_adhkar_time',
+      'sleep_adhkar_reminder': 'sleep_adhkar_reminder',
       'after_fajr_adhkar': 'after_fajr_adhkar',
       'after_asr_adhkar': 'after_asr_adhkar',
+      'adhkar_after_prayer_minutes': 'adhkar_after_prayer_minutes',
 
       // ── Muhasaba ────────────────────────────────────────────────
       // FIX: was mapped to 'eveningMuhasabaReminder' — fromMap reads 'muhasaba_reminder'
@@ -1418,6 +1420,7 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
 
       // ── Extra reminders ─────────────────────────────────────────
       'daily_duas_on': 'daily_duas_on',
+      'dua_reminder_time': 'dua_reminder_time',
       'special_reminders_on': 'special_reminders_on',
       'fasting_reminders_on': 'fasting_reminders_on',
 

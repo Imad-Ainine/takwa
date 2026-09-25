@@ -6,8 +6,9 @@ import 'package:takwa/core/notifications/notifications_service.dart';
 import 'package:takwa/core/notifications/overlay_background_service.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/app_bar_widget.dart';
-import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
+import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
 import 'package:takwa/features/settings/providers/user_preferences_provider.dart';
@@ -694,7 +695,7 @@ class _PrayerOffsetRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       child: Row(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 18)),
+          IslamicGlyph(icon, size: 18),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(

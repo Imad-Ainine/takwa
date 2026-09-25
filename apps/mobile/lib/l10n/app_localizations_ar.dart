@@ -381,13 +381,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsMorningAdhkarLabel => 'أذكار الصباح';
 
   @override
-  String get settingsMorningAdhkarSublabel => 'تذكير يومي الساعة ٦:٣٠ ص';
+  String get settingsMorningAdhkarSublabel =>
+      'تذكير في الوقت المحدد أو بعد الفجر';
 
   @override
   String get settingsEveningAdhkarLabel => 'أذكار المساء';
 
   @override
-  String get settingsEveningAdhkarSublabel => 'تذكير يومي الساعة ٥:٠٠ م';
+  String get settingsEveningAdhkarSublabel =>
+      'تذكير في الوقت المحدد أو بعد العصر';
+
+  @override
+  String get settingsSleepAdhkarLabel => 'أذكار النوم';
+
+  @override
+  String get settingsSleepAdhkarSublabel => 'تذكير قبل النوم في الوقت المحدد';
 
   @override
   String get settingsMuhasabaLabel => 'محاسبة مسائية';
@@ -416,6 +424,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsMuhasabaTimeLabel => 'وقت المحاسبة';
+
+  @override
+  String get settingsDuaTimeLabel => 'وقت دعاء اليوم';
 
   @override
   String get settingsAppearanceSectionTitle => 'المظهر';
@@ -1023,6 +1034,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get duaCategoryAfterPrayer => 'بعد الصلاة';
+
+  @override
+  String get duaCategoryHome => 'المنزل';
+
+  @override
+  String get duaCategoryFood => 'الطعام';
+
+  @override
+  String get duaCategoryAnger => 'الغضب';
+
+  @override
+  String get duaCategoryClothing => 'اللباس';
 
   @override
   String get duaCategoryGeneral => 'عامة';
@@ -2500,7 +2523,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adhkarTabWakingUp => 'الاستيقاظ من النوم';
 
   @override
+  String get adhkarTabHome => 'المنزل';
+
+  @override
+  String get adhkarTabTravel => 'السفر';
+
+  @override
   String get adhkarTabFood => 'الطعام';
+
+  @override
+  String get adhkarTabGathering => 'المجلس';
 
   @override
   String get adhkarTabMisc => 'متنوعة';
@@ -2564,6 +2596,29 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adhkarNotifAfterAsrLabel => 'بعد صلاة العصر';
+
+  @override
+  String get adhkarNotifDailySection => 'تذكير في وقت محدد';
+
+  @override
+  String get adhkarNotifPrayerSection => 'تذكير مرتبط بالصلاة';
+
+  @override
+  String get adhkarNotifDelayLabel => 'التأخير بعد الصلاة';
+
+  @override
+  String adhkarNotifDelayMinutes(int mins) {
+    return '$mins دقيقة';
+  }
+
+  @override
+  String adhkarNotifAfterPrayerHint(int mins) {
+    return 'بعد الصلاة بـ $mins دقيقة';
+  }
+
+  @override
+  String get adhkarNotifAnchorNote =>
+      'يُرسل التذكير بعد وقت الصلاة في موقعك ويحلّ محل الوقت المحدد، فلا يصلك تنبيهان للأذكار نفسها.';
 
   @override
   String get qiblaScreenTitle => 'اتجاه القبلة';
@@ -2667,57 +2722,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get khatmaDailyReminderLabel => 'تذكير يومي';
-
-  @override
-  String get overlayAdhkarMorning => 'أذكار الصباح';
-
-  @override
-  String get overlayAdhkarEvening => 'أذكار المساء';
-
-  @override
-  String get overlayAdhkarAfterPrayer => 'أذكار بعد الصلاة';
-
-  @override
-  String get overlayAdhkarSleep => 'أذكار النوم';
-
-  @override
-  String get overlayAdhkarMisc => 'أذكار متنوعة';
-
-  @override
-  String get overlayAdhkarWakingUp => 'الاستيقاظ من النوم';
-
-  @override
-  String get overlayAdhkarFood => 'أذكار الطعام';
-
-  @override
-  String get overlayDuaMorning => 'دعاء الصباح';
-
-  @override
-  String get overlayDuaDistress => 'دعاء الكرب';
-
-  @override
-  String get overlayDuaGuidance => 'دعاء الهداية';
-
-  @override
-  String get overlayDuaForgiveness => 'دعاء المغفرة';
-
-  @override
-  String get overlayDuaRizq => 'دعاء الرزق';
-
-  @override
-  String get overlayDuaHealth => 'دعاء الصحة';
-
-  @override
-  String get overlayDuaParents => 'دعاء الوالدين';
-
-  @override
-  String get overlayDuaTravel => 'دعاء السفر';
-
-  @override
-  String get overlayDuaRain => 'دعاء الاستسقاء';
-
-  @override
-  String get overlayDuaGeneral => 'دعاء عام';
 
   @override
   String get overlayTypeDua => 'دعاء';
@@ -3703,6 +3707,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notifAdhkarSleepTitle => 'حان وقت أذكار النوم';
 
   @override
+  String get notifAdhkarAfterFajrTitle => 'أذكار الصباح بعد صلاة الفجر';
+
+  @override
+  String get notifAdhkarAfterAsrTitle => 'أذكار المساء بعد صلاة العصر';
+
+  @override
   String get notifAdhkarMorningChannelName => 'أذكار الصباح';
 
   @override
@@ -4089,6 +4099,124 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get paymentComingSoonMessage => 'سيتم تفعيل الدفع قريباً إن شاء الله';
+
+  @override
+  String get paymentChooseCardSheetTitle => 'اختر شبكة بطاقتك';
+
+  @override
+  String get paymentMethodEdahabiaOnly => 'الذهبية';
+
+  @override
+  String get paymentChargilyCibTitle => 'CIB';
+
+  @override
+  String get paymentChargilyDescription => 'تقوى — دعم شهري';
+
+  @override
+  String get paymentStillPending =>
+      'لم يتم تأكيد الدفع بعد. نواصل التحقق بينما تُكمّل العملية في المتصفح.';
+
+  @override
+  String get paymentCreatingCheckout => 'جارٍ تحضير صفحة الدفع…';
+
+  @override
+  String get paymentCreatingCheckoutSubtitle =>
+      'إنشاء جلسة دفع آمنة مع Chargily.';
+
+  @override
+  String get paymentAwaitingTitle => 'أكمل عملية الدفع';
+
+  @override
+  String get paymentAwaitingSubtitle =>
+      'ادفع في الصفحة التي فُتحت في المتصفح. نؤكد الدفع هنا تلقائياً بمجرد إشعار Chargily.';
+
+  @override
+  String get paymentVerifyingTitle => 'جارٍ التحقق من الدفع…';
+
+  @override
+  String get paymentSuccessTitle => 'تم استلام الدفع';
+
+  @override
+  String get paymentSuccessSubtitle =>
+      'جزاكم الله خيراً — دعمكم يبقي تقوى مجانياً للجميع.';
+
+  @override
+  String get paymentFailedTitle => 'فشل الدفع';
+
+  @override
+  String get paymentFailedSubtitle => 'لم يكتمل الدفع. يمكنك المحاولة مجدداً.';
+
+  @override
+  String get paymentCanceledTitle => 'تم إلغاء الدفع';
+
+  @override
+  String get paymentCanceledSubtitle =>
+      'لم يتم خصم أي مبلغ. عُد متى كنت مستعداً.';
+
+  @override
+  String get paymentErrorTitle => 'حدث خطأ ما';
+
+  @override
+  String get paymentErrorSubtitle =>
+      'تعذر تجهيز جلسة الدفع. حاول مجدداً من فضلك.';
+
+  @override
+  String get paymentOpenCheckoutAgain => 'فتح صفحة الدفع مجدداً';
+
+  @override
+  String get paymentIAmDone => 'لقد أكملت الدفع';
+
+  @override
+  String get paymentDoneButton => 'تم';
+
+  @override
+  String get paymentRetryButton => 'إعادة المحاولة';
+
+  @override
+  String get wiseScreenTitle => 'فيزا / ماستركارد عبر Wise';
+
+  @override
+  String get wiseIntroMessage =>
+      'أرسل دعمك الشهري مباشرة إلى حساب المطوّر على Wise من تطبيق Wise أو تطبيق بنكك. استخدم المرجع أدناه حتىتمكن معرفة تحويلك.';
+
+  @override
+  String wiseCopiedMessage(String label) {
+    return 'تم نسخ $label إلى الحافظة';
+  }
+
+  @override
+  String get wiseHolderLabel => 'صاحب الحساب';
+
+  @override
+  String get wiseIbanLabel => 'الآيبان (IBAN)';
+
+  @override
+  String get wiseAccountLabel => 'رقم الحساب';
+
+  @override
+  String get wiseSortCodeLabel => 'رمز الترتيب';
+
+  @override
+  String get wiseBankLabel => 'البنك';
+
+  @override
+  String get wiseAmountLabel => 'المبلغ';
+
+  @override
+  String get wiseReferenceLabel => 'مرجع الدفع';
+
+  @override
+  String get wiseOpenButton => 'فتح Wise';
+
+  @override
+  String get wiseSentButton => 'لقد أرسلت الدفع';
+
+  @override
+  String get wiseThanksTitle => 'جزاكم الله خيراً';
+
+  @override
+  String get wiseThanksSubtitle =>
+      'تم تسجيل تحويلك هنا. يظهر رسمياً بعد مطابقة كشف الحساب.';
 
   @override
   String get qiyamOnboardingTitle => 'مرحباً بك في قيام الليل';

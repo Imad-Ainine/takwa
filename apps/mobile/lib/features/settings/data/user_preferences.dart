@@ -19,13 +19,21 @@ class UserPreferences {
   final TimeOfDay morningAdhkarTime;
   final TimeOfDay eveningAdhkarTime;
   final TimeOfDay sleepAdhkarTime;
+  final bool sleepAdhkarReminder;
+
+  /// After Fajr / after Asr rather than at a fixed clock time. `Fajr` and
+  /// `Asr` drift through the year, so these two reminders are scheduled from
+  /// the calculated prayer times themselves — see
+  /// `AdhkarNotificationService.rescheduleAll`.
   final bool afterFajrAdhkar;
   final bool afterAsrAdhkar;
+  final int adhkarAfterPrayerMinutes;
 
   final bool muhasabaReminder;
   final TimeOfDay muhasabaTime;
 
   final bool dailyDuasOn;
+  final TimeOfDay duaReminderTime;
   final bool specialRemindersOn;
   final bool fastingRemindersOn;
 
@@ -96,11 +104,14 @@ class UserPreferences {
     this.morningAdhkarTime = const TimeOfDay(hour: 6, minute: 30),
     this.eveningAdhkarTime = const TimeOfDay(hour: 17, minute: 0),
     this.sleepAdhkarTime = const TimeOfDay(hour: 22, minute: 0),
+    this.sleepAdhkarReminder = true,
     this.afterFajrAdhkar = true,
     this.afterAsrAdhkar = true,
+    this.adhkarAfterPrayerMinutes = 15,
     this.muhasabaReminder = true,
     this.muhasabaTime = const TimeOfDay(hour: 21, minute: 0),
     this.dailyDuasOn = true,
+    this.duaReminderTime = const TimeOfDay(hour: 12, minute: 0),
     this.specialRemindersOn = true,
     this.fastingRemindersOn = true,
     this.ramadanMode = false,
@@ -147,11 +158,14 @@ class UserPreferences {
     TimeOfDay? morningAdhkarTime,
     TimeOfDay? eveningAdhkarTime,
     TimeOfDay? sleepAdhkarTime,
+    bool? sleepAdhkarReminder,
     bool? afterFajrAdhkar,
     bool? afterAsrAdhkar,
+    int? adhkarAfterPrayerMinutes,
     bool? muhasabaReminder,
     TimeOfDay? muhasabaTime,
     bool? dailyDuasOn,
+    TimeOfDay? duaReminderTime,
     bool? specialRemindersOn,
     bool? fastingRemindersOn,
     bool? ramadanMode,
@@ -199,11 +213,15 @@ class UserPreferences {
       morningAdhkarTime: morningAdhkarTime ?? this.morningAdhkarTime,
       eveningAdhkarTime: eveningAdhkarTime ?? this.eveningAdhkarTime,
       sleepAdhkarTime: sleepAdhkarTime ?? this.sleepAdhkarTime,
+      sleepAdhkarReminder: sleepAdhkarReminder ?? this.sleepAdhkarReminder,
       afterFajrAdhkar: afterFajrAdhkar ?? this.afterFajrAdhkar,
       afterAsrAdhkar: afterAsrAdhkar ?? this.afterAsrAdhkar,
+      adhkarAfterPrayerMinutes:
+          adhkarAfterPrayerMinutes ?? this.adhkarAfterPrayerMinutes,
       muhasabaReminder: muhasabaReminder ?? this.muhasabaReminder,
       muhasabaTime: muhasabaTime ?? this.muhasabaTime,
       dailyDuasOn: dailyDuasOn ?? this.dailyDuasOn,
+      duaReminderTime: duaReminderTime ?? this.duaReminderTime,
       specialRemindersOn: specialRemindersOn ?? this.specialRemindersOn,
       fastingRemindersOn: fastingRemindersOn ?? this.fastingRemindersOn,
       ramadanMode: ramadanMode ?? this.ramadanMode,
@@ -257,12 +275,16 @@ class UserPreferences {
           '${eveningAdhkarTime.hour.toString().padLeft(2, '0')}:${eveningAdhkarTime.minute.toString().padLeft(2, '0')}',
       'sleep_adhkar_time':
           '${sleepAdhkarTime.hour.toString().padLeft(2, '0')}:${sleepAdhkarTime.minute.toString().padLeft(2, '0')}',
+      'sleep_adhkar_reminder': sleepAdhkarReminder,
       'after_fajr_adhkar': afterFajrAdhkar,
       'after_asr_adhkar': afterAsrAdhkar,
+      'adhkar_after_prayer_minutes': adhkarAfterPrayerMinutes,
       'muhasaba_reminder': muhasabaReminder,
       'evening_reminder_time':
           '${muhasabaTime.hour.toString().padLeft(2, '0')}:${muhasabaTime.minute.toString().padLeft(2, '0')}',
       'daily_duas_on': dailyDuasOn,
+      'dua_reminder_time':
+          '${duaReminderTime.hour.toString().padLeft(2, '0')}:${duaReminderTime.minute.toString().padLeft(2, '0')}',
       'special_reminders_on': specialRemindersOn,
       'fasting_reminders_on': fastingRemindersOn,
       'ramadan_mode': ramadanMode,
@@ -381,6 +403,10 @@ class UserPreferences {
         map['sleep_adhkar_time'] ?? map['sleepAdhkarTime'],
         defaultVal: const TimeOfDay(hour: 22, minute: 0),
       ),
+      sleepAdhkarReminder: parseBool(
+        map['sleep_adhkar_reminder'] ?? map['sleepAdhkarReminder'],
+        defaultVal: true,
+      ),
       afterFajrAdhkar: parseBool(
         map['after_fajr_adhkar'] ?? map['afterFajrAdhkar'],
         defaultVal: true,
@@ -388,6 +414,10 @@ class UserPreferences {
       afterAsrAdhkar: parseBool(
         map['after_asr_adhkar'] ?? map['afterAsrAdhkar'],
         defaultVal: true,
+      ),
+      adhkarAfterPrayerMinutes: parseInt(
+        map['adhkar_after_prayer_minutes'] ?? map['adhkarAfterPrayerMinutes'],
+        defaultVal: 15,
       ),
       muhasabaReminder: parseBool(
         map['muhasaba_reminder'] ?? map['muhasabaReminder'],
@@ -400,6 +430,10 @@ class UserPreferences {
       dailyDuasOn: parseBool(
         map['daily_duas_on'] ?? map['dailyDuasOn'],
         defaultVal: true,
+      ),
+      duaReminderTime: parseTime(
+        map['dua_reminder_time'] ?? map['duaReminderTime'],
+        defaultVal: const TimeOfDay(hour: 12, minute: 0),
       ),
       specialRemindersOn: parseBool(
         map['special_reminders_on'] ?? map['specialRemindersOn'],
@@ -479,7 +513,10 @@ class UserPreferences {
           map['high_latitude_rule'] ??
           map['highLatitudeRule'] ??
           'middle_of_the_night',
-      fajrOffset: parseInt(map['fajr_offset'] ?? map['fajrOffset'], defaultVal: 0),
+      fajrOffset: parseInt(
+        map['fajr_offset'] ?? map['fajrOffset'],
+        defaultVal: 0,
+      ),
       sunriseOffset: parseInt(
         map['sunrise_offset'] ?? map['sunriseOffset'],
         defaultVal: 0,
@@ -493,7 +530,10 @@ class UserPreferences {
         map['maghrib_offset'] ?? map['maghribOffset'],
         defaultVal: 0,
       ),
-      ishaOffset: parseInt(map['isha_offset'] ?? map['ishaOffset'], defaultVal: 0),
+      ishaOffset: parseInt(
+        map['isha_offset'] ?? map['ishaOffset'],
+        defaultVal: 0,
+      ),
     );
   }
 }

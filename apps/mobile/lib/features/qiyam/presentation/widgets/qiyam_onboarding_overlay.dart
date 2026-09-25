@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/features/qiyam/providers/qiyam_providers.dart';
-import 'package:takwa/features/quran/utils/quran_helpers.dart' show localizedNumeral;
+import 'package:takwa/features/quran/utils/quran_helpers.dart'
+    show localizedNumeral;
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 class QiyamOnboardingOverlay extends ConsumerStatefulWidget {
@@ -104,7 +106,7 @@ class _QiyamOnboardingOverlayState extends ConsumerState<QiyamOnboardingOverlay>
           ),
         ],
       ),
-      child: const Center(child: Text('🌙', style: TextStyle(fontSize: 60))),
+      child: const Center(child: IslamicGlyph('🌙', size: 60)),
     );
   }
 
@@ -137,10 +139,26 @@ class _QiyamOnboardingOverlayState extends ConsumerState<QiyamOnboardingOverlay>
     final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
-        _buildStepItem(context, localizedNumeral(context, 1), l10n.qiyamOnboardingStep1),
-        _buildStepItem(context, localizedNumeral(context, 2), l10n.qiyamOnboardingStep2),
-        _buildStepItem(context, localizedNumeral(context, 3), l10n.qiyamOnboardingStep3),
-        _buildStepItem(context, localizedNumeral(context, 4), l10n.qiyamOnboardingStep4),
+        _buildStepItem(
+          context,
+          localizedNumeral(context, 1),
+          l10n.qiyamOnboardingStep1,
+        ),
+        _buildStepItem(
+          context,
+          localizedNumeral(context, 2),
+          l10n.qiyamOnboardingStep2,
+        ),
+        _buildStepItem(
+          context,
+          localizedNumeral(context, 3),
+          l10n.qiyamOnboardingStep3,
+        ),
+        _buildStepItem(
+          context,
+          localizedNumeral(context, 4),
+          l10n.qiyamOnboardingStep4,
+        ),
       ],
     );
   }
@@ -155,7 +173,9 @@ class _QiyamOnboardingOverlayState extends ConsumerState<QiyamOnboardingOverlay>
             height: 32,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: context.colors.gold.withValues(alpha: 0.5)),
+              border: Border.all(
+                color: context.colors.gold.withValues(alpha: 0.5),
+              ),
             ),
             child: Center(
               child: Text(
@@ -170,7 +190,9 @@ class _QiyamOnboardingOverlayState extends ConsumerState<QiyamOnboardingOverlay>
           Expanded(
             child: Text(
               text,
-              style: context.typography.bodyMedium.copyWith(color: Colors.white),
+              style: context.typography.bodyMedium.copyWith(
+                color: Colors.white,
+              ),
             ),
           ),
         ],

@@ -399,13 +399,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsMorningAdhkarLabel => 'Morning Adhkar';
 
   @override
-  String get settingsMorningAdhkarSublabel => 'Daily reminder at 6:30 AM';
+  String get settingsMorningAdhkarSublabel =>
+      'Reminder at the set time or after Fajr';
 
   @override
   String get settingsEveningAdhkarLabel => 'Evening Adhkar';
 
   @override
-  String get settingsEveningAdhkarSublabel => 'Daily reminder at 5:00 PM';
+  String get settingsEveningAdhkarSublabel =>
+      'Reminder at the set time or after Asr';
+
+  @override
+  String get settingsSleepAdhkarLabel => 'Sleep Adhkar';
+
+  @override
+  String get settingsSleepAdhkarSublabel =>
+      'Reminder before bed at the set time';
 
   @override
   String get settingsMuhasabaLabel => 'Evening self-accountability';
@@ -437,6 +446,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsMuhasabaTimeLabel => 'Accountability time';
+
+  @override
+  String get settingsDuaTimeLabel => 'Daily dua time';
 
   @override
   String get settingsAppearanceSectionTitle => 'Appearance';
@@ -1049,6 +1061,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get duaCategoryAfterPrayer => 'After Prayer';
+
+  @override
+  String get duaCategoryHome => 'Home';
+
+  @override
+  String get duaCategoryFood => 'Food';
+
+  @override
+  String get duaCategoryAnger => 'Anger';
+
+  @override
+  String get duaCategoryClothing => 'Clothing';
 
   @override
   String get duaCategoryGeneral => 'General';
@@ -2532,7 +2556,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adhkarTabWakingUp => 'Waking Up';
 
   @override
+  String get adhkarTabHome => 'Home';
+
+  @override
+  String get adhkarTabTravel => 'Travel';
+
+  @override
   String get adhkarTabFood => 'Food';
+
+  @override
+  String get adhkarTabGathering => 'Gathering';
 
   @override
   String get adhkarTabMisc => 'Misc';
@@ -2596,6 +2629,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adhkarNotifAfterAsrLabel => 'After Asr Prayer';
+
+  @override
+  String get adhkarNotifDailySection => 'Reminder at a set time';
+
+  @override
+  String get adhkarNotifPrayerSection => 'Reminder tied to the prayer';
+
+  @override
+  String get adhkarNotifDelayLabel => 'Delay after the prayer';
+
+  @override
+  String adhkarNotifDelayMinutes(int mins) {
+    return '$mins min';
+  }
+
+  @override
+  String adhkarNotifAfterPrayerHint(int mins) {
+    return '$mins min after the prayer';
+  }
+
+  @override
+  String get adhkarNotifAnchorNote =>
+      'When the after-prayer reminder is on, it fires at the prayer time for your location and replaces the set time, so the same adhkar never arrives twice.';
 
   @override
   String get qiblaScreenTitle => 'Qibla Direction';
@@ -2702,57 +2758,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get khatmaDailyReminderLabel => 'Daily Reminder';
-
-  @override
-  String get overlayAdhkarMorning => 'Morning Adhkar';
-
-  @override
-  String get overlayAdhkarEvening => 'Evening Adhkar';
-
-  @override
-  String get overlayAdhkarAfterPrayer => 'After-Prayer Adhkar';
-
-  @override
-  String get overlayAdhkarSleep => 'Sleep Adhkar';
-
-  @override
-  String get overlayAdhkarMisc => 'Miscellaneous Adhkar';
-
-  @override
-  String get overlayAdhkarWakingUp => 'Waking Up';
-
-  @override
-  String get overlayAdhkarFood => 'Food Adhkar';
-
-  @override
-  String get overlayDuaMorning => 'Morning Dua';
-
-  @override
-  String get overlayDuaDistress => 'Dua for Distress';
-
-  @override
-  String get overlayDuaGuidance => 'Dua for Guidance';
-
-  @override
-  String get overlayDuaForgiveness => 'Dua for Forgiveness';
-
-  @override
-  String get overlayDuaRizq => 'Dua for Provision';
-
-  @override
-  String get overlayDuaHealth => 'Dua for Health';
-
-  @override
-  String get overlayDuaParents => 'Dua for Parents';
-
-  @override
-  String get overlayDuaTravel => 'Dua for Travel';
-
-  @override
-  String get overlayDuaRain => 'Dua for Rain';
-
-  @override
-  String get overlayDuaGeneral => 'General Dua';
 
   @override
   String get overlayTypeDua => 'Dua';
@@ -3741,6 +3746,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifAdhkarSleepTitle => 'Time for Sleep Adhkar';
 
   @override
+  String get notifAdhkarAfterFajrTitle => 'Morning adhkar after Fajr';
+
+  @override
+  String get notifAdhkarAfterAsrTitle => 'Evening adhkar after Asr';
+
+  @override
   String get notifAdhkarMorningChannelName => 'Morning Adhkar';
 
   @override
@@ -4123,6 +4134,125 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get paymentComingSoonMessage =>
       'Payment will be enabled soon, insha\'Allah';
+
+  @override
+  String get paymentChooseCardSheetTitle => 'Choose your card network';
+
+  @override
+  String get paymentMethodEdahabiaOnly => 'Edahabia';
+
+  @override
+  String get paymentChargilyCibTitle => 'CIB';
+
+  @override
+  String get paymentChargilyDescription => 'Takwa — monthly support';
+
+  @override
+  String get paymentStillPending =>
+      'The payment is not confirmed yet. We keep checking while you finish it in the browser.';
+
+  @override
+  String get paymentCreatingCheckout => 'Preparing the checkout…';
+
+  @override
+  String get paymentCreatingCheckoutSubtitle =>
+      'Creating a secure payment session with Chargily.';
+
+  @override
+  String get paymentAwaitingTitle => 'Complete your payment';
+
+  @override
+  String get paymentAwaitingSubtitle =>
+      'Pay in the opened browser page. We confirm the payment here automatically once Chargily reports it.';
+
+  @override
+  String get paymentVerifyingTitle => 'Verifying the payment…';
+
+  @override
+  String get paymentSuccessTitle => 'Payment received';
+
+  @override
+  String get paymentSuccessSubtitle =>
+      'Jazakum Allahu khayran — your support keeps Takwa free for everyone.';
+
+  @override
+  String get paymentFailedTitle => 'Payment failed';
+
+  @override
+  String get paymentFailedSubtitle =>
+      'The transaction could not be completed. You can try again.';
+
+  @override
+  String get paymentCanceledTitle => 'Payment canceled';
+
+  @override
+  String get paymentCanceledSubtitle =>
+      'No charge was made. Come back whenever you are ready.';
+
+  @override
+  String get paymentErrorTitle => 'Something went wrong';
+
+  @override
+  String get paymentErrorSubtitle =>
+      'The payment session could not be prepared. Please try again.';
+
+  @override
+  String get paymentOpenCheckoutAgain => 'Open the payment page again';
+
+  @override
+  String get paymentIAmDone => 'I have completed the payment';
+
+  @override
+  String get paymentDoneButton => 'Done';
+
+  @override
+  String get paymentRetryButton => 'Try again';
+
+  @override
+  String get wiseScreenTitle => 'Visa / Mastercard via Wise';
+
+  @override
+  String get wiseIntroMessage =>
+      'Send your monthly support directly to the developer\'s Wise account from the Wise app or your banking app. Use the reference below so your transfer can be recognized.';
+
+  @override
+  String wiseCopiedMessage(String label) {
+    return '$label copied to clipboard';
+  }
+
+  @override
+  String get wiseHolderLabel => 'Account holder';
+
+  @override
+  String get wiseIbanLabel => 'IBAN';
+
+  @override
+  String get wiseAccountLabel => 'Account number';
+
+  @override
+  String get wiseSortCodeLabel => 'Sort code';
+
+  @override
+  String get wiseBankLabel => 'Bank';
+
+  @override
+  String get wiseAmountLabel => 'Amount';
+
+  @override
+  String get wiseReferenceLabel => 'Payment reference';
+
+  @override
+  String get wiseOpenButton => 'Open Wise';
+
+  @override
+  String get wiseSentButton => 'I\'ve sent the payment';
+
+  @override
+  String get wiseThanksTitle => 'Jazakum Allahu khayran';
+
+  @override
+  String get wiseThanksSubtitle =>
+      'Your transfer has been recorded here. It will appear once the account statement is reconciled.';
 
   @override
   String get qiyamOnboardingTitle => 'Welcome to Qiyam al-Layl';

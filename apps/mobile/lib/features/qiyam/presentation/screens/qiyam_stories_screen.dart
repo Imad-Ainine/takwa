@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 class QiyamStoriesScreen extends StatelessWidget {
@@ -85,7 +86,7 @@ class QiyamStoriesScreen extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text(story.icon, style: const TextStyle(fontSize: 24)),
+                      IslamicGlyph(story.icon, size: 24),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: Text(

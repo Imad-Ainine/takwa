@@ -6,6 +6,7 @@ import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/supabase/sync_manager.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/routes/app_routes.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
@@ -158,7 +159,7 @@ class CustomIbadahGroup extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Text(icon, style: const TextStyle(fontSize: 18)),
+              IslamicGlyph(icon, size: 18),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
@@ -288,7 +289,9 @@ class _CustomIbadahRowState extends ConsumerState<_CustomIbadahRow> {
         color: _committed ? color.withValues(alpha: 0.07) : context.colors.card,
         borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(
-          color: _committed ? color.withValues(alpha: 0.25) : context.colors.border,
+          color: _committed
+              ? color.withValues(alpha: 0.25)
+              : context.colors.border,
         ),
       ),
       child: Row(
@@ -326,7 +329,7 @@ class _CustomIbadahRowState extends ConsumerState<_CustomIbadahRow> {
             ),
           ),
           const SizedBox(width: 10),
-          Text(widget.ibadah.emoji, style: const TextStyle(fontSize: 18)),
+          IslamicGlyph(widget.ibadah.emoji, size: 18),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(

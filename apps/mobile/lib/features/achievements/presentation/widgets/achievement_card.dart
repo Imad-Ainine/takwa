@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/features/achievements/providers/achievements_providers.dart';
@@ -115,7 +116,9 @@ class _AchievementCardState extends ConsumerState<AchievementCard>
                     ...context.shadows.card,
                     if (_celebrating)
                       BoxShadow(
-                        color: colors.gold.withValues(alpha: 0.55 * _glow.value),
+                        color: colors.gold.withValues(
+                          alpha: 0.55 * _glow.value,
+                        ),
                         blurRadius: 32 * _glow.value,
                         spreadRadius: 4 * _glow.value,
                       ),
@@ -140,7 +143,7 @@ class _AchievementCardState extends ConsumerState<AchievementCard>
                 ),
                 child: Opacity(
                   opacity: isEarned ? 1.0 : 0.4,
-                  child: Text(def.emoji, style: const TextStyle(fontSize: 34)),
+                  child: IslamicGlyph(def.emoji, size: 34),
                 ),
               ),
               const SizedBox(height: 14),

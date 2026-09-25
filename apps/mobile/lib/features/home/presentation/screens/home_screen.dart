@@ -15,6 +15,7 @@ import 'package:takwa/core/routes/app_routes.dart';
 import 'package:takwa/core/utils/hijri_display.dart';
 import 'package:takwa/core/utils/prayer_display.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/takwa_error_state.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
@@ -150,10 +151,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 pinned: true,
                 elevation: 0,
                 surfaceTintColor: Colors.transparent,
-                leading: const Padding(
-                  padding: EdgeInsets.all(AppSpacing.sm),
-                  child: DrawerMenuButton(),
-                ),
+                leading: const DrawerMenuButton(),
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.pin,
                   background: _anim(
@@ -467,7 +465,7 @@ class _RamadanBannerState extends State<_RamadanBanner>
         ),
         child: Row(
           children: [
-            Text('🌙', style: TextStyle(fontSize: 28, color: s.goldLight)),
+            IslamicGlyph('🌙', size: 28, color: s.goldLight),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
@@ -609,10 +607,7 @@ class _NextPrayerCardMergedState extends State<_NextPrayerCardMerged>
                 ],
               ),
               child: Center(
-                child: Text(
-                  prayerEmoji(next.name),
-                  style: const TextStyle(fontSize: 24),
-                ),
+                child: IslamicGlyph(prayerEmoji(next.name), size: 24),
               ),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -858,7 +853,7 @@ class _MihrabPrayerChip extends StatelessWidget {
             AnimatedScale(
               scale: isActive ? 1.2 : 1.0,
               duration: const Duration(milliseconds: 300),
-              child: Text(emoji, style: const TextStyle(fontSize: 22)),
+              child: IslamicGlyph(emoji, size: 22),
             ),
             const Spacer(),
             Text(
@@ -1363,7 +1358,7 @@ class _IbadahChipMerged extends ConsumerWidget {
               clipBehavior: Clip.none,
               alignment: Alignment.topRight,
               children: [
-                Text(emoji, style: const TextStyle(fontSize: 24)),
+                IslamicGlyph(emoji, size: 24),
                 if (done)
                   Positioned(
                     top: -2,
@@ -1774,7 +1769,7 @@ class _IftarCard extends StatelessWidget {
     ),
     child: Column(
       children: [
-        Text(icon, style: const TextStyle(fontSize: 24)),
+        IslamicGlyph(icon, size: 24),
         const SizedBox(height: 6),
         Text(label, style: style.naskh(11, color: style.textSec)),
         const SizedBox(height: AppSpacing.xs),
@@ -1817,7 +1812,7 @@ class _DailyDhikrCard extends StatelessWidget {
         decoration: s.cardDeco,
         child: Row(
           children: [
-            const Text('📿', style: TextStyle(fontSize: 22)),
+            const IslamicGlyph('📿', size: 22),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
@@ -2010,12 +2005,7 @@ class _BookCard extends StatelessWidget {
                       ),
                     // Glassmorphism Overlay for Emoji info if no cover
                     if (book.coverUrl == null)
-                      Center(
-                        child: Text(
-                          book.emoji,
-                          style: const TextStyle(fontSize: 40),
-                        ),
-                      ),
+                      Center(child: IslamicGlyph(book.emoji, size: 40)),
                     Positioned(
                       bottom: 8,
                       right: 8,

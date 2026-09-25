@@ -68,7 +68,8 @@ class _OverlayPalette {
   });
 
   factory _OverlayPalette.of(BuildContext context) {
-    final isDark = (MediaQuery.maybePlatformBrightnessOf(context) ??
+    final isDark =
+        (MediaQuery.maybePlatformBrightnessOf(context) ??
             Theme.of(context).brightness) ==
         Brightness.dark;
 
@@ -160,50 +161,30 @@ class _PopupItem {
   });
 }
 
+/// The popup pool is built straight from the two data files and their category
+/// extensions, so a new category is included automatically. It used to be two
+/// literal maps keyed by category: the adhkar one read values with `!` (a new
+/// category crashed the overlay), and the dua one skipped missing keys (a new
+/// category's duas silently never appeared).
 List<_PopupItem> _buildAllItems() {
   final items = <_PopupItem>[];
 
-  final catNames = {
-    AdhkarCategory.morning: ('🌅', _l10n.overlayAdhkarMorning),
-    AdhkarCategory.evening: ('🌆', _l10n.overlayAdhkarEvening),
-    AdhkarCategory.afterPrayer: ('🕌', _l10n.overlayAdhkarAfterPrayer),
-    AdhkarCategory.sleep: ('🌙', _l10n.overlayAdhkarSleep),
-    AdhkarCategory.misc: ('📿', _l10n.overlayAdhkarMisc),
-    AdhkarCategory.wakingUp: ('📿', _l10n.overlayAdhkarWakingUp),
-    AdhkarCategory.food: ('📿', _l10n.overlayAdhkarFood),
-  };
-
   for (final entry in kAdhkarData.entries) {
-    final meta = catNames[entry.key]!;
     for (final d in entry.value) {
       items.add(
         _PopupItem(
           arabic: d.arabic,
           fadl: d.fadl,
           source: d.source,
-          emoji: meta.$1,
-          categoryName: meta.$2,
+          emoji: entry.key.emoji,
+          categoryName: entry.key.arabicLabel,
           isDua: false,
         ),
       );
     }
   }
 
-  final duaCatNames = {
-    DuaCategory.morning: ('🌅', _l10n.overlayDuaMorning),
-    DuaCategory.distress: ('🌊', _l10n.overlayDuaDistress),
-    DuaCategory.guidance: ('🌟', _l10n.overlayDuaGuidance),
-    DuaCategory.forgiveness: ('🌿', _l10n.overlayDuaForgiveness),
-    DuaCategory.rizq: ('🌾', _l10n.overlayDuaRizq),
-    DuaCategory.health: ('🫀', _l10n.overlayDuaHealth),
-    DuaCategory.parents: ('❤️', _l10n.overlayDuaParents),
-    DuaCategory.travel: ('✈️', _l10n.overlayDuaTravel),
-    DuaCategory.rain: ('🌧️', _l10n.overlayDuaRain),
-    DuaCategory.general: ('🤲', _l10n.overlayDuaGeneral),
-  };
   for (final entry in kDuasData.entries) {
-    final meta = duaCatNames[entry.key];
-    if (meta == null) continue;
     for (final d in entry.value) {
       items.add(
         _PopupItem(
@@ -211,7 +192,7 @@ List<_PopupItem> _buildAllItems() {
           meaning: d.meaning,
           source: d.source,
           emoji: d.emoji,
-          categoryName: meta.$2,
+          categoryName: entry.key.arabicLabel,
           isDua: true,
         ),
       );
@@ -223,7 +204,10 @@ List<_PopupItem> _buildAllItems() {
 class _IslamicPatternPainter extends CustomPainter {
   final double opacity;
   final Color color;
-  const _IslamicPatternPainter({this.opacity = 0.07, this.color = _IGold.gold1});
+  const _IslamicPatternPainter({
+    this.opacity = 0.07,
+    this.color = _IGold.gold1,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -770,10 +754,7 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: palette.outerBorder,
-                      width: 1.0,
-                    ),
+                    border: Border.all(color: palette.outerBorder, width: 1.0),
                   ),
                 ),
               ),
@@ -787,10 +768,7 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(17),
-                    border: Border.all(
-                      color: palette.innerBorder,
-                      width: 0.8,
-                    ),
+                    border: Border.all(color: palette.innerBorder, width: 0.8),
                   ),
                 ),
               ),
@@ -918,7 +896,9 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      item.isDua ? _l10n.overlayTypeDua : _l10n.overlayTypeDhikr,
+                      item.isDua
+                          ? _l10n.overlayTypeDua
+                          : _l10n.overlayTypeDhikr,
                       style: TextStyle(
                         fontFamily: 'Amiri',
                         fontSize: 11,
@@ -1060,7 +1040,10 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
                   decoration: BoxDecoration(
                     color: palette.meaningBg,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: palette.meaningBorder, width: 0.7),
+                    border: Border.all(
+                      color: palette.meaningBorder,
+                      width: 0.7,
+                    ),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1117,8 +1100,9 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: _copied
-                  ? (palette.isDark ? _IGold.teal : _IGold.tealDark)
-                      .withValues(alpha: 0.2)
+                  ? (palette.isDark ? _IGold.teal : _IGold.tealDark).withValues(
+                      alpha: 0.2,
+                    )
                   : palette.btnBg,
               border: Border.all(
                 color: _copied

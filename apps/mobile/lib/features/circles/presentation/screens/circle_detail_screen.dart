@@ -9,6 +9,7 @@ import 'package:takwa/core/supabase/supabase_config.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/primary_switch.dart';
 import 'package:takwa/core/widgets/takwa_error_state.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
@@ -123,7 +124,10 @@ class _CircleDetailScreenState extends ConsumerState<CircleDetailScreen> {
           CustomLeadingButton(onPressed: () => Navigator.pop(context)),
           const SizedBox(width: AppSpacing.md),
           Expanded(
-            child: Text(widget.circle.name, style: context.typography.headingMedium),
+            child: Text(
+              widget.circle.name,
+              style: context.typography.headingMedium,
+            ),
           ),
           if (isOwner)
             PopupMenuButton<_OwnerAction>(
@@ -231,9 +235,7 @@ class _CircleDetailScreenState extends ConsumerState<CircleDetailScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.danger,
-            ),
+            style: TextButton.styleFrom(foregroundColor: context.colors.danger),
             child: Text(l10n.circleDeleteConfirm),
           ),
         ],
@@ -245,9 +247,9 @@ class _CircleDetailScreenState extends ConsumerState<CircleDetailScreen> {
         if (context.mounted) Navigator.pop(context);
       } catch (_) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.circleErrorGeneric)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.circleErrorGeneric)));
         }
       }
     }
@@ -274,7 +276,10 @@ class _InviteCodeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.circlesInviteCodeLabel, style: context.typography.caption),
+                Text(
+                  l10n.circlesInviteCodeLabel,
+                  style: context.typography.caption,
+                ),
                 const SizedBox(height: 2),
                 Text(
                   circle.inviteCode,
@@ -291,9 +296,7 @@ class _InviteCodeCard extends StatelessWidget {
             tooltip: l10n.circlesShareInviteButton,
             onPressed: () {
               HapticFeedback.lightImpact();
-              SharePlus.instance.share(
-                ShareParams(text: circle.inviteCode),
-              );
+              SharePlus.instance.share(ShareParams(text: circle.inviteCode));
             },
           ),
         ],
@@ -342,9 +345,9 @@ class _SharingSettingsCard extends ConsumerWidget {
         ref.invalidate(circleLeaderboardProvider(circleId));
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.circleErrorGeneric)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.circleErrorGeneric)));
         }
       }
     }
@@ -359,7 +362,10 @@ class _SharingSettingsCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.circleSharingSectionTitle, style: context.typography.labelLarge),
+          Text(
+            l10n.circleSharingSectionTitle,
+            style: context.typography.labelLarge,
+          ),
           const SizedBox(height: AppSpacing.sm),
           _toggleRow(
             context,
@@ -456,10 +462,7 @@ class _ReceivedReactions extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    Text(
-                      phrase?.emoji ?? '💌',
-                      style: const TextStyle(fontSize: 18),
-                    ),
+                    IslamicGlyph(phrase?.emoji ?? '💌', size: 18),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
@@ -525,7 +528,8 @@ class _Leaderboard extends ConsumerWidget {
             compact: true,
           ),
           data: (rows) {
-            final sorted = [...rows]..sort((a, b) {
+            final sorted = [...rows]
+              ..sort((a, b) {
               final aVal = sortMetric == _SortMetric.streak
                   ? a.currentStreak
                   : a.totalPoints;
@@ -611,7 +615,9 @@ class _SortSelector extends ConsumerWidget {
         child: Text(
           label,
           style: context.typography.labelMedium.copyWith(
-            color: selected ? context.colors.tealText : context.colors.textSecondary,
+            color: selected
+                ? context.colors.tealText
+                : context.colors.textSecondary,
           ),
         ),
       ),
@@ -653,14 +659,15 @@ class _MemberTile extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  row.username ?? '—',
-                  style: context.typography.labelLarge,
-                ),
+                Text(row.username ?? '—', style: context.typography.labelLarge),
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    _stat(context, '🔥', row.currentStreak?.toString() ?? _hidden),
+                    _stat(
+                      context,
+                      '🔥',
+                      row.currentStreak?.toString() ?? _hidden,
+                    ),
                     const SizedBox(width: AppSpacing.md),
                     _stat(context, '⭐', row.totalPoints?.toString() ?? _hidden),
                     const SizedBox(width: AppSpacing.md),
@@ -701,7 +708,7 @@ class _MemberTile extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(emoji, style: const TextStyle(fontSize: 12)),
+        IslamicGlyph(emoji, size: 12),
         const SizedBox(width: 2),
         Text(value, style: context.typography.caption),
       ],
@@ -723,15 +730,15 @@ class _MemberTile extends ConsumerWidget {
             phraseKey: phrase.key,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.circleReactionSentMessage)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.circleReactionSentMessage)));
       }
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.circleErrorGeneric)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.circleErrorGeneric)));
       }
     }
   }
@@ -745,9 +752,7 @@ class _MemberTile extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(l10n.circleRemoveMemberConfirmTitle),
-        content: Text(
-          l10n.circleRemoveMemberConfirmBody(memberName),
-        ),
+        content: Text(l10n.circleRemoveMemberConfirmBody(memberName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -755,9 +760,7 @@ class _MemberTile extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.danger,
-            ),
+            style: TextButton.styleFrom(foregroundColor: context.colors.danger),
             child: Text(l10n.circleRemoveMemberConfirm),
           ),
         ],
@@ -770,16 +773,17 @@ class _MemberTile extends ConsumerWidget {
             .removeMember(circleId, row.userId);
       } catch (_) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.circleErrorGeneric)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.circleErrorGeneric)));
         }
       }
     }
   }
 }
 
-String reactionPhraseLabel(AppLocalizations l10n, ReactionPhrase p) => switch (p) {
+String reactionPhraseLabel(AppLocalizations l10n, ReactionPhrase p) =>
+    switch (p) {
   ReactionPhrase.duaForYou => l10n.reactionPhraseDuaForYou,
   ReactionPhrase.keepGoing => l10n.reactionPhraseKeepGoing,
   ReactionPhrase.proudOfYou => l10n.reactionPhraseProudOfYou,
@@ -800,11 +804,14 @@ class _ReactionPicker extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.circleReactionSheetTitle, style: context.typography.headingMedium),
+            Text(
+              l10n.circleReactionSheetTitle,
+              style: context.typography.headingMedium,
+            ),
             const SizedBox(height: AppSpacing.md),
             ...ReactionPhrase.values.map(
               (p) => ListTile(
-                leading: Text(p.emoji, style: const TextStyle(fontSize: 22)),
+                leading: IslamicGlyph(p.emoji, size: 22),
                 title: Text(reactionPhraseLabel(l10n, p)),
                 onTap: () => Navigator.pop(context, p),
               ),

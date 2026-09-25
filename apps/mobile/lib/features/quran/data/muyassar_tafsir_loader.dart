@@ -29,9 +29,7 @@ class MuyassarTafsirLoader {
   static bool _attempted = false;
 
   /// Loads the asset and registers it with [ql.TafsirCtrl], unless an entry
-  /// with this name is already registered (either from an earlier call this
-  /// run, or restored from a previous app run — TafsirCtrl persists custom
-  /// entries across restarts).
+  /// with this name is already registered from an earlier call this run.
   ///
   /// Safe to call multiple times; safe to call before the reader screen
   /// ever opens. Never throws — a failure here just means "التفسير الميسر"
@@ -41,9 +39,14 @@ class MuyassarTafsirLoader {
     _attempted = true;
 
     final ctrl = ql.TafsirCtrl.instance;
-    if (ctrl.tafsirAndTranslationsItems.any((e) => e.name == name)) {
-      return;
-    }
+    // Checked against `customTafsirEntries` (what `fetchData` reads), not the
+    // menu list: the failure fixed below leaves a name in the menu list with
+    // no entry behind it, and trusting the menu list alone would skip
+    // re-registering and keep rendering an empty tafsir.
+    if (ctrl.customTafsirEntries.any((e) => e.name == name)) return;
+    ctrl.tafsirAndTranslationsItems.removeWhere(
+      (e) => e.isCustom && e.name == name,
+    );
 
     try {
       final raw = await rootBundle.loadString(_assetPath);
@@ -82,7 +85,19 @@ class MuyassarTafsirLoader {
         index: ctrl.tafsirAndTranslationsItems.length,
       );
 
-      await ctrl.addCustomTafsirEntries([entry]);
+      // Not `ctrl.addCustomTafsirEntries([entry])`, which the package cannot
+      // actually use here: it feeds this one index to both
+      // `tafsirAndTranslationsItems.insert(index, …)` (length 45, valid) and
+      // `customTafsirEntries.insert(index, …)` (empty, invalid), so the second
+      // throws `RangeError: Only valid value is 0: 45`, the method swallows it,
+      // and the entry never lands in the list `fetchData` reads — the tafsir
+      // shows up in the menu but renders no text. Appending to both lists
+      // directly is the same registration without the out-of-range insert.
+      // `_persistCustoms` is deliberately skipped: this runs from a bundled
+      // asset on every launch, and its restore path has the same bug.
+      ctrl.tafsirAndTranslationsItems.add(entry.model);
+      ctrl.customTafsirEntries.add(entry);
+      ctrl.update(['tafsirs_menu_list']);
     } catch (e) {
       developer.log(
         'Failed to register Tafsir Al-Muyassar: $e',
