@@ -41,9 +41,15 @@ class ChargilyConfig {
   /// for client-side identification and widget-based checkout flows.
   static String get publicKey => dotenv.env['CHARGILY_PUBLIC_KEY'] ?? '';
 
-  /// Optional override; defaults to 200 centime = 200.00 DZD.
-  static int get subscriptionAmountCentime =>
+  /// Checkout amount in whole DZD (major units) as sent to Chargily V2 —
+  /// the API takes dinars, not centimes: the hosted page echoes the value
+  /// verbatim (sending 20000 displayed as 20,000.00 DZD). Optional
+  /// override; defaults to 200 DZD.
+  static int get subscriptionAmountDzd =>
       int.tryParse(dotenv.env['CHARGILY_SUBSCRIPTION_AMOUNT'] ?? '') ?? 200;
+
+  /// Same amount in centime (minor units) for local payment records.
+  static int get subscriptionAmountCentime => subscriptionAmountDzd * 100;
 
   /// Base URL of the deployed web app. Chargily only accepts http(s)
   /// success/failure URLs, so checkouts redirect to the web app's

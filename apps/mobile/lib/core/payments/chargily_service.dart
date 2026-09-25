@@ -65,8 +65,8 @@ class ChargilyService {
     'Accept': 'application/json',
   };
 
-  /// Creates a checkout for the monthly support amount (in centime, as
-  /// Chargily expects integer minor units) and returns the hosted payment
+  /// Creates a checkout for the monthly support amount (in whole DZD —
+  /// Chargily V2 takes major units) and returns the hosted payment
   /// page URL to open in the browser / in-app checkout view.
   ///
   /// [successUrl]/[failureUrl] are where Chargily's page redirects the
@@ -83,7 +83,7 @@ class ChargilyService {
     Map<String, String>? metadata,
   }) async {
     final body = <String, dynamic>{
-      'amount': amount ?? ChargilyConfig.subscriptionAmountCentime,
+      'amount': amount ?? ChargilyConfig.subscriptionAmountDzd,
       'currency': currency,
       'payment_method': paymentMethod,
       if (description != null) 'description': description,
