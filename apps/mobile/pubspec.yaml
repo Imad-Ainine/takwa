@@ -1,7 +1,7 @@
 name: takwa
 description: "تطبيق تقوى - تطبيق إسلامي يومي للمحاسبة والمتابعة"
 publish_to: "none"
-version: 1.7.1+53
+version: 1.7.2+55
 
 environment:
   sdk: ^3.11.4
