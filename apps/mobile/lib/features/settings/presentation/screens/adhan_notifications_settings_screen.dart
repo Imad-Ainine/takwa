@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:takwa/core/notifications/notifications_service.dart';
@@ -67,6 +68,30 @@ final notificationPermissionsGrantedProvider = FutureProvider<bool>((ref) {
 /// returns from the system prompt.
 final batteryOptimizationExemptProvider = FutureProvider<bool>((ref) {
   return NotificationsService.isBatteryOptimizationExempt();
+});
+
+/// Whether the app may start its own activity from the background service,
+/// which is what brings up the Adhan screen after the process has been
+/// swiped away (`OverlayBackgroundService._launchForAdhan`). Android refuses
+/// background activity starts unless "display over other apps" is granted,
+/// and Android 14+ separately revokes the full-screen-intent fallback from
+/// apps it does not classify as an alarm — so without this the Adhan screen
+/// shows only while Takwa is already open.
+final overlayLaunchGrantedProvider = FutureProvider<bool>((ref) {
+  if (defaultTargetPlatform != TargetPlatform.android) {
+    return Future.value(true);
+  }
+  return FlutterForegroundTask.canDrawOverlays;
+});
+
+/// Whether the OS still honours `fullScreenIntent` on this app. Android 14+
+/// withdraws it silently, and it is the only route that opens the Adhan
+/// screen when the process was killed rather than swiped away — the case the
+/// background service cannot serve. Read passively (no system page opens);
+/// re-read via `ref.invalidate(fullScreenIntentGrantedProvider)` after the
+/// user returns from `ensureFullScreenIntentPermission()`.
+final fullScreenIntentGrantedProvider = FutureProvider<bool>((ref) {
+  return NotificationsService.canUseFullScreenIntent();
 });
 
 class AdhanNotificationSettingsScreen extends ConsumerWidget {
@@ -564,6 +589,35 @@ class AdhanNotificationSettingsScreen extends ConsumerWidget {
                                 ],
                                 if (defaultTargetPlatform ==
                                         TargetPlatform.android &&
+                                    prefs.adhanScreenEnabled &&
+                                    ref
+                                            .watch(
+                                              fullScreenIntentGrantedProvider,
+                                            )
+                                            .valueOrNull ==
+                                        false) ...[
+                                  const SettingsDivider(),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: AppSpacing.sm,
+                                    ),
+                                    child: _PermissionWarning(
+                                      title: l10n
+                                          .adhanFullScreenIntentWarningTitle,
+                                      body:
+                                          l10n.adhanFullScreenIntentWarningBody,
+                                      onGrant: () async {
+                                        await NotificationsService.ensureFullScreenIntentPermission();
+                                        ref.invalidate(
+                                          fullScreenIntentGrantedProvider,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                                if (defaultTargetPlatform ==
+                                        TargetPlatform.android &&
                                     ref
                                             .watch(
                                               batteryOptimizationExemptProvider,
@@ -584,6 +638,31 @@ class AdhanNotificationSettingsScreen extends ConsumerWidget {
                                         await NotificationsService.requestBackgroundPermission();
                                         ref.invalidate(
                                           batteryOptimizationExemptProvider,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                                if (defaultTargetPlatform ==
+                                        TargetPlatform.android &&
+                                    prefs.adhanScreenEnabled &&
+                                    ref
+                                            .watch(overlayLaunchGrantedProvider)
+                                            .valueOrNull ==
+                                        false) ...[
+                                  const SettingsDivider(),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: AppSpacing.sm,
+                                    ),
+                                    child: _PermissionWarning(
+                                      title: l10n.adhanOverlayLaunchTitle,
+                                      body: l10n.adhanOverlayLaunchBody,
+                                      onGrant: () async {
+                                        await FlutterForegroundTask.openSystemAlertWindowSettings();
+                                        ref.invalidate(
+                                          overlayLaunchGrantedProvider,
                                         );
                                       },
                                     ),

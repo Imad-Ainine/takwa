@@ -1,0 +1,28 @@
+{
+  "folders": [
+    {
+      "name": "📱 mobile (Flutter app)",
+      "path": "apps/mobile"
+    },
+    {
+      "name": "takwa (monorepo root)",
+      "path": "."
+    }
+  ],
+  "settings": {
+    // Exclude heavy build artifacts from search/watch to keep tooling fast.
+    "files.exclude": {
+      "**/.dart_tool": true,
+      "**/build": true,
+      "**/.gradle": true,
+      "**/.kotlin": true
+    },
+    "search.exclude": {
+      "**/build": true,
+      "**/.dart_tool": true,
+      "**/.gradle": true,
+      "**/node_modules": true
+    },
+    "debug.enableStatusBarColor": false
+  }
+}

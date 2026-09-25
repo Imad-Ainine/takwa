@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:io';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
@@ -244,6 +245,36 @@ class CircleOperationException implements Exception {
   String toString() => 'CircleOperationException($code)';
 }
 
+/// How many absent `user_settings` columns one push may skip before the error
+/// is allowed to surface. A real migration gap costs one; beyond that the
+/// payload is wrong in some other way and silence would hide it.
+const _kMaxMissingColumnsDropped = 3;
+
+/// The [settings] key PostgREST is rejecting because no column backs it, or
+/// null when the error is not that kind.
+///
+/// [PostgrestException] reports a missing column two ways depending on the
+/// route: `PGRST204` "Could not find the 'x' column of 'user_settings' in the
+/// schema cache" from the schema cache, and Postgres `42703` "column ... does
+/// not exist". Only a quoted name that is actually in [pushedKeys] is returned,
+/// so no other failure — RLS, a constraint, a bad value type — can make a
+/// setting get dropped.
+@visibleForTesting
+String? undefinedUserSettingsColumn(
+  PostgrestException error,
+  Iterable<String> pushedKeys,
+) {
+  final code = error.code;
+  if (code != 'PGRST204' && code != '42703') return null;
+  for (final match in _quotedNames.allMatches(error.message)) {
+    final name = match.group(1);
+    if (name != null && pushedKeys.contains(name)) return name;
+  }
+  return null;
+}
+
+final _quotedNames = RegExp(r'''['"]([A-Za-z_][A-Za-z0-9_]*)['"]''');
+
 /// Real implementation, talking to an injected [SupabaseClient].
 class SupabaseClientService implements SupabaseService {
   SupabaseClientService(this._db);
@@ -481,9 +512,32 @@ class SupabaseClientService implements SupabaseService {
       'updated_at': DateTime.now().toIso8601String(),
     };
 
-    await _safeRequest(
-      () => _db.from('user_settings').upsert(payload, onConflict: 'user_id'),
-    );
+    // PostgREST rejects the *whole* upsert when the payload carries one key the
+    // table has no column for, so a preference that ships ahead of its
+    // migration silently freezes every other setting — twice in this table's
+    // history (supabase/migrations/20260912130000_...). Sending the rest and
+    // logging the gap keeps the row current; the pull side already ignores
+    // unknown columns, so nothing here is lost once the migration lands.
+    for (var dropped = 0; ; dropped++) {
+      try {
+        await _safeRequest(
+          () =>
+              _db.from('user_settings').upsert(payload, onConflict: 'user_id'),
+        );
+        return;
+      } on PostgrestException catch (e) {
+        final column = dropped < _kMaxMissingColumnsDropped
+            ? undefinedUserSettingsColumn(e, payload.keys)
+            : null;
+        if (column == null) rethrow;
+        payload.remove(column);
+        developer.log(
+          'user_settings has no column "$column" — pushed the other settings '
+          'without it; add a migration for it',
+          name: 'SupabaseService',
+        );
+      }
+    }
   }
 
   @override
@@ -718,10 +772,7 @@ class SupabaseClientService implements SupabaseService {
     // needed an RLS policy broad enough to let any signed-in user UPDATE
     // any column on any row. The function only ever touches `likes`, only
     // on already-approved rows, atomically.
-    await _db.rpc(
-      'increment_community_adhkar_likes',
-      params: {'row_id': id},
-    );
+    await _db.rpc('increment_community_adhkar_likes', params: {'row_id': id});
   }
 
   @override
@@ -1046,10 +1097,10 @@ class SupabaseClientService implements SupabaseService {
     if (userId == null) return [];
 
     return _safeRequest<List<Map<String, dynamic>>>(() async {
-      final data = await _db.from('khatma_sessions').select().eq(
-        'user_id',
-        userId,
-      );
+      final data = await _db
+          .from('khatma_sessions')
+          .select()
+          .eq('user_id', userId);
       return List<Map<String, dynamic>>.from(data);
     });
   }
@@ -1161,10 +1212,10 @@ class SupabaseClientService implements SupabaseService {
   }) async {
     try {
       await _safeRequest(
-        () => _db.rpc('rename_circle', params: {
-          'circle_id': circleId,
-          'new_name': newName,
-        }),
+        () => _db.rpc(
+          'rename_circle',
+          params: {'circle_id': circleId, 'new_name': newName},
+        ),
       );
     } on PostgrestException catch (e) {
       throw CircleOperationException(e.message);
@@ -1189,10 +1240,10 @@ class SupabaseClientService implements SupabaseService {
   }) async {
     try {
       await _safeRequest(
-        () => _db.rpc('remove_circle_member', params: {
-          'circle_id': circleId,
-          'member_user_id': userId,
-        }),
+        () => _db.rpc(
+          'remove_circle_member',
+          params: {'circle_id': circleId, 'member_user_id': userId},
+        ),
       );
     } on PostgrestException catch (e) {
       throw CircleOperationException(e.message);

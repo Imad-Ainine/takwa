@@ -12,6 +12,7 @@ import 'package:sound_mode/sound_mode.dart';
 import 'package:sound_mode/utils/ringer_mode_statuses.dart';
 
 import '../utils/timezone_resolver.dart';
+import 'adhan_auto_trigger.dart';
 import 'notifications_service.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
@@ -36,7 +37,7 @@ const _kLastPopupMsKey = 'last_adhkar_popup_ms';
 const _kOverlayEnabledKey = 'overlay_popups_enabled';
 const _kPreAdhanNotifEnabledKey = 'pre_adhan_notif';
 const _kPopupIntervalMinsKey = 'popup_interval_minutes';
-const _kAdhanScreenTriggeredKey = 'adhan_screen_triggered';
+const _kWakeScreenEnabledKey = 'wake_screen_enabled';
 const _kSilentModeEnabledKey = 'silent_mode_enabled';
 const _kSilentDurationMinsKey = 'silent_duration_mins';
 const _kAutoSilentAfterAdhanKey = 'auto_silent_after_adhan';
@@ -543,11 +544,59 @@ class _OverlayTaskHandler extends TaskHandler {
             'adhanMode': _adhanMode,
             'sound': _adhanMode == 'sound', // legacy compat
           });
+          await _launchForAdhan(prayer, prefs);
         }
 
         debugPrint('🕌 أُطلق أذان ${prayer.nameAr}');
         return;
       }
+    }
+  }
+
+  /// Start the app for [prayer] when no main isolate is alive to hear
+  /// `sendDataToMain`.
+  ///
+  /// That message is the fast path, and it only reaches a live process. Once
+  /// Takwa has been swiped away nothing is listening, and the one remaining
+  /// route to the Adhan screen was the prayer notification's
+  /// `fullScreenIntent` — which Android 14+ withdraws from any app it does not
+  /// classify as an alarm or call app, so the OS posts a banner and never
+  /// starts the activity. That is the reported "لا تظهر شاشة الأذان إلا عند
+  /// فتح التطبيق".
+  ///
+  /// Starting an activity from here is itself refused on Android 10+ unless
+  /// the app holds `SYSTEM_ALERT_WINDOW`, which is also what the adhkar popup
+  /// in [_checkAndShowAdhkarOverlay] needs — so it is the one permission the
+  /// settings screen has to ask for by name.
+  Future<void> _launchForAdhan(
+    _PrayerInfo prayer,
+    SharedPreferences prefs,
+  ) async {
+    try {
+      if (await FlutterForegroundTask.isAppOnForeground) return;
+      if (!await FlutterForegroundTask.canDrawOverlays) {
+        debugPrint(
+          'OverlayService: adhan launch refused — no "display over other apps"',
+        );
+        return;
+      }
+      await prefs.setString(
+        AdhanAutoTrigger.pendingAdhanKey,
+        AdhanAutoTrigger.pendingAdhanMarker(
+          key: prayer.name,
+          nameAr: prayer.nameAr,
+          at: DateTime.now(),
+        ),
+      );
+      // The notification would have lit the screen; without fullScreenIntent
+      // nothing else does, so wake it here when the user asked for that.
+      if (prefs.getBool(_kWakeScreenEnabledKey) ?? true) {
+        FlutterForegroundTask.wakeUpScreen();
+      }
+      FlutterForegroundTask.launchApp();
+      debugPrint('🕌 Launching app for ${prayer.nameAr}');
+    } catch (e) {
+      debugPrint('OverlayService: adhan launch failed: $e');
     }
   }
 
@@ -1046,5 +1095,3 @@ class TestableOverlayHandler {
     }
   }
 }
-
-

@@ -2342,6 +2342,18 @@ abstract class AppLocalizations {
   /// **'لم يُفعَّل الإذن — فعّله من إعدادات النظام'**
   String get adhanFullScreenIntentDenied;
 
+  /// No description provided for @adhanFullScreenIntentWarningTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'النظام منع فتح شاشة الأذان تلقائياً'**
+  String get adhanFullScreenIntentWarningTitle;
+
+  /// No description provided for @adhanFullScreenIntentWarningBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'في أندرويد 14 وما بعده يسحب النظام هذا الإذن تلقائياً عن التطبيقات التي لا يصنّفها كمنبّه، فلا تُفتح شاشة الأذان إذا كان التطبيق مغلقاً بالكامل. أعد تفعيله من إعدادات النظام.'**
+  String get adhanFullScreenIntentWarningBody;
+
   /// No description provided for @batteryOptimizationWarningTitle.
   ///
   /// In ar, this message translates to:
@@ -2353,6 +2365,18 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'اسمح للتطبيق بالعمل في الخلفية دون قيود، حتى تصل شاشة الأذان في وقتها وأنت نائم.'**
   String get batteryOptimizationWarningBody;
+
+  /// No description provided for @adhanOverlayLaunchTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'شاشة الأذان لا تظهر إلا عند فتح التطبيق'**
+  String get adhanOverlayLaunchTitle;
+
+  /// No description provided for @adhanOverlayLaunchBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسمح للتطبيق بالظهور فوق التطبيقات الأخرى حتى تُفتح شاشة الأذان وحدها في وقت الصلاة، ولو كان التطبيق مغلقاً.'**
+  String get adhanOverlayLaunchBody;
 
   /// No description provided for @adhanSettingsAccountSectionTitle.
   ///
@@ -7543,6 +7567,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تعذر تجهيز جلسة الدفع. حاول مجدداً من فضلك.'**
   String get paymentErrorSubtitle;
+
+  /// No description provided for @paymentNetworkError.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذر الاتصال بخدمة الدفع. تحقق من الشبكة ثم أعد المحاولة.'**
+  String get paymentNetworkError;
 
   /// No description provided for @paymentOpenCheckoutAgain.
   ///

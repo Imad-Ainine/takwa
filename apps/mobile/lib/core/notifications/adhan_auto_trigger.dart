@@ -120,7 +120,9 @@ class AdhanAudioPlayer {
       try {
         await SoundMode.setSoundMode(RingerModeStatus.silent);
         // Requirement 2.10: emit a log line confirming flip-to-silence executed.
-        debugPrint('🤫 Flip-to-silence triggered for ${_currentPrayerNameAr ?? 'الصلاة'}');
+        debugPrint(
+          '🤫 Flip-to-silence triggered for ${_currentPrayerNameAr ?? 'الصلاة'}',
+        );
       } catch (e) {
         debugPrint('❌ Flip-to-silence: could not set silent mode: $e');
       }
@@ -293,12 +295,166 @@ class AdhanAutoTrigger {
     }
   }
 
+  /// Written by `OverlayBackgroundService` right before it starts the app for
+  /// a prayer — see [_resumeServiceLaunch].
+  static const pendingAdhanKey = 'pending_adhan';
+
+  /// A marker older than this is treated as abandoned: a launch that never
+  /// landed must not replay the Adhan later in the day, and a real one is
+  /// read within seconds of being written.
+  static const pendingAdhanTtl = Duration(minutes: 3);
+
+  /// Serialises the "open the Adhan screen for this prayer" hand-off between
+  /// the background isolate ([OverlayBackgroundService]) and the process it
+  /// starts. Both sides go through these two functions — the marker crosses a
+  /// process boundary as a raw string, so a format change on one side alone
+  /// would fail silently.
+  static String pendingAdhanMarker({
+    required String key,
+    required String nameAr,
+    required DateTime at,
+  }) => '$key|$nameAr|${at.millisecondsSinceEpoch}';
+
+  /// The inverse of [pendingAdhanMarker]; null if [raw] is absent, malformed,
+  /// or older than [pendingAdhanTtl] relative to [now].
+  static ({String key, String nameAr})? parsePendingAdhanMarker(
+    String? raw, {
+    required DateTime now,
+  }) {
+    if (raw == null || raw.isEmpty) return null;
+    final parts = raw.split('|');
+    if (parts.length != 3 || parts.first.isEmpty) return null;
+    final at = int.tryParse(parts[2]);
+    if (at == null) return null;
+    final age = now.difference(DateTime.fromMillisecondsSinceEpoch(at));
+    if (age > pendingAdhanTtl || age.isNegative) return null;
+    return (key: parts.first, nameAr: parts[1]);
+  }
+
+  /// The prayer a service-initiated launch was for, or null.
+  ///
+  /// `sendDataToMain` — how this isolate normally hears about a prayer, see
+  /// [handleForegroundData] — reaches only a live main isolate. When the app
+  /// has been swiped away the Flutter engine is gone and the message is
+  /// dropped, so the service leaves this marker and starts the activity
+  /// itself; the process it starts reads the marker here.
+  static Future<({String key, String nameAr})?> _takePendingAdhan() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(pendingAdhanKey);
+      if (raw == null) return null;
+      await prefs.remove(pendingAdhanKey);
+      return parsePendingAdhanMarker(raw, now: DateTime.now());
+    } catch (e) {
+      debugPrint('AdhanAutoTrigger: pending adhan read failed: $e');
+      return null;
+    }
+  }
+
+  /// Drops the hand-off marker for [prayerKey] when this process handled the
+  /// prayer itself.
+  ///
+  /// The service writes the marker and calls `launchApp()` in the same breath
+  /// as `sendDataToMain`, so a live isolate that got the message here has no
+  /// use for it — and neither does whatever cold start comes later.
+  static Future<void> _discardPendingAdhan(String? prayerKey) async {
+    if (prayerKey == null) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(pendingAdhanKey);
+      if (raw == null) return;
+      final pending = parsePendingAdhanMarker(raw, now: DateTime.now());
+      if (pending?.key == prayerKey) await prefs.remove(pendingAdhanKey);
+    } catch (e) {
+      debugPrint('AdhanAutoTrigger: pending adhan discard failed: $e');
+    }
+  }
+
+  /// Undoes [_markTriggeredSharedly] for [prayerName].
+  ///
+  /// Needed because the service marks the prayer triggered *before* launching
+  /// the app, and [_check] defers to that mark (R7) — without this, the
+  /// process the launch starts would suppress the very Adhan screen it was
+  /// started to show.
+  static Future<void> _releaseSharedClaim(String prayerName) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if ((prefs.getString(_kTriggeredPrayersDateKey) ?? '') ==
+          _sharedDateKey(DateTime.now())) {
+        final triggered = (prefs.getString(_kTriggeredPrayersKey) ?? '')
+            .split(',')
+            .where((p) => p.isNotEmpty && p != prayerName)
+            .join(',');
+        await prefs.setString(_kTriggeredPrayersKey, triggered);
+      }
+      final key = _dailyKey(prayerName, DateTime.now());
+      if (_lastTriggeredPrayer == key) _lastTriggeredPrayer = null;
+    } catch (e) {
+      debugPrint('AdhanAutoTrigger: shared dedupe release failed: $e');
+    }
+  }
+
   /// يبدأ مراقبة أوقات الصلاة كل ثانية بدقة عالية
   static void start(WidgetRef ref, GlobalKey<NavigatorState> navigatorKey) {
     _checkTimer?.cancel();
     _checkTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       _check(ref, navigatorKey);
     });
+    unawaited(_resumeServiceLaunch(ref, navigatorKey));
+  }
+
+  /// Show the Adhan screen for a launch `OverlayBackgroundService` started by
+  /// itself because the app had been swiped away — the case
+  /// [handleForegroundData] cannot serve, since `sendDataToMain` reaches only
+  /// a live main isolate.
+  ///
+  /// This deliberately does not wait for [_check]'s normal loop: that reads
+  /// [prayerTimesProvider], which after a cold start is still resolving
+  /// location and computing times for many seconds, and the service has
+  /// already claimed the prayer for the day, which [_check] defers to. So the
+  /// prayer comes from the marker, and the claim is released on the way
+  /// through so no second screen follows.
+  static Future<void> _resumeServiceLaunch(
+    WidgetRef ref,
+    GlobalKey<NavigatorState> navigatorKey,
+  ) async {
+    final pending = await _takePendingAdhan();
+    if (pending == null) return;
+
+    final UserPreferences prefs =
+        ref.read(userPreferencesProvider).valueOrNull ??
+        await ref.read(userPreferencesProvider.future);
+    if (!prefs.adhanScreenEnabled) return;
+
+    bool adhanAlreadyVisible = false;
+    navigatorKey.currentState?.popUntil((route) {
+      if (route.settings.name == Routes.adhan) adhanAlreadyVisible = true;
+      return true;
+    });
+    // Something else already shows this prayer — keep the service's claim, so
+    // [_check] doesn't reopen the screen for the same prayer later.
+    if (adhanAlreadyVisible) return;
+
+    // Only now release the claim: the service marked this prayer triggered
+    // before launching, and [_check] defers to that mark.
+    await _releaseSharedClaim(pending.key);
+    _lastTriggeredPrayer = _dailyKey(pending.key, DateTime.now());
+    if (prefs.wakeScreenEnabled) {
+      FlutterForegroundTask.wakeUpScreen();
+      onWakeUpScreenForTesting?.call();
+    }
+    await _waitForNavigatorReady(navigatorKey);
+    NotificationRouter.claimAdhanRoute(pending.key);
+    navigatorKey.currentState?.pushNamed(
+      Routes.adhan,
+      arguments: pending.nameAr,
+    );
+    AdhanAudioPlayer.ensureFlipArmed(
+      prefs.flipToSilenceEnabled,
+      flipSilencePhone: prefs.autoSilentAfterAdhan,
+      prayerNameAr: pending.nameAr,
+    );
+    debugPrint('🕌 Adhan screen for service-launched ${pending.nameAr}');
   }
 
   static void stop() {
@@ -494,6 +650,7 @@ class AdhanAutoTrigger {
       final key = _dailyKey(prayerKey, DateTime.now());
       if (_lastTriggeredPrayer == key) return;
       _lastTriggeredPrayer = key;
+      unawaited(_discardPendingAdhan(prayerKey));
     }
 
     final prayerName = (data['prayer'] as String?) ?? 'الصلاة';

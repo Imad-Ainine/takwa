@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 const APP_SCHEME = 'takwa://';
@@ -15,12 +15,10 @@ export default function PaymentRedirectClient() {
 	const searchParams = useSearchParams();
 	const target = searchParams.get('to');
 	const isValid = target !== null && target.startsWith(APP_SCHEME);
-	const [hopped, setHopped] = useState(false);
 
 	useEffect(() => {
 		if (!isValid || target === null) return;
 		window.location.replace(target);
-		setHopped(true);
 	}, [isValid, target]);
 
 	return (
@@ -29,7 +27,7 @@ export default function PaymentRedirectClient() {
 			className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[#0d0a1a] px-6 text-center"
 		>
 			<h1 className="text-2xl font-semibold text-[#d4af37]">
-				{hopped ? 'Opening the Takwa app…' : 'Preparing your return to Takwa…'}
+				Preparing your return to Takwa…
 			</h1>
 			<p className="max-w-md text-sm leading-6 text-white/70" dir="rtl">
 				إن لم يُفتح التطبيق تلقائياً، اضغط الزر أدناه للعودة إليه والتحقق من

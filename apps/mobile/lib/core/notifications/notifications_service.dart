@@ -397,6 +397,11 @@ class PrayerTimeInfo {
 
 class NotificationsService {
   static final _plugin = FlutterLocalNotificationsPlugin();
+
+  /// Platform state flutter_local_notifications does not expose — see
+  /// `MainActivity.kt` (`canUseFullScreenIntent`).
+  static const _permissionsChannel = MethodChannel('com.takwa/permissions');
+
   static bool _initialized = false;
 
   // ── تهيئة الخدمة ──
@@ -488,16 +493,36 @@ class NotificationsService {
     return await Permission.notification.isGranted;
   }
 
+  /// الحالة الفعلية لإذن `USE_FULL_SCREEN_INTENT` دون فتح أي شاشة.
+  ///
+  /// حزمة flutter_local_notifications 18 توفّر الطلب لا الاستعلام، والطلب وحده
+  /// يقذف المستخدم إلى صفحة إعدادات النظام حين يكون الإذن ناقصاً — لذا يُقرأ
+  /// الوضع من قناة المنصّة (`MainActivity.kt`) لتظهر البطاقة التحذيرية في
+  /// الإعدادات فقط عند الحاجة. تُرجع true على ما دون Android 14 حيث لا يُطلب
+  /// الإذن أصلاً، وعلى أي خطأ في القناة حتى لا نُظهر تحذيراً كاذباً.
+  static Future<bool> canUseFullScreenIntent() async {
+    if (!Platform.isAndroid) return true;
+    try {
+      final granted = await _permissionsChannel.invokeMethod<bool>(
+        'canUseFullScreenIntent',
+      );
+      return granted ?? true;
+    } catch (e) {
+      debugPrint('NotificationsService: FSI state query failed: $e');
+      return true;
+    }
+  }
+
   /// Android 14+ (API 34) ينزع `USE_FULL_SCREEN_INTENT` عن التطبيقات التي
   /// لا يصنّفها متجر Play كتطبيق منبّه أو اتصال. حينها يظهر إشعار وقت
   /// الصلاة عادياً (بانر علوي) لكن النظام يتجاهل علم `fullScreenIntent`،
   /// فلا تُفتح شاشة الأذان تلقائياً فوق التطبيقات ولا فوق شاشة القفل —
   /// وهو سبب مباشر لشكوى "لا تظهر الشاشة إلا إذا فتحت التطبيق".
   ///
-  /// لا توفّر حزمة flutter_local_notifications 18 استعلاماً عن حالة هذا
-  /// الإذن، بل الطلب فقط — لذلك هذا "تأكيد" لا "فحص": إن كان الإذن ممنوحاً
-  /// (أو كان الإصدار أقدم من 14) تُرجع الدالة true فوراً دون فتح أي شاشة،
-  /// وتفتح صفحة إعدادات النظام فقط عندما يكون ناقصاً فعلاً.
+  /// هذا "تأكيد" لا "فحص": إن كان الإذن ممنوحاً (أو كان الإصدار أقدم من 14)
+  /// تُرجع الدالة true فوراً دون فتح أي شاشة، وتفتح صفحة إعدادات النظام فقط
+  /// عندما يكون ناقصاً فعلاً. للاستعلام دون أثر جانبي استخدم
+  /// [canUseFullScreenIntent].
   static Future<bool> ensureFullScreenIntentPermission() async {
     if (!Platform.isAndroid) return true;
     try {

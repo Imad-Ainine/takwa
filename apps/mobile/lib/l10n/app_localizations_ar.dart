@@ -1197,12 +1197,28 @@ class AppLocalizationsAr extends AppLocalizations {
       'لم يُفعَّل الإذن — فعّله من إعدادات النظام';
 
   @override
+  String get adhanFullScreenIntentWarningTitle =>
+      'النظام منع فتح شاشة الأذان تلقائياً';
+
+  @override
+  String get adhanFullScreenIntentWarningBody =>
+      'في أندرويد 14 وما بعده يسحب النظام هذا الإذن تلقائياً عن التطبيقات التي لا يصنّفها كمنبّه، فلا تُفتح شاشة الأذان إذا كان التطبيق مغلقاً بالكامل. أعد تفعيله من إعدادات النظام.';
+
+  @override
   String get batteryOptimizationWarningTitle =>
       'قد يتأخر الأذان بسبب توفير البطارية';
 
   @override
   String get batteryOptimizationWarningBody =>
       'اسمح للتطبيق بالعمل في الخلفية دون قيود، حتى تصل شاشة الأذان في وقتها وأنت نائم.';
+
+  @override
+  String get adhanOverlayLaunchTitle =>
+      'شاشة الأذان لا تظهر إلا عند فتح التطبيق';
+
+  @override
+  String get adhanOverlayLaunchBody =>
+      'اسمح للتطبيق بالظهور فوق التطبيقات الأخرى حتى تُفتح شاشة الأذان وحدها في وقت الصلاة، ولو كان التطبيق مغلقاً.';
 
   @override
   String get adhanSettingsAccountSectionTitle => 'إعدادات الحساب';
@@ -4159,6 +4175,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get paymentErrorSubtitle =>
       'تعذر تجهيز جلسة الدفع. حاول مجدداً من فضلك.';
+
+  @override
+  String get paymentNetworkError =>
+      'تعذر الاتصال بخدمة الدفع. تحقق من الشبكة ثم أعد المحاولة.';
 
   @override
   String get paymentOpenCheckoutAgain => 'فتح صفحة الدفع مجدداً';

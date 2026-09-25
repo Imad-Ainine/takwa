@@ -22,10 +22,17 @@ class ChargilyConfig {
   static bool get isLive =>
       (dotenv.env['CHARGILY_LIVE'] ?? '').toLowerCase() == 'true';
 
-  static String get apiBase =>
-      isLive
-          ? 'https://pay.chargily.com/api/v2'
-          : 'https://pay.chargily.com/test/api/v2';
+  /// The host the REST API actually answers on (dev.chargily.com docs:
+  /// "Test Mode Base Url https://pay.chargily.net/test/api/v2"). `pay.chargily
+  /// .com` is not it — it never completes a TCP handshake, so every checkout
+  /// sat until the request timeout and the UI showed
+  /// "TimeoutException after 0:00:20: Future not completed". The hosted
+  /// checkout *page* comes back on another host (`pay.chargily.dz` in
+  /// `checkout_url`); see [ChargilyCheckout] for why the app rewrites it to
+  /// this host before opening it.
+  static String get apiBase => isLive
+      ? 'https://pay.chargily.net/api/v2'
+      : 'https://pay.chargily.net/test/api/v2';
 
   /// Secret bearer token from the Chargily dashboard (Developers corner).
   /// Used only for server-to-server calls ([ChargilyService]); never shown
@@ -63,9 +70,9 @@ class ChargilyConfig {
   static String webRedirectUrl(String appSchemeUrl, {required String locale}) {
     const supported = {'ar', 'en', 'fr'};
     final loc = supported.contains(locale) ? locale : 'en';
-    return Uri.parse('$webBaseUrl/$loc/payment-redirect').replace(
-      queryParameters: {'to': appSchemeUrl},
-    ).toString();
+    return Uri.parse(
+      '$webBaseUrl/$loc/payment-redirect',
+    ).replace(queryParameters: {'to': appSchemeUrl}).toString();
   }
 
   /// The secret key is what actually gates API access; the public key

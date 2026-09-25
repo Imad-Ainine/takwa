@@ -1226,12 +1226,28 @@ class AppLocalizationsEn extends AppLocalizations {
       'Not enabled — please allow it in system settings';
 
   @override
+  String get adhanFullScreenIntentWarningTitle =>
+      'Android blocked the automatic Adhan screen';
+
+  @override
+  String get adhanFullScreenIntentWarningBody =>
+      'On Android 14+ the system withdraws this permission from apps it does not classify as alarms, so the Adhan screen cannot open when Takwa is fully closed. Re-enable it in system settings.';
+
+  @override
   String get batteryOptimizationWarningTitle =>
       'Adhan may be delayed by battery optimization';
 
   @override
   String get batteryOptimizationWarningBody =>
       'Let the app run in the background without restrictions, so the Adhan screen reaches you on time while you\'re asleep.';
+
+  @override
+  String get adhanOverlayLaunchTitle =>
+      'The Adhan screen only opens when you launch Takwa';
+
+  @override
+  String get adhanOverlayLaunchBody =>
+      'Allow Takwa to display over other apps so the Adhan screen can open by itself at prayer time, even after you closed the app.';
 
   @override
   String get adhanSettingsAccountSectionTitle => 'Account Settings';
@@ -4195,6 +4211,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get paymentErrorSubtitle =>
       'The payment session could not be prepared. Please try again.';
+
+  @override
+  String get paymentNetworkError =>
+      'Could not reach the payment service. Check your connection and try again.';
 
   @override
   String get paymentOpenCheckoutAgain => 'Open the payment page again';

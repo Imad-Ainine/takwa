@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,7 +107,12 @@ class _ChargilyPaymentScreenState extends ConsumerState<ChargilyPaymentScreen>
       if (!mounted) return;
       setState(() {
         _stage = _Stage.error;
-        _errorMessage = '$e';
+        // A stalled socket is the usual failure on mobile data, and
+        // "TimeoutException after 0:00:20.000000: Future not completed" tells
+        // the user nothing they can act on.
+        _errorMessage = e is TimeoutException || e is SocketException
+            ? l10n.paymentNetworkError
+            : '$e';
       });
     }
   }
@@ -123,7 +129,11 @@ class _ChargilyPaymentScreenState extends ConsumerState<ChargilyPaymentScreen>
       if (opened) return;
       throw Exception('no in-app browser available');
     } catch (e, st) {
-      AppLogger.warning('in-app checkout tab failed, opening externally', e, st);
+      AppLogger.warning(
+        'in-app checkout tab failed, opening externally',
+        e,
+        st,
+      );
       try {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } catch (e2, st2) {
@@ -177,16 +187,18 @@ class _ChargilyPaymentScreenState extends ConsumerState<ChargilyPaymentScreen>
     ChargilyCheckout checkout, {
     required String status,
   }) async {
-    await ref.read(subscriptionStoreProvider).recordPayment(
-      SupportPayment(
-        channel: SupportChannel.chargily,
-        checkoutId: checkout.id,
-        status: status,
-        amountMinor: ChargilyConfig.subscriptionAmountCentime,
-        currency: 'dzd',
-        at: DateTime.now(),
-      ),
-    );
+    await ref
+        .read(subscriptionStoreProvider)
+        .recordPayment(
+          SupportPayment(
+            channel: SupportChannel.chargily,
+            checkoutId: checkout.id,
+            status: status,
+            amountMinor: ChargilyConfig.subscriptionAmountCentime,
+            currency: 'dzd',
+            at: DateTime.now(),
+          ),
+        );
   }
 
   /// "I have completed the payment" — manual re-check when the user came
@@ -203,7 +215,9 @@ class _ChargilyPaymentScreenState extends ConsumerState<ChargilyPaymentScreen>
         setState(() => _stage = _Stage.awaiting);
         _startPolling();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.paymentStillPending)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.paymentStillPending),
+          ),
         );
         return;
       }
@@ -275,20 +289,18 @@ class _ChargilyPaymentScreenState extends ConsumerState<ChargilyPaymentScreen>
 
   Color get _titleColor => switch (_stage) {
     _Stage.paid => context.colors.successText,
-    _Stage.failed || _Stage.canceled || _Stage.error => context.colors.dangerText,
+    _Stage.failed ||
+    _Stage.canceled ||
+    _Stage.error => context.colors.dangerText,
     _ => context.colors.gold,
   };
 
   Widget _buildIcon() {
     final (icon, bg) = switch (_stage) {
-      _Stage.paid => (
-        Icons.check_circle_rounded,
-        context.colors.successDim,
-      ),
-      _Stage.failed || _Stage.canceled || _Stage.error => (
-        Icons.error_outline_rounded,
-        context.colors.dangerDim,
-      ),
+      _Stage.paid => (Icons.check_circle_rounded, context.colors.successDim),
+      _Stage.failed ||
+      _Stage.canceled ||
+      _Stage.error => (Icons.error_outline_rounded, context.colors.dangerDim),
       _ => (Icons.credit_card_rounded, context.colors.goldDim),
     };
     return Center(
@@ -304,7 +316,8 @@ class _ChargilyPaymentScreenState extends ConsumerState<ChargilyPaymentScreen>
         child: Icon(
           icon,
           size: 46,
-          color: _stage == _Stage.failed ||
+          color:
+              _stage == _Stage.failed ||
                   _stage == _Stage.canceled ||
                   _stage == _Stage.error
               ? context.colors.dangerText
@@ -419,9 +432,7 @@ class _ErrorBox extends StatelessWidget {
       ),
       child: Text(
         message,
-        style: context.typography.bodySmall.copyWith(
-          color: colors.dangerText,
-        ),
+        style: context.typography.bodySmall.copyWith(color: colors.dangerText),
       ),
     );
   }

@@ -27,12 +27,22 @@ class ChargilyCheckout {
     );
   }
 
-  /// Chargily hands back an `http://` checkout URL; Android Custom Tabs
-  /// silently refuse non-https links, so upgrade to https (the page serves
-  /// it fine) before anyone tries to open it.
+  /// Chargily hands back `http://pay.chargily.dz/<mode>/checkouts/<id>/pay`.
+  /// Two reasons not to open that verbatim:
+  /// - Android Custom Tabs silently refuse non-https links;
+  /// - `pay.chargily.dz` does not complete a TCP handshake from every network
+  ///   (measured here: 20s connect timeout on both 443 and 80, IPv4 and IPv6),
+  ///   which is the blank payment page users reported.
+  /// The same checkout app serves the identical path on the API host, so
+  /// normalize to `pay.chargily.net`.
   static Uri _hostedCheckoutUrl(String raw) {
-    final url = Uri.parse(raw);
-    return url.scheme == 'http' ? url.replace(scheme: 'https') : url;
+    final parsed = Uri.parse(raw);
+    var url = parsed;
+    if (parsed.host == 'pay.chargily.dz') {
+      url = url.replace(host: 'pay.chargily.net');
+    }
+    if (url.scheme == 'http') url = url.replace(scheme: 'https');
+    return url;
   }
 }
 

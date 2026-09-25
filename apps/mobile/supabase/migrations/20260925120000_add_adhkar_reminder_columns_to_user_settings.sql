@@ -12,6 +12,11 @@
 -- Types match what toMap() actually sends (see that note on pre_adhan_notif),
 -- and every default equals the Dart default so a pull on a fresh device
 -- reproduces the in-app defaults.
+--
+-- Verified applied on the live project (fmmgiykwebwruhxeztvs) on 2026-09-25:
+-- all three columns exist and every key UserPreferences.toMap() pushes has a
+-- column. Re-running this is a no-op, which is why it is written with
+-- `if not exists`.
 -- ─────────────────────────────────────────────────────────────
 
 alter table public.user_settings
