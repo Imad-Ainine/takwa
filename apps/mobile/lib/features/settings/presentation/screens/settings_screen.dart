@@ -357,13 +357,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                     ),
                     SettingsCard(
                       children: [
-                        ActionSetting(
-                          icon: '🔔',
-                          label: l10n.settingsTestNotifLabel,
-                          sublabel: l10n.settingsTestNotifSublabel,
-                          onTap: _showTestMenu,
-                        ),
-                        const SettingsDivider(),
+                        // Test-menu entry stays hidden in release builds for
+                        // everyone except the owner account.
+                        if (kDebugMode ||
+                            ref.watch(supabaseUserProvider).value?.email ==
+                                'imad.ainine11@gmail.com') ...[
+                          ActionSetting(
+                            icon: '🔔',
+                            label: l10n.settingsTestNotifLabel,
+                            sublabel: l10n.settingsTestNotifSublabel,
+                            onTap: _showTestMenu,
+                          ),
+                          const SettingsDivider(),
+                        ],
                         ActionSetting(
                           icon: '💎',
                           label: l10n.settingsSubscriptionLabel,

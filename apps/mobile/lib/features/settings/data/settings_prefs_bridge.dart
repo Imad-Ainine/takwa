@@ -20,4 +20,16 @@ class SettingsPrefsBridge {
     if (value is double) return _prefs.setDouble(key, value);
     return _prefs.setString(key, value.toString());
   }
+
+  /// Mirrors a whole settings map in one pass. Called on every
+  /// `UserPreferencesNotifier.build()` so the background isolate's copy is
+  /// re-seeded from the canonical Drift store at startup — keys the user
+  /// never explicitly changed (DB seeds, Supabase pulls) would otherwise
+  /// be absent from SharedPreferences and the isolate would fall back to
+  /// its own defaults, computing different prayer times than the screen.
+  Future<void> mirrorAll(Map<String, dynamic> values) async {
+    for (final entry in values.entries) {
+      await mirror(entry.key, entry.value);
+    }
+  }
 }

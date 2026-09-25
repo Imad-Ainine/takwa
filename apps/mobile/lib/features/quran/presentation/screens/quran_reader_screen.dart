@@ -98,7 +98,6 @@ class _QuranReaderScreenState extends ConsumerState<QuranReaderScreen>
     _sessionStart = DateTime.now();
     _khatmaNotifier = ref.read(khatmaExProvider.notifier);
     _lastReadNotifier = ref.read(quranLastReadProvider.notifier);
-    _lastReadNotifier = ref.read(quranLastReadProvider.notifier);
 
     int startPage = 1;
     if (widget.initialPage != null) {

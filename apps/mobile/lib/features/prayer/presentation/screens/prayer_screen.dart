@@ -154,6 +154,9 @@ class PrayerNotifier extends StateNotifier<PrayerScreenState> {
 
   final Ref _ref;
   Timer? _ticker;
+  List<PrayerTimeInfo> _tomorrowPrayers = const [];
+  bool _loadingTomorrow = false;
+  String _dateKey = '';
 
   Future<void> _init() async {
     _listenToPrayers();
@@ -211,6 +214,9 @@ class PrayerNotifier extends StateNotifier<PrayerScreenState> {
     ) {
       next.whenData((prayers) {
         state = state.copyWith(prayers: prayers);
+        // Settings or location changed — tomorrow's cached list was computed
+        // with the old ones, so drop it and let the next tick reload it.
+        _tomorrowPrayers = const [];
         _tick(); // تحديث فوري للحسابات عند تغير الأوقات
       });
     }, fireImmediately: false);
@@ -275,7 +281,25 @@ class PrayerNotifier extends StateNotifier<PrayerScreenState> {
   void _tick() {
     if (state.prayers.isEmpty) return;
     final now = DateTime.now();
-    final next = PrayerTimesService.nextPrayer(state.prayers);
+    final dateKey = '${now.year}-${now.month}-${now.day}';
+    if (_dateKey.isNotEmpty && _dateKey != dateKey) {
+      // Past midnight: state.prayers is yesterday's list. Force both day
+      // lists to recompute, then let the provider listener re-tick.
+      _dateKey = dateKey;
+      _tomorrowPrayers = const [];
+      _ref.invalidate(prayerTimesProvider);
+      _ref.invalidate(tomorrowPrayerTimesProvider);
+      return;
+    }
+    _dateKey = dateKey;
+
+    var next = PrayerTimesService.nextPrayer(state.prayers, now: now);
+    if (next == null) {
+      // Isha has passed — the countdown rolls into tomorrow's Fajr, the
+      // same resolution the foreground notification uses.
+      _ensureTomorrowPrayers();
+      next = _tomorrowPrayers.isEmpty ? null : _tomorrowPrayers.first;
+    }
     if (next == null) return;
 
     final iqamaOffset = _kIqamaOffsets[next.name] ?? 15;
@@ -293,6 +317,19 @@ class PrayerNotifier extends StateNotifier<PrayerScreenState> {
       remainingIqama: iqamaTime.difference(now),
       isIqamaPhase: isIqamaPhase,
     );
+  }
+
+  void _ensureTomorrowPrayers() {
+    if (_loadingTomorrow || _tomorrowPrayers.isNotEmpty) return;
+    _loadingTomorrow = true;
+    _ref.read(tomorrowPrayerTimesProvider.future).then((prayers) {
+      if (!mounted) return;
+      _tomorrowPrayers = prayers;
+      _loadingTomorrow = false;
+      _tick();
+    }).catchError((Object e) {
+      _loadingTomorrow = false;
+    });
   }
 
   @override

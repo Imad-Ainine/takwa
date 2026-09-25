@@ -68,13 +68,11 @@ const _kOverlayAutoCloseSecs = 20;
 // ─────────────────────────────────────────
 //  PRAYER INFO MODEL
 // ─────────────────────────────────────────
-class _PrayerInfo {
-  final String name;
-  final String nameAr;
-  final String emoji;
-  final DateTime time;
-  const _PrayerInfo(this.name, this.nameAr, this.emoji, this.time);
-}
+// The task handler stores the same [PrayerTimeInfo] records the main
+// isolate produces (via the identical PrayerTimesService.calculate call),
+// so the ongoing notification and the Adhan screen resolve the next prayer
+// through one shared code path and can't drift apart.
+typedef _PrayerInfo = PrayerTimeInfo;
 
 class OverlayBackgroundService {
   static const _channelId = 'takkwa_background_overlay';
@@ -130,6 +128,24 @@ class OverlayBackgroundService {
       ],
       callback: startCallback,
     );
+  }
+
+  /// Tells the running background task (when there is one) to re-read the
+  /// mirrored settings and recompute its prayer lists. Call this after any
+  /// write to the SharedPreferences keys `_OverlayTaskHandler` reads —
+  /// calculation method, madhab, offsets, coordinates, timezone — otherwise
+  /// the ongoing notification keeps displaying times computed from the old
+  /// settings until the next midnight refresh while the screen already shows
+  /// the new ones. A no-op (swallowed) when the service isn't running; it
+  /// recomputes from prefs on its own at `onStart` in that case.
+  static void requestPrayerTimesRefresh() {
+    try {
+      FlutterForegroundTask.sendDataToTask(
+        const {'action': 'refresh_prayer_times'},
+      );
+    } catch (e) {
+      debugPrint('OverlayBackgroundService: refresh signal failed: $e');
+    }
   }
 
   static Future<void> stop() async {
@@ -255,6 +271,7 @@ void startCallback() {
 
 class _OverlayTaskHandler extends TaskHandler {
   List<_PrayerInfo> _todayPrayers = [];
+  List<_PrayerInfo> _tomorrowPrayers = [];
   String _lastPrayerDate = '';
 
   // إعدادات قابلة للتحديث ديناميكياً
@@ -309,6 +326,12 @@ class _OverlayTaskHandler extends TaskHandler {
     if (data is Map) {
       final action = data['action'];
       if (action == 'update_location') _handleLocationUpdate();
+      // Pushed by the main isolate whenever a prayer-calculation setting
+      // changes (or on app resume): re-read the mirrored prefs, recompute
+      // both day lists, and repaint the ongoing notification immediately —
+      // otherwise the notification keeps showing times computed with the
+      // old method/offsets until the next midnight refresh.
+      if (action == 'refresh_prayer_times') _refreshAndRepaint();
       if (data.containsKey('overlay_popups_enabled')) {
         _overlayEnabled = data['overlay_popups_enabled'] as bool;
       }
@@ -419,6 +442,7 @@ class _OverlayTaskHandler extends TaskHandler {
     if (_todayPrayers.isEmpty) return;
 
     final next = _nextPrayer(now);
+    if (next == null) return;
     final countdown = _countdown(now, next.time);
     final text =
         '$countdown ${next.emoji} ${next.nameAr}  |  ${DateFormat('HH:mm').format(next.time)}';
@@ -673,18 +697,15 @@ class _OverlayTaskHandler extends TaskHandler {
   // ──────────────────────────────────────
   //  PRAYER TIMES
   // ──────────────────────────────────────
-  _PrayerInfo _nextPrayer(DateTime now) {
-    for (final p in _todayPrayers) {
-      if (p.time.isAfter(now)) return p;
-    }
-    // كل الصلوات انتهت → فجر الغد
-    final tomorrow = now.add(const Duration(days: 1));
-    return _PrayerInfo(
-      'fajr',
-      'الفجر',
-      '🌅',
-      DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 5, 0),
-    );
+  /// Same shared resolution the Adhan screen countdown uses: the next
+  /// adhan-bearing prayer today (sunrise skipped), rolling over into the
+  /// real computed tomorrow-Fajr time after Isha — never a hardcoded 05:00.
+  _PrayerInfo? _nextPrayer(DateTime now) => PrayerTimesService
+      .nextPrayerOrTomorrow(_todayPrayers, _tomorrowPrayers, now: now);
+
+  Future<void> _refreshAndRepaint() async {
+    await _refreshPrayerTimes();
+    await _updateForegroundNotification();
   }
 
   Future<void> _refreshPrayerTimes() async {
@@ -711,27 +732,70 @@ class _OverlayTaskHandler extends TaskHandler {
       // resolved to different angles and different dhuhr/maghrib adjustments)
       // — so the pre-scheduled exact alarms and this isolate's own polling
       // could disagree about when the same prayer was.
-      final times = await PrayerTimesService.calculate(
-        latitude: lat,
-        longitude: lng,
-        timezone: prefs.getString(_kTimezoneKey),
-        madhab: prefs.getString(_kMadhabKey) ?? 'shafi',
-        method: prefs.getString(_kCalcMethodKey) ?? 'Algeria',
-        highLatitudeRule: prefs.getString(_kHighLatitudeRuleKey),
-        fajrOffset: _intPref(prefs, 'fajr_offset'),
-        sunriseOffset: _intPref(prefs, 'sunrise_offset'),
-        dhuhrOffset: _intPref(prefs, 'dhuhr_offset'),
-        asrOffset: _intPref(prefs, 'asr_offset'),
-        maghribOffset: _intPref(prefs, 'maghrib_offset'),
-        ishaOffset: _intPref(prefs, 'isha_offset'),
-      );
+      // Defaults here must match UserPreferences exactly ('MWL', not
+      // 'Algeria'): a key the user never explicitly changed may simply not
+      // exist in the mirrored prefs, and a divergent default made this
+      // isolate compute Maghrib +5 min from the Algeria adjustment while
+      // the screen showed the MWL time.
+      final timezone =
+          prefs.getString(_kTimezoneKey) ??
+          TimezoneResolver.resolveFromCoordinates(lat, lng);
+      final madhab = prefs.getString(_kMadhabKey) ?? 'shafi';
+      final method = prefs.getString(_kCalcMethodKey) ?? 'MWL';
+      final highLatitudeRule = prefs.getString(_kHighLatitudeRuleKey);
+      final fajrOffset = _intPref(prefs, 'fajr_offset');
+      final sunriseOffset = _intPref(prefs, 'sunrise_offset');
+      final dhuhrOffset = _intPref(prefs, 'dhuhr_offset');
+      final asrOffset = _intPref(prefs, 'asr_offset');
+      final maghribOffset = _intPref(prefs, 'maghrib_offset');
+      final ishaOffset = _intPref(prefs, 'isha_offset');
+
+      final now = DateTime.now();
+      final todayDate = DateTime(now.year, now.month, now.day);
 
       // Sunrise carries no adhan; the polling loops only ever care about the
       // five prayers.
-      _todayPrayers = times
+      List<_PrayerInfo> adhanPrayersOnly(List<PrayerTimeInfo> times) => times
           .where((p) => p.name != 'sunrise')
-          .map((p) => _PrayerInfo(p.name, p.nameAr, p.emoji, p.time))
           .toList();
+
+      _todayPrayers = adhanPrayersOnly(
+        await PrayerTimesService.calculate(
+          latitude: lat,
+          longitude: lng,
+          timezone: timezone,
+          madhab: madhab,
+          method: method,
+          highLatitudeRule: highLatitudeRule,
+          fajrOffset: fajrOffset,
+          sunriseOffset: sunriseOffset,
+          dhuhrOffset: dhuhrOffset,
+          asrOffset: asrOffset,
+          maghribOffset: maghribOffset,
+          ishaOffset: ishaOffset,
+          date: todayDate,
+        ),
+      );
+
+      // Tomorrow's real Fajr — the after-Isha countdown target, shared with
+      // the main screen via nextPrayerOrTomorrow instead of a guessed 05:00.
+      _tomorrowPrayers = adhanPrayersOnly(
+        await PrayerTimesService.calculate(
+          latitude: lat,
+          longitude: lng,
+          timezone: timezone,
+          madhab: madhab,
+          method: method,
+          highLatitudeRule: highLatitudeRule,
+          fajrOffset: fajrOffset,
+          sunriseOffset: sunriseOffset,
+          dhuhrOffset: dhuhrOffset,
+          asrOffset: asrOffset,
+          maghribOffset: maghribOffset,
+          ishaOffset: ishaOffset,
+          date: todayDate.add(const Duration(days: 1)),
+        ),
+      );
 
       // Keep the exact-alarm/full-screen-intent Adhan notifications in sync
       // with whatever day this isolate thinks it is. That's the one mechanism
@@ -808,9 +872,13 @@ class _OverlayTaskHandler extends TaskHandler {
       await NotificationsService.scheduleUpcomingPrayerNotifications(
         latitude: lat,
         longitude: lng,
-        timezone: prefs.getString(_kTimezoneKey),
+        timezone:
+            prefs.getString(_kTimezoneKey) ??
+            TimezoneResolver.resolveFromCoordinates(lat, lng),
         madhab: prefs.getString(_kMadhabKey) ?? 'shafi',
-        method: prefs.getString(_kCalcMethodKey) ?? 'Algeria',
+        // Default must match UserPreferences.calcMethod ('MWL') — see the
+        // same note in _refreshPrayerTimes.
+        method: prefs.getString(_kCalcMethodKey) ?? 'MWL',
         highLatitudeRule: prefs.getString(_kHighLatitudeRuleKey),
         fajrOffset: _intPref(prefs, 'fajr_offset'),
         sunriseOffset: _intPref(prefs, 'sunrise_offset'),
@@ -954,8 +1022,11 @@ class _OverlayTaskHandler extends TaskHandler {
   //  HELPERS
   // ──────────────────────────────────────
   String _countdown(DateTime now, DateTime target) {
-    Duration diff = target.difference(now);
-    if (diff.isNegative) diff = const Duration(hours: 24) + diff;
+    var diff = target.difference(now);
+    // The roll-over resolution guarantees a future target; a negative diff
+    // here only happens inside the one-tick window between a prayer arriving
+    // and the next recompute, so show 00:00:00 rather than wrapping +24h.
+    if (diff.isNegative) diff = Duration.zero;
     final h = diff.inHours;
     final m = diff.inMinutes % 60;
     final s = diff.inSeconds % 60;
@@ -1027,7 +1098,9 @@ class TestableOverlayHandler {
     required String emoji,
     required DateTime time,
   }) {
-    _prayers = [_PrayerInfo(name, nameAr, emoji, time)];
+    _prayers = [
+      PrayerTimeInfo(name: name, nameAr: nameAr, emoji: emoji, time: time, notifId: -1),
+    ];
   }
 
   /// Runs the adhan-trigger logic (mirrors [_OverlayTaskHandler._checkAndTriggerAdhan])

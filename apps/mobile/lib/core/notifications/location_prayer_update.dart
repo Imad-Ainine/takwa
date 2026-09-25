@@ -9,6 +9,7 @@ import 'package:geocoding/geocoding.dart';
 import '../providers/database_providers.dart';
 import '../providers/shared_preferences_provider.dart';
 import 'notifications_service.dart';
+import 'overlay_background_service.dart';
 import '../utils/timezone_resolver.dart';
 import '../../features/settings/providers/user_preferences_provider.dart';
 import '../../features/settings/presentation/widgets/location_picker_sheet.dart';
@@ -708,6 +709,11 @@ class LocationPrayerManager {
     await prefs.setString('longitude', longitude.toString());
     await prefs.setString('timezone', timezone);
     await prefs.setString('cityName', cityName);
+
+    // The mirrored coords are only half the fix — the background isolate
+    // caches its prayer lists and would keep announcing the old location's
+    // times until midnight without an explicit recompute signal.
+    OverlayBackgroundService.requestPrayerTimesRefresh();
   }
 
   /// جدولة إشعارات الصلاة لموقع محدد

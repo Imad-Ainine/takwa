@@ -1528,16 +1528,43 @@ class PrayerTimesService {
     );
   }
 
-  static PrayerTimeInfo? nextPrayer(List<PrayerTimeInfo> prayers) {
-    final now = DateTime.now();
+  /// The next adhan-bearing prayer after [now], or null once today's five
+  /// are done. Sunrise is never a countdown target — it is listed between
+  /// Fajr and Dhuhr but carries no adhan, and both the prayer screen and
+  /// the background service's notification must agree on skipping it.
+  static PrayerTimeInfo? nextPrayer(
+    List<PrayerTimeInfo> prayers, {
+    DateTime? now,
+  }) {
+    final reference = now ?? DateTime.now();
     for (final p in prayers) {
-      if (p.time.isAfter(now)) return p;
+      if (p.name == 'sunrise') continue;
+      if (p.time.isAfter(reference)) return p;
     }
     return null;
   }
 
-  static Duration? timeUntilNext(List<PrayerTimeInfo> prayers) =>
-      nextPrayer(prayers)?.time.difference(DateTime.now());
+  /// [nextPrayer] with a roll-over into tomorrow's Fajr once the last prayer
+  /// of today has passed. [tomorrow] must be tomorrow's list computed with
+  /// the same settings/location; its first entry is Fajr. This is the single
+  /// resolution both the Adhan screen countdown and the ongoing foreground
+  /// notification go through, so they can never disagree about the target.
+  static PrayerTimeInfo? nextPrayerOrTomorrow(
+    List<PrayerTimeInfo> today,
+    List<PrayerTimeInfo> tomorrow, {
+    DateTime? now,
+  }) {
+    return nextPrayer(today, now: now) ??
+        (tomorrow.isEmpty ? null : tomorrow.first);
+  }
+
+  static Duration? timeUntilNext(
+    List<PrayerTimeInfo> prayers, {
+    DateTime? now,
+  }) {
+    final next = nextPrayer(prayers, now: now);
+    return next?.time.difference(now ?? DateTime.now());
+  }
 
   static String formatTime(DateTime dt) {
     final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
@@ -1815,7 +1842,12 @@ class NotificationRouter {
   };
 }
 
-final prayerTimesProvider = FutureProvider<List<PrayerTimeInfo>>((ref) async {
+/// Shared body for [prayerTimesProvider] and [tomorrowPrayerTimesProvider] —
+/// one calculation path, parameterised only by which calendar day to resolve.
+Future<List<PrayerTimeInfo>> _computePrayerTimes(
+  Ref ref, {
+  int dayOffset = 0,
+}) async {
   final prefs = await ref.watch(userPreferencesProvider.future);
   final settings = ref.watch(settingsDaoProvider);
 
@@ -1852,6 +1884,11 @@ final prayerTimesProvider = FutureProvider<List<PrayerTimeInfo>>((ref) async {
 
   final tzName = savedTz ?? TimezoneResolver.resolveFromCoordinates(lat, lng);
 
+  final now = DateTime.now();
+  final date = dayOffset == 0
+      ? null
+      : DateTime(now.year, now.month, now.day + dayOffset);
+
   return PrayerTimesService.calculate(
     latitude: lat,
     longitude: lng,
@@ -1864,9 +1901,20 @@ final prayerTimesProvider = FutureProvider<List<PrayerTimeInfo>>((ref) async {
     asrOffset: prefs.asrOffset,
     maghribOffset: prefs.maghribOffset,
     ishaOffset: prefs.ishaOffset,
+    date: date,
     timezone: tzName,
   );
-});
+}
+
+final prayerTimesProvider = FutureProvider<List<PrayerTimeInfo>>(
+  (ref) => _computePrayerTimes(ref),
+);
+
+/// Tomorrow's times with the same settings as today — the roll-over target
+/// for every countdown once Isha has passed.
+final tomorrowPrayerTimesProvider = FutureProvider<List<PrayerTimeInfo>>(
+  (ref) => _computePrayerTimes(ref, dayOffset: 1),
+);
 
 final nextPrayerProvider = Provider<AsyncValue<PrayerTimeInfo?>>(
   (ref) => ref

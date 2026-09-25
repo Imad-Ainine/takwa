@@ -183,10 +183,11 @@ class TakwaApp extends ConsumerStatefulWidget {
   ConsumerState<TakwaApp> createState() => _TakwaAppState();
 }
 
-class _TakwaAppState extends ConsumerState<TakwaApp> {
+class _TakwaAppState extends ConsumerState<TakwaApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     FlutterForegroundTask.addTaskDataCallback(_onForegroundData);
     // بدء مراقبة أوقات الصلاة لتشغيل الأذان تلقائياً
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -244,9 +245,24 @@ class _TakwaAppState extends ConsumerState<TakwaApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     FlutterForegroundTask.removeTaskDataCallback(_onForegroundData);
     AdhanAutoTrigger.stop();
     super.dispose();
+  }
+
+  /// A paused-then-resumed process can have slept through a prayer
+  /// transition, a midnight date change, or a device timezone/DST shift —
+  /// and the background isolate may have been killed while suspended.
+  /// Recompute both sides' prayer lists on resume so the screen countdown
+  /// and the ongoing notification re-sync immediately instead of waiting
+  /// for the next settings change or midnight refresh.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    ref.invalidate(prayerTimesProvider);
+    ref.invalidate(tomorrowPrayerTimesProvider);
+    OverlayBackgroundService.requestPrayerTimesRefresh();
   }
 
   void _onForegroundData(Object data) {
