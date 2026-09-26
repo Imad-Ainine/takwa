@@ -276,13 +276,6 @@ class OnboardingScreen extends ConsumerWidget {
             ref.invalidate(onboardingDoneProvider);
           },
         );
-      // case OnboardStep.plan:
-      //   return _PlanStep(
-      //     onStart: () async {
-      //       await ref.read(settingsDaoProvider).set('onboardingDone', 'true');
-      //       ref.invalidate(onboardingDoneProvider);
-      //     },
-      //   );
     }
   }
 }
@@ -1428,67 +1421,6 @@ class _BottomActions extends StatelessWidget {
 // mode. Each painter below now takes the resolved `AppColorsExtension` from
 // its caller's `context.colors` instead, so onboarding matches whichever
 // theme is active like the rest of the app.
-class _OnboardBgPainter extends CustomPainter {
-  final double t;
-  final AppColorsExtension colors;
-  _OnboardBgPainter({required this.t, required this.colors});
-
-  static final _rng = math.Random(42);
-  static List<Offset>? _stars;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      Paint()..color = colors.night,
-    );
-
-    _stars ??= List.generate(
-      80,
-      (_) => Offset(
-        _rng.nextDouble() * size.width,
-        _rng.nextDouble() * size.height,
-      ),
-    );
-
-    for (int i = 0; i < _stars!.length; i++) {
-      final op = 0.05 + 0.2 * ((math.sin(t * 2 * math.pi + i * 0.4) + 1) / 2);
-      canvas.drawCircle(
-        _stars![i],
-        0.8 + _rng.nextDouble(),
-        Paint()..color = colors.gold.withValues(alpha: op),
-      );
-    }
-
-    final cx = size.width * 0.84, cy = size.height * 0.08;
-    canvas.drawCircle(
-      Offset(cx, cy),
-      18,
-      Paint()..color = const Color(0xFFFFF3CC),
-    );
-    canvas.drawCircle(
-      Offset(cx + 10, cy - 4),
-      15,
-      Paint()..color = colors.night,
-    );
-
-    canvas.drawCircle(
-      Offset(size.width / 2, -60),
-      200,
-      Paint()
-        ..shader =
-            RadialGradient(
-              colors: [colors.gold.withValues(alpha: 0.06), Colors.transparent],
-            ).createShader(
-              Rect.fromCircle(center: Offset(size.width / 2, -60), radius: 200),
-            ),
-    );
-  }
-
-  @override
-  bool shouldRepaint(_OnboardBgPainter o) => o.t != t || o.colors != colors;
-}
-
 class _LocationIllustration extends CustomPainter {
   final AppColorsExtension colors;
   _LocationIllustration({required this.colors});

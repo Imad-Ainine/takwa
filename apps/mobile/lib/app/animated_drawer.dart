@@ -1079,42 +1079,6 @@ class _HLine extends StatelessWidget {
 // ─────────────────────────────────────────
 //  BACKGROUND PAINTER
 // ─────────────────────────────────────────
-class _DrawerBgPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // نقاط هندسية
-    final p = Paint()..color = const Color(0x0AC8A96E);
-    for (double x = 16; x < size.width; x += 24) {
-      for (double y = 16; y < size.height; y += 24) {
-        canvas.drawCircle(Offset(x, y), 1, p);
-      }
-    }
-    // خطوط مائلة
-    final lp = Paint()
-      ..color = const Color(0x06C8A96E)
-      ..strokeWidth = 0.5;
-    for (double x = -size.height; x < size.width + size.height; x += 36) {
-      canvas.drawLine(Offset(x, 0), Offset(x + size.height, size.height), lp);
-    }
-    // glow أسفل يسار
-    canvas.drawCircle(
-      Offset(0, size.height),
-      160,
-      Paint()
-        ..shader =
-            const RadialGradient(
-              colors: [Color(0x14C8A96E), Colors.transparent],
-            ).createShader(
-              Rect.fromCircle(center: Offset(0, size.height), radius: 160),
-            ),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter o) => false;
-}
-
-// ─────────────────────────────────────────
 //  DATA CLASS
 // ─────────────────────────────────────────
 class _NavItem {

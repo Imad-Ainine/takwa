@@ -14,4 +14,4 @@ export 'theme/app_typography.dart';
 export 'theme/context_extensions.dart';
 export 'theme/theme_builder.dart';
 
-export 'widgets/display/takwa_badges.dart';
+export 'widgets/display/taqwa_badge.dart';

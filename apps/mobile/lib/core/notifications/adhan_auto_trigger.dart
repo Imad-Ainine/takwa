@@ -827,23 +827,3 @@ class AdhanScreenController {
     await AdhanAudioPlayer.stop();
   }
 }
-
-mixin AdhanAutoMixin<T extends ConsumerStatefulWidget> on ConsumerState<T> {
-  void initAdhanAuto(GlobalKey<NavigatorState> navigatorKey) {
-    AdhanAutoTrigger.start(ref, navigatorKey);
-  }
-
-  @override
-  void dispose() {
-    AdhanAutoTrigger.stop();
-    super.dispose();
-  }
-
-  /// استدعِ هذا من _onAdhanData في TakwaApp
-  Future<void> handleAdhanData(
-    Map data,
-    GlobalKey<NavigatorState> navigatorKey,
-  ) async {
-    await AdhanAutoTrigger.handleForegroundData(data, navigatorKey, ref);
-  }
-}

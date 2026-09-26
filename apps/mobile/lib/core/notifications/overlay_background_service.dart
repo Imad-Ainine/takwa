@@ -40,7 +40,6 @@ const _kPopupIntervalMinsKey = 'popup_interval_minutes';
 const _kWakeScreenEnabledKey = 'wake_screen_enabled';
 const _kSilentModeEnabledKey = 'silent_mode_enabled';
 const _kSilentDurationMinsKey = 'silent_duration_mins';
-const _kAutoSilentAfterAdhanKey = 'auto_silent_after_adhan';
 const _kSilentModeVibrationKey = 'silent_vibration_enabled';
 // Adhan mode ('sound' | 'vibrate' | 'silent') — mirrored from SQLite via
 // SettingsPrefsBridge so the background isolate can read the canonical
@@ -55,15 +54,6 @@ const _kOngoingNotifEnabledKey = 'ongoing_notif_enabled';
 // ─────────────────────────────────────────
 /// كل 24 دقيقة = 60 مرة يومياً تقريباً
 const _kDefaultPopupIntervalMins = 24;
-
-/// نافذة اكتشاف وقت الصلاة: ±90 ثانية
-const _kPrayerWindowSecs = 90;
-
-/// حجب إعادة الأذان لنفس الصلاة لمدة 30 دقيقة
-const _kAdhanCooldownMins = 30;
-
-/// مدة عرض الـ overlay قبل إغلاقه تلقائياً (ثانية)
-const _kOverlayAutoCloseSecs = 20;
 
 // ─────────────────────────────────────────
 //  PRAYER INFO MODEL

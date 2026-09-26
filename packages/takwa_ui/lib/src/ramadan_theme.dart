@@ -396,7 +396,9 @@ class RamadanBgPainter extends CustomPainter {
       ..strokeWidth = 1.0;
 
     final glowP = Paint()
-      ..color = RamadanColors.goldenLight.withValues(alpha: isDark ? 0.3 * flicker : 0.15 * flicker)
+      ..color = RamadanColors.goldenLight.withValues(
+        alpha: isDark ? 0.3 * flicker : 0.15 * flicker,
+      )
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
 
     canvas.drawCircle(pos + const Offset(0, 15), 15 * scale, glowP);
@@ -431,7 +433,9 @@ class RamadanBgPainter extends CustomPainter {
 
     // Inner light
     final innerP = Paint()
-      ..color = RamadanColors.goldenLight.withValues(alpha: isDark ? 0.5 * flicker : 0.3 * flicker)
+      ..color = RamadanColors.goldenLight.withValues(
+        alpha: isDark ? 0.5 * flicker : 0.3 * flicker,
+      )
       ..style = PaintingStyle.fill;
     canvas.drawRect(
       Rect.fromCenter(
@@ -677,7 +681,11 @@ class AdaptiveStyle {
     double? height,
     bool bodyFont = false,
   }) {
-    final withColor = style.copyWith(color: color, fontWeight: weight, height: height);
+    final withColor = style.copyWith(
+      color: color,
+      fontWeight: weight,
+      height: height,
+    );
     if (!bodyFont) return withColor;
     // AppTypographyExtension.fromColors bakes appFontFamily (the display/
     // heading face — Amiri for Arabic) into every role, since that's what
@@ -694,42 +702,127 @@ class AdaptiveStyle {
   }
 
   TextStyle displayLarge({Color? color, FontWeight? weight, double? height}) =>
-      _override(_withRamadanGlow(_type.displayLarge, strong: true), color: color, weight: weight, height: height);
+      _override(
+        _withRamadanGlow(_type.displayLarge, strong: true),
+        color: color,
+        weight: weight,
+        height: height,
+      );
 
   TextStyle displayMedium({Color? color, FontWeight? weight, double? height}) =>
-      _override(_withRamadanGlow(_type.displayMedium, strong: true), color: color, weight: weight, height: height);
+      _override(
+        _withRamadanGlow(_type.displayMedium, strong: true),
+        color: color,
+        weight: weight,
+        height: height,
+      );
 
   TextStyle headingLarge({Color? color, FontWeight? weight, double? height}) =>
-      _override(_withRamadanGlow(_type.headingLarge, strong: true), color: color, weight: weight, height: height);
+      _override(
+        _withRamadanGlow(_type.headingLarge, strong: true),
+        color: color,
+        weight: weight,
+        height: height,
+      );
 
   TextStyle headingMedium({Color? color, FontWeight? weight, double? height}) =>
-      _override(_withRamadanGlow(_type.headingMedium, strong: false), color: color, weight: weight, height: height);
+      _override(
+        _withRamadanGlow(_type.headingMedium, strong: false),
+        color: color,
+        weight: weight,
+        height: height,
+      );
 
   /// [bodyFont]: use the body face (NotoNaskhArabic for Arabic) instead of
   /// this role's baked-in display face — pass this when migrating a
   /// `naskh(N)` call site, so the rendered font doesn't change along with
   /// the size. Leave it false when migrating an `amiri(N)` call site,
   /// which already used the display face this role defaults to.
-  TextStyle bodyLarge({Color? color, FontWeight? weight, double? height, bool bodyFont = false}) =>
-      _override(_type.bodyLarge, color: color, weight: weight, height: height, bodyFont: bodyFont);
+  TextStyle bodyLarge({
+    Color? color,
+    FontWeight? weight,
+    double? height,
+    bool bodyFont = false,
+  }) => _override(
+    _type.bodyLarge,
+    color: color,
+    weight: weight,
+    height: height,
+    bodyFont: bodyFont,
+  );
 
-  TextStyle bodyMedium({Color? color, FontWeight? weight, double? height, bool bodyFont = false}) =>
-      _override(_type.bodyMedium, color: color, weight: weight, height: height, bodyFont: bodyFont);
+  TextStyle bodyMedium({
+    Color? color,
+    FontWeight? weight,
+    double? height,
+    bool bodyFont = false,
+  }) => _override(
+    _type.bodyMedium,
+    color: color,
+    weight: weight,
+    height: height,
+    bodyFont: bodyFont,
+  );
 
-  TextStyle bodySmall({Color? color, FontWeight? weight, double? height, bool bodyFont = false}) =>
-      _override(_type.bodySmall, color: color, weight: weight, height: height, bodyFont: bodyFont);
+  TextStyle bodySmall({
+    Color? color,
+    FontWeight? weight,
+    double? height,
+    bool bodyFont = false,
+  }) => _override(
+    _type.bodySmall,
+    color: color,
+    weight: weight,
+    height: height,
+    bodyFont: bodyFont,
+  );
 
-  TextStyle labelLarge({Color? color, FontWeight? weight, double? height, bool bodyFont = false}) =>
-      _override(_type.labelLarge, color: color, weight: weight, height: height, bodyFont: bodyFont);
+  TextStyle labelLarge({
+    Color? color,
+    FontWeight? weight,
+    double? height,
+    bool bodyFont = false,
+  }) => _override(
+    _type.labelLarge,
+    color: color,
+    weight: weight,
+    height: height,
+    bodyFont: bodyFont,
+  );
 
-  TextStyle labelMedium({Color? color, FontWeight? weight, double? height, bool bodyFont = false}) =>
-      _override(_type.labelMedium, color: color, weight: weight, height: height, bodyFont: bodyFont);
+  TextStyle labelMedium({
+    Color? color,
+    FontWeight? weight,
+    double? height,
+    bool bodyFont = false,
+  }) => _override(
+    _type.labelMedium,
+    color: color,
+    weight: weight,
+    height: height,
+    bodyFont: bodyFont,
+  );
 
-  TextStyle caption({Color? color, FontWeight? weight, double? height, bool bodyFont = false}) =>
-      _override(_type.caption, color: color, weight: weight, height: height, bodyFont: bodyFont);
+  TextStyle caption({
+    Color? color,
+    FontWeight? weight,
+    double? height,
+    bool bodyFont = false,
+  }) => _override(
+    _type.caption,
+    color: color,
+    weight: weight,
+    height: height,
+    bodyFont: bodyFont,
+  );
 
   TextStyle quranicVerse({Color? color, FontWeight? weight, double? height}) =>
-      _override(_type.quranicVerse, color: color, weight: weight, height: height);
+      _override(
+        _type.quranicVerse,
+        color: color,
+        weight: weight,
+        height: height,
+      );
 
   TextStyle taqwaScore({Color? color, FontWeight? weight, double? height}) =>
       _override(_type.taqwaScore, color: color, weight: weight, height: height);

@@ -94,6 +94,13 @@ class SyncManager {
 
       _ref.read(isSyncingProvider.notifier).state = true;
       try {
+        // Runs first: the retry steps below would otherwise push the
+        // previous account's queued rows under this uid.
+        await _runStep(
+          'foreignPendingPushes',
+          _dropForeignPendingPushes,
+          stepErrors,
+        );
         await _runStep('dailyRecords', _syncDailyRecords, stepErrors);
         await _runStep('prohibitions', _syncProhibitions, stepErrors);
         await _runStep('customIbadah', _syncCustomIbadah, stepErrors);
@@ -133,6 +140,39 @@ class SyncManager {
         stackTrace: st,
       );
       stepErrors.add('$name: $e');
+    }
+  }
+
+  /// Drop pending pushes that belong to a different account than the one now
+  /// signed in.
+  ///
+  /// `SyncOutbox` keys are just a table name plus an entity key — they don't
+  /// record who created them. Retry steps (`_syncDailyRecords` and friends)
+  /// stamp the *current* uid onto whatever they find pending, so on a device
+  /// where account A signed out with unsynced rows and B then signed in, A's
+  /// checklist rows would be pushed into B's Supabase rows. `_syncQuran` has
+  /// always guarded its own tables with the same data-owner marker; this
+  /// covers the four it doesn't.
+  ///
+  /// Only the queued pushes are dropped, never the local rows — the previous
+  /// account's data stays on the device exactly as it was, and anything
+  /// already pushed for it is safe server-side. A first-ever sign-in
+  /// (owner == null) adopts the pending rows instead, since they belong to
+  /// the user who just signed in.
+  Future<void> _dropForeignPendingPushes() async {
+    final uid = _ref.read(currentUserProvider)?.id;
+    if (uid == null) return;
+    final owner = _ref.read(quranPrefsRepositoryProvider).getDataOwner();
+    if (owner == null || owner == uid) return;
+
+    final outbox = _ref.read(syncOutboxDaoProvider);
+    for (final table in const [
+      'daily_records',
+      'prohibitions_log',
+      'custom_ibadah_log',
+      'achievements',
+    ]) {
+      await outbox.clearPendingTable(table);
     }
   }
 
@@ -402,7 +442,9 @@ class SyncManager {
         'mood': record.mood,
         'notes': record.notes,
       });
-      await _ref.read(syncOutboxDaoProvider).clearPending('daily_records', _dateKey(record.date));
+      await _ref
+          .read(syncOutboxDaoProvider)
+          .clearPending('daily_records', _dateKey(record.date));
     } catch (e) {
       developer.log('syncDailyRecord exception: $e', name: 'SyncManager');
       await _ref

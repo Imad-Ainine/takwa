@@ -43,9 +43,36 @@ class QuranStateNotifier extends StateNotifier<QuranReadingState> {
     await _repo.setReaderTheme(t);
   }
 
+  Timer? _pendingFontSizeSave;
+  static const _kFontSizeSaveDelay = Duration(milliseconds: 300);
+
   Future<void> setFontSize(double s) async {
-    state = state.copyWith(fontSize: s.clamp(16, 36));
-    await _repo.setFontSize(s);
+    final double clamped = s.clamp(16.0, 36.0);
+    if (clamped == state.fontSize) return;
+    state = state.copyWith(fontSize: clamped);
+    // Coalesced write: the settings slider fires this on every drag tick and
+    // the reader's pinch/step controls on every scale change, so one
+    // SharedPreferences round-trip per frame was pure I/O churn for a value
+    // nobody reads until the gesture settles.
+    _pendingFontSizeSave?.cancel();
+    _pendingFontSizeSave = Timer(_kFontSizeSaveDelay, _flushFontSize);
+  }
+
+  void _flushFontSize() {
+    // Cancel as well as clear: when this runs *from* the timer the handle is
+    // still set, and disposing the notifier has to leave nothing that can
+    // fire later and read `state` after `dispose`.
+    _pendingFontSizeSave?.cancel();
+    _pendingFontSizeSave = null;
+    unawaited(_repo.setFontSize(state.fontSize));
+  }
+
+  @override
+  void dispose() {
+    // Flush rather than drop: the notifier can go away the moment the reader
+    // screen closes, which is exactly when a drag has just ended.
+    if (_pendingFontSizeSave != null) _flushFontSize();
+    super.dispose();
   }
 
   Future<void> setPage(int page) async {
@@ -161,7 +188,11 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   /// and bottom bar play buttons, which always pass ayah 1 — "play this
   /// surah"): pauses if that surah is already playing, resumes in place if
   /// it's already loaded but paused, otherwise starts it fresh.
-  Future<void> togglePlay(BuildContext context, int surahNum, int ayahNum) async {
+  Future<void> togglePlay(
+    BuildContext context,
+    int surahNum,
+    int ayahNum,
+  ) async {
     final audioState = ql.AudioCtrl.instance.state;
     final surahs = ql.QuranLibrary.quranCtrl.surahs;
     if (surahNum < 1 || surahNum > surahs.length) return;
@@ -208,10 +239,9 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     audioState.isAudioPreparing.value = true;
     try {
       await audioState.audioPlayer.stop();
-      await audioState.audioPlayer.setAudioSources(
-        [for (final a in playAyahs) ql.AudioSource.uri(Uri.parse(urlFor(a)))],
-        initialIndex: 0,
-      );
+      await audioState.audioPlayer.setAudioSources([
+        for (final a in playAyahs) ql.AudioSource.uri(Uri.parse(urlFor(a))),
+      ], initialIndex: 0);
       await audioState.audioPlayer.setShuffleModeEnabled(false);
       await audioState.audioPlayer.setLoopMode(ql.LoopMode.off);
 
@@ -331,10 +361,8 @@ class _ThrottledPush {
 
 final quranLastReadProvider =
     StateNotifierProvider<QuranLastReadNotifier, QuranBookmark?>(
-      (ref) => QuranLastReadNotifier(
-        ref,
-        ref.watch(quranPrefsRepositoryProvider),
-      ),
+      (ref) =>
+          QuranLastReadNotifier(ref, ref.watch(quranPrefsRepositoryProvider)),
     );
 
 class QuranLastReadNotifier extends StateNotifier<QuranBookmark?> {
@@ -954,7 +982,8 @@ final khatmaCancelledProvider = FutureProvider<List<KhatmaSessionEx>>((
 /// reinstall. Callers must invalidate
 /// khatmaCompletedProvider/khatmaCancelledProvider afterward.
 final khatmaDeleteHistoryProvider = Provider<Future<void> Function(String)>(
-  (ref) => (id) => ref.read(khatmaExProvider.notifier).deleteSession(id),
+  (ref) =>
+      (id) => ref.read(khatmaExProvider.notifier).deleteSession(id),
 );
 
 // ─────────────────────────────────────────────────────────────
@@ -989,8 +1018,7 @@ final khatmaReadingStatsProvider = FutureProvider<KhatmaReadingStats>((
 ) async {
   final records = await ref.watch(dailyRecordDaoProvider).getLastNDays(60);
   final byDay = <DateTime, int>{
-    for (final r in records)
-      KhatmaReadingStats.dayOnly(r.date): r.quranPages,
+    for (final r in records) KhatmaReadingStats.dayOnly(r.date): r.quranPages,
   };
 
   final today = KhatmaReadingStats.dayOnly(DateTime.now());

@@ -16,6 +16,7 @@ import '../features/qiyam/presentation/screens/qiyam_dashboard_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../app/animated_drawer.dart';
 import '../core/providers/auth_providers.dart';
+import '../core/supabase/supabase_providers.dart';
 import '../features/auth/presentation/pages/auth_choice_screen.dart';
 import '../core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/islamic_glyph.dart';
@@ -204,9 +205,25 @@ class _MainShellState extends ConsumerState<MainShell>
         }
 
         // Check Auth Status
-        final authStatus = ref.watch(authStatusProvider);
-        if (authStatus == AuthStatus.unauthenticated) {
-          return const AuthChoiceScreen();
+        switch (ref.watch(authStatusProvider)) {
+          case AuthStatus.error:
+            // An auth-stream failure is not "signed out" — the session may be
+            // perfectly good — but it will not resolve on its own either, so
+            // this retries the subscription instead of reporting no user. It
+            // matches the escape above uses for a failed onboarding read.
+            return _SplashErrorScreen(
+              onRetry: () => ref.invalidate(authStateProvider),
+            );
+          case AuthStatus.pending:
+            // Same splash the onboarding read uses: until the auth stream has
+            // resolved there is no basis for either the shell or the sign-in
+            // screen, and guessing bounced users between the two.
+            return const _SplashScreen();
+          case AuthStatus.unauthenticated:
+            return const AuthChoiceScreen();
+          case AuthStatus.authenticated:
+          case AuthStatus.guest:
+            break;
         }
 
         return _buildShell();

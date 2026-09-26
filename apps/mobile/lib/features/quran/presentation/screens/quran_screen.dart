@@ -12,7 +12,6 @@ import '../../utils/quran_helpers.dart';
 import 'create_khatma_screen.dart';
 import 'khatma_history_screen.dart';
 import 'khatma_progress_screen.dart';
-// import 'khatma_settings_screen.dart';
 import 'ai_memorize_screen.dart';
 import 'quran_reader_screen.dart';
 import 'free_reading_screen.dart';
@@ -151,22 +150,6 @@ class _QuranScreenState extends ConsumerState<QuranScreen>
       ),
     );
   }
-
-  Widget _iconBtn(IconData icon, VoidCallback onTap, AdaptiveStyle style) =>
-      TakwaTappable(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        child: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: style.text.withValues(alpha: 0.07),
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(color: style.border),
-          ),
-          child: Icon(icon, color: style.textSec, size: 22),
-        ),
-      );
 
   Widget _buildDatePill(AdaptiveStyle style) {
     return Center(

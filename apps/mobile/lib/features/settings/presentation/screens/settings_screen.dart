@@ -507,57 +507,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     );
   }
 
-  Future<void> _resetSettings() async {
-    final l10n = AppLocalizations.of(context)!;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: context.colors.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: BorderSide(color: context.colors.border),
-        ),
-        title: Text(
-          l10n.settingsResetTitle,
-          style: context.typography.headingMedium.copyWith(
-            fontSize: 18,
-            color: context.colors.danger,
-          ),
-        ),
-        content: Text(
-          l10n.settingsResetConfirm,
-          style: context.typography.bodyMedium.copyWith(
-            fontSize: 13,
-            color: context.colors.textSecondary,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              l10n.commonCancel,
-              style: context.typography.labelMedium.copyWith(
-                fontSize: 13,
-                color: context.colors.textSecondary,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              l10n.commonDelete,
-              style: context.typography.labelMedium.copyWith(
-                fontSize: 13,
-                color: context.colors.danger,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-    if (confirm == true) await NotificationsService.cancelAll();
-  }
-
   Future<void> _handleLogout() async {
     final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(

@@ -8163,6 +8163,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_prohibitions_log_record',
     'CREATE INDEX idx_prohibitions_log_record ON prohibitions_log (record_id)',
   );
+  late final Index idxAchievementsTypeUnique = Index(
+    'idx_achievements_type_unique',
+    'CREATE UNIQUE INDEX idx_achievements_type_unique ON achievements (type)',
+  );
   late final Index idxCustomIbadahLogRecordIbadah = Index(
     'idx_custom_ibadah_log_record_ibadah',
     'CREATE INDEX idx_custom_ibadah_log_record_ibadah ON custom_ibadah_log (record_id, ibadah_id)',
@@ -8219,6 +8223,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     zakatCalculations,
     qadaCounters,
     idxProhibitionsLogRecord,
+    idxAchievementsTypeUnique,
     idxCustomIbadahLogRecordIbadah,
     idxRamadanProgressRecord,
     idxSyncOutboxTableKey,

@@ -10,6 +10,13 @@
     }
   ],
   "settings": {
+    // Run the Gradle Tooling-API import on a JDK supported by Gradle 8.14 / AGP 8.11.
+    // The system default (JAVA_HOME) is JDK 26, which Gradle 8.14 cannot run on,
+    // causing "The supplied phased action failed with an exception. 26.0.1".
+    // Android Studio's bundled JBR (OpenJDK 21) matches the daemon pin in
+    // apps/mobile/android/gradle/gradle-daemon-jvm.properties.
+    "java.import.gradle.enabled": true,
+    "java.import.gradle.java.home": "C:\\Program Files\\Android\\Android Studio\\jbr",
     // Exclude heavy build artifacts from search/watch to keep tooling fast.
     "files.exclude": {
       "**/.dart_tool": true,

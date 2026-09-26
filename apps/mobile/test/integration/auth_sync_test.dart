@@ -14,9 +14,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:takwa/core/database/app_database.dart';
 import 'package:takwa/core/providers/database_providers.dart';
+import 'package:takwa/core/providers/shared_preferences_provider.dart';
 import 'package:takwa/core/supabase/supabase_config.dart';
 import 'package:takwa/core/supabase/supabase_providers.dart';
 import 'package:takwa/core/supabase/sync_manager.dart';
+import 'package:takwa/features/quran/providers/quran_providers.dart';
 
 import '../support/fake_supabase_service.dart';
 
@@ -33,14 +35,16 @@ void main() {
   late FakeSupabaseService fakeService;
   late ProviderContainer container;
 
-  setUp(() {
+  setUp(() async {
     SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
     db = AppDatabase.forTesting(NativeDatabase.memory());
     fakeService = FakeSupabaseService();
 
     container = ProviderContainer(
       overrides: [
         appDatabaseProvider.overrideWithValue(db),
+        sharedPreferencesProvider.overrideWithValue(prefs),
         supabaseServiceProvider.overrideWithValue(fakeService),
         currentUserProvider.overrideWithValue(_fakeUser()),
         connectivityCheckerProvider.overrideWithValue(() async => true),
@@ -281,40 +285,140 @@ void main() {
     );
   });
 
-  test('connectivity is checked once per pass, not once per pushed record',
-      () async {
-    var checkCount = 0;
-    final countingContainer = ProviderContainer(
-      overrides: [
-        appDatabaseProvider.overrideWithValue(db),
-        supabaseServiceProvider.overrideWithValue(fakeService),
-        currentUserProvider.overrideWithValue(_fakeUser()),
-        connectivityCheckerProvider.overrideWithValue(() async {
-          checkCount++;
-          return true;
-        }),
-      ],
-    );
-    addTearDown(countingContainer.dispose);
+  test(
+    'connectivity is checked once per pass, not once per pushed record',
+    () async {
+      var checkCount = 0;
+      final countingContainer = ProviderContainer(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          supabaseServiceProvider.overrideWithValue(fakeService),
+          currentUserProvider.overrideWithValue(_fakeUser()),
+          connectivityCheckerProvider.overrideWithValue(() async {
+            checkCount++;
+            return true;
+          }),
+        ],
+      );
+      addTearDown(countingContainer.dispose);
 
-    // Seed 5 recent days so the push loop has several records, each of
-    // which used to pay for its own platform-channel connectivity check.
-    for (var i = 1; i <= 5; i++) {
+      // Seed 5 recent days so the push loop has several records, each of
+      // which used to pay for its own platform-channel connectivity check.
+      for (var i = 1; i <= 5; i++) {
+        await db
+            .into(db.dailyRecords)
+            .insert(
+              DailyRecordsCompanion.insert(
+                date: DateTime.now().subtract(Duration(days: i)),
+              ),
+            );
+      }
+
+      await countingContainer.read(syncManagerProvider).fullSync();
+
+      expect(
+        fakeService.callLog.any((c) => c.startsWith('upsertDailyRecord')),
+        isTrue,
+        reason: 'sanity: the seeded records were actually pushed',
+      );
+      expect(
+        checkCount,
+        1,
+        reason: 'the whole pass should share one cached connectivity result',
+      );
+    },
+  );
+
+  // P2: SyncManager only clears an outbox entry after the push actually
+  // happened. These pin both halves — a failing push keeps the entry (so a
+  // session that ends mid-pass can't delete unsent data), and entries left by
+  // a DIFFERENT account are dropped instead of being replayed under the uid
+  // that happens to be signed in now.
+  group('outbox entries survive a failed push', () {
+    /// A date outside the 7-day push window, so only the retry loop can ever
+    /// push it — that keeps "was this retried?" unambiguous.
+    Future<DateTime> seedOldPendingRecord() async {
+      final date = daysAgo(20);
       await db
           .into(db.dailyRecords)
           .insert(
             DailyRecordsCompanion.insert(
-              date: DateTime.now().subtract(Duration(days: i)),
+              date: date,
+              netPoints: const Value(10),
+              taqwaPoints: const Value(10),
             ),
           );
+      await db.syncOutboxDao.markPending(
+        'daily_records',
+        dateKeyFor(date),
+        'previous attempt failed',
+      );
+      return date;
     }
 
-    await countingContainer.read(syncManagerProvider).fullSync();
+    test(
+      'a push that throws keeps its entry pending for the next pass',
+      () async {
+        fakeService.signedOutDuringPush = true;
+        final record = await db.dailyRecordDao.getOrCreateToday();
+        await db.dailyRecordDao.updatePrayerStatus(
+          recordId: record.id,
+          prayerName: 'fajr',
+          status: PrayerStatus.performed,
+        );
 
-    expect(fakeService.callLog.any((c) => c.startsWith('upsertDailyRecord')),
-        isTrue,
-        reason: 'sanity: the seeded records were actually pushed');
-    expect(checkCount, 1,
-        reason: 'the whole pass should share one cached connectivity result');
+        await container.read(syncManagerProvider).fullSync();
+
+        expect(
+          fakeService.dailyRecordsByDate,
+          isEmpty,
+          reason: 'nothing reached the remote',
+        );
+        expect(
+          await db.syncOutboxDao.getPendingKeys('daily_records'),
+          isNotEmpty,
+          reason:
+              'the unsent record must still be queued — clearing it here is '
+              'how data used to disappear silently',
+        );
+      },
+    );
+
+    test('entries left by another account are dropped, not pushed under the '
+        'current uid', () async {
+      final date = await seedOldPendingRecord();
+      await container
+          .read(quranPrefsRepositoryProvider)
+          .setDataOwner('a-different-user');
+
+      await container.read(syncManagerProvider).fullSync();
+
+      expect(
+        fakeService.callLog,
+        isNot(contains('upsertDailyRecord:${dateKeyFor(date)}')),
+        reason: "the previous account's row must not land in this account",
+      );
+      expect(await db.syncOutboxDao.getPendingKeys('daily_records'), isEmpty);
+      expect(
+        await db.dailyRecordDao.getRecordByDate(date),
+        isNotNull,
+        reason: 'only the queued push is dropped, never the local row',
+      );
+    });
+
+    test(
+      'a first sign-in adopts pending entries instead of dropping them',
+      () async {
+        final date = await seedOldPendingRecord();
+
+        await container.read(syncManagerProvider).fullSync();
+
+        expect(
+          fakeService.callLog,
+          contains('upsertDailyRecord:${dateKeyFor(date)}'),
+        );
+        expect(await db.syncOutboxDao.getPendingKeys('daily_records'), isEmpty);
+      },
+    );
   });
 }

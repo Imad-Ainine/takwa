@@ -1,3 +1,5 @@
+import 'dart:async' show StreamSubscription, unawaited;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -148,15 +150,6 @@ Future<void> _runApp() async {
   }
 
   try {
-    // Registers "التفسير الميسر" as a selectable tafsir — quran_library
-    // doesn't bundle it, so this must run after QuranLibrary.init() (which
-    // sets up TafsirCtrl) and before the reader screen can be opened.
-    await MuyassarTafsirLoader.register();
-  } catch (e, st) {
-    AppLogger.warning('Muyassar tafsir registration error', e, st);
-  }
-
-  try {
     // Makes the reciter picker's 7 reciters (the app's own list, e.g.
     // Alafasy/Saad Al-Ghamdi/Al-Shatri) actually selectable — quran_library's
     // own reader list is missing 3 of them. Synchronous; just needs to run
@@ -174,6 +167,12 @@ Future<void> _runApp() async {
       child: const TakwaApp(),
     ),
   );
+
+  // P1 #6: Al-Muyassar registration decodes a 2.6 MB asset into 6236
+  // objects — off the startup critical path now. register() is idempotent
+  // and swallows its own errors; the reader screen awaits it before
+  // opening the tafsir sheet, so the first tap can't lose a race.
+  unawaited(MuyassarTafsirLoader.register());
 }
 
 // ─────────────────────────────────────────
@@ -183,7 +182,8 @@ class TakwaApp extends ConsumerStatefulWidget {
   ConsumerState<TakwaApp> createState() => _TakwaAppState();
 }
 
-class _TakwaAppState extends ConsumerState<TakwaApp> with WidgetsBindingObserver {
+class _TakwaAppState extends ConsumerState<TakwaApp>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -226,25 +226,43 @@ class _TakwaAppState extends ConsumerState<TakwaApp> with WidgetsBindingObserver
 
   void _setupAuthListener() {
     try {
-      Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-        final event = data.event;
-        if (event == AuthChangeEvent.passwordRecovery) {
-          debugPrint('Auth: Password Recovery mode detected');
-          NotificationRouter.navigatorKey.currentState?.pushNamed(
-            Routes.updatePassword,
-          );
-        } else if (event == AuthChangeEvent.signedIn) {
-          debugPrint('Auth: User signed in. Triggering fullSync...');
-          ref.read(syncManagerProvider).fullSync();
-        }
-      });
+      // Kept so dispose() can cancel it: this used to be a fire-and-forget
+      // listen() on a broadcast auth stream, so the subscription outlived
+      // nothing and its callback kept firing against a disposed widget (and
+      // a dead ProviderScope) after the app shell went away.
+      _authSub = SupabaseConfig.client.auth.onAuthStateChange.listen(
+        (data) {
+          final event = data.event;
+          if (event == AuthChangeEvent.passwordRecovery) {
+            debugPrint('Auth: Password Recovery mode detected');
+            NotificationRouter.navigatorKey.currentState?.pushNamed(
+              Routes.updatePassword,
+            );
+          } else if (event == AuthChangeEvent.signedIn) {
+            debugPrint('Auth: User signed in. Triggering fullSync...');
+            ref.read(syncManagerProvider).fullSync();
+          }
+        },
+        // Without this an auth-stream failure (token refresh rejected,
+        // GoTrue error) reaches the zone's error handler as an uncaught
+        // error instead of a log line, and the app keeps a session it can
+        // no longer refresh without saying so.
+        onError: (Object error, StackTrace _) {
+          debugPrint('Auth: onAuthStateChange error: $error');
+        },
+        cancelOnError: false,
+      );
     } catch (e) {
       debugPrint('Auth listener setup error: $e');
     }
   }
 
+  StreamSubscription<AuthState>? _authSub;
+
   @override
   void dispose() {
+    unawaited(_authSub?.cancel());
+    _authSub = null;
     WidgetsBinding.instance.removeObserver(this);
     FlutterForegroundTask.removeTaskDataCallback(_onForegroundData);
     AdhanAutoTrigger.stop();

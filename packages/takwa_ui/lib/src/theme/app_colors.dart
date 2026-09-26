@@ -355,11 +355,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
         other.disabledBackground,
         t,
       )!,
-      disabledContent: Color.lerp(
-        disabledContent,
-        other.disabledContent,
-        t,
-      )!,
+      disabledContent: Color.lerp(disabledContent, other.disabledContent, t)!,
       backgroundGradient: LinearGradient.lerp(
         backgroundGradient,
         other.backgroundGradient,
@@ -501,7 +497,8 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     borderSubdued: Color(0xFFEDF0F4),
     borderHover: AppPalette.neutral300,
     borderStrong: AppPalette.neutral400,
-    focusRing: AppPalette.gold700, // 4.8:1 on #FFFFFF — clears WCAG 2.2 non-text minimum
+    focusRing: AppPalette
+        .gold700, // 4.8:1 on #FFFFFF — clears WCAG 2.2 non-text minimum
     overlay: Color(0x80000000), // 50% black
     disabledBackground: Color(0xFFF3F4F6),
     disabledContent: Color(0xFF9CA3AF),

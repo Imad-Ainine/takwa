@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 
+import '../tokens/app_breakpoints.dart';
+import '../tokens/app_motion.dart';
 import '../tokens/app_radii.dart';
+import '../tokens/app_shadows.dart';
 import '../tokens/app_spacing.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_palettes.dart';
 import '../theme/app_typography.dart';
 import '../theme/context_extensions.dart';
-import '../widgets/buttons/takwa_button.dart';
-import '../widgets/cards/takwa_card.dart';
-import '../widgets/cards/takwa_highlight_card.dart';
-import '../widgets/display/takwa_badges.dart';
-import '../widgets/forms/takwa_text_field.dart';
+import '../widgets/display/taqwa_badge.dart';
 
 /// Interactive style guide for the Takwa Design System, in the spirit of
 /// Shopify Polaris / IBM Carbon storybook pages.
 ///
-/// Renders the three token layers — primitive ramps (AppPalette), semantic
-/// roles (AppColorsExtension) and component themes — plus the type scale
-/// and core components. Reads everything from the ambient theme, so it
-/// renders correctly under any of the four themes (base/Ramadan x
-/// light/dark):
+/// A reference page for the token layers: primitive ramps (AppPalette),
+/// semantic roles (AppColorsExtension), the type scale, and the spacing,
+/// radii, motion, elevation and breakpoint tokens — all read from the
+/// ambient theme, so it renders correctly under any of the four themes
+/// (base/Ramadan x light/dark):
 ///
 /// ```dart
 /// MaterialApp(
@@ -73,10 +72,22 @@ class DesignSystemShowcase extends StatelessWidget {
                 _TokenTile(label: 'deep', color: colors.deep),
                 _TokenTile(label: 'card', color: colors.card),
                 _TokenTile(label: 'card2', color: colors.card2),
-                _TokenTile(label: 'surfaceSubdued', color: colors.surfaceSubdued),
-                _TokenTile(label: 'surfaceHovered', color: colors.surfaceHovered),
-                _TokenTile(label: 'surfacePressed', color: colors.surfacePressed),
-                _TokenTile(label: 'surfaceInverse', color: colors.surfaceInverse),
+                _TokenTile(
+                  label: 'surfaceSubdued',
+                  color: colors.surfaceSubdued,
+                ),
+                _TokenTile(
+                  label: 'surfaceHovered',
+                  color: colors.surfaceHovered,
+                ),
+                _TokenTile(
+                  label: 'surfacePressed',
+                  color: colors.surfacePressed,
+                ),
+                _TokenTile(
+                  label: 'surfaceInverse',
+                  color: colors.surfaceInverse,
+                ),
                 _TokenTile(label: 'border', color: colors.border),
                 _TokenTile(label: 'borderSubdued', color: colors.borderSubdued),
                 _TokenTile(label: 'borderHover', color: colors.borderHover),
@@ -164,24 +175,89 @@ class DesignSystemShowcase extends StatelessWidget {
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
               children: [
-                _OnColorChip(fill: colors.gold, foreground: colors.onGold, label: 'on gold'),
-                _OnColorChip(fill: colors.teal, foreground: colors.onTeal, label: 'on teal'),
-                _OnColorChip(fill: colors.success, foreground: colors.onSuccess, label: 'on success'),
-                _OnColorChip(fill: colors.warning, foreground: colors.onWarning, label: 'on warning'),
-                _OnColorChip(fill: colors.danger, foreground: colors.onDanger, label: 'on danger'),
-                _OnColorChip(fill: colors.info, foreground: colors.onInfo, label: 'on info'),
+                _OnColorChip(
+                  fill: colors.gold,
+                  foreground: colors.onGold,
+                  label: 'on gold',
+                ),
+                _OnColorChip(
+                  fill: colors.teal,
+                  foreground: colors.onTeal,
+                  label: 'on teal',
+                ),
+                _OnColorChip(
+                  fill: colors.success,
+                  foreground: colors.onSuccess,
+                  label: 'on success',
+                ),
+                _OnColorChip(
+                  fill: colors.warning,
+                  foreground: colors.onWarning,
+                  label: 'on warning',
+                ),
+                _OnColorChip(
+                  fill: colors.danger,
+                  foreground: colors.onDanger,
+                  label: 'on danger',
+                ),
+                _OnColorChip(
+                  fill: colors.info,
+                  foreground: colors.onInfo,
+                  label: 'on info',
+                ),
               ],
             ),
           ),
           _Section(
             title: 'Typography',
-            caption: 'Dual-script type scale (Amiri/Poppins display, Naskh body)',
+            caption:
+                'Dual-script type scale (Amiri/Poppins display, Naskh body)',
             child: _TypographyScale(colors: colors),
           ),
           const _Section(
-            title: 'Components',
-            caption: 'Core components built from the tokens above',
-            child: _Components(),
+            title: 'Spacing',
+            caption: '4/8dp scale — every gap in the app comes from this list',
+            child: _SpacingScale(),
+          ),
+          const _Section(
+            title: 'Radii',
+            caption:
+                'Corner treatments, including the predefined BorderRadius shapes',
+            child: _RadiusGallery(),
+          ),
+          const _Section(
+            title: 'Motion',
+            caption:
+                'Durations and curves; prefersReducedMotion() overrides all three',
+            child: _MotionTable(),
+          ),
+          const _Section(
+            title: 'Elevation',
+            caption:
+                'Box-shadow presets (the glows read best on the dark theme)',
+            child: _ShadowGallery(),
+          ),
+          const _Section(
+            title: 'Breakpoints',
+            caption:
+                'Responsive bands — context.breakpoint / isCompact / isExpanded',
+            child: _BreakpointTable(),
+          ),
+          _Section(
+            title: 'Component',
+            caption: 'The one design-system widget the app still builds from',
+            child: Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                const TaqwaBadge(label: 'TaqwaBadge'),
+                TaqwaBadge(
+                  label: 'teal',
+                  color: colors.teal,
+                  bgColor: colors.tealDim,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -196,7 +272,11 @@ class _Section extends StatelessWidget {
   final String caption;
   final Widget child;
 
-  const _Section({required this.title, required this.caption, required this.child});
+  const _Section({
+    required this.title,
+    required this.caption,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +284,10 @@ class _Section extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        // `stretch`, not `start`: in RTL the start edge is the right one, so a
+        // shrink-wrapping child like the typography card hugs the right edge
+        // and leaves the rest of the row empty.
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(title, style: typography.headingLarge),
           const SizedBox(height: AppSpacing.xs),
@@ -241,7 +324,10 @@ class _RampRow extends StatelessWidget {
               for (final (index, color) in ramp.indexed)
                 Expanded(
                   child: Tooltip(
-                    message: '${index == 0 ? 50 : index * 100} — ${_hex(color)}',
+                    // Leading LRM: the tooltip overlay inherits the page's RTL
+                    // direction, which would reorder the '#'.
+                    message:
+                        '\u200E${index == 0 ? 50 : index * 100} — ${_hex(color)}',
                     child: AspectRatio(
                       aspectRatio: 1,
                       child: Container(
@@ -299,7 +385,10 @@ class _TokenTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          Text(_hex(color), style: typography.caption.copyWith(color: colors.textDim)),
+          _LtrText(
+            _hex(color),
+            style: typography.caption.copyWith(color: colors.textDim),
+          ),
         ],
       ),
     );
@@ -352,7 +441,11 @@ class _StateSwatch extends StatelessWidget {
   final Color color;
   final bool dim;
 
-  const _StateSwatch({required this.label, required this.color, this.dim = false});
+  const _StateSwatch({
+    required this.label,
+    required this.color,
+    this.dim = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -372,7 +465,12 @@ class _StateSwatch extends StatelessWidget {
               ),
               alignment: Alignment.center,
               child: dim
-                  ? Text('Aa', style: typography.caption.copyWith(color: colors.disabledContent))
+                  ? Text(
+                      'Aa',
+                      style: typography.caption.copyWith(
+                        color: colors.disabledContent,
+                      ),
+                    )
                   : null,
             ),
             const SizedBox(height: AppSpacing.xs),
@@ -422,8 +520,14 @@ class _StatusTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: typography.labelMedium.copyWith(color: foreground)),
-                Text(message, style: typography.bodySmall.copyWith(color: foreground)),
+                Text(
+                  title,
+                  style: typography.labelMedium.copyWith(color: foreground),
+                ),
+                Text(
+                  message,
+                  style: typography.bodySmall.copyWith(color: foreground),
+                ),
               ],
             ),
           ),
@@ -440,17 +544,21 @@ class _OnColorChip extends StatelessWidget {
   final Color foreground;
   final String label;
 
-  const _OnColorChip({required this.fill, required this.foreground, required this.label});
+  const _OnColorChip({
+    required this.fill,
+    required this.foreground,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
     final typography = context.typography;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: fill,
-        borderRadius: AppRadius.chip,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
       ),
+      decoration: BoxDecoration(color: fill, borderRadius: AppRadius.chip),
       child: Text(
         'Aa $label',
         style: typography.labelMedium.copyWith(color: foreground),
@@ -503,7 +611,12 @@ class _TypographyScale extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(name, style: typography.caption),
-                  Text('Takwa — التقوى', style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(
+                    'Takwa — التقوى',
+                    style: style,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
@@ -513,10 +626,22 @@ class _TypographyScale extends StatelessWidget {
   }
 }
 
-// ── Component gallery ──────────────────────────────────────────────────
+// ── Spacing scale ──────────────────────────────────────────────────────
 
-class _Components extends StatelessWidget {
-  const _Components();
+class _SpacingScale extends StatelessWidget {
+  const _SpacingScale();
+
+  static const _steps = <(String, double)>[
+    ('xxs', AppSpacing.xxs),
+    ('xs', AppSpacing.xs),
+    ('sm', AppSpacing.sm),
+    ('md', AppSpacing.md),
+    ('lg', AppSpacing.lg),
+    ('xl', AppSpacing.xl),
+    ('xxl', AppSpacing.xxl),
+    ('xxxl', AppSpacing.xxxl),
+    ('huge', AppSpacing.huge),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -526,62 +651,219 @@ class _Components extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            TakwaButton(text: 'Primary'),
-            TakwaButton(text: 'Secondary', variant: TakwaButtonVariant.secondary),
-            TakwaButton(text: 'Outline', variant: TakwaButtonVariant.outline),
-            TakwaButton(text: 'Ghost', variant: TakwaButtonVariant.ghost),
-            TakwaButton(text: 'Destructive', variant: TakwaButtonVariant.destructive),
-            TakwaButton(text: 'Disabled', onPressed: null),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            TakwaChip(label: 'Chip', onTap: () {}),
-            TakwaChip(label: 'Selected', isSelected: true, onTap: () {}),
-            const TaqwaBadge(label: 'Badge'),
-            const StreakBadge(label: '7 days'),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        TakwaCard(
-          child: Text('TakwaCard — standard surface', style: typography.bodyMedium),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        TakwaHighlightCard(
-          child: Text('TakwaHighlightCard — gold gradient', style: typography.bodyMedium),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        const TakwaTextField(
-          label: 'TakwaTextField',
-          hint: 'name@example.com',
-          helperText: 'Helper text',
-        ),
-        const SizedBox(height: AppSpacing.md),
-        const TakwaTextField(
-          label: 'Error state',
-          hint: 'name@example.com',
-          errorText: 'This field is required',
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: colors.surfaceHovered,
-            borderRadius: BorderRadius.circular(AppSpacing.md),
-            border: Border.all(color: colors.borderHover),
+        for (final (name, value) in _steps)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 56,
+                  child: Text(
+                    name,
+                    style: typography.caption.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 12,
+                  width: value,
+                  decoration: BoxDecoration(
+                    color: colors.goldDim,
+                    borderRadius: BorderRadius.circular(AppRadius.xs),
+                    border: Border.all(color: colors.gold),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  '${value.toInt()}dp',
+                  style: typography.caption.copyWith(color: colors.textDim),
+                ),
+              ],
+            ),
           ),
-          child: Text(
-            'surfaceHovered + borderHover',
-            style: typography.bodySmall,
+      ],
+    );
+  }
+}
+
+// ── Radius shapes ──────────────────────────────────────────────────────
+
+class _RadiusGallery extends StatelessWidget {
+  const _RadiusGallery();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    final shapes = <(String, BorderRadius)>[
+      ('card · lg', AppRadius.card),
+      ('button · full', AppRadius.button),
+      ('chip · full', AppRadius.chip),
+      ('input · md', AppRadius.input),
+      ('bottomSheet · xxl', AppRadius.bottomSheet),
+    ];
+
+    return Wrap(
+      spacing: AppSpacing.md,
+      runSpacing: AppSpacing.md,
+      children: [
+        for (final (name, radius) in shapes)
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 88,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: colors.card2,
+                  borderRadius: radius,
+                  border: Border.all(color: colors.borderStrong),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(name, style: typography.caption),
+            ],
           ),
-        ),
+      ],
+    );
+  }
+}
+
+// ── Motion tokens ──────────────────────────────────────────────────────
+
+class _MotionTable extends StatelessWidget {
+  const _MotionTable();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    final rows = <(String, String)>[
+      ('fast', '${AppMotion.fast.inMilliseconds}ms · press feedback, toggles'),
+      (
+        'base',
+        '${AppMotion.base.inMilliseconds}ms · crossfades, card and section transitions',
+      ),
+      (
+        'slow',
+        '${AppMotion.slow.inMilliseconds}ms · page, sheet and drawer slides',
+      ),
+      ('standard', 'Curves.easeOutCubic · default entrance'),
+      ('emphasized', 'Curves.easeInOutCubic · morph and expand'),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final (name, detail) in rows)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 88,
+                  child: Text(
+                    name,
+                    style: typography.caption.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ),
+                Expanded(child: Text(detail, style: typography.caption)),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// ── Elevation presets ──────────────────────────────────────────────────
+
+class _ShadowGallery extends StatelessWidget {
+  const _ShadowGallery();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    final presets = <(String, List<BoxShadow>)>[
+      ('card', AppShadows.card),
+      ('modal', AppShadows.modal),
+      ('goldGlow', AppShadows.goldGlow),
+      ('tealGlow', AppShadows.tealGlow),
+    ];
+
+    return Wrap(
+      spacing: AppSpacing.md,
+      runSpacing: AppSpacing.md,
+      children: [
+        for (final (name, shadows) in presets)
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 88,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: colors.card,
+                  borderRadius: AppRadius.card,
+                  border: Border.all(color: colors.border),
+                  boxShadow: shadows,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(name, style: typography.caption),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+// ── Responsive bands ───────────────────────────────────────────────────
+
+class _BreakpointTable extends StatelessWidget {
+  const _BreakpointTable();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final band in AppBreakpoint.values)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 88,
+                  child: Text(
+                    band.name,
+                    style: typography.caption.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: _LtrText(
+                    band.maxWidth == double.infinity
+                        ? '≥ ${band.minWidth.toInt()}dp'
+                        : '${band.minWidth.toInt()}–${band.maxWidth.toInt()}dp',
+                    style: typography.caption,
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -591,3 +873,25 @@ class _Components extends StatelessWidget {
 
 String _hex(Color color) =>
     '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
+
+/// A token value that must keep its left-to-right glyph order even when the
+/// page is rendered under Arabic RTL. `#` and `–` are directionally neutral,
+/// so in an RTL paragraph `#C8A96E` prints as `C8A96E#` and `0–599dp` prints
+/// as `599dp–0` — wrong values on the page that exists to report values.
+class _LtrText extends StatelessWidget {
+  final String data;
+  final TextStyle? style;
+  final TextAlign textAlign;
+
+  const _LtrText(
+    this.data, {
+    this.style,
+    this.textAlign = TextAlign.start,
+  });
+
+  @override
+  Widget build(BuildContext context) => Directionality(
+    textDirection: TextDirection.ltr,
+    child: Text(data, style: style, textAlign: textAlign),
+  );
+}

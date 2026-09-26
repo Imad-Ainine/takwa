@@ -5,9 +5,7 @@
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:takwa/core/supabase/supabase_service.dart'
-    show
-        SupabaseService,
-        CircleOperationException;
+    show SupabaseService, CircleOperationException, NotAuthenticatedException;
 
 class FakeSupabaseService implements SupabaseService {
   // Keyed storage, mirroring each table's real unique constraint.
@@ -41,6 +39,11 @@ class FakeSupabaseService implements SupabaseService {
   /// retry/delete-journal paths can be exercised.
   bool failQuranPushes = false;
 
+  /// When true, `upsertDailyRecord` throws the same way the real service does
+  /// for a session that ended after SyncManager's signed-in check — which is
+  /// exactly the moment the outbox entry must NOT be cleared.
+  bool signedOutDuringPush = false;
+
   void _maybeFailQuranPush() {
     if (failQuranPushes) throw Exception('fake offline');
   }
@@ -59,8 +62,10 @@ class FakeSupabaseService implements SupabaseService {
   }) => throw UnimplementedError('not used by these tests');
 
   @override
-  Future<AuthResponse> signIn({required String email, required String password}) =>
-      throw UnimplementedError('not used by these tests');
+  Future<AuthResponse> signIn({
+    required String email,
+    required String password,
+  }) => throw UnimplementedError('not used by these tests');
 
   @override
   Future<AuthResponse?> signInWithGoogle() =>
@@ -77,6 +82,7 @@ class FakeSupabaseService implements SupabaseService {
   // ─────────────── DATA ───────────────
   @override
   Future<void> upsertDailyRecord(Map<String, dynamic> record) async {
+    if (signedOutDuringPush) throw const NotAuthenticatedException();
     callLog.add('upsertDailyRecord:${record['date']}');
     dailyRecordsByDate[record['date'] as String] = Map.of(record);
   }
@@ -89,7 +95,9 @@ class FakeSupabaseService implements SupabaseService {
     final fromStr = _dateStr(from);
     final toStr = _dateStr(to);
     return dailyRecordsByDate.entries
-        .where((e) => e.key.compareTo(fromStr) >= 0 && e.key.compareTo(toStr) <= 0)
+        .where(
+          (e) => e.key.compareTo(fromStr) >= 0 && e.key.compareTo(toStr) <= 0,
+        )
         .map((e) => e.value)
         .toList();
   }
@@ -124,7 +132,9 @@ class FakeSupabaseService implements SupabaseService {
   Future<void> upsertProhibitionLog(Map<String, dynamic> log) async {
     callLog.add('upsertProhibitionLog');
     prohibitionLogs.removeWhere(
-      (l) => l['record_id'] == log['record_id'] && l['category'] == log['category'],
+      (l) =>
+          l['record_id'] == log['record_id'] &&
+          l['category'] == log['category'],
     );
     prohibitionLogs.add(Map.of(log));
   }
@@ -256,7 +266,8 @@ class FakeSupabaseService implements SupabaseService {
 
   // ─────────────── COMMUNITY ADHKAR / DUAS ───────────────
   @override
-  Future<List<Map<String, dynamic>>> getCommunityAdhkar() async => communityAdhkar;
+  Future<List<Map<String, dynamic>>> getCommunityAdhkar() async =>
+      communityAdhkar;
 
   @override
   Future<void> likeAdhkar(String id) async {}
@@ -292,7 +303,10 @@ class FakeSupabaseService implements SupabaseService {
   Future<List<Map<String, dynamic>>> getBooks() async => books;
 
   @override
-  Future<void> upsertBookProgress(String bookId, Map<String, dynamic> data) async {
+  Future<void> upsertBookProgress(
+    String bookId,
+    Map<String, dynamic> data,
+  ) async {
     bookProgressByBookId[bookId] = {...?bookProgressByBookId[bookId], ...data};
   }
 

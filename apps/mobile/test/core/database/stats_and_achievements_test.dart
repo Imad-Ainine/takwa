@@ -6,7 +6,7 @@
 //
 // See the "Performance" section of the engineering audit for context.
 
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hijri/hijri_calendar.dart';
@@ -243,6 +243,168 @@ void main() {
       await seedDay(base.add(const Duration(days: 5)), netPoints: 10);
       granted = await db.statsDao.checkAndGrantAchievements();
       expect(granted.map((a) => a.type), contains('points_100'));
+    });
+  });
+
+  // The month/range statistics moved from "load every row, fold in Dart" to
+  // single COUNT(*) FILTER / SUM() queries (P1 #5). These lock the aggregate
+  // results — in particular the intEnum comparison behind `performed`, which
+  // is easy to get wrong silently since both sides are just integers in SQL.
+  group('aggregate statistics over a range', () {
+    /// Two days in July 2026: day 1 has 3 of 5 prayers performed, day 2 has
+    /// 2 of 5. Together: 5 performed out of 10 slots = 0.5.
+    Future<void> seedPrayerDays() async {
+      await db
+          .into(db.dailyRecords)
+          .insert(
+            DailyRecordsCompanion.insert(
+              date: DateTime(2026, 7, 1),
+              netPoints: const Value(30),
+              quranPages: const Value(12),
+              fajrStatus: const Value(PrayerStatus.performed),
+              dhuhrStatus: const Value(PrayerStatus.performed),
+              asrStatus: const Value(PrayerStatus.performed),
+              maghribStatus: const Value(PrayerStatus.missed),
+              ishaStatus: const Value(PrayerStatus.qadaa),
+            ),
+          );
+      await db
+          .into(db.dailyRecords)
+          .insert(
+            DailyRecordsCompanion.insert(
+              date: DateTime(2026, 7, 2),
+              netPoints: const Value(20),
+              quranPages: const Value(8),
+              fajrStatus: const Value(PrayerStatus.performed),
+              dhuhrStatus: const Value(PrayerStatus.performed),
+              asrStatus: const Value(PrayerStatus.missed),
+              maghribStatus: const Value(PrayerStatus.missed),
+              ishaStatus: const Value(PrayerStatus.missed),
+            ),
+          );
+    }
+
+    test('getMonthStats sums points, pages and prayer rate', () async {
+      await seedPrayerDays();
+      final stats = await db.statsDao.getMonthStats(2026, 7);
+      expect(stats.totalPoints, 50);
+      expect(stats.quranPages, 20);
+      expect(stats.prayerRate, 0.5);
+    });
+
+    test('getStatsForRange ignores days outside the range', () async {
+      await seedPrayerDays();
+      await seedDay(DateTime(2026, 8, 1), netPoints: 999);
+      final stats = await db.statsDao.getStatsForRange(
+        DateTime(2026, 7, 1),
+        DateTime(2026, 7, 2),
+      );
+      expect(stats.totalPoints, 50);
+      expect(stats.quranPages, 20);
+      expect(stats.prayerRate, 0.5);
+    });
+
+    test('getPerPrayerRates divides each prayer by the day count', () async {
+      await seedPrayerDays();
+      final rates = await db.statsDao.getPerPrayerRates(
+        DateTime(2026, 7, 1),
+        DateTime(2026, 7, 2),
+      );
+      expect(rates.map((r) => r.rate), [1.0, 1.0, 0.5, 0.0, 0.0]);
+    });
+
+    test('an empty range yields zeros rather than dividing by zero', () async {
+      final stats = await db.statsDao.getMonthStats(2026, 3);
+      expect(stats.totalPoints, 0);
+      expect(stats.prayerRate, 0);
+
+      final rates = await db.statsDao.getPerPrayerRates(
+        DateTime(2026, 3, 1),
+        DateTime(2026, 3, 31),
+      );
+      expect(rates, hasLength(5));
+      expect(rates.every((r) => r.rate == 0), isTrue);
+    });
+  });
+
+  // Two grant passes can legitimately run at the same moment — the statistics
+  // screen's post-frame sweep while the achievements screen refreshes — and
+  // both used to read "not earned yet" before either wrote, leaving the same
+  // achievement stored twice (duplicate badge, and the unlock animation
+  // replaying because each copy starts out unseen).
+  group('achievement grants are race-proof', () {
+    Future<List<Achievement>> rowsOfType(String type) =>
+        (db.select(db.achievements)
+              ..where((a) => a.type.equals(type)))
+            .get();
+
+    /// Three consecutive positive-point days: enough for streak_3, not enough
+    /// for streak_7, so exactly one grant is in play.
+    Future<void> seedThreeDayStreak() async {
+      final today = DateTime.now();
+      final start = DateTime(today.year, today.month, today.day).subtract(
+        const Duration(days: 2),
+      );
+      for (var i = 0; i < 3; i++) {
+        await seedDay(start.add(Duration(days: i)), netPoints: 10);
+      }
+    }
+
+    test('concurrent sweeps leave exactly one row per achievement', () async {
+      await seedThreeDayStreak();
+
+      final results = await Future.wait([
+        db.statsDao.checkAndGrantAchievements(),
+        db.statsDao.checkAndGrantAchievements(),
+      ]);
+
+      expect(results.expand((r) => r).map((a) => a.type), contains('streak_3'));
+      expect(await rowsOfType('streak_3'), hasLength(1));
+    });
+
+    test('the unique index rejects a second row for the same type', () async {
+      await db.statsDao.addAchievement(
+        type: 'streak_3',
+        titleAr: 'x',
+        descAr: 'y',
+        emoji: '🌱',
+      );
+
+      // Not a DAO-level check — this is the database constraint that makes
+      // the grant path correct even if a future caller forgets to look first.
+      // Asserted by outcome rather than exception type: the native driver
+      // surfaces a constraint violation as its own SqliteException class,
+      // which isn't a declared dependency here.
+      Object? rejected;
+      try {
+        await db
+            .into(db.achievements)
+            .insert(
+              AchievementsCompanion(
+                type: const Value('streak_3'),
+                titleAr: const Value('other'),
+                descAr: const Value('other'),
+                emoji: const Value('🔥'),
+                earnedAt: Value(DateTime.now()),
+              ),
+            );
+      } catch (e) {
+        rejected = e;
+      }
+      expect(rejected, isNotNull, reason: 'the second row must be rejected');
+      expect(await rowsOfType('streak_3'), hasLength(1));
+    });
+
+    test('addAchievement is a no-op for a type that already exists', () async {
+      for (var i = 0; i < 2; i++) {
+        await db.statsDao.addAchievement(
+          type: 'quran_juz',
+          titleAr: 'x',
+          descAr: 'y',
+          emoji: '📖',
+        );
+      }
+      expect(await rowsOfType('quran_juz'), hasLength(1));
     });
   });
 }

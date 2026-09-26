@@ -117,6 +117,12 @@ class PrayerTimesCache extends Table {
 // ─────────────────────────────────────────
 //  TABLE: achievements
 // ─────────────────────────────────────────
+//
+// `type` is the achievement's stable identifier (streak_7, quran_juz, …) and
+// is what `addAchievement`/`_tryGrant` de-duplicate against, so the database
+// enforces it too — two sync sweeps racing on the same threshold used to be
+// able to insert the same achievement twice.
+@TableIndex(name: 'idx_achievements_type_unique', unique: true, columns: {#type})
 class Achievements extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get type => text()();
@@ -412,7 +418,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -528,6 +534,21 @@ class AppDatabase extends _$AppDatabase {
         // have no direct-value entry.
         await m.addColumn(zakatCalculations, zakatCalculations.goldValue);
         await m.addColumn(zakatCalculations, zakatCalculations.silverValue);
+      }
+      if (from < 13) {
+        // One row per achievement `type`. Two sweeps that raced on the same
+        // threshold (statistics screen opening while the achievements screen
+        // refreshed) could both pass the "not earned yet" check and insert,
+        // which showed the badge twice and replayed the unlock animation for
+        // the second copy. Collapse any existing duplicates to the earliest
+        // row — that's the original earn timestamp — before adding the
+        // unique index, which would otherwise fail to build.
+        final db = m.database;
+        await db.customStatement(
+          'DELETE FROM achievements WHERE id NOT IN '
+          '(SELECT MIN(id) FROM achievements GROUP BY type)',
+        );
+        await m.createIndex(idxAchievementsTypeUnique);
       }
     },
     beforeOpen: (details) async {

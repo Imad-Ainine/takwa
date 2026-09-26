@@ -12,56 +12,58 @@ double contrastRatio(Color a, Color b) {
 
 /// Text-role colors that must stay legible on card surfaces.
 Map<String, Color> textRoles(AppColorsExtension c) => {
-      'goldText': c.goldText,
-      'tealText': c.tealText,
-      'successText': c.successText,
-      'warningText': c.warningText,
-      'dangerText': c.dangerText,
-      'infoText': c.infoText,
-      'textPrimary': c.textPrimary,
-      'textSecondary': c.textSecondary,
-    };
+  'goldText': c.goldText,
+  'tealText': c.tealText,
+  'successText': c.successText,
+  'warningText': c.warningText,
+  'dangerText': c.dangerText,
+  'infoText': c.infoText,
+  'textPrimary': c.textPrimary,
+  'textSecondary': c.textSecondary,
+};
 
 /// Foreground/background pairs for solid brand fills.
-Map<String, ({Color foreground, Color fill})> onColorPairs(AppColorsExtension c) => {
-      'onGold': (foreground: c.onGold, fill: c.gold),
-      'onTeal': (foreground: c.onTeal, fill: c.teal),
-      'onSuccess': (foreground: c.onSuccess, fill: c.success),
-      'onDanger': (foreground: c.onDanger, fill: c.danger),
-      'onWarning': (foreground: c.onWarning, fill: c.warning),
-      'onInfo': (foreground: c.onInfo, fill: c.info),
-    };
+Map<String, ({Color foreground, Color fill})> onColorPairs(
+  AppColorsExtension c,
+) => {
+  'onGold': (foreground: c.onGold, fill: c.gold),
+  'onTeal': (foreground: c.onTeal, fill: c.teal),
+  'onSuccess': (foreground: c.onSuccess, fill: c.success),
+  'onDanger': (foreground: c.onDanger, fill: c.danger),
+  'onWarning': (foreground: c.onWarning, fill: c.warning),
+  'onInfo': (foreground: c.onInfo, fill: c.info),
+};
 
 /// Roles added by the Polaris/Carbon-style semantic interaction layer.
 Map<String, Color> interactionRoles(AppColorsExtension c) => {
-      'info': c.info,
-      'infoDim': c.infoDim,
-      'infoText': c.infoText,
-      'onGold': c.onGold,
-      'onTeal': c.onTeal,
-      'onSuccess': c.onSuccess,
-      'onDanger': c.onDanger,
-      'onWarning': c.onWarning,
-      'onInfo': c.onInfo,
-      'primaryHover': c.primaryHover,
-      'primaryPressed': c.primaryPressed,
-      'primaryDisabled': c.primaryDisabled,
-      'onPrimaryDisabled': c.onPrimaryDisabled,
-      'secondaryHover': c.secondaryHover,
-      'secondaryPressed': c.secondaryPressed,
-      'surfaceSubdued': c.surfaceSubdued,
-      'surfaceHovered': c.surfaceHovered,
-      'surfacePressed': c.surfacePressed,
-      'surfaceInverse': c.surfaceInverse,
-      'onSurfaceInverse': c.onSurfaceInverse,
-      'borderSubdued': c.borderSubdued,
-      'borderHover': c.borderHover,
-      'borderStrong': c.borderStrong,
-      'focusRing': c.focusRing,
-      'overlay': c.overlay,
-      'disabledBackground': c.disabledBackground,
-      'disabledContent': c.disabledContent,
-    };
+  'info': c.info,
+  'infoDim': c.infoDim,
+  'infoText': c.infoText,
+  'onGold': c.onGold,
+  'onTeal': c.onTeal,
+  'onSuccess': c.onSuccess,
+  'onDanger': c.onDanger,
+  'onWarning': c.onWarning,
+  'onInfo': c.onInfo,
+  'primaryHover': c.primaryHover,
+  'primaryPressed': c.primaryPressed,
+  'primaryDisabled': c.primaryDisabled,
+  'onPrimaryDisabled': c.onPrimaryDisabled,
+  'secondaryHover': c.secondaryHover,
+  'secondaryPressed': c.secondaryPressed,
+  'surfaceSubdued': c.surfaceSubdued,
+  'surfaceHovered': c.surfaceHovered,
+  'surfacePressed': c.surfacePressed,
+  'surfaceInverse': c.surfaceInverse,
+  'onSurfaceInverse': c.onSurfaceInverse,
+  'borderSubdued': c.borderSubdued,
+  'borderHover': c.borderHover,
+  'borderStrong': c.borderStrong,
+  'focusRing': c.focusRing,
+  'overlay': c.overlay,
+  'disabledBackground': c.disabledBackground,
+  'disabledContent': c.disabledContent,
+};
 
 void main() {
   group('Takwa Design System Tokens', () {
@@ -126,17 +128,20 @@ void main() {
       }
     });
 
-    test('ramps are tonally monotonic (lightening step index lowers luminance)', () {
-      for (final entry in ramps.entries) {
-        for (var i = 1; i < entry.value.length; i++) {
-          expect(
-            entry.value[i].computeLuminance(),
-            lessThanOrEqualTo(entry.value[i - 1].computeLuminance() + 0.001),
-            reason: '${entry.key}[$i] should not be lighter than [${i - 1}]',
-          );
+    test(
+      'ramps are tonally monotonic (lightening step index lowers luminance)',
+      () {
+        for (final entry in ramps.entries) {
+          for (var i = 1; i < entry.value.length; i++) {
+            expect(
+              entry.value[i].computeLuminance(),
+              lessThanOrEqualTo(entry.value[i - 1].computeLuminance() + 0.001),
+              reason: '${entry.key}[$i] should not be lighter than [${i - 1}]',
+            );
+          }
         }
-      }
-    });
+      },
+    );
 
     test('step 500 anchors each ramp to its brand color', () {
       expect(AppPalette.gold500, const Color(0xFFC8A96E));
@@ -176,12 +181,15 @@ void main() {
         }
       });
 
-      test('${theme.key}: focus ring clears the WCAG 2.2 3:1 non-text minimum', () {
-        expect(
-          contrastRatio(theme.value.focusRing, theme.value.card),
-          greaterThanOrEqualTo(3.0),
-        );
-      });
+      test(
+        '${theme.key}: focus ring clears the WCAG 2.2 3:1 non-text minimum',
+        () {
+          expect(
+            contrastRatio(theme.value.focusRing, theme.value.card),
+            greaterThanOrEqualTo(3.0),
+          );
+        },
+      );
     }
   });
 
@@ -190,7 +198,10 @@ void main() {
       const base = AppColorsExtension.dark;
       expect(interactionRoles(base.copyWith()), interactionRoles(base));
 
-      final overridden = base.copyWith(focusRing: Colors.black, infoText: Colors.white);
+      final overridden = base.copyWith(
+        focusRing: Colors.black,
+        infoText: Colors.white,
+      );
       expect(overridden.focusRing, Colors.black);
       expect(overridden.infoText, Colors.white);
       expect(overridden.gold, base.gold);
@@ -213,28 +224,55 @@ void main() {
           expect(
             entry.value == a || entry.value == b,
             isFalse,
-            reason: '${entry.key} should be blended, not snapped to an endpoint',
+            reason:
+                '${entry.key} should be blended, not snapped to an endpoint',
           );
         }
       }
     });
 
-    test('AppTheme wires hover/pressed/disabled states into button schemes', () {
-      const dark = AppColorsExtension.dark;
-      final style = AppTheme.dark().elevatedButtonTheme.style!;
+    test(
+      'AppTheme wires hover/pressed/disabled states into button schemes',
+      () {
+        const dark = AppColorsExtension.dark;
+        final style = AppTheme.dark().elevatedButtonTheme.style!;
 
-      expect(style.backgroundColor?.resolve(const <WidgetState>{}), dark.gold);
-      expect(style.backgroundColor?.resolve(const <WidgetState>{WidgetState.hovered}), dark.primaryHover);
-      expect(style.backgroundColor?.resolve(const <WidgetState>{WidgetState.pressed}), dark.primaryPressed);
-      expect(style.backgroundColor?.resolve(const <WidgetState>{WidgetState.disabled}), dark.primaryDisabled);
-      expect(style.foregroundColor?.resolve(const <WidgetState>{}), dark.onGold);
+        expect(
+          style.backgroundColor?.resolve(const <WidgetState>{}),
+          dark.gold,
+        );
+        expect(
+          style.backgroundColor?.resolve(const <WidgetState>{
+            WidgetState.hovered,
+          }),
+          dark.primaryHover,
+        );
+        expect(
+          style.backgroundColor?.resolve(const <WidgetState>{
+            WidgetState.pressed,
+          }),
+          dark.primaryPressed,
+        );
+        expect(
+          style.backgroundColor?.resolve(const <WidgetState>{
+            WidgetState.disabled,
+          }),
+          dark.primaryDisabled,
+        );
+        expect(
+          style.foregroundColor?.resolve(const <WidgetState>{}),
+          dark.onGold,
+        );
 
-      final outlined = AppTheme.dark().outlinedButtonTheme.style!;
-      expect(
-        outlined.side?.resolve(const <WidgetState>{WidgetState.hovered})?.color,
-        dark.borderHover,
-      );
-    });
+        final outlined = AppTheme.dark().outlinedButtonTheme.style!;
+        expect(
+          outlined.side?.resolve(const <WidgetState>{
+            WidgetState.hovered,
+          })?.color,
+          dark.borderHover,
+        );
+      },
+    );
 
     test('AppTheme maps on-colors into the Material ColorScheme', () {
       final scheme = AppTheme.dark().colorScheme;
@@ -250,156 +288,23 @@ void main() {
     test('input theme uses the focus ring for its focused border', () {
       final scheme = AppTheme.dark().extension<AppColorsExtension>()!;
       final border =
-          AppTheme.dark().inputDecorationTheme.focusedBorder! as OutlineInputBorder;
+          AppTheme.dark().inputDecorationTheme.focusedBorder!
+              as OutlineInputBorder;
       expect(border.borderSide.color, scheme.focusRing);
       expect(border.borderSide.width, greaterThanOrEqualTo(2.0));
     });
   });
 
-  group('Takwa UI Components', () {
-    Widget buildTestHarness(Widget child, {bool isDark = true}) {
-      return MaterialApp(
-        theme: isDark ? AppTheme.dark() : AppTheme.light(),
-        home: Scaffold(
-          body: Center(child: child),
-        ),
-      );
-    }
+  group('DesignSystemShowcase', () {
+    testWidgets('renders every token layer', (tester) async {
+      // A viewport tall enough for the whole page: a ListView recycles rows
+      // that leave the viewport, which would make scroll-then-assert
+      // assertions depend on the order they run in.
+      tester.view.physicalSize = const Size(1200, 9000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
 
-    testWidgets('TakwaButton renders and respects minimum 48dp height', (tester) async {
-      bool tapped = false;
-
-      await tester.pumpWidget(
-        buildTestHarness(
-          TakwaButton(
-            text: 'تسجيل الصلاة',
-            onPressed: () => tapped = true,
-          ),
-        ),
-      );
-
-      final buttonFinder = find.byType(TakwaButton);
-      expect(buttonFinder, findsOneWidget);
-
-      final renderBox = tester.renderObject<RenderBox>(buttonFinder);
-      expect(renderBox.size.height, greaterThanOrEqualTo(48.0));
-
-      await tester.tap(buttonFinder);
-      await tester.pumpAndSettle();
-      expect(tapped, isTrue);
-    });
-
-    testWidgets('TakwaButton shows loader and ignores taps when isLoading', (tester) async {
-      bool tapped = false;
-
-      await tester.pumpWidget(
-        buildTestHarness(
-          TakwaButton(
-            text: 'تحميل',
-            isLoading: true,
-            onPressed: () => tapped = true,
-          ),
-        ),
-      );
-
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-
-      await tester.tap(find.byType(TakwaButton));
-      await tester.pump(const Duration(milliseconds: 100));
-      expect(tapped, isFalse);
-    });
-
-    testWidgets('TakwaIconButton satisfies minimum 48x48dp touch bounds', (tester) async {
-      await tester.pumpWidget(
-        buildTestHarness(
-          const TakwaIconButton(
-            icon: Icon(Icons.bookmark),
-            tooltip: 'Bookmark',
-          ),
-        ),
-      );
-
-      final iconButtonFinder = find.byType(TakwaIconButton);
-      expect(iconButtonFinder, findsOneWidget);
-
-      final renderBox = tester.renderObject<RenderBox>(iconButtonFinder);
-      expect(renderBox.size.width, greaterThanOrEqualTo(48.0));
-      expect(renderBox.size.height, greaterThanOrEqualTo(48.0));
-    });
-
-    testWidgets('TakwaCard and TakwaHighlightCard render children', (tester) async {
-      await tester.pumpWidget(
-        buildTestHarness(
-          const Column(
-            children: [
-              TakwaCard(child: Text('Standard Card')),
-              TakwaHighlightCard(child: Text('Highlight Card')),
-            ],
-          ),
-        ),
-      );
-
-      expect(find.text('Standard Card'), findsOneWidget);
-      expect(find.text('Highlight Card'), findsOneWidget);
-    });
-
-    testWidgets('TakwaTextField displays label and error state', (tester) async {
-      await tester.pumpWidget(
-        buildTestHarness(
-          const TakwaTextField(
-            label: 'البريد الإلكتروني',
-            hint: 'name@example.com',
-            errorText: 'الحقل مطلوب',
-          ),
-        ),
-      );
-
-      expect(find.text('البريد الإلكتروني'), findsOneWidget);
-      expect(find.text('الحقل مطلوب'), findsOneWidget);
-    });
-
-    testWidgets('AyahText renders Arabic numerals and verse text in RTL', (tester) async {
-      await tester.pumpWidget(
-        buildTestHarness(
-          const AyahText(
-            text: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
-            ayahNumber: 1,
-          ),
-        ),
-      );
-
-      final ayahFinder = find.byType(AyahText);
-      expect(ayahFinder, findsOneWidget);
-
-      // Verify Arabic numeral conversion (1 -> ١)
-      expect(find.textContaining('١'), findsOneWidget);
-
-      final directionality = tester.widget<Directionality>(
-        find.descendant(of: ayahFinder, matching: find.byType(Directionality)),
-      );
-      expect(directionality.textDirection, TextDirection.rtl);
-    });
-
-    testWidgets('TakwaChip triggers onTap callback', (tester) async {
-      bool chipSelected = false;
-
-      await tester.pumpWidget(
-        buildTestHarness(
-          TakwaChip(
-            label: 'الفجر',
-            isSelected: false,
-            onTap: () => chipSelected = true,
-          ),
-        ),
-      );
-
-      expect(find.text('الفجر'), findsOneWidget);
-      await tester.tap(find.byType(TakwaChip));
-      await tester.pumpAndSettle();
-      expect(chipSelected, isTrue);
-    });
-
-    testWidgets('DesignSystemShowcase renders every token layer', (tester) async {
       await tester.pumpWidget(
         MaterialApp(theme: AppTheme.dark(), home: const DesignSystemShowcase()),
       );
@@ -407,12 +312,30 @@ void main() {
 
       expect(find.text('Takwa Design System'), findsOneWidget);
       expect(find.text('Color palettes'), findsOneWidget);
+      for (final section in [
+        'Semantic tokens',
+        'Action states',
+        'Status',
+        'On-colors',
+        'Typography',
+        'Spacing',
+        'Radii',
+        'Motion',
+        'Elevation',
+        'Breakpoints',
+      ]) {
+        expect(find.text(section), findsOneWidget, reason: '$section rendered');
+      }
 
-      await tester.scrollUntilVisible(find.text('Components'), 300);
-      expect(find.text('Components'), findsOneWidget);
+      // The token sections print their own values, so a wrong token or a
+      // broken import shows up as a missing label, not a silent blank row.
+      expect(find.text('48dp'), findsOneWidget);
+      expect(find.textContaining('280ms · crossfades'), findsOneWidget);
+      expect(find.text('≥ 840dp'), findsOneWidget);
+      expect(find.text('TaqwaBadge'), findsOneWidget);
     });
 
-    testWidgets('DesignSystemShowcase reaches its last row on a phone viewport', (tester) async {
+    testWidgets('reaches its last row on a phone viewport', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.75;
       addTearDown(tester.view.resetPhysicalSize);
@@ -423,14 +346,21 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final position = tester.state<ScrollableState>(find.byType(Scrollable).first).position;
+      final position = tester
+          .state<ScrollableState>(find.byType(Scrollable).first)
+          .position;
       expect(position.maxScrollExtent, greaterThan(0));
 
       position.jumpTo(position.maxScrollExtent);
       await tester.pumpAndSettle();
 
-      final lastRow = tester.getRect(find.text('surfaceHovered + borderHover'));
-      expect(lastRow.bottom, lessThanOrEqualTo(position.viewportDimension + position.minScrollExtent));
+      final lastRow = tester.getRect(find.text('TaqwaBadge'));
+      expect(
+        lastRow.bottom,
+        lessThanOrEqualTo(
+          position.viewportDimension + position.minScrollExtent,
+        ),
+      );
       expect(tester.takeException(), isNull);
     });
   });

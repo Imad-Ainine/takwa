@@ -152,9 +152,7 @@ class DailyRecordDao extends DatabaseAccessor<AppDatabase>
       mode: InsertMode.insertOrIgnore,
     );
 
-    return (select(
-      dailyRecords,
-    )..where((r) => r.date.equals(day))).getSingle();
+    return (select(dailyRecords)..where((r) => r.date.equals(day))).getSingle();
   }
 
   /// Mark sadaqah logged and persist [amount] for an arbitrary [date].
@@ -200,9 +198,11 @@ class DailyRecordDao extends DatabaseAccessor<AppDatabase>
               dailyRecords.date.isBetweenValues(from, to)
         : dailyRecords.sadaqah.equals(true);
 
-    final row = await (selectOnly(
-      dailyRecords,
-    )..addColumns([amountSum])..where(condition)).getSingle();
+    final row =
+        await (selectOnly(dailyRecords)
+              ..addColumns([amountSum])
+              ..where(condition))
+            .getSingle();
     return row.read(amountSum) ?? 0;
   }
 
@@ -660,8 +660,7 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase>
   Future<void> clearPending(String entityTable, String entityKey) async {
     await (delete(syncOutbox)..where(
           (o) =>
-              o.entityTable.equals(entityTable) &
-              o.entityKey.equals(entityKey),
+              o.entityTable.equals(entityTable) & o.entityKey.equals(entityKey),
         ))
         .go();
   }
@@ -671,10 +670,9 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase>
   /// signed in on this device changed, so retrying those pushes would just
   /// re-upload the previous account's data).
   Future<void> clearPendingTable(String entityTable) async {
-    await (delete(syncOutbox)..where(
-          (o) => o.entityTable.equals(entityTable),
-        ))
-        .go();
+    await (delete(
+      syncOutbox,
+    )..where((o) => o.entityTable.equals(entityTable))).go();
   }
 
   /// All keys currently pending push for [entityTable] (e.g. the ISO date
@@ -705,13 +703,14 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase>
 class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
   StatsDao(super.db);
 
-  Future<int> getMonthlyPoints(int year, int month) async {
-    final from = DateTime(year, month, 1);
-    final to = DateTime(year, month + 1, 0);
-    final rows = await (select(
-      dailyRecords,
-    )..where((r) => r.date.isBetweenValues(from, to))).get();
-    return rows.fold<int>(0, (sum, r) => sum + r.netPoints);
+  /// COUNT(*) FILTER (WHERE status = performed) for one of the five prayer
+  /// status columns. `equalsValue` maps through the column's intEnum
+  /// converter, so this never hard-codes the ordinal SQLite actually stores.
+  Expression<int> _performed(
+    GeneratedColumnWithTypeConverter<PrayerStatus, int> col,
+  ) {
+    final isPerformed = col.equalsValue(PrayerStatus.performed);
+    return isPerformed.count(filter: isPerformed);
   }
 
   Future<int> getLongestStreak() async {
@@ -774,40 +773,43 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
     return streak;
   }
 
-  Future<double> getPrayerAttendanceRate(int year, int month) async {
-    final from = DateTime(year, month, 1);
-    final to = DateTime(year, month + 1, 0);
-    final rows = await (select(
-      dailyRecords,
-    )..where((r) => r.date.isBetweenValues(from, to))).get();
-
-    if (rows.isEmpty) return 0;
-
-    int total = rows.length * 5;
-    int performed = 0;
-
-    for (final r in rows) {
-      for (final status in [
-        r.fajrStatus,
-        r.dhuhrStatus,
-        r.asrStatus,
-        r.maghribStatus,
-        r.ishaStatus,
-      ]) {
-        if (status == PrayerStatus.performed) performed++;
-      }
-    }
-    return performed / total;
+  /// Reads every statistic the screens aggregate over a date range in one
+  /// SQL pass (P1 #5). Previously each of `getMonthStats`, `getPerPrayerRates`
+  /// and `getStatsForRange` fetched all 15+ columns of every matching row and
+  /// folded them in Dart.
+  Future<_StatTotals> _statTotals(DateTime from, DateTime to) async {
+    final f = _performed(dailyRecords.fajrStatus);
+    final d = _performed(dailyRecords.dhuhrStatus);
+    final a = _performed(dailyRecords.asrStatus);
+    final m = _performed(dailyRecords.maghribStatus);
+    final i = _performed(dailyRecords.ishaStatus);
+    final days = countAll();
+    final points = dailyRecords.netPoints.sum();
+    final pages = dailyRecords.quranPages.sum();
+    final row =
+        await (selectOnly(dailyRecords)
+              ..addColumns([f, d, a, m, i, days, points, pages])
+              ..where(dailyRecords.date.isBetweenValues(from, to)))
+            .getSingle();
+    // SQLite's SUM is NULL over an empty range (COUNT is already 0).
+    int read(Expression<int> e) => row.read(e) ?? 0;
+    return (
+      days: read(days),
+      fajr: read(f),
+      dhuhr: read(d),
+      asr: read(a),
+      maghrib: read(m),
+      isha: read(i),
+      points: read(points),
+      pages: read(pages),
+    );
   }
 
-  Future<int> getMonthlyQuranPages(int year, int month) async {
-    final from = DateTime(year, month, 1);
-    final to = DateTime(year, month + 1, 0);
-    final rows = await (select(
-      dailyRecords,
-    )..where((r) => r.date.isBetweenValues(from, to))).get();
-    return rows.fold<int>(0, (sum, r) => sum + r.quranPages);
-  }
+  double _attendanceRate(int performed, int days) =>
+      days == 0 ? 0 : performed / (days * 5);
+
+  Future<_StatTotals> _monthTotals(int year, int month) =>
+      _statTotals(DateTime(year, month, 1), DateTime(year, month + 1, 0));
 
   Future<List<WeeklyPoint>> getWeeklyPoints() async {
     final today = DateTime.now();
@@ -823,12 +825,18 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
   TaqwaLevel getTaqwaLevel(int totalPoints) => taqwaLevelFor(totalPoints);
 
   Future<MonthStats> getMonthStats(int year, int month) async {
+    // One aggregate pass for the whole month (P1 #5) — the points, rate and
+    // pages figures used to each trigger their own month scan.
+    final t = await _monthTotals(year, month);
     return MonthStats(
-      totalPoints: await getMonthlyPoints(year, month),
+      totalPoints: t.points,
       longestStreak: await getLongestStreak(),
       currentStreak: await getCurrentStreak(),
-      prayerRate: await getPrayerAttendanceRate(year, month),
-      quranPages: await getMonthlyQuranPages(year, month),
+      prayerRate: _attendanceRate(
+        t.fajr + t.dhuhr + t.asr + t.maghrib + t.isha,
+        t.days,
+      ),
+      quranPages: t.pages,
     );
   }
 
@@ -860,16 +868,14 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
     DateTime from,
     DateTime to,
   ) async {
-    final rows = await (select(
-      dailyRecords,
-    )..where((r) => r.date.isBetweenValues(from, to))).get();
-
     // Same "DB layer can't be locale-aware without going through ARB
     // directly" situation as checkAndGrantAchievements() — see that
     // method's comment.
     final l10n = lookupAppLocalizations(const Locale('ar'));
-
-    if (rows.isEmpty) {
+    final t = await _statTotals(from, to);
+    // SQLite COUNT is 0 (not NULL) for an empty range, so the old
+    // `rows.isEmpty` special case collapses into this same guard.
+    if (t.days == 0) {
       return [
         PrayerRateData(name: l10n.prayerFajr, emoji: '🌅', rate: 0),
         PrayerRateData(name: l10n.prayerDhuhr, emoji: '☀️', rate: 0),
@@ -878,54 +884,35 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
         PrayerRateData(name: l10n.prayerIsha, emoji: '🌃', rate: 0),
       ];
     }
-
-    int fajr = 0, dhuhr = 0, asr = 0, maghrib = 0, isha = 0;
-    for (final r in rows) {
-      if (r.fajrStatus == PrayerStatus.performed) fajr++;
-      if (r.dhuhrStatus == PrayerStatus.performed) dhuhr++;
-      if (r.asrStatus == PrayerStatus.performed) asr++;
-      if (r.maghribStatus == PrayerStatus.performed) maghrib++;
-      if (r.ishaStatus == PrayerStatus.performed) isha++;
-    }
-    final n = rows.length;
     return [
-      PrayerRateData(name: l10n.prayerFajr, emoji: '🌅', rate: fajr / n),
-      PrayerRateData(name: l10n.prayerDhuhr, emoji: '☀️', rate: dhuhr / n),
-      PrayerRateData(name: l10n.prayerAsr, emoji: '🌤', rate: asr / n),
-      PrayerRateData(name: l10n.prayerMaghrib, emoji: '🌆', rate: maghrib / n),
-      PrayerRateData(name: l10n.prayerIsha, emoji: '🌃', rate: isha / n),
+      PrayerRateData(name: l10n.prayerFajr, emoji: '🌅', rate: t.fajr / t.days),
+      PrayerRateData(
+        name: l10n.prayerDhuhr,
+        emoji: '☀️',
+        rate: t.dhuhr / t.days,
+      ),
+      PrayerRateData(name: l10n.prayerAsr, emoji: '🌤', rate: t.asr / t.days),
+      PrayerRateData(
+        name: l10n.prayerMaghrib,
+        emoji: '🌆',
+        rate: t.maghrib / t.days,
+      ),
+      PrayerRateData(name: l10n.prayerIsha, emoji: '🌃', rate: t.isha / t.days),
     ];
   }
 
   /// Returns MonthStats aggregated over any date range [from, to].
   Future<MonthStats> getStatsForRange(DateTime from, DateTime to) async {
-    final rows = await (select(
-      dailyRecords,
-    )..where((r) => r.date.isBetweenValues(from, to))).get();
-
-    final totalPoints = rows.fold<int>(0, (s, r) => s + r.netPoints);
-    final quranPages = rows.fold<int>(0, (s, r) => s + r.quranPages);
-
-    int performed = 0;
-    for (final r in rows) {
-      for (final s in [
-        r.fajrStatus,
-        r.dhuhrStatus,
-        r.asrStatus,
-        r.maghribStatus,
-        r.ishaStatus,
-      ]) {
-        if (s == PrayerStatus.performed) performed++;
-      }
-    }
-    final prayerRate = rows.isEmpty ? 0.0 : performed / (rows.length * 5);
-
+    final t = await _statTotals(from, to);
     return MonthStats(
-      totalPoints: totalPoints,
+      totalPoints: t.points,
       longestStreak: await getLongestStreak(),
       currentStreak: await getCurrentStreak(),
-      prayerRate: prayerRate,
-      quranPages: quranPages,
+      prayerRate: _attendanceRate(
+        t.fajr + t.dhuhr + t.asr + t.maghrib + t.isha,
+        t.days,
+      ),
+      quranPages: t.pages,
     );
   }
 
@@ -999,6 +986,9 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
     )..where((a) => a.type.equals(type))).get();
     if (existing.isNotEmpty) return;
 
+    // DoNothing rather than a bare insert: `achievements.type` is unique, and
+    // this check-then-insert can still lose a race against a concurrent sweep
+    // (the pull side runs while the local grant path may be inserting).
     await into(achievements).insert(
       AchievementsCompanion(
         type: Value(type),
@@ -1008,6 +998,7 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
         pointsReward: Value(pointsReward),
         earnedAt: Value(earnedAt ?? DateTime.now()),
       ),
+      onConflict: DoNothing(),
     );
   }
 
@@ -1065,7 +1056,7 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
     }
 
     // 2. Quran
-    final quranPages = await getMonthlyQuranPages(now.year, now.month);
+    final quranPages = (await _monthTotals(now.year, now.month)).pages;
     if (quranPages >= 30) {
       final a = await _tryGrant(
         'quran_juz',
@@ -1317,11 +1308,19 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
     String emoji,
     int pts,
   ) async {
-    final exists = await (select(
-      achievements,
-    )..where((a) => a.type.equals(type))).getSingleOrNull();
-    if (exists == null) {
-      final id = await into(achievements).insert(
+    // The existence check and the insert share one transaction, and
+    // `achievements.type` carries a unique index (schema v13): two sweeps
+    // crossing the same threshold — the statistics screen's post-frame grant
+    // pass while the achievements screen refreshes — used to both read "not
+    // earned yet" and both insert, leaving duplicate badges that each replayed
+    // the unlock animation because `seen` defaults to false.
+    return transaction(() async {
+      final exists = await (select(
+        achievements,
+      )..where((a) => a.type.equals(type))).getSingleOrNull();
+      if (exists != null) return null;
+
+      await into(achievements).insert(
         AchievementsCompanion(
           type: Value(type),
           titleAr: Value(title),
@@ -1330,10 +1329,17 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
           pointsReward: Value(pts),
           earnedAt: Value(DateTime.now()),
         ),
+        // The loser of a race must not throw on the unique index — the grant
+        // pass runs dozens of these, and one exception would abort the sweep.
+        onConflict: DoNothing(),
       );
-      return (select(achievements)..where((a) => a.id.equals(id))).getSingle();
-    }
-    return null;
+      // Re-read by type instead of trusting the inserted id: if a racing grant
+      // won, this insert was ignored and the row that exists is still the one
+      // the user earned.
+      return (select(
+        achievements,
+      )..where((a) => a.type.equals(type))).getSingle();
+    });
   }
 }
 
@@ -1375,10 +1381,8 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
   }
 
   /// Persists [timestamp] as the last-visited time for [circleId] (ISO 8601).
-  Future<void> setCircleLastVisited(
-    String circleId,
-    DateTime timestamp,
-  ) => set('circle_last_visited_$circleId', timestamp.toIso8601String());
+  Future<void> setCircleLastVisited(String circleId, DateTime timestamp) =>
+      set('circle_last_visited_$circleId', timestamp.toIso8601String());
 
   Stream<String?> watch(String key) {
     return (select(userSettings)..where((s) => s.key.equals(key)))
@@ -1804,7 +1808,9 @@ class CustomIbadahDao extends DatabaseAccessor<AppDatabase>
   /// `SyncManager._syncCustomIbadah` to retry a push that's pending in the
   /// `SyncOutbox` (see achievements-statistics-db-persistence-fix.md R2).
   Future<CustomIbadahLogData?> getLogById(int id) {
-    return (select(customIbadahLog)..where((t) => t.id.equals(id))).getSingleOrNull();
+    return (select(
+      customIbadahLog,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
   Future<void> logIbadah(
@@ -2206,10 +2212,9 @@ class QadaDao extends DatabaseAccessor<AppDatabase> with _$QadaDaoMixin {
   /// increments its lifetime completed count — see the spec's R3.
   Future<void> markOneCompleted(String prayerName) async {
     await transaction(() async {
-      final existing =
-          await (select(qadaCounters)
-                ..where((t) => t.prayerName.equals(prayerName)))
-              .getSingleOrNull();
+      final existing = await (select(
+        qadaCounters,
+      )..where((t) => t.prayerName.equals(prayerName))).getSingleOrNull();
       final owed = existing?.owedCount ?? 0;
       final completed = existing?.completedCount ?? 0;
       if (owed <= 0) return;
@@ -2230,9 +2235,9 @@ class QadaDao extends DatabaseAccessor<AppDatabase> with _$QadaDaoMixin {
   Future<({int totalOwed, int totalCompleted})> getSummary() async {
     final owedSum = qadaCounters.owedCount.sum();
     final completedSum = qadaCounters.completedCount.sum();
-    final row = await (selectOnly(qadaCounters)
-          ..addColumns([owedSum, completedSum]))
-        .getSingle();
+    final row = await (selectOnly(
+      qadaCounters,
+    )..addColumns([owedSum, completedSum])).getSingle();
     return (
       totalOwed: row.read(owedSum) ?? 0,
       totalCompleted: row.read(completedSum) ?? 0,
@@ -2248,3 +2253,21 @@ class QadaDao extends DatabaseAccessor<AppDatabase> with _$QadaDaoMixin {
     ).watch().asyncMap((_) => getSummary());
   }
 }
+
+// ─────────────────────────────────────────
+//  Shared aggregates
+// ─────────────────────────────────────────
+
+/// Everything StatsDao can compute for one date range in a single SQL pass.
+/// `days` is the number of records in the range; the five prayer fields count
+/// records whose status is `performed` for that slot.
+typedef _StatTotals = ({
+  int days,
+  int fajr,
+  int dhuhr,
+  int asr,
+  int maghrib,
+  int isha,
+  int points,
+  int pages,
+});

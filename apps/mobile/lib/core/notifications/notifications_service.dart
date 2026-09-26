@@ -19,6 +19,7 @@ import 'package:takwa/core/providers/shared_preferences_provider.dart';
 import 'package:takwa/core/routes/app_routes.dart';
 import 'package:takwa/core/providers/adhkar_providers.dart';
 import 'package:takwa/core/utils/prayer_display.dart';
+import 'package:takwa/core/utils/prayer_schedule_params.dart';
 import 'package:takwa/core/utils/timezone_resolver.dart';
 import 'package:takwa/features/settings/data/user_preferences.dart';
 import 'package:takwa/features/settings/providers/user_preferences_provider.dart';
@@ -700,13 +701,7 @@ class NotificationsService {
     bool adhanScreenEnabled = true,
     bool adhanAlarmEnabled = true,
   }) async {
-    final iqamaOffsets = {
-      'fajr': 20,
-      'dhuhr': 15,
-      'asr': 15,
-      'maghrib': 5,
-      'isha': 15,
-    };
+    const iqamaOffsets = PrayerScheduleParams.iqamaOffsets;
 
     final now = DateTime.now();
 
@@ -720,7 +715,7 @@ class NotificationsService {
 
       // 1. تنبيه قبل الأذان بـ 15 دقيقة
       if (preAdhanEnabled) {
-        final preTime = prayer.time.subtract(const Duration(minutes: 15));
+        final preTime = prayer.time.subtract(PrayerScheduleParams.preAdhanLead);
         if (preTime.isAfter(now)) {
           await _scheduleExact(
             id: NotifIds.preAdhanId(dayOffset, prayer.name)!,
@@ -1093,8 +1088,6 @@ class NotificationsService {
   // ── إلغاء الإشعارات ──
   static Future<void> cancel(int id) => _plugin.cancel(id);
   static Future<void> cancelAll() => _plugin.cancelAll();
-  static Future<List<PendingNotificationRequest>> getPending() =>
-      _plugin.pendingNotificationRequests();
 
   // ─────────────────── PRIVATE ───────────────────
 
@@ -1396,13 +1389,6 @@ class NotificationsService {
     return '$cut…';
   }
 
-  static String _formatTime(DateTime dt) {
-    final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
-    final m = dt.minute.toString().padLeft(2, '0');
-    final ap = dt.hour < 12 ? 'ص' : 'م';
-    return '$h:$m $ap';
-  }
-
   static void _onNotifTap(NotificationResponse response) {
     NotificationRouter.route(response.payload ?? '');
   }
@@ -1556,14 +1542,6 @@ class PrayerTimesService {
   }) {
     return nextPrayer(today, now: now) ??
         (tomorrow.isEmpty ? null : tomorrow.first);
-  }
-
-  static Duration? timeUntilNext(
-    List<PrayerTimeInfo> prayers, {
-    DateTime? now,
-  }) {
-    final next = nextPrayer(prayers, now: now);
-    return next?.time.difference(now ?? DateTime.now());
   }
 
   static String formatTime(DateTime dt) {

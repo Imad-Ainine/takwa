@@ -201,5 +201,8 @@ String appBodyFontFamily(Locale locale) =>
     locale.languageCode == 'ar' ? 'NotoNaskhArabic' : 'Poppins';
 
 /// Fallback fonts for untranslated or mixed Arabic/Latin strings.
-List<String> appFontFamilyFallback(Locale locale) =>
-    const ['Tajawal', 'NotoNaskhArabic', 'Amiri'];
+List<String> appFontFamilyFallback(Locale locale) => const [
+  'Tajawal',
+  'NotoNaskhArabic',
+  'Amiri',
+];

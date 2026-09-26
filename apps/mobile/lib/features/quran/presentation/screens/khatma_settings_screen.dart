@@ -18,7 +18,10 @@ class KhatmaSettingsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final isRamadan = ref.watch(ramadanModeProvider).value ?? false;
     final style = AdaptiveStyle(context, isRamadan);
-    final state = ref.watch(quranStateProvider);
+    // Only these two fields are rendered here; watching the whole state
+    // object also rebuilt on page-number and mode changes.
+    final fontSize = ref.watch(quranStateProvider.select((s) => s.fontSize));
+    final theme = ref.watch(quranStateProvider.select((s) => s.theme));
 
     return Scaffold(
       backgroundColor: style.bg,
@@ -67,7 +70,7 @@ class KhatmaSettingsScreen extends ConsumerWidget {
                             ),
                             const Spacer(),
                             Text(
-                              localizedNumeral(context, state.fontSize.toInt()),
+                              localizedNumeral(context, fontSize.toInt()),
                               style: style.naskh(
                                 15,
                                 color: style.gold,
@@ -77,7 +80,7 @@ class KhatmaSettingsScreen extends ConsumerWidget {
                           ],
                         ),
                         Slider(
-                          value: state.fontSize,
+                          value: fontSize,
                           min: 14,
                           max: 34,
                           activeColor: style.gold,
@@ -96,10 +99,7 @@ class KhatmaSettingsScreen extends ConsumerWidget {
                           child: Center(
                             child: Text(
                               'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ',
-                              style: style.amiri(
-                                state.fontSize,
-                                color: style.text,
-                              ),
+                              style: style.amiri(fontSize, color: style.text),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -148,7 +148,7 @@ class KhatmaSettingsScreen extends ConsumerWidget {
                               'sepia': const Color(0xFFF4ECD8),
                               'white': Colors.white,
                             }[t.name]!;
-                            final selected = state.theme == t;
+                            final selected = theme == t;
                             return Expanded(
                               child: GestureDetector(
                                 onTap: () => ref
@@ -321,12 +321,18 @@ class KhatmaSettingsScreen extends ConsumerWidget {
     children: [
       Icon(icon, color: style.gold, size: 20),
       const SizedBox(width: AppSpacing.md),
-      Text(label, style: style.naskh(14, color: style.text.withValues(alpha: 0.7))),
+      Text(
+        label,
+        style: style.naskh(14, color: style.text.withValues(alpha: 0.7)),
+      ),
       const Spacer(),
       if (trailing != null)
         trailing
       else
-        Text(value, style: style.naskh(13, color: style.text.withValues(alpha: 0.4))),
+        Text(
+          value,
+          style: style.naskh(13, color: style.text.withValues(alpha: 0.4)),
+        ),
     ],
   );
 }

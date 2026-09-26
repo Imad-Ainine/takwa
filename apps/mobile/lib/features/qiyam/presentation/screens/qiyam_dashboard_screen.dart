@@ -66,15 +66,6 @@ class _QiyamDashboardScreenState extends ConsumerState<QiyamDashboardScreen>
     _pulseCtrl.repeatUnlessReducedMotion(context, reverse: true);
   }
 
-  Future<void> _playWelcomeSound() async {
-    try {
-      await _audioPlayer.setAsset('assets/sounds/ayah.mp3');
-      await _audioPlayer.play();
-    } catch (e) {
-      debugPrint('Error playing welcome sound: $e');
-    }
-  }
-
   @override
   void dispose() {
     _pulseCtrl.dispose();

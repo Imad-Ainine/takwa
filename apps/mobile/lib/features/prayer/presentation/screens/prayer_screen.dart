@@ -15,19 +15,9 @@ import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
 import 'package:takwa/core/utils/prayer_display.dart';
+import 'package:takwa/core/utils/prayer_schedule_params.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 import 'package:takwa/features/settings/presentation/widgets/location_picker_sheet.dart';
-
-// ─────────────────────────────────────────
-//  IQAMA OFFSETS (minutes after adhan)
-// ─────────────────────────────────────────
-const Map<String, int> _kIqamaOffsets = {
-  'fajr': 20,
-  'dhuhr': 15,
-  'asr': 15,
-  'maghrib': 5,
-  'isha': 15,
-};
 
 // ─────────────────────────────────────────
 //  PRAYER VISUAL DATA – Refined Islamic Palette
@@ -294,7 +284,7 @@ class PrayerNotifier extends StateNotifier<PrayerScreenState> {
     }
     if (next == null) return;
 
-    final iqamaOffset = _kIqamaOffsets[next.name] ?? 15;
+    final iqamaOffset = PrayerScheduleParams.iqamaOffsetMinutes(next.name);
     final iqamaTime = next.time.add(Duration(minutes: iqamaOffset));
     final isIqamaPhase = now.isAfter(next.time) && now.isBefore(iqamaTime);
 
@@ -521,7 +511,7 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen>
                   _DailyPrayersTable(
                     prayers: state.prayers,
                     currentKey: state.next?.name ?? '',
-                    iqamaOffsets: _kIqamaOffsets,
+                    iqamaOffsets: PrayerScheduleParams.iqamaOffsets,
                     entryCtrl: _entryCtrl,
                     style: style,
                   ),
@@ -963,7 +953,7 @@ class _MainPrayerCard extends StatelessWidget {
                 _AdhanIqamaRow(
                   adhanTime: next.time,
                   iqamaTime: iqamaTime,
-                  iqamaOffset: _kIqamaOffsets[next.name] ?? 15,
+                  iqamaOffset: PrayerScheduleParams.iqamaOffsetMinutes(next.name),
                   isIqamaPhase: isIqama,
                   style: style,
                 ),
@@ -1580,7 +1570,7 @@ class _DailyPrayersTable extends StatelessWidget {
                 final isNext = p.name == currentKey;
                 final isPast = DateTime.now().isAfter(p.time);
                 final iqama = p.time.add(
-                  Duration(minutes: _kIqamaOffsets[p.name] ?? 15),
+                  Duration(minutes: PrayerScheduleParams.iqamaOffsetMinutes(p.name)),
                 );
 
                 return _PrayerTableRow(

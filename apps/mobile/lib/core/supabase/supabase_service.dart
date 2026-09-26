@@ -277,6 +277,21 @@ String? undefinedUserSettingsColumn(
 
 final _quotedNames = RegExp(r'''['"]([A-Za-z_][A-Za-z0-9_]*)['"]''');
 
+/// Thrown by the write methods below when there is no authenticated session.
+///
+/// The distinction matters for [SyncManager]: it clears a `SyncOutbox` entry
+/// only after a push returns successfully. When these methods returned
+/// normally for a signed-out user, an entry was deleted for data that was
+/// never sent — a session that ends between the `currentUserProvider` check
+/// and the push silently dropped those rows for good. Throwing keeps the entry
+/// pending so the next signed-in pass retries it.
+class NotAuthenticatedException implements Exception {
+  const NotAuthenticatedException();
+
+  @override
+  String toString() => 'NotAuthenticatedException: no Supabase session';
+}
+
 /// Real implementation, talking to an injected [SupabaseClient].
 class SupabaseClientService implements SupabaseService {
   SupabaseClientService(this._db);
@@ -284,6 +299,10 @@ class SupabaseClientService implements SupabaseService {
   final SupabaseClient _db;
 
   String? get _uid => _db.auth.currentUser?.id;
+
+  /// [uid] for a write that must not be silently skipped — see
+  /// [NotAuthenticatedException].
+  String get _requireUid => _uid ?? (throw const NotAuthenticatedException());
 
   /// Helper لإجراء الطلبات مع إعادة المحاولة في حال فشل الشبكة
   Future<T> _safeRequest<T>(Future<T> Function() request) async {
@@ -453,8 +472,7 @@ class SupabaseClientService implements SupabaseService {
 
   @override
   Future<void> updateProfile(Map<String, dynamic> data) async {
-    final uid = _uid;
-    if (uid == null) throw 'User not logged in';
+    final uid = _requireUid;
 
     await _safeRequest(() => _db.from('profiles').update(data).eq('id', uid));
   }
@@ -462,8 +480,7 @@ class SupabaseClientService implements SupabaseService {
   // ─────────────── DATA ───────────────
   @override
   Future<void> upsertDailyRecord(Map<String, dynamic> record) async {
-    final uid = _uid;
-    if (uid == null) return;
+    final uid = _requireUid;
 
     await _safeRequest(
       () => _db.from('daily_records').upsert({
@@ -567,8 +584,7 @@ class SupabaseClientService implements SupabaseService {
   // ─────────────── PROHIBITIONS ───────────────
   @override
   Future<void> upsertProhibitionLog(Map<String, dynamic> log) async {
-    final uid = _uid;
-    if (uid == null) return;
+    final uid = _requireUid;
 
     await _safeRequest(
       () => _db.from('prohibitions_log').upsert({
@@ -598,8 +614,7 @@ class SupabaseClientService implements SupabaseService {
   // ─────────────── CUSTOM IBADAH ───────────────
   @override
   Future<void> upsertCustomIbadah(Map<String, dynamic> ibadah) async {
-    final uid = _uid;
-    if (uid == null) return;
+    final uid = _requireUid;
 
     await _safeRequest(
       () => _db.from('custom_ibadah').upsert({...ibadah, 'user_id': uid}),
@@ -617,8 +632,7 @@ class SupabaseClientService implements SupabaseService {
 
   @override
   Future<void> upsertCustomIbadahLog(Map<String, dynamic> log) async {
-    final uid = _uid;
-    if (uid == null) return;
+    final uid = _requireUid;
 
     await _safeRequest(
       () => _db.from('custom_ibadah_log').upsert({...log, 'user_id': uid}),
@@ -655,8 +669,7 @@ class SupabaseClientService implements SupabaseService {
   // ─────────────── ACHIEVEMENTS ───────────────
   @override
   Future<void> upsertAchievement(Map<String, dynamic> achievement) async {
-    final uid = _uid;
-    if (uid == null) return;
+    final uid = _requireUid;
 
     await _db.from('achievements').upsert({
       ...achievement,
