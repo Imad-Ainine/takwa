@@ -233,20 +233,27 @@ jobs:
           echo "Publishing manifest.json to Supabase (${BUCKET})..."
           echo "$MANIFEST"
 
+          # Supabase's storage API rejects a v2 `sb_secret_` key sent only as
+          # `Authorization: Bearer` on writes (400 / "Invalid Compact JWS");
+          # it must also be presented as the `apikey` header.
           HTTP_CODE=$(echo "$MANIFEST" | curl -s -o response.json -w "%{http_code}" \
             -X POST "${SUPABASE_URL}/storage/v1/object/${BUCKET}/manifest.json" \
             -H "Authorization: Bearer ${SERVICE_KEY}" \
+            -H "apikey: ${SERVICE_KEY}" \
             -H "Content-Type: application/json" \
             -H "x-upsert: true" \
             --data-binary @-)
 
           if [ "$HTTP_CODE" -ne 200 ] && [ "$HTTP_CODE" -ne 201 ]; then
-            echo "⚠️ Supabase manifest upload failed (HTTP $HTTP_CODE):"
+            # Fail the job: a silent publish error leaves the website pinned to
+            # whatever version manifest.json last held, with no signal at all.
+            echo "::error::Supabase manifest upload failed (HTTP $HTTP_CODE) — the website will keep advertising the previous release."
             cat response.json
-          else
-            echo "✅ manifest.json published successfully!"
-            echo "   Public URL: ${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/manifest.json"
+            exit 1
           fi
+
+          echo "✅ manifest.json published successfully!"
+          echo "   Public URL: ${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/manifest.json"
         working-directory: apps/mobile
 
       # ── Push notification: new release available ──────────────────────
