@@ -48,6 +48,14 @@ class _DrawerScaffoldState extends ConsumerState<DrawerScaffold>
 
   static const _drawerWidth = 280.0;
 
+  /// Drawer-open used to fire a full 11-step sync (30-day pulls, per-row
+  /// pushes) on EVERY open — two quick opens could stack passes, and casual
+  /// drawer use hammered the backend. Throttled to one trigger per interval;
+  /// the timestamp is static because the throttle must survive the scaffold
+  /// being rebuilt.
+  static const _syncThrottle = Duration(minutes: 5);
+  static DateTime? _lastSyncTriggeredAt;
+
   @override
   void initState() {
     super.initState();
@@ -92,7 +100,19 @@ class _DrawerScaffoldState extends ConsumerState<DrawerScaffold>
     HapticFeedback.mediumImpact();
     ref.read(drawerOpenProvider.notifier).state = true;
     _ctrl.forward();
-    ref.read(syncManagerProvider).fullSync(); // Trigger sync when opening
+    _triggerSyncIfStale();
+  }
+
+  /// Throttled drawer-open sync. Only counts as "triggered" when signed in —
+  /// a no-op while signed out must not burn the throttle window (sign-in
+  /// itself fires its own fullSync from main.dart).
+  void _triggerSyncIfStale() {
+    if (ref.read(currentUserProvider) == null) return;
+    final now = DateTime.now();
+    final last = _lastSyncTriggeredAt;
+    if (last != null && now.difference(last) < _syncThrottle) return;
+    _lastSyncTriggeredAt = now;
+    ref.read(syncManagerProvider).fullSync();
   }
 
   void _close() {

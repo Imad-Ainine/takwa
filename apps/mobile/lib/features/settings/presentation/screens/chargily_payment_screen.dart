@@ -18,11 +18,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// CIB / Edahabia payment via Chargily Pay V2 hosted checkout.
 ///
-/// Flow: create checkout (server-to-server call with the Chargily token) →
-/// open the returned `checkout_url` in an in-app browser → Chargily
-/// redirects the browser to `takwa://payment-*`, which returns the user to
-/// this screen → poll `GET /checkouts/{id}` until the status leaves
-/// `pending` (a redirect alone is never treated as proof of payment).
+/// Flow: create checkout through the Takwa web app's proxy (which holds the
+/// Chargily secret server-side) → open the returned `checkout_url` in an
+/// in-app browser → Chargily redirects the browser to `takwa://payment-*`,
+/// which returns the user to this screen → poll the proxy's status route
+/// until the status leaves `pending` (a redirect alone is never treated as
+/// proof of payment).
 class ChargilyPaymentScreen extends ConsumerStatefulWidget {
   /// `cib` or `edahabia` — selects the card network preselected on the
   /// hosted page.
@@ -83,16 +84,9 @@ class _ChargilyPaymentScreenState extends ConsumerState<ChargilyPaymentScreen>
       final checkout = await ChargilyService().createCheckout(
         paymentMethod: widget.paymentMethod,
         description: l10n.paymentChargilyDescription,
-        // Chargily rejects custom-scheme callbacks; the web hop bounces
-        // the browser back into the app after the card attempt.
-        successUrl: ChargilyConfig.webRedirectUrl(
-          'takwa://payment-success',
-          locale: locale,
-        ),
-        failureUrl: ChargilyConfig.webRedirectUrl(
-          'takwa://payment-failure',
-          locale: locale,
-        ),
+        // The proxy builds the https redirect hop (Chargily rejects
+        // custom-scheme callbacks) from this locale and bounces the browser
+        // back into the app after the card attempt.
         locale: locale,
       );
       if (!mounted) return;

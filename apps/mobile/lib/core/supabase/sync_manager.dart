@@ -50,17 +50,35 @@ class SyncManager {
 
   SupabaseService get _service => _ref.read(supabaseServiceProvider);
 
-  Future<bool> get _hasConnection => _ref.read(connectivityCheckerProvider)();
+  /// Connectivity is a platform-channel round-trip, and the per-record sync
+  /// helpers used to each pay for one — dozens of times per `fullSync()`
+  /// pass. Caching the last result briefly collapses that to one real check
+  /// per pass; a connection that drops mid-pass is still handled by the
+  /// per-record try/catch → outbox `markPending` retry path.
+  static const _connectivityCacheTtl = Duration(seconds: 15);
+  DateTime? _connectivityCheckedAt;
+  bool _connectivityCached = false;
+
+  Future<bool> get _hasConnection async {
+    final checkedAt = _connectivityCheckedAt;
+    if (checkedAt != null &&
+        DateTime.now().difference(checkedAt) < _connectivityCacheTtl) {
+      return _connectivityCached;
+    }
+    final online = await _ref.read(connectivityCheckerProvider)();
+    _connectivityCached = online;
+    _connectivityCheckedAt = DateTime.now();
+    return online;
+  }
 
   /// Full synchronization on App Start
   Future<void> fullSync() async {
     if (_syncing) return;
-    final isOnline = await _hasConnection;
-    final isAuth = _ref.read(currentUserProvider) != null;
-    if (!isOnline || !isAuth) return;
-
+    // Set BEFORE the first await: the old code awaited `_hasConnection`
+    // while `_syncing` was still false, so two rapid triggers (drawer opened
+    // twice, sign-in + drawer) both passed the guard and interleaved two
+    // full passes — duplicate remote writes for every step.
     _syncing = true;
-    _ref.read(isSyncingProvider.notifier).state = true;
     // R5: each step used to run inside one flat try/finally, so a throw
     // from any one of them (a schema mismatch, an RLS rejection, a dropped
     // connection mid-step) skipped every step after it — e.g. a failure
@@ -70,23 +88,31 @@ class SyncManager {
     // takes the rest of the sync down with it.
     final stepErrors = <String>[];
     try {
-      await _runStep('dailyRecords', _syncDailyRecords, stepErrors);
-      await _runStep('prohibitions', _syncProhibitions, stepErrors);
-      await _runStep('customIbadah', _syncCustomIbadah, stepErrors);
-      await _runStep('achievements', _syncAchievements, stepErrors);
-      await _runStep('settings', _syncSettings, stepErrors);
-      await _runStep('stats', _syncStats, stepErrors);
-      await _runStep('bookProgress', _syncBookProgress, stepErrors);
-      await _runStep('reminders', _syncReminders, stepErrors);
-      await _runStep('userAdhkar', _syncUserAdhkar, stepErrors);
-      await _runStep('userDuas', _syncUserDuas, stepErrors);
-      await _runStep('quran', _syncQuran, stepErrors);
+      final isOnline = await _hasConnection;
+      final isAuth = _ref.read(currentUserProvider) != null;
+      if (!isOnline || !isAuth) return;
+
+      _ref.read(isSyncingProvider.notifier).state = true;
+      try {
+        await _runStep('dailyRecords', _syncDailyRecords, stepErrors);
+        await _runStep('prohibitions', _syncProhibitions, stepErrors);
+        await _runStep('customIbadah', _syncCustomIbadah, stepErrors);
+        await _runStep('achievements', _syncAchievements, stepErrors);
+        await _runStep('settings', _syncSettings, stepErrors);
+        await _runStep('stats', _syncStats, stepErrors);
+        await _runStep('bookProgress', _syncBookProgress, stepErrors);
+        await _runStep('reminders', _syncReminders, stepErrors);
+        await _runStep('userAdhkar', _syncUserAdhkar, stepErrors);
+        await _runStep('userDuas', _syncUserDuas, stepErrors);
+        await _runStep('quran', _syncQuran, stepErrors);
+      } finally {
+        _ref.read(isSyncingProvider.notifier).state = false;
+        _ref.read(lastSyncErrorProvider.notifier).state = stepErrors.isEmpty
+            ? null
+            : stepErrors.join('; ');
+      }
     } finally {
       _syncing = false;
-      _ref.read(isSyncingProvider.notifier).state = false;
-      _ref.read(lastSyncErrorProvider.notifier).state = stepErrors.isEmpty
-          ? null
-          : stepErrors.join('; ');
     }
   }
 
@@ -147,16 +173,21 @@ class SyncManager {
       await syncDailyRecord(record);
     }
 
-    // 2. Pull from Supabase
+    // 2. Pull from Supabase. The whole pull runs in one transaction: 30
+    // individual upserts used to each commit separately, firing every
+    // DB-backed stat watcher ~30x per sync; one commit notifies once.
     final from = DateTime.now().subtract(const Duration(days: 30));
     final remoteRecords = await _service.getRecordsRange(
       from: from,
       to: DateTime.now(),
     );
 
-    for (final record in remoteRecords) {
-      await dao.upsertFromRemote(record);
-    }
+    final db = _ref.read(appDatabaseProvider);
+    await db.transaction(() async {
+      for (final record in remoteRecords) {
+        await dao.upsertFromRemote(record);
+      }
+    });
   }
 
   Future<void> _syncProhibitions() async {
@@ -185,9 +216,12 @@ class SyncManager {
       to: DateTime.now(),
     );
 
-    for (final log in remoteLogs) {
-      await dao.upsertProhibitionFromRemote(log);
-    }
+    final db = _ref.read(appDatabaseProvider);
+    await db.transaction(() async {
+      for (final log in remoteLogs) {
+        await dao.upsertProhibitionFromRemote(log);
+      }
+    });
   }
 
   Future<void> _syncCustomIbadah() async {
@@ -227,17 +261,18 @@ class SyncManager {
       to: DateTime.now(),
     );
 
-    for (final item in remoteIbadah) {
-      await ibadahDao.upsertCustomIbadahFromRemote(item);
-    }
-
-    // Keep track of dates to recalc points later
+    final db = _ref.read(appDatabaseProvider);
     final updatedDates = <DateTime>{};
-    for (final log in remoteLogs) {
-      await ibadahDao.upsertCustomIbadahLogFromRemote(log);
-      final dateStr = log['date'] as String;
-      updatedDates.add(DateTime.parse(dateStr));
-    }
+    await db.transaction(() async {
+      for (final item in remoteIbadah) {
+        await ibadahDao.upsertCustomIbadahFromRemote(item);
+      }
+      for (final log in remoteLogs) {
+        await ibadahDao.upsertCustomIbadahLogFromRemote(log);
+        final dateStr = log['date'] as String;
+        updatedDates.add(DateTime.parse(dateStr));
+      }
+    });
 
     // 3. Recalculate points for all affected dates
     final dailyDao = _ref.read(dailyRecordDaoProvider);
@@ -262,22 +297,25 @@ class SyncManager {
     final statsDao = _ref.read(statsDaoProvider);
     final db = _ref.read(appDatabaseProvider);
 
-    // 1. Pull from Supabase FIRST
-    for (final data in remoteAchievements) {
-      final earnedAtStr = data['earned_at'] as String?;
-      final earnedAt = earnedAtStr != null
-          ? DateTime.tryParse(earnedAtStr)
-          : null;
+    // 1. Pull from Supabase FIRST — one transaction so the whole batch of
+    // achievement inserts is a single commit/notification.
+    await db.transaction(() async {
+      for (final data in remoteAchievements) {
+        final earnedAtStr = data['earned_at'] as String?;
+        final earnedAt = earnedAtStr != null
+            ? DateTime.tryParse(earnedAtStr)
+            : null;
 
-      await statsDao.addAchievement(
-        type: data['type'],
-        titleAr: data['title_ar'] ?? '',
-        descAr: data['desc_ar'] ?? '',
-        emoji: data['emoji'] ?? '✨',
-        pointsReward: data['points_reward'] ?? 0,
-        earnedAt: earnedAt,
-      );
-    }
+        await statsDao.addAchievement(
+          type: data['type'],
+          titleAr: data['title_ar'] ?? '',
+          descAr: data['desc_ar'] ?? '',
+          emoji: data['emoji'] ?? '✨',
+          pointsReward: data['points_reward'] ?? 0,
+          earnedAt: earnedAt,
+        );
+      }
+    });
 
     // 2. Push local earned achievements (that might not be on Supabase yet)
     final localEarned = await (db.select(db.achievements)).get();
@@ -551,12 +589,13 @@ class SyncManager {
     try {
       final remoteReminders = await _service.getReminders();
       final dao = _ref.read(remindersDaoProvider);
+      final db = _ref.read(appDatabaseProvider);
 
-      for (final remote in remoteReminders) {
-        // Upsert remote into local DB
-        // We need a method in RemindersDao to handle this
-        await dao.upsertFromRemote(remote);
-      }
+      await db.transaction(() async {
+        for (final remote in remoteReminders) {
+          await dao.upsertFromRemote(remote);
+        }
+      });
     } catch (e) {
       developer.log('Failed to sync reminders: $e', name: 'SyncManager');
     }
@@ -589,10 +628,13 @@ class SyncManager {
     try {
       final remoteItems = await _service.getUserAdhkar();
       final dao = _ref.read(userAdhkarDaoProvider);
+      final db = _ref.read(appDatabaseProvider);
 
-      for (final remote in remoteItems) {
-        await dao.upsertFromRemote(remote);
-      }
+      await db.transaction(() async {
+        for (final remote in remoteItems) {
+          await dao.upsertFromRemote(remote);
+        }
+      });
     } catch (e) {
       developer.log('Failed to sync user adhkar: $e', name: 'SyncManager');
     }
@@ -602,10 +644,13 @@ class SyncManager {
     try {
       final remoteItems = await _service.getUserDuas();
       final dao = _ref.read(userDuasDaoProvider);
+      final db = _ref.read(appDatabaseProvider);
 
-      for (final remote in remoteItems) {
-        await dao.upsertFromRemote(remote);
-      }
+      await db.transaction(() async {
+        for (final remote in remoteItems) {
+          await dao.upsertFromRemote(remote);
+        }
+      });
     } catch (e) {
       developer.log('Failed to sync user duas: $e', name: 'SyncManager');
     }

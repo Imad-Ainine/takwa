@@ -32,16 +32,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-        // Add the line below to satisfy the Kotlin 2.x compiler requirements
-        freeCompilerArgs += listOf(
-            "-Xannotation-default-target=param-property",
-            "-Xopt-in=kotlin.RequiresOptIn",
-            "-Xsuppress-version-warnings",
-        )
-    }
-
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.takwa"
@@ -107,4 +97,19 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+}
+
+// AGP 9 dropped the android.kotlinOptions{} DSL; the Kotlin compiler options
+// belong on the `kotlin` extension (applied by the Flutter Gradle plugin).
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+        freeCompilerArgs.addAll(
+            listOf(
+                "-Xannotation-default-target=param-property",
+                "-Xopt-in=kotlin.RequiresOptIn",
+                "-Xsuppress-version-warnings",
+            )
+        )
+    }
 }

@@ -34,37 +34,40 @@ void main() {
     client = _StubClient();
     service = ChargilyService(
       client: client,
-      baseUrl: 'https://pay.chargily.net/test/api/v2',
-      secretKey: 'test_sk_secret123',
+      baseUrl: 'https://takwa-web.vercel.app/api/payments/checkout',
     );
   });
 
   group('ChargilyService', () {
-    test('createCheckout authenticates with the secret key', () async {
+    test('createCheckout posts to the web proxy without any Chargily auth',
+        () async {
       await service.createCheckout(
-        amount: 10000,
         paymentMethod: 'edahabia',
-        successUrl: 'takwa://payment-success',
+        description: 'Support Takwa',
+        locale: 'ar',
       );
 
       final request = client.lastRequest!;
       expect(request.method, 'POST');
-      expect(request.url.path, '/test/api/v2/checkouts');
-      expect(request.headers['Authorization'], 'Bearer test_sk_secret123');
+      expect(request.url.path, '/api/payments/checkout');
+      // The secret key lives server-side now; the client must never send one.
+      expect(request.headers.containsKey('Authorization'), isFalse);
 
       final body = jsonDecode(client.lastBody!) as Map<String, dynamic>;
-      expect(body['amount'], 10000);
-      expect(body['currency'], 'dzd');
       expect(body['payment_method'], 'edahabia');
-      expect(body['success_url'], 'takwa://payment-success');
+      expect(body['description'], 'Support Takwa');
+      expect(body['locale'], 'ar');
+      // Amount and redirect URLs are owned by the proxy, not the client.
+      expect(body.containsKey('amount'), isFalse);
+      expect(body.containsKey('success_url'), isFalse);
     });
 
     test(
       'createCheckout parses the hosted checkout url and forces https',
       () async {
         // Chargily returns http://…; Custom Tabs on Android refuse it, so the
-        // model must upgrade to https://.
-        final checkout = await service.createCheckout(amount: 10000);
+        // model must upgrade to https:// even if the proxy forgot to.
+        final checkout = await service.createCheckout();
         expect(checkout.id, 'chk_1');
         expect(checkout.checkoutUrl.scheme, 'https');
         expect(checkout.checkoutUrl.path, '/test/checkouts/chk_1/pay');
@@ -75,7 +78,7 @@ void main() {
     test('createCheckout moves the checkout page off pay.chargily.dz', () async {
       // pay.chargily.dz hangs at TCP connect from some networks; the identical
       // page is served on the API host, so that is what the app opens.
-      final checkout = await service.createCheckout(amount: 10000);
+      final checkout = await service.createCheckout();
       expect(checkout.checkoutUrl.host, 'pay.chargily.net');
     });
 
@@ -85,7 +88,7 @@ void main() {
         200,
       );
 
-      final checkout = await service.createCheckout(amount: 10000);
+      final checkout = await service.createCheckout();
       expect(
         checkout.checkoutUrl.toString(),
         'https://pay.chargily.net/test/checkouts/chk_2/pay',
@@ -100,50 +103,59 @@ void main() {
 
       final checkout = await service.fetchCheckout('chk_1');
       expect(client.lastRequest!.method, 'GET');
-      expect(client.lastRequest!.url.path, '/test/api/v2/checkouts/chk_1');
+      expect(
+        client.lastRequest!.url.path,
+        '/api/payments/checkout/chk_1',
+      );
       expect(checkout.status, 'paid');
       expect(checkout.isPaid, isTrue);
     });
 
-    test('surfaces API errors as ChargilyException', () async {
-      client.nextResponse = http.Response('{"message":"bad key"}', 401);
+    test('surfaces proxy errors as ChargilyException', () async {
+      client.nextResponse = http.Response(
+        '{"error":"payments_not_configured"}',
+        503,
+      );
 
       expect(
-        service.createCheckout(amount: 10000),
+        service.createCheckout(),
         throwsA(
           isA<ChargilyException>().having(
             (e) => e.statusCode,
             'statusCode',
-            401,
+            503,
           ),
         ),
       );
     });
 
-    test('the configured host is the one Chargily documents', () {
-      // `pay.chargily.com` is plausible-looking but never completes a TCP
-      // handshake, so every checkout sat until the request timeout and the
-      // screen showed "TimeoutException after 0:00:20.000000". The API lives
-      // on pay.chargily.net; only the hosted checkout page is pay.chargily.dz.
-      dotenv.loadFromString(envString: 'CHARGILY_LIVE=false');
-      expect(ChargilyConfig.apiBase, 'https://pay.chargily.net/test/api/v2');
-      dotenv.loadFromString(envString: 'CHARGILY_LIVE=true');
-      expect(ChargilyConfig.apiBase, 'https://pay.chargily.net/api/v2');
+    test('the default endpoint is the deployed web proxy', () {
+      // The app must never point at the Chargily REST API directly — that
+      // would require shipping the secret key inside the APK.
+      dotenv.loadFromString(envString: 'TAKWA_TEST_PLACEHOLDER=1');
+      expect(
+        ChargilyService(client: client)
+            .createCheckout()
+            .then((_) => client.lastRequest!.url.toString()),
+        completion('https://takwa-web.vercel.app/api/payments/checkout'),
+      );
+    });
+  });
+
+  group('ChargilyConfig', () {
+    test('webBaseUrl falls back to the deployed app and honors overrides', () {
+      dotenv.loadFromString(envString: 'TAKWA_TEST_PLACEHOLDER=1');
+      expect(ChargilyConfig.webBaseUrl, 'https://takwa-web.vercel.app');
+      dotenv.loadFromString(envString: 'TAKWA_WEB_BASE_URL=https://staging.example');
+      expect(ChargilyConfig.webBaseUrl, 'https://staging.example');
     });
 
-    test('an empty secret key throws like a missing one', () {
-      // The release workflow writes `CHARGILY_SECRET_KEY=` (empty) when the
-      // GitHub secret is absent — shipping that produced a confusing
-      // Chargily 401 instead of a clear configuration error.
-      dotenv.loadFromString(envString: 'CHARGILY_SECRET_KEY=');
-      expect(() => ChargilyConfig.secretKey, throwsStateError);
-      expect(ChargilyConfig.isConfigured, isFalse);
-    });
-
-    test('a non-empty secret key is accepted', () {
-      dotenv.loadFromString(envString: 'CHARGILY_SECRET_KEY=test_sk_x');
-      expect(ChargilyConfig.secretKey, 'test_sk_x');
-      expect(ChargilyConfig.isConfigured, isTrue);
+    test('subscription amount defaults to 200 DZD / 20000 centime', () {
+      dotenv.loadFromString(envString: 'TAKWA_TEST_PLACEHOLDER=1');
+      expect(ChargilyConfig.subscriptionAmountDzd, 200);
+      expect(ChargilyConfig.subscriptionAmountCentime, 20000);
+      dotenv.loadFromString(envString: 'CHARGILY_SUBSCRIPTION_AMOUNT=350');
+      expect(ChargilyConfig.subscriptionAmountDzd, 350);
     });
   });
 }

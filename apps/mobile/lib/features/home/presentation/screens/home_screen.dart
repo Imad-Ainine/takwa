@@ -551,17 +551,6 @@ class _NextPrayerCardMergedState extends State<_NextPrayerCardMerged>
     final s = widget.style;
     final l10n = AppLocalizations.of(context)!;
     final next = widget.prayerState.next!;
-    final diff = widget.prayerState.remaining ?? const Duration();
-    String countdown;
-    if (diff.isNegative || diff.inSeconds == 0) {
-      countdown = l10n.homeCountdownNow;
-    } else {
-      final h = diff.inHours;
-      final m = diff.inMinutes % 60;
-      countdown = h > 0
-          ? l10n.homeCountdownHoursMinutes(h, m)
-          : l10n.homeCountdownMinutesOnly(m);
-    }
 
     return AnimatedBuilder(
       animation: _pulse,
@@ -649,15 +638,39 @@ class _NextPrayerCardMergedState extends State<_NextPrayerCardMerged>
                   borderRadius: BorderRadius.circular(AppRadius.xl),
                   border: Border.all(color: s.gold.withValues(alpha: 0.25)),
                 ),
-                child: Text(
-                  countdown,
-                  style: s.naskh(
-                    11,
-                    color: widget.prayerState.isIqamaPhase
-                        ? Colors.redAccent
-                        : s.goldLight,
-                    weight: FontWeight.w600,
-                  ),
+                // Countdown-only 1 Hz consumer: the card itself no longer
+                // rebuilds every second (P1 #3 split the ticker out of
+                // prayerScreenProvider).
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    ref.watch(prayerClockTickProvider);
+                    final st = widget.prayerState;
+                    final now = DateTime.now();
+                    final target = (st.isIqamaPhase && st.iqamaTime != null)
+                        ? st.iqamaTime!
+                        : next.time;
+                    final diff = target.difference(now);
+                    final String countdown;
+                    if (diff.isNegative || diff.inSeconds == 0) {
+                      countdown = l10n.homeCountdownNow;
+                    } else {
+                      final h = diff.inHours;
+                      final m = diff.inMinutes % 60;
+                      countdown = h > 0
+                          ? l10n.homeCountdownHoursMinutes(h, m)
+                          : l10n.homeCountdownMinutesOnly(m);
+                    }
+                    return Text(
+                      countdown,
+                      style: s.naskh(
+                        11,
+                        color: st.isIqamaPhase
+                            ? Colors.redAccent
+                            : s.goldLight,
+                        weight: FontWeight.w600,
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -1649,33 +1662,6 @@ class _RamadanIftar extends ConsumerStatefulWidget {
 }
 
 class _RamadanIftarState extends ConsumerState<_RamadanIftar> {
-  // Kept as raw Durations rather than pre-formatted strings: formatting
-  // needs AppLocalizations, and that can't be looked up from initState()
-  // (no Localizations ancestor is wired up for dependency tracking yet at
-  // that point) — so the l10n-aware text is built once, in build().
-  Duration _iftarRemaining = Duration.zero;
-  Duration _suhoorRemaining = Duration.zero;
-
-  @override
-  void initState() {
-    super.initState();
-    _tick();
-  }
-
-  void _tick() {
-    if (!mounted) return;
-    final now = DateTime.now();
-    // In a real app, use actual prayer times
-    final iftar = DateTime(now.year, now.month, now.day, 18, 30);
-    final suhoor = DateTime(now.year, now.month, now.day + 1, 4, 15);
-
-    setState(() {
-      _iftarRemaining = iftar.difference(now);
-      _suhoorRemaining = suhoor.difference(now);
-    });
-    Future.delayed(const Duration(seconds: 1), _tick);
-  }
-
   String _fmt(AppLocalizations l10n, Duration d) {
     if (d.isNegative) return l10n.homeCountdownPassed;
     final h = d.inHours.toString().padLeft(2, '0');
@@ -1688,8 +1674,16 @@ class _RamadanIftarState extends ConsumerState<_RamadanIftar> {
   Widget build(BuildContext context) {
     final s = widget.style;
     final l10n = AppLocalizations.of(context)!;
-    final iftarCountdown = _fmt(l10n, _iftarRemaining);
-    final suhoorCountdown = _fmt(l10n, _suhoorRemaining);
+    // Shared 1 Hz clock (P1 #3) — used to be an uncancellable
+    // Future.delayed(1s) recursion that kept ticking after the tab was
+    // disposed and called setState unconditionally.
+    ref.watch(prayerClockTickProvider);
+    final now = DateTime.now();
+    // In a real app, use actual prayer times
+    final iftar = DateTime(now.year, now.month, now.day, 18, 30);
+    final suhoor = DateTime(now.year, now.month, now.day + 1, 4, 15);
+    final iftarCountdown = _fmt(l10n, iftar.difference(now));
+    final suhoorCountdown = _fmt(l10n, suhoor.difference(now));
     return Column(
       children: [
         Padding(

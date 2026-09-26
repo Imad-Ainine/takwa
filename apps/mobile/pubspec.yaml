@@ -77,7 +77,7 @@ dependencies:
   geocoding: ^5.0.0
 
   # ── Quran & Audio ──
-  quran_library: ^4.0.0
+  quran_library: ^5.0.1
   just_audio: ^0.10.5
   audio_service: ^0.18.18
 

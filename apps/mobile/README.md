@@ -167,15 +167,20 @@ dart run build_runner watch --delete-conflicting-outputs
 
 Create `apps/mobile/.env` (not committed) with:
 
+> ⚠️ `.env` is bundled into the APK as a Flutter asset — it must only ever
+> contain public/client keys. The Chargily SECRET key and the Supabase
+> service-role key live server-side: `CHARGILY_SECRET_KEY` in the web app's
+> env (Vercel → Environment Variables, or `apps/web/.env` for local dev),
+> and the service-role key in `apps/mobile/local-secrets.env` (git-ignored,
+> not bundled) for local CLI use only.
+
 | Variable                | Required | Purpose                                                              |
 | ----------------------- | -------- | ---------------------------------------------------------------------- |
 | `SUPABASE_URL`           | Yes      | Supabase project URL — see [`auth_setup_guide.md`](docs/auth_setup_guide.md) |
 | `SUPABASE_ANON_KEY`      | Yes      | Supabase anon/public key                                              |
 | `SENTRY_DSN`             | No       | Enables crash/error reporting via Sentry. Left unset, the app runs with no crash reporting — no events are sent anywhere. |
-| `CHARGILY_SECRET_KEY`    | No       | Chargily Pay V2 secret key (`test_sk_…` / `sk_…`) — Bearer token for the CIB/Edahabia checkout API. Unset, the Chargily flow shows an error. |
-| `CHARGILY_PUBLIC_KEY`    | No       | Chargily publishable key (`test_pk_…` / `pk_…`) — client-side identifier, kept for the widget-based flow. |
-| `CHARGILY_LIVE`          | No       | `true` switches the API base URL to live mode; anything else stays on the test endpoints. |
-| `CHARGILY_SUBSCRIPTION_AMOUNT` | No | Checkout amount in centime (minor units). Defaults to `200` = 200.00 DZD. |
+| `TAKWA_WEB_BASE_URL`     | No       | Base URL of the deployed Takwa web app, which hosts the Chargily checkout proxy (`/api/payments/checkout`). Defaults to `https://takwa-web.vercel.app`. |
+| `CHARGILY_SUBSCRIPTION_AMOUNT` | No | Mirrors the proxy's charged amount in whole DZD, for local payment records/display only — the server decides what is actually charged. Defaults to `200`. |
 | `WISE_IBAN` / `WISE_ACCOUNT_NUMBER` / `WISE_SORT_CODE` / `WISE_HOLDER_NAME` / `WISE_BANK_NAME` | No | Visa/Mastercard path: recipient details of the Wise account, shown on the Wise screen for the user to transfer from. Unset, that screen shows "coming soon". |
 | `WISE_PROFILE_LINK`      | No       | `wise.com/pay/me/…` profile link opened by the "Open Wise" button (falls back to `https://app.wise.com`). |
 | `WISE_MONTHLY_EUR`       | No       | Monthly amount in euro displayed on the Wise screen. Defaults to `10`. |

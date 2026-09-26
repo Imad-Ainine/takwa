@@ -4,6 +4,8 @@
 // SupabaseService (test/support/fake_supabase_service.dart) instead of a
 // real backend — see supabase_service.dart for why that seam exists.
 
+import 'dart:async';
+
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -240,5 +242,79 @@ void main() {
     final second = container.read(syncManagerProvider).fullSync();
     await Future.wait([first, second]);
     // No exception means both calls completed cleanly.
+  });
+
+  test('overlapping fullSync triggers with a pending connectivity check run '
+      'only ONE pass (P1 #4 race regression)', () async {
+    // The old code awaited the connectivity check while `_syncing` was
+    // still false, so a second trigger that started during that await
+    // passed the guard too and interleaved a duplicate full pass —
+    // double-pushing every record. The gate holds the first pass open at
+    // exactly that window.
+    final gate = Completer<bool>();
+    var checkCount = 0;
+    final raceContainer = ProviderContainer(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(db),
+        supabaseServiceProvider.overrideWithValue(fakeService),
+        currentUserProvider.overrideWithValue(_fakeUser()),
+        connectivityCheckerProvider.overrideWithValue(() {
+          checkCount++;
+          return gate.future;
+        }),
+      ],
+    );
+    addTearDown(raceContainer.dispose);
+
+    final first = raceContainer.read(syncManagerProvider).fullSync();
+    final second = raceContainer.read(syncManagerProvider).fullSync();
+    gate.complete(true);
+    await Future.wait([first, second]);
+
+    // updateUserStats is called exactly once per _syncStats step — two
+    // means both triggers ran a full pass.
+    expect(checkCount, 1, reason: 'second trigger must not hit connectivity');
+    expect(
+      fakeService.callLog.where((c) => c == 'updateUserStats').length,
+      1,
+      reason: 'only one fullSync pass should have run',
+    );
+  });
+
+  test('connectivity is checked once per pass, not once per pushed record',
+      () async {
+    var checkCount = 0;
+    final countingContainer = ProviderContainer(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(db),
+        supabaseServiceProvider.overrideWithValue(fakeService),
+        currentUserProvider.overrideWithValue(_fakeUser()),
+        connectivityCheckerProvider.overrideWithValue(() async {
+          checkCount++;
+          return true;
+        }),
+      ],
+    );
+    addTearDown(countingContainer.dispose);
+
+    // Seed 5 recent days so the push loop has several records, each of
+    // which used to pay for its own platform-channel connectivity check.
+    for (var i = 1; i <= 5; i++) {
+      await db
+          .into(db.dailyRecords)
+          .insert(
+            DailyRecordsCompanion.insert(
+              date: DateTime.now().subtract(Duration(days: i)),
+            ),
+          );
+    }
+
+    await countingContainer.read(syncManagerProvider).fullSync();
+
+    expect(fakeService.callLog.any((c) => c.startsWith('upsertDailyRecord')),
+        isTrue,
+        reason: 'sanity: the seeded records were actually pushed');
+    expect(checkCount, 1,
+        reason: 'the whole pass should share one cached connectivity result');
   });
 }

@@ -205,6 +205,70 @@ class AdhanAutoTrigger {
   /// works even when the overlay screen never mounts (background trigger path).
   static Timer? _vibrationTimer;
 
+  /// Set once the vibration timer has observed the Adhan audio actually
+  /// playing; from then on, audio stopping (natural completion) ends the
+  /// vibration. See [_armVibrationWithAdhan].
+  static bool _vibrationAudioSeen = false;
+
+  /// Remaining 2s ticks the vibration timer waits for playback to start
+  /// before giving up (covers the window between arming and the overlay
+  /// screen calling [AdhanAudioPlayer.play]).
+  static int _vibrationGraceTicks = 0;
+
+  /// Whether the permanent silenced-listener guard is registered. Registered
+  /// lazily once instead of per trigger — the old code added a new anonymous
+  /// listener to the static [AdhanAudioPlayer.silenced] on every prayer.
+  static bool _vibrationStopListenerInstalled = false;
+
+  static const _vibrationAudioStartGraceTicks = 30; // 60s
+
+  /// Starts vibration alongside the Adhan audio and keeps it bounded:
+  /// stops when the audio completes or is silenced (flip-to-silence), and
+  /// gives up if playback never starts. The previous inline block cancelled
+  /// only on flip-to-silence, so an adhan that ended naturally left the phone
+  /// vibrating every 2s until process death.
+  static void _armVibrationWithAdhan() {
+    _vibrationTimer?.cancel();
+    if (!_vibrationStopListenerInstalled) {
+      _vibrationStopListenerInstalled = true;
+      AdhanAudioPlayer.silenced.addListener(_stopVibrationIfSilenced);
+    }
+    _vibrationAudioSeen = false;
+    _vibrationGraceTicks = _vibrationAudioStartGraceTicks;
+    _vibrationTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+      if (AdhanAudioPlayer.silenced.value) {
+        _stopVibration();
+        return;
+      }
+      if (AdhanAudioPlayer.isPlaying) {
+        _vibrationAudioSeen = true;
+      } else if (_vibrationAudioSeen) {
+        // Audio ended since the last tick.
+        _stopVibration();
+        return;
+      } else {
+        _vibrationGraceTicks--;
+        if (_vibrationGraceTicks <= 0) {
+          _stopVibration();
+          return;
+        }
+      }
+      HapticFeedback.vibrate();
+      onVibrationTickForTesting?.call();
+    });
+  }
+
+  static void _stopVibrationIfSilenced() {
+    if (AdhanAudioPlayer.silenced.value) _stopVibration();
+  }
+
+  static void _stopVibration() {
+    _vibrationTimer?.cancel();
+    _vibrationTimer = null;
+    _vibrationAudioSeen = false;
+    _vibrationGraceTicks = 0;
+  }
+
   /// Testing hook: called whenever [FlutterForegroundTask.launchApp] is about
   /// to be invoked. Null in production (default), set by tests to track calls.
   @visibleForTesting
@@ -229,8 +293,7 @@ class AdhanAutoTrigger {
   static void resetForTesting() {
     _lastTriggeredPrayer = null;
     _checking = false;
-    _vibrationTimer?.cancel();
-    _vibrationTimer = null;
+    _stopVibration();
     onLaunchAppForTesting = null;
     onWakeUpScreenForTesting = null;
     onVibrationTickForTesting = null;
@@ -460,8 +523,7 @@ class AdhanAutoTrigger {
   static void stop() {
     _checkTimer?.cancel();
     _checkTimer = null;
-    _vibrationTimer?.cancel();
-    _vibrationTimer = null;
+    _stopVibration();
     AdhanAudioPlayer.stop();
   }
 
@@ -590,18 +652,7 @@ class AdhanAutoTrigger {
         // HapticFeedback.vibrate() fires even when the overlay screen never
         // mounts (e.g. background trigger, adhanScreenEnabled=false).
         if (prefs.vibrateWithAdhan && prefs.adhanMode == 'sound') {
-          _vibrationTimer?.cancel();
-          _vibrationTimer = Timer.periodic(const Duration(seconds: 2), (_) {
-            HapticFeedback.vibrate();
-            onVibrationTickForTesting?.call();
-          });
-          // Cancel the timer when audio stops (player silenced or stopped).
-          AdhanAudioPlayer.silenced.addListener(() {
-            if (AdhanAudioPlayer.silenced.value) {
-              _vibrationTimer?.cancel();
-              _vibrationTimer = null;
-            }
-          });
+          _armVibrationWithAdhan();
         }
 
         break;
@@ -720,17 +771,7 @@ class AdhanAutoTrigger {
     // Requirement 2.17: start vibration from the foreground-data path too
     // so HapticFeedback fires even when adhanScreen=false.
     if (prefs.vibrateWithAdhan && prefs.adhanMode == 'sound') {
-      _vibrationTimer?.cancel();
-      _vibrationTimer = Timer.periodic(const Duration(seconds: 2), (_) {
-        HapticFeedback.vibrate();
-        onVibrationTickForTesting?.call();
-      });
-      AdhanAudioPlayer.silenced.addListener(() {
-        if (AdhanAudioPlayer.silenced.value) {
-          _vibrationTimer?.cancel();
-          _vibrationTimer = null;
-        }
-      });
+      _armVibrationWithAdhan();
     }
   }
 

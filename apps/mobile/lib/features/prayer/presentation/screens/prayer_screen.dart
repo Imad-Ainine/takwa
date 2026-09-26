@@ -97,9 +97,7 @@ const _kPrayerVisuals = {
 class PrayerScreenState {
   final List<PrayerTimeInfo> prayers;
   final PrayerTimeInfo? next;
-  final Duration? remaining;
   final DateTime? iqamaTime;
-  final Duration? remainingIqama;
   final bool isIqamaPhase;
   final String cityName;
   final bool loading;
@@ -109,9 +107,7 @@ class PrayerScreenState {
   const PrayerScreenState({
     this.prayers = const [],
     this.next,
-    this.remaining,
     this.iqamaTime,
-    this.remainingIqama,
     this.isIqamaPhase = false,
     this.cityName = '',
     this.loading = true,
@@ -122,9 +118,7 @@ class PrayerScreenState {
   PrayerScreenState copyWith({
     List<PrayerTimeInfo>? prayers,
     PrayerTimeInfo? next,
-    Duration? remaining,
     DateTime? iqamaTime,
-    Duration? remainingIqama,
     bool? isIqamaPhase,
     String? cityName,
     bool? loading,
@@ -133,9 +127,7 @@ class PrayerScreenState {
   }) => PrayerScreenState(
     prayers: prayers ?? this.prayers,
     next: next ?? this.next,
-    remaining: remaining ?? this.remaining,
     iqamaTime: iqamaTime ?? this.iqamaTime,
-    remainingIqama: remainingIqama ?? this.remainingIqama,
     isIqamaPhase: isIqamaPhase ?? this.isIqamaPhase,
     cityName: cityName ?? this.cityName,
     loading: loading ?? this.loading,
@@ -306,15 +298,21 @@ class PrayerNotifier extends StateNotifier<PrayerScreenState> {
     final iqamaTime = next.time.add(Duration(minutes: iqamaOffset));
     final isIqamaPhase = now.isAfter(next.time) && now.isBefore(iqamaTime);
 
-    final remaining = isIqamaPhase
-        ? iqamaTime.difference(now)
-        : next.time.difference(now);
+    // Only push DISCRETE changes into state. The countdown seconds live in
+    // the widgets via prayerClockTickProvider (they derive the Duration
+    // from next.time/iqamaTime on each tick); assigning a fresh
+    // `remaining` here every second rebuilt the whole PrayerScreen and
+    // Home for the app's entire lifetime (P1 #3).
+    if (state.next?.name == next.name &&
+        state.next?.time == next.time &&
+        state.iqamaTime == iqamaTime &&
+        state.isIqamaPhase == isIqamaPhase) {
+      return;
+    }
 
     state = state.copyWith(
       next: next,
-      remaining: remaining,
       iqamaTime: iqamaTime,
-      remainingIqama: iqamaTime.difference(now),
       isIqamaPhase: isIqamaPhase,
     );
   }
@@ -343,6 +341,16 @@ final prayerScreenProvider =
     StateNotifierProvider<PrayerNotifier, PrayerScreenState>(
       (ref) => PrayerNotifier(ref),
     );
+
+/// Shared 1 Hz clock for the few widgets that actually display a ticking
+/// countdown (PrayerScreen ring/clock banner, Home next-prayer chip, iftar
+/// card). autoDispose: the periodic Stream stops when no countdown widget
+/// is mounted. Countdowns derive their Duration from
+/// [PrayerScreenState.next]/iqamaTime at each tick instead of the notifier
+/// mutating state every second.
+final prayerClockTickProvider = StreamProvider.autoDispose<DateTime>((
+  ref,
+) => Stream.periodic(const Duration(seconds: 1), (_) => DateTime.now()));
 
 class PrayerScreen extends ConsumerStatefulWidget {
   const PrayerScreen({super.key});
@@ -878,7 +886,6 @@ class _MainPrayerCard extends StatelessWidget {
     final next = state.next;
     if (next == null) return const SizedBox();
 
-    final remaining = state.remaining ?? Duration.zero;
     final iqamaTime = state.iqamaTime;
     final isIqama = state.isIqamaPhase;
 
@@ -930,12 +937,25 @@ class _MainPrayerCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xxxl),
 
                 // ── Countdown Ring ──
-                _CountdownRing(
-                  remaining: remaining,
-                  visual: visual,
-                  isIqama: isIqama,
-                  pulseAnim: pulseAnim,
-                  style: style,
+                // The only per-second subtree on this screen: it watches the
+                // shared clock tick and derives the countdown from the
+                // discrete state times, instead of the notifier mutating
+                // state every second.
+                Consumer(
+                  builder: (context, ref, _) {
+                    ref.watch(prayerClockTickProvider);
+                    final now = DateTime.now();
+                    final remaining = (isIqama && iqamaTime != null)
+                        ? iqamaTime.difference(now)
+                        : next.time.difference(now);
+                    return _CountdownRing(
+                      remaining: remaining,
+                      visual: visual,
+                      isIqama: isIqama,
+                      pulseAnim: pulseAnim,
+                      style: style,
+                    );
+                  },
                 ),
                 const SizedBox(height: AppSpacing.xxxl),
 
@@ -1784,45 +1804,27 @@ class _MihrabPrayerChip extends StatelessWidget {
   }
 }
 
-class _LiveClockBanner extends StatefulWidget {
+class _LiveClockBanner extends ConsumerWidget {
   final AdaptiveStyle style;
   final AnimationController entryCtrl;
   const _LiveClockBanner({required this.style, required this.entryCtrl});
 
   @override
-  State<_LiveClockBanner> createState() => _LiveClockBannerState();
-}
-
-class _LiveClockBannerState extends State<_LiveClockBanner> {
-  late Timer _timer;
-  DateTime _now = DateTime.now();
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) setState(() => _now = DateTime.now());
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final h = _now.hour % 12 == 0 ? 12 : _now.hour % 12;
-    final m = _now.minute.toString().padLeft(2, '0');
-    final s = _now.second.toString().padLeft(2, '0');
-    final ampm = _now.hour < 12 ? 'AM' : 'PM';
-    final weekday = DateFormat('EEEE', 'ar').format(_now);
-    final date = DateFormat('d MMMM yyyy', 'ar').format(_now);
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Shared 1 Hz clock instead of a private Timer.periodic (P1 #3) —
+    // the banner rebuilds once per second either way; now it costs no
+    // extra timer.
+    final now = ref.watch(prayerClockTickProvider).value ?? DateTime.now();
+    final h = now.hour % 12 == 0 ? 12 : now.hour % 12;
+    final m = now.minute.toString().padLeft(2, '0');
+    final s = now.second.toString().padLeft(2, '0');
+    final ampm = now.hour < 12 ? 'AM' : 'PM';
+    final weekday = DateFormat('EEEE', 'ar').format(now);
+    final date = DateFormat('d MMMM yyyy', 'ar').format(now);
 
     return FadeTransition(
       opacity: CurvedAnimation(
-        parent: widget.entryCtrl,
+        parent: entryCtrl,
         curve: const Interval(0.0, 0.55),
       ),
       child: Padding(
@@ -1833,10 +1835,10 @@ class _LiveClockBannerState extends State<_LiveClockBanner> {
             vertical: 15,
           ),
           decoration: BoxDecoration(
-            color: widget.style.text.withValues(alpha: 0.05),
+            color: style.text.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: widget.style.gold.withValues(alpha: 0.15),
+              color: style.gold.withValues(alpha: 0.15),
               width: 1.1,
             ),
             boxShadow: [
@@ -1862,7 +1864,7 @@ class _LiveClockBannerState extends State<_LiveClockBanner> {
                           fontFamily: 'NotoNaskhArabic',
                           fontSize: 40,
                           fontWeight: FontWeight.w700,
-                          color: widget.style.text,
+                          color: style.text,
                           height: 1.0,
                         ),
                       ),
@@ -1872,7 +1874,7 @@ class _LiveClockBannerState extends State<_LiveClockBanner> {
                           fontFamily: 'NotoNaskhArabic',
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: widget.style.gold,
+                          color: style.gold,
                         ),
                       ),
                     ],
@@ -1889,7 +1891,7 @@ class _LiveClockBannerState extends State<_LiveClockBanner> {
                     fontFamily: 'NotoNaskhArabic',
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
-                    color: widget.style.textDim,
+                    color: style.textDim,
                   ),
                 ),
               ),
@@ -1904,7 +1906,7 @@ class _LiveClockBannerState extends State<_LiveClockBanner> {
                       fontFamily: 'Amiri',
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: widget.style.gold,
+                      color: style.gold,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -1913,7 +1915,7 @@ class _LiveClockBannerState extends State<_LiveClockBanner> {
                     style: TextStyle(
                       fontFamily: 'NotoNaskhArabic',
                       fontSize: 11,
-                      color: widget.style.textDim,
+                      color: style.textDim,
                     ),
                   ),
                 ],
