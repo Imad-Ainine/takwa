@@ -81,6 +81,9 @@ dependencies:
   just_audio: ^0.10.5
   audio_service: ^0.18.18
 
+  # ── Animations ──
+  lottie: ^3.3.1
+
   # ── PDF and Images ──
   syncfusion_flutter_pdfviewer: ^34.2.6 # upgraded to resolve win32 ^6.x conflict
   cached_network_image: ^3.4.1
@@ -122,6 +125,7 @@ flutter:
     - assets/sounds/
     - assets/images/
     - assets/tafsir/
+    - assets/lottie/
     - assets/
   fonts:
     - family: Amiri

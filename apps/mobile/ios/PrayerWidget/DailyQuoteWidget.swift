@@ -112,8 +112,17 @@ private struct DailyQuoteContentView: View {
                     Text("×\(data.count)")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(theme.teal)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(RoundedRectangle(cornerRadius: 10).fill(theme.tealTint))
                 }
             }
+            // Short gold→teal accent rule under the header, echoing the
+            // in-app section headers — same as Android's widget_accent_bar.
+            LinearGradient(colors: [theme.gold, theme.teal.opacity(0.15)], startPoint: .leading, endPoint: .trailing)
+                .frame(width: 36, height: 2)
+                .clipShape(Capsule())
+                .frame(maxWidth: .infinity, alignment: .leading)
             Text(data.text)
                 .font(.system(size: 15))
                 .foregroundColor(theme.textPrimary)

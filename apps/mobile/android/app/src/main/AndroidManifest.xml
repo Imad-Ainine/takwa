@@ -123,6 +123,50 @@
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/verse_of_day_widget_info" />
         </receiver>
+        <!-- Home screen 2×2 "next prayer hero" widget — reads the same
+             prayer data as the two prayer-size variants (see
+             NextPrayerHeroProvider.kt). -->
+        <receiver android:name=".NextPrayerHeroProvider"
+            android:label="تقوى - الصلاة القادمة"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/next_prayer_hero_widget_info" />
+        </receiver>
+        <!-- Home screen Hijri-date widget (see HijriDateProvider.kt) -->
+        <receiver android:name=".HijriDateProvider"
+            android:label="تقوى - التاريخ الهجري"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/hijri_date_widget_info" />
+        </receiver>
+        <!-- Home screen "Asma ul-Husna of the day" widget (see
+             AsmaOfDayWidgetProvider.kt) -->
+        <receiver android:name=".AsmaOfDayWidgetProvider"
+            android:label="تقوى - اسم الله الحسنى"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/asma_of_day_widget_info" />
+        </receiver>
+        <!-- Home screen Ayat al-Kursi widget, fully static (see
+             AyatAlKursiWidgetProvider.kt) -->
+        <receiver android:name=".AyatAlKursiWidgetProvider"
+            android:label="تقوى - آية الكرسي"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/ayat_al_kursi_widget_info" />
+        </receiver>
         <!-- home_widget: re-arms the alarms PrayerHomeWidgetService and
              DailyQuoteWidgetService schedule via
              HomeWidget.scheduleWidgetUpdates() after a reboot, an app

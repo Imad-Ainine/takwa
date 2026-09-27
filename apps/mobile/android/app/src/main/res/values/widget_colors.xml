@@ -35,4 +35,13 @@
     <color name="widget_overlay_teal">#0A3AAFA9</color>
     <!-- Progress track for the large prayer widget's countdown bar. -->
     <color name="widget_progress_track">#1A111827</color>
+    <!-- Soft gold fill + hairline stroke of the rounded pill behind the
+         next prayer's cell (Muslim-Pro-style highlight). -->
+    <color name="widget_highlight_bg">#14C8A96E</color>
+    <color name="widget_highlight_stroke">#2EC8A96E</color>
+    <!-- Soft teal fill behind the dhikr "×N" count pill. -->
+    <color name="widget_teal_tint">#140F5C57</color>
+    <!-- Far end of the countdown bar's gold gradient (near end is
+         widget_gold). -->
+    <color name="widget_gold_soft">#FFA0863F</color>
 </resources>

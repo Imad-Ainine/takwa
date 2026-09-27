@@ -52,24 +52,46 @@ class MuyassarTafsirLoader {
       final raw = await rootBundle.loadString(_assetPath);
       final List<dynamic> rows = json.decode(raw) as List<dynamic>;
       final items = <ql.TafsirTableData>[
+        // `id` is what the tafsir sheet matches on: TafsirPagesBuild looks an
+        // ayah up as `tafseerList.firstWhere((e) => e.id == ayahUQNumber)`,
+        // where ayahUQNumber is the 1-based global ayah number (Al-Fatiha 1:1
+        // is 1, Al-Baqarah 2:1 is 8). The asset is in canonical mushaf order
+        // (verified: 6236 rows, one per ayah, none empty), so row i is ayah
+        // i+1. A 0-based id would show the next ayah's tafsir text.
         for (var i = 0; i < rows.length; i++)
           ql.TafsirTableData(
-            id: i,
+            id: i + 1,
             surahNum: rows[i]['s'] as int,
             ayahNum: rows[i]['a'] as int,
             tafsirText: rows[i]['t'] as String,
-            // Not used for lookups on custom tafsirs (TafsirCtrl matches by
-            // surah/ayah, not page, for isCustom entries) — 0 is fine.
+            // Only read by the page-filtered fetch path (fetchTafsirPage),
+            // which the sheet doesn't use; TafsirCtrl.fetchData ignores
+            // pageNum for custom entries.
             pageNum: 0,
           ),
       ];
 
-      // Append rather than insert at the front: TafsirCtrl's `radioValue`
-      // (the currently-selected tafsir/translation index) is computed from
-      // the list as it stood when TafsirCtrl initialized — which already
-      // happened by the time this runs (QuranLibrary.init() completes
-      // before this is called). Inserting anywhere but the end would shift
-      // every later index and silently point radioValue at the wrong item.
+      // Must land in the tafsir section of the list, not at the end:
+      // TafsirCtrl treats any index >= `translationsStartIndex` as a
+      // translation (`isCurrentATranslation`), which makes `fetchData` skip
+      // the custom-entry branch and instead try to open
+      // `<appDir>/muyassar_ar.json` — a file that isn't there, since this
+      // tafsir is bundled as an asset. The result is an empty `tafseerList`
+      // and a bottom sheet that renders `SizedBox.shrink()`, i.e. a blank
+      // body under a selected "التفسير الميسر" chip.
+      // Inserting *at* translationsStartIndex pushes every translation one
+      // slot right, so `translationsStartIndex` itself moves up by one and
+      // this entry ends up just inside the tafsir range.
+      final insertAt = ctrl.tafsirAndTranslationsItems.indexWhere(
+        (e) => e.isTranslation,
+      );
+      final at = insertAt == -1
+          ? ctrl.tafsirAndTranslationsItems.length
+          : insertAt;
+      // radioValue was resolved against the list before the shift; keep it
+      // pointing at the same entry it selected at startup.
+      if (ctrl.radioValue.value >= at) ctrl.radioValue.value++;
+
       final entry = ql.CustomTafsirEntry(
         name: name,
         model: ql.TafsirNameModel(
@@ -82,7 +104,7 @@ class MuyassarTafsirLoader {
           type: ql.TafsirFileType.json,
         ),
         items: items,
-        index: ctrl.tafsirAndTranslationsItems.length,
+        index: at,
       );
 
       // Not `ctrl.addCustomTafsirEntries([entry])`, which the package cannot
@@ -91,11 +113,11 @@ class MuyassarTafsirLoader {
       // `customTafsirEntries.insert(index, …)` (empty, invalid), so the second
       // throws `RangeError: Only valid value is 0: 45`, the method swallows it,
       // and the entry never lands in the list `fetchData` reads — the tafsir
-      // shows up in the menu but renders no text. Appending to both lists
+      // shows up in the menu but renders no text. Inserting into both lists
       // directly is the same registration without the out-of-range insert.
       // `_persistCustoms` is deliberately skipped: this runs from a bundled
       // asset on every launch, and its restore path has the same bug.
-      ctrl.tafsirAndTranslationsItems.add(entry.model);
+      ctrl.tafsirAndTranslationsItems.insert(at, entry.model);
       ctrl.customTafsirEntries.add(entry);
       ctrl.update(['tafsirs_menu_list']);
     } catch (e) {

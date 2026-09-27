@@ -79,17 +79,27 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="الفجر"
-                    android:textColor="@color/widget_text_primary"
-                    android:textSize="11sp" />
+                    android:text="🌅"
+                    android:textSize="10sp" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
+                    android:text="الفجر"
+                    android:textColor="@color/widget_text_secondary"
+                    android:textSize="10sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
                     android:text="05:06"
                     android:textColor="@color/widget_text_primary"
                     android:textStyle="bold"
@@ -101,17 +111,27 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="الظهر"
-                    android:textColor="@color/widget_text_primary"
-                    android:textSize="11sp" />
+                    android:text="☀️"
+                    android:textSize="10sp" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
+                    android:text="الظهر"
+                    android:textColor="@color/widget_text_secondary"
+                    android:textSize="10sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
                     android:text="11:44"
                     android:textColor="@color/widget_text_primary"
                     android:textStyle="bold"
@@ -123,17 +143,27 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="العصر"
-                    android:textColor="@color/widget_text_primary"
-                    android:textSize="11sp" />
+                    android:text="⛅"
+                    android:textSize="10sp" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
+                    android:text="العصر"
+                    android:textColor="@color/widget_text_secondary"
+                    android:textSize="10sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
                     android:text="03:20"
                     android:textColor="@color/widget_text_primary"
                     android:textStyle="bold"
@@ -145,17 +175,28 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:background="@drawable/widget_prayer_cell_active">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="المغرب"
-                    android:textColor="@color/widget_gold"
-                    android:textSize="11sp" />
+                    android:text="🌇"
+                    android:textSize="10sp" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
+                    android:text="المغرب"
+                    android:textColor="@color/widget_gold"
+                    android:textSize="10sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
                     android:text="06:31"
                     android:textColor="@color/widget_gold"
                     android:textStyle="bold"
@@ -167,17 +208,27 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="العشاء"
-                    android:textColor="@color/widget_text_primary"
-                    android:textSize="11sp" />
+                    android:text="🌙"
+                    android:textSize="10sp" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
+                    android:text="العشاء"
+                    android:textColor="@color/widget_text_secondary"
+                    android:textSize="10sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
                     android:text="07:57"
                     android:textColor="@color/widget_text_primary"
                     android:textStyle="bold"

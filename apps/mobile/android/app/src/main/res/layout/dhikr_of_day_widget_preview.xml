@@ -48,12 +48,23 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@drawable/widget_count_pill"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
                 android:gravity="end"
                 android:text="×100"
                 android:textColor="@color/widget_teal"
                 android:textStyle="bold"
                 android:textSize="12sp" />
         </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="36dp"
+            android:layout_height="2dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/widget_accent_bar" />
 
         <TextView
             android:layout_width="match_parent"

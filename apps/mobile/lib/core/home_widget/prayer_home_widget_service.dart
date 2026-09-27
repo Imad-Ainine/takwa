@@ -31,6 +31,15 @@ class PrayerHomeWidgetService {
   /// so every push here has to reach it too, not just [androidWidgetName].
   static const androidLargeWidgetName = 'PrayerWidgetLargeProvider';
 
+  /// The 2×2 "next prayer hero" tile (NextPrayerHeroProvider.kt) and the
+  /// Hijri-date widget (HijriDateProvider.kt) — same story as the large
+  /// variant: separate providers, same payload, so each push has to name
+  /// them too. On iOS both live in the same `PrayerWidget` kind
+  /// (`.systemSmall` hero family / `HijriDateWidget` kind for the date).
+  static const androidHeroWidgetName = 'NextPrayerHeroProvider';
+  static const androidHijriWidgetName = 'HijriDateProvider';
+  static const iOSHijriWidgetName = 'HijriDateWidget';
+
   /// Must match the `kind:` the iOS extension registers its Widget under
   /// (see ios/PrayerWidget/PrayerWidget.swift).
   static const iOSWidgetName = 'PrayerWidget';
@@ -104,15 +113,21 @@ class PrayerHomeWidgetService {
       };
 
       await HomeWidget.saveWidgetData<String>(_dataKey, jsonEncode(payload));
-      // Both size variants read this same payload but are registered as
-      // two separate AppWidgetProviders, so each needs its own
-      // updateWidget()/scheduleWidgetUpdates() call — home_widget has no
-      // "these names share one push" shorthand.
+      // All four size variants/derived widgets read this same payload but
+      // are registered as separate AppWidgetProviders, so each needs its
+      // own updateWidget() call — home_widget has no "these names share
+      // one push" shorthand. The iOS hero tile is `.systemSmall` of the
+      // PrayerWidget kind, so the first call already reloads it.
       await HomeWidget.updateWidget(
         androidName: androidWidgetName,
         iOSName: iOSWidgetName,
       );
       await HomeWidget.updateWidget(androidName: androidLargeWidgetName);
+      await HomeWidget.updateWidget(androidName: androidHeroWidgetName);
+      await HomeWidget.updateWidget(
+        androidName: androidHijriWidgetName,
+        iOSName: iOSHijriWidgetName,
+      );
 
       final upcoming = ordered
           .map((p) => p.time)
@@ -126,6 +141,11 @@ class PrayerHomeWidgetService {
         await HomeWidget.scheduleWidgetUpdates(
           upcoming,
           androidName: androidLargeWidgetName,
+        );
+        // The hero tile's countdown/selection moves with each prayer too.
+        await HomeWidget.scheduleWidgetUpdates(
+          upcoming,
+          androidName: androidHeroWidgetName,
         );
       }
     } catch (e) {

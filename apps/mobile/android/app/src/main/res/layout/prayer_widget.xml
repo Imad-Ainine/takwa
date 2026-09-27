@@ -93,7 +93,11 @@
             android:layout_marginBottom="8dp"
             android:background="@color/widget_divider" />
 
-        <!-- 5 prayer cells, evenly spaced -->
+        <!-- 5 prayer cells, evenly spaced. Each carries a static prayer
+             emoji above the label (order is fixed fajr→isha by
+             PrayerHomeWidgetService), and gets a rounded gold pill
+             background when it's the next prayer (set by the provider via
+             setBackgroundResource). -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -105,23 +109,33 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🌅"
+                    android:textSize="10sp" />
                 <TextView
                     android:id="@+id/prayer_widget_label_0"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
                     android:gravity="center"
-                    android:textColor="@color/widget_text_primary"
-                    android:textSize="11sp"
+                    android:textColor="@color/widget_text_secondary"
+                    android:textSize="10sp"
                     android:maxLines="1"
                     android:autoSizeTextType="uniform"
                     android:autoSizeMinTextSize="8sp"
-                    android:autoSizeMaxTextSize="11sp" />
+                    android:autoSizeMaxTextSize="10sp" />
                 <TextView
                     android:id="@+id/prayer_widget_time_0"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginTop="1dp"
                     android:gravity="center"
                     android:textColor="@color/widget_text_primary"
                     android:textStyle="bold"
@@ -138,23 +152,33 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="☀️"
+                    android:textSize="10sp" />
                 <TextView
                     android:id="@+id/prayer_widget_label_1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
                     android:gravity="center"
-                    android:textColor="@color/widget_text_primary"
-                    android:textSize="11sp"
+                    android:textColor="@color/widget_text_secondary"
+                    android:textSize="10sp"
                     android:maxLines="1"
                     android:autoSizeTextType="uniform"
                     android:autoSizeMinTextSize="8sp"
-                    android:autoSizeMaxTextSize="11sp" />
+                    android:autoSizeMaxTextSize="10sp" />
                 <TextView
                     android:id="@+id/prayer_widget_time_1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginTop="1dp"
                     android:gravity="center"
                     android:textColor="@color/widget_text_primary"
                     android:textStyle="bold"
@@ -171,23 +195,33 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⛅"
+                    android:textSize="10sp" />
                 <TextView
                     android:id="@+id/prayer_widget_label_2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
                     android:gravity="center"
-                    android:textColor="@color/widget_text_primary"
-                    android:textSize="11sp"
+                    android:textColor="@color/widget_text_secondary"
+                    android:textSize="10sp"
                     android:maxLines="1"
                     android:autoSizeTextType="uniform"
                     android:autoSizeMinTextSize="8sp"
-                    android:autoSizeMaxTextSize="11sp" />
+                    android:autoSizeMaxTextSize="10sp" />
                 <TextView
                     android:id="@+id/prayer_widget_time_2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginTop="1dp"
                     android:gravity="center"
                     android:textColor="@color/widget_text_primary"
                     android:textStyle="bold"
@@ -204,23 +238,33 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🌇"
+                    android:textSize="10sp" />
                 <TextView
                     android:id="@+id/prayer_widget_label_3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
                     android:gravity="center"
-                    android:textColor="@color/widget_text_primary"
-                    android:textSize="11sp"
+                    android:textColor="@color/widget_text_secondary"
+                    android:textSize="10sp"
                     android:maxLines="1"
                     android:autoSizeTextType="uniform"
                     android:autoSizeMinTextSize="8sp"
-                    android:autoSizeMaxTextSize="11sp" />
+                    android:autoSizeMaxTextSize="10sp" />
                 <TextView
                     android:id="@+id/prayer_widget_time_3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginTop="1dp"
                     android:gravity="center"
                     android:textColor="@color/widget_text_primary"
                     android:textStyle="bold"
@@ -237,23 +281,33 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🌙"
+                    android:textSize="10sp" />
                 <TextView
                     android:id="@+id/prayer_widget_label_4"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
                     android:gravity="center"
-                    android:textColor="@color/widget_text_primary"
-                    android:textSize="11sp"
+                    android:textColor="@color/widget_text_secondary"
+                    android:textSize="10sp"
                     android:maxLines="1"
                     android:autoSizeTextType="uniform"
                     android:autoSizeMinTextSize="8sp"
-                    android:autoSizeMaxTextSize="11sp" />
+                    android:autoSizeMaxTextSize="10sp" />
                 <TextView
                     android:id="@+id/prayer_widget_time_4"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginTop="1dp"
                     android:gravity="center"
                     android:textColor="@color/widget_text_primary"
                     android:textStyle="bold"

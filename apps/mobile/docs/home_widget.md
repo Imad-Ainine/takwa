@@ -1,6 +1,6 @@
 # Home screen widgets
 
-Five home-screen widgets (Android AppWidget / iOS WidgetKit), all sharing
+Nine home-screen widgets (Android AppWidget / iOS WidgetKit), all sharing
 one visual style — the app's own brand colors (gold/teal accents on a
 navy-to-card-tone gradient, plus a low-opacity rub el hizb geometric motif
 tucked into one corner), in both light and dark mode:
@@ -12,6 +12,21 @@ tucked into one corner), in both light and dark mode:
   (`.systemLarge` / `PrayerWidgetLargeProvider`) that adds a countdown bar
   to the next prayer — the countdown-timer style from the very first
   reference screenshots.
+- **Next prayer hero** — 2×2 square tile (`NextPrayerHeroProvider` on
+  Android, `.systemSmall` of the `PrayerWidget` kind on iOS): the single
+  upcoming prayer's emoji, name and large time over a gold countdown pill,
+  Muslim-Pro-style. Reads the same `prayer_widget_data` payload.
+- **Hijri date** — 4×2 (`HijriDateProvider` / `HijriDateWidget`): the
+  Hijri day number large in gold over a centered rub el hizb motif, the
+  month in a teal pill, weekday • Gregorian below. Also reads the prayer
+  payload (its `hijri` field, split back into day + month).
+- **Asma ul-Husna of the day** — 4×2 (`AsmaOfDayWidgetProvider` /
+  `AsmaOfDayWidget`): one of the 99 Names daily from the app's own bundled
+  `kAsmaData` (the Asma screen's dataset), large in gold with its meaning
+  and a "n/99" teal pill; pushed by `DailyQuoteWidgetService.updateAsma`.
+- **Ayat al-Kursi** — 4×2 (`AyatAlKursiWidgetProvider` /
+  `AyatAlKursiWidget`): fully static Quran 2:255 card with gold frame
+  accents — renders even before the app has ever been opened.
 - **Dua of the day** — one dua from the app's own bundled traditional duas,
   rotating daily.
 - **Dhikr of the day** — same idea, from the bundled adhkar, with a "×N"
@@ -92,6 +107,25 @@ this for free with no per-widget change:
    divisions) stroked at low opacity in one corner, behind the real
    content (`ic_widget_islamic_motif.xml` / `RubElHizbMotif` Shape).
 
+### Content styling (Muslim-Pro-style polish pass)
+
+- **Next-prayer pill** — the highlighted cell now sits in a rounded,
+  gold-tinted pill with a hairline gold stroke, and its label/time turn
+  gold together (`widget_prayer_cell_active.xml` set via
+  `RemoteViews.setInt(..., "setBackgroundResource", ...)`; `highlightFill/
+  Stroke` rounded rectangles on iOS). Non-highlighted cells keep a
+  subdued secondary-color label so the time carries the hierarchy.
+- **Per-prayer emoji** — sunrise / sun / cloud-sun / sunset / crescent
+  in that cell order, above each cell (static in the
+  Android layouts since the order is fixed; keyed by `prayer.key` on iOS).
+- **Countdown badge + bar** (4×3 / `.systemLarge`) — the "متبقٍ…" text is
+  a gold pill badge (`widget_countdown_pill.xml` / `Capsule`), and the
+  progress bar is a rounded gold-gradient drawable
+  (`widget_progress_gold.xml`) instead of the flat system tint.
+- **Daily-quote headers** — a short gold→teal accent rule under the
+  emoji+title row (`widget_accent_bar.xml`), and the "×N" repetition count
+  sits in a soft teal pill (`widget_count_pill.xml` / `tealTint`).
+
 ## Resizing
 
 - Every prayer/label/quote TextView that sits in a width-constrained cell
@@ -137,13 +171,19 @@ needed there.
 | Android prayer widget (compact) | `PrayerWidgetProvider.kt` + `res/layout/prayer_widget.xml` + `res/xml/prayer_widget_info.xml` |
 | Android prayer widget (large, countdown) | `PrayerWidgetLargeProvider.kt` (subclasses the above) + `res/layout/prayer_widget_large.xml` + `res/xml/prayer_widget_large_info.xml` |
 | Android dua/dhikr/verse widgets | `DailyQuoteWidgetProviderBase.kt` (shared base, three thin subclasses) + `res/layout/daily_quote_widget.xml` + `res/xml/{dua,dhikr,verse}_of_day_widget_info.xml` |
+| Android next-prayer hero tile | `NextPrayerHeroProvider.kt` + `res/layout/next_prayer_hero_widget.xml` + `res/xml/next_prayer_hero_widget_info.xml` |
+| Android Hijri-date widget | `HijriDateProvider.kt` + `res/layout/hijri_date_widget.xml` + `res/xml/hijri_date_widget_info.xml` |
+| Android Asma-of-day widget | `AsmaOfDayWidgetProvider.kt` + `res/layout/asma_widget.xml` + `res/xml/asma_of_day_widget_info.xml` |
+| Android Ayat al-Kursi widget (static) | `AyatAlKursiWidgetProvider.kt` + `res/layout/ayat_al_kursi_widget.xml` + `res/xml/ayat_al_kursi_widget_info.xml` |
 | Android brand colors | `res/values/widget_colors.xml` + `res/values-night/widget_colors.xml` |
 | Android shared card background + motif | `res/drawable/takwa_widget_card_background.xml` + `res/drawable{,-night}/ic_widget_islamic_motif.xml` |
+| Android pill/bar styling | `res/drawable/widget_{prayer_cell_active,countdown_pill,count_pill,accent_bar,progress_gold}.xml` |
 | Android widget-picker previews | `res/layout/*_widget_preview.xml` + `res/drawable-nodpi/*_widget_preview.png` |
-| iOS prayer widget (compact + large) | `ios/PrayerWidget/PrayerWidget.swift` |
+| iOS prayer widget (hero + compact + large) | `ios/PrayerWidget/PrayerWidget.swift` (`.systemSmall` = `NextPrayerHeroView`) |
 | iOS dua/dhikr/verse widgets | `ios/PrayerWidget/DailyQuoteWidget.swift` (all three, sharing one provider/view) |
+| iOS Hijri-date / Asma / Ayat al-Kursi widgets | `ios/PrayerWidget/{HijriDateWidget,AsmaOfDayWidget,AyatAlKursiWidget}.swift` |
 | iOS brand colors + shared background/motif | `ios/PrayerWidget/TakwaWidgetTheme.swift` |
-| iOS `@main` entry point | `ios/PrayerWidget/TakwaWidgetsBundle.swift` (lists all four widgets) |
+| iOS `@main` entry point | `ios/PrayerWidget/TakwaWidgetsBundle.swift` (lists all seven Widget kinds) |
 | iOS one-time Xcode setup | `ios/PrayerWidget/SETUP.md` |
 
 ## Status

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rounded, gold-gradient countdown bar for the large prayer widget —
+     replaces the flat system-tinted ProgressBar track. The progress layer
+     is clipped, so its right edge stays square mid-fill; the rounded track
+     underneath carries the pill shape. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <corners android:radius="4dp" />
+            <solid android:color="@color/widget_progress_track" />
+        </shape>
+    </item>
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape android:shape="rectangle">
+                <corners android:radius="4dp" />
+                <gradient
+                    android:angle="0"
+                    android:startColor="@color/widget_gold"
+                    android:endColor="@color/widget_gold_soft" />
+            </shape>
+        </clip>
+    </item>
+</layer-list>

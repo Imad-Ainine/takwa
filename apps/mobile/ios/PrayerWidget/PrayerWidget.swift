@@ -120,8 +120,15 @@ private struct PrayerWidgetEntryView: View {
         let theme = TakwaWidgetTheme.resolve(colorScheme)
         Group {
             if let data = entry.data {
-                PrayerContentView(data: data, theme: theme, showCountdown: family == .systemLarge)
-                    .environment(\.layoutDirection, data.isRtl ? .rightToLeft : .leftToRight)
+                Group {
+                    if family == .systemSmall {
+                        NextPrayerHeroView(data: data, theme: theme)
+                    } else {
+                        PrayerContentView(
+                            data: data, theme: theme, showCountdown: family == .systemLarge)
+                    }
+                }
+                .environment(\.layoutDirection, data.isRtl ? .rightToLeft : .leftToRight)
             } else {
                 Text("افتح تطبيق تقوى لعرض أوقات الصلاة")
                     .font(.caption)
@@ -131,6 +138,67 @@ private struct PrayerWidgetEntryView: View {
             }
         }
         .containerBackground(for: .widget) { TakwaWidgetBackgroundView(theme: theme) }
+    }
+}
+
+/// Per-prayer emoji shared by the cell layouts and the hero tile — same
+/// icons the Android layouts hard-code per cell.
+private let takwaPrayerEmojis: [String: String] = [
+    "fajr": "🌅",
+    "dhuhr": "☀️",
+    "asr": "⛅",
+    "maghrib": "🌇",
+    "isha": "🌙",
+]
+
+/// 2×2 "next prayer hero" tile — the single upcoming prayer rendered big
+/// (emoji, name, time) over a gold countdown pill. Same data as the other
+/// families; after Isha it falls back to the day's first prayer (tomorrow's
+/// Fajr) with the countdown hidden, mirroring Android's
+/// NextPrayerHeroProvider.kt.
+private struct NextPrayerHeroView: View {
+    let data: PrayerWidgetData
+    let theme: TakwaWidgetTheme
+
+    var body: some View {
+        let next = data.prayers.first { $0.key == data.nextKey } ?? data.prayers.first
+        VStack(spacing: 6) {
+            if let next {
+                Text(takwaPrayerEmojis[next.key] ?? "")
+                    .font(.system(size: 14))
+                Text(next.label)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(theme.gold)
+                Text(next.time)
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundColor(theme.textPrimary)
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                if data.nextKey != nil, let countdown = data.nextCountdown() {
+                    Text(shortRemaining(countdown))
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(theme.gold)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 2)
+                        .background(Capsule().fill(theme.highlightFill))
+                        .overlay(Capsule().stroke(theme.highlightStroke, lineWidth: 1))
+                }
+            } else {
+                Text("افتح تطبيق تقوى لعرض الصلاة القادمة")
+                    .font(.caption)
+                    .foregroundColor(theme.textPrimary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .padding(10)
+    }
+
+    /// "متبقٍ 2 س 47 د" — the hero pill drops the target prayer's name
+    /// (it's the headline right above it already).
+    private func shortRemaining(_ countdown: PrayerWidgetData.Countdown) -> String {
+        let full = countdown.label
+        guard let range = full.range(of: " لـ ") else { return full }
+        return String(full[..<range.lowerBound])
     }
 }
 
@@ -157,15 +225,29 @@ private struct PrayerContentView: View {
                     .foregroundColor(theme.textSecondary)
             }
             Divider().overlay(theme.divider)
-            HStack(spacing: 0) {
+            HStack(spacing: 4) {
                 ForEach(data.prayers, id: \.key) { prayer in
                     let isNext = prayer.key == data.nextKey
                     VStack(spacing: 2) {
-                        Text(prayer.label).font(.system(size: 11))
-                        Text(prayer.time).font(.system(size: 13, weight: .bold))
+                        Text(takwaPrayerEmojis[prayer.key] ?? "")
+                            .font(.system(size: 10))
+                        Text(prayer.label)
+                            .font(.system(size: 10))
+                            .foregroundColor(isNext ? theme.gold : theme.textSecondary)
+                        Text(prayer.time)
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(isNext ? theme.gold : theme.textPrimary)
                     }
                     .frame(maxWidth: .infinity)
-                    .foregroundColor(isNext ? theme.gold : theme.textPrimary)
+                    .padding(.vertical, 4)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(isNext ? theme.highlightFill : Color.clear)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(isNext ? theme.highlightStroke : Color.clear, lineWidth: 1)
+                    )
                     .minimumScaleFactor(0.7)
                     .lineLimit(1)
                 }
@@ -176,9 +258,14 @@ private struct PrayerContentView: View {
                     Text(countdown.label)
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(theme.gold)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 4)
+                        .background(Capsule().fill(theme.highlightFill))
+                        .overlay(Capsule().stroke(theme.highlightStroke, lineWidth: 1))
                     ProgressView(value: countdown.progress)
+                        .progressViewStyle(.linear)
                         .tint(theme.gold)
-                        .background(theme.progressTrack)
+                        .background(Capsule().fill(theme.progressTrack))
                 }
             }
         }
@@ -232,8 +319,10 @@ struct PrayerWidget: Widget {
         // equivalent of Android's separate PrayerWidgetLargeProvider; here
         // it's one Widget whose view adapts to `\.widgetFamily` instead of
         // a second provider, since WidgetKit (unlike AppWidgetProviderInfo)
-        // lets one widget declare several sizes.
-        .supportedFamilies([.systemMedium, .systemLarge])
+        // lets one widget declare several sizes. `.systemSmall` is the
+        // "next prayer hero" tile (NextPrayerHeroView) — Android's separate
+        // NextPrayerHeroProvider, same payload.
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 

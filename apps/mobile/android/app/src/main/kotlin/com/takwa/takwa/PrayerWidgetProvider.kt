@@ -43,6 +43,7 @@ open class PrayerWidgetProvider : HomeWidgetProvider() {
     ) {
         val data = parseData(widgetData.getString(DATA_KEY, null))
         val colorDefault = ContextCompat.getColor(context, R.color.widget_text_primary)
+        val colorLabel = ContextCompat.getColor(context, R.color.widget_text_secondary)
         val colorHighlight = ContextCompat.getColor(context, R.color.widget_gold)
 
         appWidgetIds.forEach { widgetId ->
@@ -58,7 +59,7 @@ open class PrayerWidgetProvider : HomeWidgetProvider() {
             } else {
                 views.setViewVisibility(R.id.prayer_widget_content, View.VISIBLE)
                 views.setViewVisibility(R.id.prayer_widget_empty, View.GONE)
-                bindContent(views, data, colorDefault, colorHighlight)
+                bindContent(views, data, colorDefault, colorLabel, colorHighlight)
             }
 
             appWidgetManager.updateAppWidget(widgetId, views)
@@ -78,6 +79,7 @@ open class PrayerWidgetProvider : HomeWidgetProvider() {
         views: RemoteViews,
         data: JSONObject,
         colorDefault: Int,
+        colorLabel: Int,
         colorHighlight: Int,
     ) {
         views.setTextViewText(R.id.prayer_widget_hijri, data.optString("hijri"))
@@ -101,8 +103,15 @@ open class PrayerWidgetProvider : HomeWidgetProvider() {
 
             val isNext = nextKey != null && nextKey == prayer.optString("key", null)
             val color = if (isNext) colorHighlight else colorDefault
-            views.setTextColor(labelId, color)
             views.setTextColor(timeId, color)
+            views.setTextColor(labelId, if (isNext) colorHighlight else colorLabel)
+            // Rounded gold pill behind the next prayer's cell; 0 clears the
+            // background on every other cell (idempotent across redraws).
+            views.setInt(
+                cellId,
+                "setBackgroundResource",
+                if (isNext) R.drawable.widget_prayer_cell_active else 0,
+            )
         }
 
         bindExtra(views, prayers, nextKey)

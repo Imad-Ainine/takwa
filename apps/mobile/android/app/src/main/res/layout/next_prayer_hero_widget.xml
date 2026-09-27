@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  2×2 "next prayer hero" widget — Muslim-Pro-style square tile: the single
+  upcoming prayer rendered big (emoji, name, time) with a gold countdown
+  pill underneath. Filled by NextPrayerHeroProvider.kt from the same
+  `prayer_widget_data` JSON the other prayer widgets read; nothing here is
+  data-bound statically.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/next_prayer_hero_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/takwa_widget_card_background">
+
+    <TextView
+        android:id="@+id/next_prayer_hero_empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="12dp"
+        android:text="افتح تطبيق تقوى لعرض الصلاة القادمة"
+        android:textColor="@color/widget_text_primary"
+        android:textSize="12sp"
+        android:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/next_prayer_hero_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="10dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/next_prayer_hero_emoji"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/next_prayer_hero_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:textColor="@color/widget_gold"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/next_prayer_hero_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:textColor="@color/widget_text_primary"
+            android:textStyle="bold"
+            android:textSize="26sp"
+            android:maxLines="1"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="16sp"
+            android:autoSizeMaxTextSize="26sp" />
+
+        <TextView
+            android:id="@+id/next_prayer_hero_countdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/widget_countdown_pill"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:textColor="@color/widget_gold"
+            android:textStyle="bold"
+            android:textSize="11sp"
+            android:maxLines="1"
+            android:visibility="gone" />
+    </LinearLayout>
+</FrameLayout>

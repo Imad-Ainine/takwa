@@ -31,6 +31,14 @@ struct TakwaWidgetTheme {
     /// Rub el hizb corner motif stroke — same brand gold as `overlayGold`,
     /// just a touch more opaque so the outline actually reads.
     let motif: Color
+    /// Soft gold fill + hairline stroke of the rounded pill behind the next
+    /// prayer's cell and the countdown badge (Android's
+    /// `widget_prayer_cell_active` / `widget_countdown_pill`).
+    let highlightFill: Color
+    let highlightStroke: Color
+    /// Soft teal fill behind the dhikr "×N" count pill (Android's
+    /// `widget_count_pill`).
+    let tealTint: Color
 
     // ≈ AppColorsExtension.light
     static let light = TakwaWidgetTheme(
@@ -45,7 +53,10 @@ struct TakwaWidgetTheme {
         progressTrack: Color.black.opacity(0.1),
         overlayGold: Color(red: 0.784, green: 0.663, blue: 0.431).opacity(0.0625), // #10C8A96E
         overlayTeal: Color(red: 0.227, green: 0.686, blue: 0.663).opacity(0.039), // #0A3AAFA9
-        motif: Color(red: 0.784, green: 0.663, blue: 0.431).opacity(0.12)
+        motif: Color(red: 0.784, green: 0.663, blue: 0.431).opacity(0.12),
+        highlightFill: Color(red: 0.784, green: 0.663, blue: 0.431).opacity(0.08), // #14C8A96E
+        highlightStroke: Color(red: 0.784, green: 0.663, blue: 0.431).opacity(0.18), // #2EC8A96E
+        tealTint: Color(red: 0.059, green: 0.361, blue: 0.341).opacity(0.08) // #140F5C57
     )
 
     // ≈ AppColorsExtension.dark
@@ -61,7 +72,10 @@ struct TakwaWidgetTheme {
         progressTrack: Color.white.opacity(0.15),
         overlayGold: Color(red: 0.784, green: 0.663, blue: 0.431).opacity(0.125), // #20C8A96E
         overlayTeal: Color(red: 0.227, green: 0.686, blue: 0.663).opacity(0.051), // #0D3AAFA9
-        motif: Color(red: 0.784, green: 0.663, blue: 0.431).opacity(0.15)
+        motif: Color(red: 0.784, green: 0.663, blue: 0.431).opacity(0.15),
+        highlightFill: Color(red: 0.784, green: 0.663, blue: 0.431).opacity(0.15), // #26C8A96E
+        highlightStroke: Color(red: 0.784, green: 0.663, blue: 0.431).opacity(0.25), // #40C8A96E
+        tealTint: Color(red: 0.227, green: 0.686, blue: 0.663).opacity(0.15) // #263AAFA9
     )
 
     static func resolve(_ scheme: ColorScheme) -> TakwaWidgetTheme {
@@ -83,6 +97,16 @@ struct TakwaWidgetTheme {
             colors: [overlayGold, overlayTeal],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
+        )
+    }
+
+    /// Short gold→teal accent rule drawn under the daily-quote widgets'
+    /// header row — Android's `widget_accent_bar`.
+    var accentBar: LinearGradient {
+        LinearGradient(
+            colors: [gold, teal.opacity(0.15)],
+            startPoint: .leading,
+            endPoint: .trailing
         )
     }
 }

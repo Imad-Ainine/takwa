@@ -6,6 +6,7 @@ import 'package:home_widget/home_widget.dart';
 import 'package:quran_library/quran_library.dart' as ql;
 
 import '../providers/adhkar_providers.dart' show kAdhkarData;
+import '../../features/asma/data/asma_data.dart' show kAsmaData;
 import '../../features/duas/data/duas_data.dart' show kDuasData;
 
 /// Keeps the "Dua of the Day", "Dhikr of the Day" and "Verse of the Day"
@@ -25,16 +26,19 @@ class DailyQuoteWidgetService {
   static const androidDuaWidgetName = 'DuaOfDayWidgetProvider';
   static const androidDhikrWidgetName = 'DhikrOfDayWidgetProvider';
   static const androidVerseWidgetName = 'VerseOfDayWidgetProvider';
+  static const androidAsmaWidgetName = 'AsmaOfDayWidgetProvider';
 
   /// Must match the `kind:` each iOS Widget registers under (see
   /// ios/PrayerWidget/DailyQuoteWidget.swift).
   static const iOSDuaWidgetName = 'DuaOfDayWidget';
   static const iOSDhikrWidgetName = 'DhikrOfDayWidget';
   static const iOSVerseWidgetName = 'VerseOfDayWidget';
+  static const iOSAsmaWidgetName = 'AsmaOfDayWidget';
 
   static const _duaDataKey = 'dua_of_day_widget_data';
   static const _dhikrDataKey = 'dhikr_of_day_widget_data';
   static const _verseDataKey = 'verse_of_day_widget_data';
+  static const _asmaDataKey = 'asma_of_day_widget_data';
 
   /// Juz 30's short, single-topic surahs (At-Takathur..An-Nas) — every one
   /// of them reads fine as a single standalone ayah, unlike a mid-surah
@@ -61,6 +65,7 @@ class DailyQuoteWidgetService {
       updateDua(locale: locale),
       updateDhikr(locale: locale),
       updateVerse(locale: locale),
+      updateAsma(locale: locale),
     ]);
   }
 
@@ -154,6 +159,30 @@ class DailyQuoteWidgetService {
       // refresh take the app down" rule as everywhere else here.
       debugPrint('[DailyQuoteWidgetService] updateVerse failed: $e');
     }
+  }
+
+  /// "Asma ul-Husna of the day" — one of the 99 Names, same deterministic
+  /// date-based pick as the other daily widgets, from the app's own
+  /// bundled [kAsmaData] (the dataset the Asma screen shows). The Name and
+  /// its meaning are always Arabic — devotional text, not UI chrome — so
+  /// only the title follows the app locale.
+  static Future<void> updateAsma({required Locale locale}) async {
+    final chosen = _pickForToday(kAsmaData);
+    if (chosen == null) return;
+
+    final isArabic = locale.languageCode == 'ar';
+    await _push(
+      dataKey: _asmaDataKey,
+      androidName: androidAsmaWidgetName,
+      iOSName: iOSAsmaWidgetName,
+      payload: {
+        'isRtl': isArabic,
+        'title': isArabic ? 'اسم الله الحسنى اليوم' : 'Name of Allah Today',
+        'number': chosen.number,
+        'name': chosen.name,
+        'meaning': chosen.meaning,
+      },
+    );
   }
 
   static Future<void> _push({

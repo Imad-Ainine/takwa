@@ -23,4 +23,10 @@
     <color name="widget_overlay_gold">#20C8A96E</color>
     <color name="widget_overlay_teal">#0D3AAFA9</color>
     <color name="widget_progress_track">#26FFFFFF</color>
+    <!-- Next-prayer pill — see values/widget_colors.xml; brand gold reads
+         directly on the dark card, so the fill/stroke run a bit stronger. -->
+    <color name="widget_highlight_bg">#26C8A96E</color>
+    <color name="widget_highlight_stroke">#40C8A96E</color>
+    <color name="widget_teal_tint">#263AAFA9</color>
+    <color name="widget_gold_soft">#FFE3CFA0</color>
 </resources>
