@@ -1,49 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_islamic_icons/flutter_islamic_icons.dart';
 
-/// Renders an emoji used as interface chrome as a real icon glyph when
-/// [FlutterIslamicIcons] has an unambiguous match, and as plain text otherwise.
+/// Renders an emoji the way Muslim Pro does: as the platform's colour emoji,
+/// optionally with a second smaller emoji stacked on top for composite icons
+/// (mosque+pin, kaaba+compass, book+beads).
 ///
 /// The incoming string is often a persisted model field (`Dua.emoji`,
-/// `AchievementDefinition.emoji`, …), so this stays a resolver rather than a
-/// call-site rewrite: data keeps rendering, only the presentation upgrades.
+/// `AchievementDefinition.emoji`, …), so this stays a resolver rather than
+/// a call-site rewrite: data keeps rendering, only the presentation upgrades.
 class IslamicGlyph extends StatelessWidget {
-  const IslamicGlyph(this.glyph, {super.key, this.size, this.color});
+  const IslamicGlyph(this.glyph, {super.key, this.size, this.badge});
 
   final String glyph;
   final double? size;
-  final Color? color;
 
-  /// Emoji whose meaning is stable everywhere in the app. Time-of-day, flag and
-  /// generic pictograms are deliberately absent — they have no correct match.
-  static const Map<String, IconData> _icons = {
-    '🕌': FlutterIslamicIcons.mosque,
-    '🕋': FlutterIslamicIcons.kaaba,
-    '📖': FlutterIslamicIcons.quran,
-    '📿': FlutterIslamicIcons.tasbih,
-    '🤲': FlutterIslamicIcons.prayingPerson,
-    '🌙': FlutterIslamicIcons.crescentMoon,
-    '🧭': FlutterIslamicIcons.qibla,
-    '📅': FlutterIslamicIcons.calendar,
-  };
-
-  static IconData? resolve(String glyph) => _icons[glyph];
+  /// Smaller emoji stacked on [glyph] for composite icons, paired with the
+  /// corner it sits in, e.g. `('📍', AlignmentDirectional.topStart)`.
+  final (String, AlignmentGeometry)? badge;
 
   @override
   Widget build(BuildContext context) {
-    final icon = _icons[glyph];
-    if (icon == null) {
-      return Text(
-        glyph,
-        style: TextStyle(fontSize: size, color: color),
-      );
-    }
-    // Unlike Text, Icon ignores the ambient text color and falls back to
-    // ThemeData.iconTheme, so resolve it here to keep previous ink on screen.
-    final effectiveColor =
-        color ??
-        DefaultTextStyle.of(context).style.color ??
-        IconTheme.of(context).color;
-    return Icon(icon, size: size, color: effectiveColor);
+    final main = Text(glyph, style: TextStyle(fontSize: size));
+    if (badge == null) return main;
+    final box = (size ?? 24) * 1.35;
+    return SizedBox(
+      width: box,
+      height: box,
+      child: Stack(
+        children: [
+          Center(child: main),
+          Align(
+            alignment: badge!.$2,
+            child: Text(badge!.$1, style: TextStyle(fontSize: box * 0.42)),
+          ),
+        ],
+      ),
+    );
   }
 }

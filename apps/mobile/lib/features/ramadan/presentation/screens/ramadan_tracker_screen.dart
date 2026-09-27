@@ -283,11 +283,7 @@ class _CountdownItem extends StatelessWidget {
             ),
           )
         else
-          IslamicGlyph(
-            '🌙',
-            size: 34,
-            color: context.typography.displayLarge.color,
-          ),
+          const IslamicGlyph('🌙', size: 34),
         const SizedBox(height: AppSpacing.xs),
         Text(
           clock,

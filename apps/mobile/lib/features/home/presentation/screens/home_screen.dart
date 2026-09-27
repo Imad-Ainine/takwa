@@ -465,7 +465,7 @@ class _RamadanBannerState extends State<_RamadanBanner>
         ),
         child: Row(
           children: [
-            IslamicGlyph('🌙', size: 28, color: s.goldLight),
+            const IslamicGlyph('🌙', size: 28),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
@@ -1427,26 +1427,31 @@ class _FeatureRow extends StatelessWidget {
   final AdaptiveStyle style;
   const _FeatureRow({required this.style});
 
-  static List<(String, String, String)> _features(AppLocalizations l10n) => [
-    ('🕌', l10n.homeFeaturePrayerTimes, '/prayer'),
-    ('📖', l10n.labelQuran, '/quran'),
-    ('🧭', l10n.homeFeatureQibla, '/qibla'),
-    ('📿', l10n.labelAdhkar, '/adhkar'),
-    ('🤲', l10n.homeFeatureDuas, '/duas'),
-    ('✨', l10n.homeFeatureMisbaha, '/misbaha'),
-    ('🕋', l10n.homeFeatureMosques, '/mosques'),
-    ('📊', l10n.homeFeatureStatistics, '/statistics'),
-    ('🏆', l10n.homeFeatureAchievements, '/achievements'),
-    ('🔔', l10n.homeFeatureReminders, '/reminders'),
-    ('💰', l10n.homeFeatureZakat, Routes.zakatCalculator),
-    ('👨‍👩‍👧‍👦', l10n.homeFeatureCircles, Routes.circles),
-    ('🔁', l10n.homeFeatureQada, Routes.qadaTracker),
-    ('💧', l10n.homeFeatureSadaqah, Routes.sadaqahTracker),
-    ('📅', l10n.homeFeatureOccasions, Routes.islamicOccasions),
+  // Muslim Pro renders these tiles as the platform color emoji, stacking a
+  // second smaller emoji on top for composites (mosque+pin, kaaba+compass,
+  // book+beads). Tuple: (emoji, badge overlay, label, route).
+  static List<(String, (String, AlignmentGeometry)?, String, String)> _features(
+    AppLocalizations l10n,
+  ) => [
+    ('🕌', null, l10n.homeFeaturePrayerTimes, '/prayer'),
+    ('📖', null, l10n.labelQuran, '/quran'),
+    ('🕋', ('', AlignmentDirectional.topStart), l10n.homeFeatureQibla, '/qibla'),
+    ('📿', null, l10n.labelAdhkar, '/adhkar'),
+    ('🤲', null, l10n.homeFeatureDuas, '/duas'),
+    ('📖', ('📿', Alignment.topCenter), l10n.homeFeatureMisbaha, '/misbaha'),
+    ('🕌', ('📍', AlignmentDirectional.topStart), l10n.homeFeatureMosques, '/mosques'),
+    ('📊', null, l10n.homeFeatureStatistics, '/statistics'),
+    ('🏆', null, l10n.homeFeatureAchievements, '/achievements'),
+    ('🔔', null, l10n.homeFeatureReminders, '/reminders'),
+    ('💰', null, l10n.homeFeatureZakat, Routes.zakatCalculator),
+    ('👨‍👩‍👧‍👦', null, l10n.homeFeatureCircles, Routes.circles),
+    ('🔁', null, l10n.homeFeatureQada, Routes.qadaTracker),
+    ('💧', null, l10n.homeFeatureSadaqah, Routes.sadaqahTracker),
+    ('📅', null, l10n.homeFeatureOccasions, Routes.islamicOccasions),
     // Only surfaced during the Hijri month of Ramadan — same `hMonth == 9`
     // check statistics_screen.dart uses for its own Ramadan-only UI.
     if (HijriCalendar.now().hMonth == 9)
-      ('🌙', l10n.homeFeatureRamadan, Routes.ramadanTracker),
+      ('🌙', null, l10n.homeFeatureRamadan, Routes.ramadanTracker),
   ];
 
   @override
@@ -1486,7 +1491,7 @@ class _FeatureRow extends StatelessWidget {
 }
 
 class _FeatureItem extends StatelessWidget {
-  final (String, String, String) f;
+  final (String, (String, AlignmentGeometry)?, String, String) f;
   final AdaptiveStyle style;
   const _FeatureItem({required this.f, required this.style});
 
@@ -1496,7 +1501,7 @@ class _FeatureItem extends StatelessWidget {
     return TakwaTappable(
       onTap: () {
         HapticFeedback.selectionClick();
-        Navigator.pushNamed(context, f.$3);
+        Navigator.pushNamed(context, f.$4);
       },
       borderRadius: BorderRadius.circular(AppRadius.xl),
       child: AnimatedContainer(
@@ -1525,19 +1530,12 @@ class _FeatureItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: s.gold.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Text(f.$1, style: const TextStyle(fontSize: 20)),
-            ),
+            IslamicGlyph(f.$1, size: 28, badge: f.$2),
             const SizedBox(height: 6),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Text(
-                f.$2,
+                f.$3,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
