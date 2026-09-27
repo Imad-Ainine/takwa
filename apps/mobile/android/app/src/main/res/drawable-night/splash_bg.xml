@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash backdrop: the app's dark backgroundGradient token
+     (#0D1117 → #111827 → #0D1117, top to bottom). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="270"
+        android:startColor="#FF0D1117"
+        android:centerColor="#FF111827"
+        android:endColor="#FF0D1117" />
+</shape>

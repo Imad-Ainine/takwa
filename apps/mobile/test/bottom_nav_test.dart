@@ -1,7 +1,7 @@
 // Bottom-nav behaviour for the redesigned bar: the three worship tabs render
 // through flutter_islamic_icons (outline when inactive, solid when active),
-// the gold pill slides to the tapped cell, it never escapes the capsule at
-// either end, and it mirrors correctly under Arabic.
+// the active tab is marked by gold tint alone — no cell carries a filled
+// background — and the cells lay out mirrored under Arabic.
 //
 // Harness is copied from test/widget_test.dart on purpose — same provider
 // overrides, same phone-sized surface, same bounded pumps instead of
@@ -93,12 +93,9 @@ void main() {
     }
   }
 
-  Finder pill(Finder scope) => find
-      .descendant(
-        of: scope,
-        matching: find.byType(AnimatedPositionedDirectional),
-      )
-      .first;
+  Color Function(IconData) iconColorIn(WidgetTester tester) {
+    return (icon) => tester.widget<Icon>(find.byIcon(icon)).color!;
+  }
 
   testWidgets('worship tabs use IslamicIcons, solid for the active tab', (
     tester,
@@ -116,90 +113,131 @@ void main() {
     await teardown(tester);
   });
 
-  testWidgets('tapping a tab slides the pill and swaps that pair to solid', (
+  testWidgets('the active tab is tinted gold and swaps that pair to solid', (
     tester,
   ) async {
     await pumpShell(tester);
 
-    final scope = find.byKey(_capsule);
-    final before = tester
-        .widget<AnimatedPositionedDirectional>(pill(scope))
-        .start;
+    final colors =
+        Theme.of(tester.element(find.byKey(_capsule)))
+            .extension<AppColorsExtension>()!;
+    final iconColor = iconColorIn(tester);
+
+    expect(iconColor(FlutterIslamicIcons.solidMosque), colors.goldText);
+    expect(iconColor(FlutterIslamicIcons.crescentMoon), colors.textDim);
 
     await tester.tap(find.byIcon(FlutterIslamicIcons.crescentMoon));
     await settleBar(tester);
 
-    final after = tester
-        .widget<AnimatedPositionedDirectional>(pill(scope))
-        .start;
-    expect(after, greaterThan(before!));
     expect(
-      find.byIcon(FlutterIslamicIcons.solidCrescentMoon),
-      findsOneWidget,
+      iconColor(FlutterIslamicIcons.solidCrescentMoon),
+      colors.goldText,
       reason: 'Qiyam is now the selected tab',
     );
+    expect(iconColor(FlutterIslamicIcons.mosque), colors.textDim);
     expect(
-      find.byIcon(FlutterIslamicIcons.mosque),
-      findsOneWidget,
+      find.byIcon(FlutterIslamicIcons.solidMosque),
+      findsNothing,
       reason: 'Home fell back to its outline glyph',
     );
 
     await teardown(tester);
   });
 
-  testWidgets('pill stays inside the capsule at the first and last cell', (
-    tester,
-  ) async {
+  testWidgets('no tab cell carries a filled background', (tester) async {
     await pumpShell(tester);
 
     final scope = find.byKey(_capsule);
     final capsule = tester.getRect(scope);
 
+    expect(
+      find.descendant(
+        of: scope,
+        matching: find.byType(AnimatedPositionedDirectional),
+      ),
+      findsNothing,
+      reason: 'the sliding selection pill was removed from the bar',
+    );
+    expect(
+      find.descendant(of: scope, matching: find.byType(DecoratedBox)),
+      findsNothing,
+      reason: 'only the bar capsule paints; nothing decorates a single cell',
+    );
+
+    // Selection still has to survive without the fill, so the outline→solid
+    // swap and the gold tint must both move with the tap.
+    final colors =
+        Theme.of(tester.element(find.byKey(_capsule)))
+            .extension<AppColorsExtension>()!;
+    final iconColor = iconColorIn(tester);
+
+    await tester.tap(find.byIcon(FlutterIslamicIcons.crescentMoon));
+    await settleBar(tester);
+    expect(iconColor(FlutterIslamicIcons.solidCrescentMoon), colors.goldText);
+    expect(iconColor(FlutterIslamicIcons.mosque), colors.textDim);
+
+    await tester.tap(find.byIcon(FlutterIslamicIcons.prayer));
+    await settleBar(tester);
+    expect(
+      iconColor(FlutterIslamicIcons.solidPrayer),
+      colors.goldText,
+      reason: 'Muhasaba is now the selected tab',
+    );
+    expect(
+      iconColor(FlutterIslamicIcons.crescentMoon),
+      colors.textDim,
+      reason: 'Qiyam drops back to the inactive tint',
+    );
+
+    // Nothing slides any more, so cell geometry is a static property: every
+    // glyph — including the two end cells — sits inside the capsule. Home is
+    // re-selected first so the expected glyph set is the boot-time one.
+    await tester.tap(find.byIcon(FlutterIslamicIcons.mosque));
+    await settleBar(tester);
     for (final icon in [
+      FlutterIslamicIcons.solidMosque,
       FlutterIslamicIcons.crescentMoon,
       FlutterIslamicIcons.prayer,
       Icons.bar_chart_outlined,
       Icons.settings_outlined,
     ]) {
-      await tester.tap(find.byIcon(icon));
-      await settleBar(tester);
-
-      final rect = tester.getRect(pill(scope));
+      final rect = tester.getRect(find.byIcon(icon));
       expect(
-        rect.left >= capsule.left - 0.5 && rect.right <= capsule.right + 0.5,
+        rect.left >= capsule.left && rect.right <= capsule.right,
         isTrue,
-        reason: 'pill $rect must not escape capsule $capsule',
+        reason: 'icon $rect must not escape capsule $capsule',
       );
-      expect(rect.top >= capsule.top - 0.5, isTrue);
-      expect(rect.bottom <= capsule.bottom + 0.5, isTrue);
+      expect(rect.top >= capsule.top, isTrue);
+      expect(rect.bottom <= capsule.bottom, isTrue);
     }
 
     await teardown(tester);
   });
 
-  testWidgets('Arabic RTL mirrors the pill to the opposite edge', (
+  testWidgets('Arabic RTL puts the first tab at the right edge', (
     tester,
   ) async {
     await pumpShell(tester, locale: const Locale('ar'));
 
-    final scope = find.byKey(_capsule);
-    final capsule = tester.getRect(scope);
-    final homePill = tester.getRect(pill(scope));
+    final capsule = tester.getRect(find.byKey(_capsule));
+    final home = tester.getRect(find.byIcon(FlutterIslamicIcons.solidMosque));
 
-    // Tab 0 is the right-most cell in RTL, so the pill hugs the right edge.
+    // Tab 0 is the right-most cell in RTL.
     expect(
-      homePill.center.dx,
+      home.center.dx,
       greaterThan(capsule.center.dx),
       reason: 'first RTL tab should sit right of centre',
     );
 
     await tester.tap(find.byIcon(FlutterIslamicIcons.crescentMoon));
     await settleBar(tester);
-    final secondPill = tester.getRect(pill(scope));
+    final qiyam = tester.getRect(
+      find.byIcon(FlutterIslamicIcons.solidCrescentMoon),
+    );
     expect(
-      secondPill.center.dx,
-      lessThan(homePill.center.dx),
-      reason: 'RTL travel goes right-to-left',
+      qiyam.center.dx,
+      lessThan(home.center.dx),
+      reason: 'RTL cell order goes right-to-left',
     );
 
     await teardown(tester);

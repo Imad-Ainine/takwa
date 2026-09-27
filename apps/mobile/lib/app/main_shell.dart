@@ -305,7 +305,6 @@ class _BottomNav extends StatelessWidget {
   });
 
   static const double _barHeight = 64;
-  static const double _pillInset = 5;
 
   @override
   Widget build(BuildContext context) {
@@ -334,133 +333,99 @@ class _BottomNav extends StatelessWidget {
               ),
             ],
           ),
-          // The clip also contains the pill's easeOutBack overshoot at the
-          // two end tabs, which would otherwise poke past the capsule.
+          // Still needed with no sliding pill: the pattern background below is
+          // a plain fill, and this clip is what gives it capsule corners.
           child: ClipRRect(
             key: const Key('bottomNavCapsule'),
             borderRadius: radius,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final cellWidth = constraints.maxWidth / tabs.length;
-                return Stack(
-                  children: [
-                    const Positioned.fill(
-                      child: CustomPatternBackground(
-                        pattern: BackgroundPattern.adhkar,
-                      ),
-                    ),
-                    // Directional rather than Positioned: the Row below lays
-                    // out right-to-left under Arabic, so `start` is the only
-                    // offset that tracks the active cell in both directions.
-                    AnimatedPositionedDirectional(
-                      duration: AppMotion.base,
-                      curve: Curves.easeOutBack,
-                      start: cellWidth * currentIndex + _pillInset,
-                      top: _pillInset,
-                      width: cellWidth - (_pillInset * 2),
-                      height: _barHeight - (_pillInset * 2),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [colors.goldLight, colors.gold],
-                          ),
-                          borderRadius: BorderRadius.circular(AppRadius.xl),
-                          boxShadow: [
-                            BoxShadow(
-                              color: colors.gold.withValues(alpha: 0.35),
-                              blurRadius: 16,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: _barHeight,
-                      child: Row(
-                        children: List.generate(tabs.length, (i) {
-                          final tab = tabs[i];
-                          final isActive = currentIndex == i;
-                          // onGold is 7.6:1 on gold and higher on goldLight,
-                          // so the pill carries the contrast rather than the
-                          // old gold-on-card tint.
-                          final foreground = isActive
-                              ? colors.onGold
-                              : colors.textDim;
-                          return Expanded(
-                            // One coherent "button, label, selected" stop for
-                            // a screen reader instead of the pill, icon and
-                            // label each being a separate stop.
-                            child: Semantics(
-                              label: tab.label,
-                              button: true,
-                              selected: isActive,
-                              onTap: () => onTap(i),
-                              excludeSemantics: true,
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () => onTap(i),
-                                child: AnimatedBuilder(
-                                  animation: tabAnims[i],
-                                  builder: (_, _) {
-                                    final t = tabAnims[i].value;
-                                    return Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Transform.scale(
-                                          scale: isActive
-                                              ? 1.0 + 0.12 * t
-                                              : 1.0,
-                                          child: Icon(
-                                            isActive
-                                                ? tab.activeIcon
-                                                : tab.icon,
-                                            size: 22,
+            child: Stack(
+              children: [
+                const Positioned.fill(
+                  child: CustomPatternBackground(
+                    pattern: BackgroundPattern.adhkar,
+                  ),
+                ),
+                SizedBox(
+                  height: _barHeight,
+                  child: Row(
+                    children: List.generate(tabs.length, (i) {
+                      final tab = tabs[i];
+                      final isActive = currentIndex == i;
+                      // goldText is the token built for gold sitting on a
+                      // surface rather than a surface sitting on gold: 7.18:1
+                      // on the dark bar, 7.28:1 on the light one. `gold`
+                      // itself only reaches 2.24:1 in light mode, so it stays
+                      // an accent fill and never a foreground.
+                      final foreground = isActive
+                          ? colors.goldText
+                          : colors.textDim;
+                      return Expanded(
+                        // One coherent "button, label, selected" stop for
+                        // a screen reader instead of the icon and label each
+                        // being a separate stop.
+                        child: Semantics(
+                          label: tab.label,
+                          button: true,
+                          selected: isActive,
+                          onTap: () => onTap(i),
+                          excludeSemantics: true,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => onTap(i),
+                            child: AnimatedBuilder(
+                              animation: tabAnims[i],
+                              builder: (_, _) {
+                                final t = tabAnims[i].value;
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Transform.scale(
+                                      scale: isActive ? 1.0 + 0.12 * t : 1.0,
+                                      child: Icon(
+                                        isActive
+                                            ? tab.activeIcon
+                                            : tab.icon,
+                                        size: 22,
+                                        color: foreground,
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.xxs),
+                                    AnimatedDefaultTextStyle(
+                                      duration: AppMotion.fast,
+                                      style: context.typography.caption
+                                          .copyWith(
+                                            // 11 is Material's smallest
+                                            // label size / the iOS HIG
+                                            // floor — this used to be
+                                            // 9.5, below both platforms'
+                                            // minimums.
+                                            fontSize: 11,
                                             color: foreground,
+                                            fontWeight: isActive
+                                                ? FontWeight.w700
+                                                : FontWeight.w500,
+                                            letterSpacing: isActive
+                                                ? 0.2
+                                                : 0,
                                           ),
-                                        ),
-                                        const SizedBox(height: AppSpacing.xxs),
-                                        AnimatedDefaultTextStyle(
-                                          duration: AppMotion.fast,
-                                          style: context.typography.caption
-                                              .copyWith(
-                                                // 11 is Material's smallest
-                                                // label size / the iOS HIG
-                                                // floor — this used to be
-                                                // 9.5, below both platforms'
-                                                // minimums.
-                                                fontSize: 11,
-                                                color: foreground,
-                                                fontWeight: isActive
-                                                    ? FontWeight.w700
-                                                    : FontWeight.w500,
-                                                letterSpacing: isActive
-                                                    ? 0.2
-                                                    : 0,
-                                              ),
-                                          child: Text(
-                                            tab.label,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ),
-                              ),
+                                      child: Text(
+                                        tab.label,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
-                          );
-                        }),
-                      ),
-                    ),
-                  ],
-                );
-              },
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

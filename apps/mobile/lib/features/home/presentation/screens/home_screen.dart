@@ -221,7 +221,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           prayerState: prayerState,
                         ),
                       ),
-                    if (prayerState.next != null) const SizedBox(height: 14),
+                    if (prayerState.next != null) const SizedBox(height: 22),
 
                     // ③ Prayer Times Mosque Section
                     if (prayerState.prayers.isNotEmpty)
@@ -234,7 +234,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                       ),
                     if (prayerState.prayers.isNotEmpty)
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 22),
 
                     // ④ Taqwa Ring
                     _anim(
@@ -252,7 +252,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 22),
 
                     // ⑤ Quick Ibadah Grid
                     _anim(
@@ -267,22 +267,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             _QuickIbadahGridMerged(record: r, style: style),
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 22),
 
                     // ⑥ Features Row
                     _anim(5, _FeatureRow(style: style)),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 22),
 
                     // ⑦ Books Section
                     _anim(6, _BooksSection(style: style)),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 22),
 
                     // ⑧ Verse Card
                     _anim(
                       7,
                       _VerseCardMerged(style: style, isRamadan: isRamadan),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 22),
 
                     // ⑨ Ramadan Iftar
                     if (isRamadan)
@@ -1725,7 +1725,7 @@ class _RamadanIftarState extends ConsumerState<_RamadanIftar> {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 22),
       ],
     );
   }
@@ -1876,7 +1876,7 @@ class _BooksSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsetsDirectional.only(start: 8, bottom: 12),
+          padding: const EdgeInsetsDirectional.only(bottom: 12),
           child: Row(
             children: [
               Text(
@@ -1904,14 +1904,14 @@ class _BooksSection extends ConsumerWidget {
           ),
         ),
         SizedBox(
-          height: 200,
+          height: 216,
           child: booksAsync.when(
             loading: () => ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
               itemCount: 3,
               separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
-              itemBuilder: (_, __) => _Skeleton(style: s, height: 190),
+              itemBuilder: (_, __) => _Skeleton(style: s, height: 206),
             ),
             error: (_, __) => TakwaErrorState(
               compact: true,
@@ -1947,7 +1947,7 @@ class _BookCard extends StatelessWidget {
           Navigator.pushNamed(context, '/books/chapter', arguments: book),
       borderRadius: BorderRadius.circular(AppRadius.xl),
       child: Container(
-        width: 130,
+        width: 138,
         decoration: BoxDecoration(
           color: s.card,
           borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -2029,7 +2029,7 @@ class _BookCard extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
-                  vertical: 7,
+                  vertical: 10,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -2043,7 +2043,7 @@ class _BookCard extends StatelessWidget {
                         weight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       book.authorAr,
                       maxLines: 1,

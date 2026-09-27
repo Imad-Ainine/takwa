@@ -94,6 +94,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       backgroundColor: context.colors.background,
       body: Stack(
         children: [
+          // ── Themed backdrop (matches the native splash gradient) ──
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: context.colors.backgroundGradient,
+              ),
+            ),
+          ),
+
           // ── Geometric Background (Shared) ──
           const CustomPatternBackground(pattern: BackgroundPattern.adhkar),
 
