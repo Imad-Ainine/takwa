@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:takwa/core/providers/adhkar_providers.dart';
+import '../data/dhikr_edge_voice.dart';
 
 class MisbahaState {
   final int count;
@@ -42,6 +45,14 @@ class MisbahaState {
 class MisbahaNotifier extends Notifier<MisbahaState> {
   late stt.SpeechToText _speech;
   late FlutterTts _tts;
+  final DhikrEdgeVoice _voice = DhikrEdgeVoice();
+  VoidCallback? _speakingListener;
+
+  /// Riverpod's Notifier has no mounted flag of its own, and both the voice
+  /// and the TTS engine can report back after this provider is gone —
+  /// writing `state` then throws.
+  bool _disposed = false;
+
   String _lastRecognizedWords = '';
   DateTime _lastIncrementTime = DateTime.fromMillisecondsSinceEpoch(0);
 
@@ -51,6 +62,16 @@ class MisbahaNotifier extends Notifier<MisbahaState> {
     _tts = FlutterTts();
     _initSpeech();
     _initTts();
+    _speakingListener = () {
+      if (!_disposed) state = state.copyWith(isSpeaking: _voice.speaking.value);
+    };
+    _voice.speaking.addListener(_speakingListener!);
+    ref.onDispose(() {
+      _disposed = true;
+      _voice.speaking.removeListener(_speakingListener!);
+      unawaited(_voice.dispose());
+      unawaited(_tts.stop());
+    });
     return MisbahaState();
   }
 
@@ -61,23 +82,29 @@ class MisbahaNotifier extends Notifier<MisbahaState> {
     await _tts.setVolume(1.0);
     await _tts.awaitSpeakCompletion(true);
 
+    // Completion can land after the provider is gone (the handlers outlive
+    // `dispose` on the platform side), and writing state then throws.
     _tts.setCompletionHandler(() {
-      state = state.copyWith(isSpeaking: false);
+      if (!_disposed) state = state.copyWith(isSpeaking: false);
     });
 
     _tts.setCancelHandler(() {
-      state = state.copyWith(isSpeaking: false);
+      if (!_disposed) state = state.copyWith(isSpeaking: false);
     });
   }
 
-  void selectDhikr(DhikrItem item) {
-    // Also stop speaking if currently speaking
-    if (state.isSpeaking) _tts.stop();
+  Future<void> selectDhikr(DhikrItem item) async {
+    await _stopSpeaking();
     state = state.copyWith(selectedDhikr: item, count: 0, isSpeaking: false);
+    // Fetched here rather than on the sound button's tap, so the recitation
+    // starts in the frame it was asked for. A tap that beats the network is
+    // still covered — play() waits on this — and only a failed synthesis falls
+    // back to the platform voice.
+    await _voice.prime(item.arabic);
   }
 
-  void clearDhikr() {
-    if (state.isSpeaking) _tts.stop();
+  Future<void> clearDhikr() async {
+    await _stopSpeaking();
     state = state.copyWith(
       clearSelectedDhikr: true,
       count: 0,
@@ -86,15 +113,24 @@ class MisbahaNotifier extends Notifier<MisbahaState> {
   }
 
   Future<void> speakDhikr() async {
-    if (state.selectedDhikr == null) return;
+    final dhikr = state.selectedDhikr;
+    if (dhikr == null) return;
 
     if (state.isSpeaking) {
-      await _tts.stop();
+      await _stopSpeaking();
       state = state.copyWith(isSpeaking: false);
-    } else {
-      state = state.copyWith(isSpeaking: true);
-      await _tts.speak(state.selectedDhikr!.arabic);
+      return;
     }
+    state = state.copyWith(isSpeaking: true);
+    // Completes when the clip has run out; the voice's own listener keeps
+    // isSpeaking in step either way.
+    if (await _voice.play()) return;
+    await _tts.speak(dhikr.arabic);
+  }
+
+  Future<void> _stopSpeaking() async {
+    await _voice.stop();
+    await _tts.stop();
   }
 
   Future<void> _initSpeech() async {

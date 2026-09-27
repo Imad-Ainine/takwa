@@ -288,6 +288,12 @@ class QuranReaderBottomBar extends StatelessWidget {
     final textDim = isDark ? Colors.white54 : Colors.black45;
     final border = isDark ? Colors.white10 : Colors.black12;
 
+    // Playback state is app-wide while this row belongs to one surah, so the
+    // transport controls only light up for the surah that is loaded.
+    final isThisSurahSession = audio.sessionSurah == surahNum;
+    final isThisSurahPlaying = isThisSurahSession && audio.isPlaying;
+    final isThisSurahLoading = isThisSurahSession && audio.isLoading;
+
     const khatmaPages = 12;
     final readCount = pagesRead.clamp(0, khatmaPages);
 
@@ -505,6 +511,11 @@ class QuranReaderBottomBar extends StatelessWidget {
                     const Spacer(),
 
                     // Play/pause button
+                    //
+                    // Reflects the session for *this* surah, not audio in
+                    // general: while another surah is reciting, this button
+                    // still means "play what I'm reading", and tapping it
+                    // switches the session over.
                     TakwaTappable(
                       onTap: onTogglePlay,
                       // Sits in a fixed-height audio toolbar row — see
@@ -517,7 +528,7 @@ class QuranReaderBottomBar extends StatelessWidget {
                         height: 38,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: audio.isLoading
+                          color: isThisSurahLoading
                               ? Colors.white24
                               : kReaderGreenHdr,
                           boxShadow: [
@@ -527,13 +538,13 @@ class QuranReaderBottomBar extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: audio.isLoading
+                        child: isThisSurahLoading
                             ? const Padding(
                                 padding: EdgeInsets.all(10),
                                 child: TakwaLoadingIndicator(size: 24),
                               )
                             : Icon(
-                                audio.isPlaying
+                                isThisSurahPlaying
                                     ? Icons.pause_rounded
                                     : Icons.play_arrow_rounded,
                                 color: Colors.white,
@@ -549,7 +560,10 @@ class QuranReaderBottomBar extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          localizedSurahName(context, surahNum),
+                          localizedSurahName(
+                            context,
+                            audio.hasSession ? audio.surah : surahNum,
+                          ),
                           style: TextStyle(
                             fontFamily: 'Amiri',
                             fontSize: 13,
@@ -557,8 +571,14 @@ class QuranReaderBottomBar extends StatelessWidget {
                             color: isDark ? Colors.white70 : Colors.black87,
                           ),
                         ),
+                        // Blank while idle — naming an ayah here used to
+                        // claim Al-Fatihah 1:1 for every surah, since that was
+                        // the state's "nothing loaded" default.
                         Text(
-                          '${localizedSurahName(context, audio.surah)}: ${localizedNumeral(context, audio.ayah)}',
+                          audio.hasSession
+                              ? '${localizedSurahName(context, audio.surah)}: '
+                                    '${localizedNumeral(context, audio.ayah)}'
+                              : '',
                           style: TextStyle(
                             fontFamily: 'NotoNaskhArabic',
                             fontSize: 11,
@@ -593,27 +613,28 @@ class QuranReaderBottomBar extends StatelessWidget {
                     ),
                     const SizedBox(width: AppSpacing.sm),
 
-                    // Stop
-                    TakwaTappable(
-                      onTap: onStop,
-                      minTapSize: null,
-                      borderRadius: BorderRadius.circular(AppRadius.xs),
-                      child: Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(AppRadius.xs),
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.08)
-                              : Colors.black.withValues(alpha: 0.05),
-                        ),
-                        child: Icon(
-                          Icons.stop_rounded,
-                          color: textDim,
-                          size: 16,
+                    // Stop — only meaningful once something is loaded.
+                    if (audio.hasSession)
+                      TakwaTappable(
+                        onTap: onStop,
+                        minTapSize: null,
+                        borderRadius: BorderRadius.circular(AppRadius.xs),
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(AppRadius.xs),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : Colors.black.withValues(alpha: 0.05),
+                          ),
+                          child: Icon(
+                            Icons.stop_rounded,
+                            color: textDim,
+                            size: 16,
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),

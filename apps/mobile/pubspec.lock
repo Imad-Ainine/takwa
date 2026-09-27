@@ -298,7 +298,7 @@ packages:
     source: hosted
     version: "0.3.5+5"
   crypto:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: crypto
       sha256: c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf
@@ -518,6 +518,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.1"
+  flutter_edge_tts:
+    dependency: "direct main"
+    description:
+      name: flutter_edge_tts
+      sha256: "1223b652f09d055e26d840102943e3c6398500b0874ac6a8ad61ea6025cfa47c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   flutter_foreground_task:
     dependency: "direct main"
     description:
@@ -1328,10 +1336,11 @@ packages:
   quran_library:
     dependency: "direct main"
     description:
-      name: quran_library
-      sha256: "982801ca1798f901f160efb6e0b996129efe3fabc469c58aeef6cf1a098a7c04"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "v5.0.1-hydro.1"
+      resolved-ref: "7b5fa761530da47cb174cb33bc0dd261d1bfcb39"
+      url: "https://github.com/Imad-Ainine/quran_library.git"
+    source: git
     version: "5.0.1"
   realtime_client:
     dependency: transitive

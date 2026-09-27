@@ -115,7 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context); // required by AutomaticKeepAliveClientMixin
-    final isRamadan = ref.watch(ramadanModeProvider).value ?? false;
+    final isRamadan = ref.watch(ramadanModeProvider).valueOrNull ?? false;
     final todayAsync = ref.watch(todayRecordProvider);
     final streakAsync = ref.watch(currentStreakProvider);
     final prayerState = ref.watch(prayerScreenProvider);
@@ -664,9 +664,7 @@ class _NextPrayerCardMergedState extends State<_NextPrayerCardMerged>
                       countdown,
                       style: s.naskh(
                         11,
-                        color: st.isIqamaPhase
-                            ? Colors.redAccent
-                            : s.goldLight,
+                        color: st.isIqamaPhase ? Colors.redAccent : s.goldLight,
                         weight: FontWeight.w600,
                       ),
                     );
@@ -1435,11 +1433,21 @@ class _FeatureRow extends StatelessWidget {
   ) => [
     ('🕌', null, l10n.homeFeaturePrayerTimes, '/prayer'),
     ('📖', null, l10n.labelQuran, '/quran'),
-    ('🕋', ('', AlignmentDirectional.topStart), l10n.homeFeatureQibla, '/qibla'),
+    (
+      '🕋',
+      ('', AlignmentDirectional.topStart),
+      l10n.homeFeatureQibla,
+      '/qibla',
+    ),
     ('📿', null, l10n.labelAdhkar, '/adhkar'),
     ('🤲', null, l10n.homeFeatureDuas, '/duas'),
     ('📖', ('📿', Alignment.topCenter), l10n.homeFeatureMisbaha, '/misbaha'),
-    ('🕌', ('📍', AlignmentDirectional.topStart), l10n.homeFeatureMosques, '/mosques'),
+    (
+      '🕌',
+      ('📍', AlignmentDirectional.topStart),
+      l10n.homeFeatureMosques,
+      '/mosques',
+    ),
     ('📊', null, l10n.homeFeatureStatistics, '/statistics'),
     ('🏆', null, l10n.homeFeatureAchievements, '/achievements'),
     ('🔔', null, l10n.homeFeatureReminders, '/reminders'),
@@ -1903,6 +1911,7 @@ class _BooksSection extends ConsumerWidget {
             ],
           ),
         ),
+        const SizedBox(height: AppSpacing.md),
         SizedBox(
           height: 216,
           child: booksAsync.when(

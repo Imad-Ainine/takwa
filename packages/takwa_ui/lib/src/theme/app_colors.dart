@@ -428,7 +428,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     backgroundGradient: LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Color(0xFF0D1117), Color(0xFF111827), Color(0xFF0D1117)],
+      colors: [Color(0xFF04011E), Color(0xFF111827)],
     ),
     cardGradient: LinearGradient(
       begin: Alignment.topLeft,

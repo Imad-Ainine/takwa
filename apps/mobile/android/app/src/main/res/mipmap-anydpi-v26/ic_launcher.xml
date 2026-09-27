@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Hand-maintained: flutter_launcher_icons only writes this file when
+     adaptive_icon_background/foreground are set, and Takwa's launcher uses a
+     single composed master image. Safe-zone scaling is baked into the
+     ic_launcher_foreground/monochrome PNGs, so no <inset> wrapper here. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
   <background android:drawable="@drawable/ic_launcher_background"/>
-  <foreground>
-      <inset
-          android:drawable="@drawable/ic_launcher_foreground"
-          android:inset="16%" />
-  </foreground>
+  <foreground android:drawable="@drawable/ic_launcher_foreground"/>
+  <monochrome android:drawable="@drawable/ic_launcher_monochrome"/>
 </adaptive-icon>

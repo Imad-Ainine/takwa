@@ -323,7 +323,11 @@ class _TakwaAppState extends ConsumerState<TakwaApp>
 
   @override
   Widget build(BuildContext context) {
-    final isRamadan = ref.watch(ramadanModeProvider).value ?? false;
+    // valueOrNull, not .value: on an AsyncError Riverpod's `.value` getter
+    // *rethrows*, and this is the root widget — a failed settings read used to
+    // replace the whole app with release mode's gray error box, with no way
+    // out. Falling back to the default theme keeps the app usable.
+    final isRamadan = ref.watch(ramadanModeProvider).valueOrNull ?? false;
     // Driven by the language switcher in Settings (persisted via
     // localeProvider); defaults to Arabic, matching today's behavior. Also
     // picks the theme's font — Amiri/NotoNaskhArabic for Arabic (unchanged),
@@ -343,7 +347,7 @@ class _TakwaAppState extends ConsumerState<TakwaApp>
       );
     });
     ref.listen(localeProvider, (_, nextLocale) {
-      final prayers = ref.read(prayerTimesProvider).value;
+      final prayers = ref.read(prayerTimesProvider).valueOrNull;
       if (prayers != null) {
         PrayerHomeWidgetService.update(prayers: prayers, locale: nextLocale);
       }

@@ -259,12 +259,18 @@ class _FontSizeSheetState extends State<QuranReaderFontSizeSheet> {
 // ─── Surah Picker Sheet ──────────────────────────────────────
 class QuranSurahPickerSheet extends StatefulWidget {
   final int currentSurah;
+
+  /// Surah the audio session is currently loaded with (0 when nothing is).
+  final int playingSurah;
   final ValueChanged<SurahMeta> onSelectSurah;
+  final ValueChanged<SurahMeta> onPlaySurah;
 
   const QuranSurahPickerSheet({
     super.key,
     required this.currentSurah,
+    required this.playingSurah,
     required this.onSelectSurah,
+    required this.onPlaySurah,
   });
 
   @override
@@ -420,26 +426,48 @@ class _SurahPickerSheetState extends State<QuranSurahPickerSheet> {
                       color: Colors.white54,
                     ),
                   ),
-                  trailing: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isCurrent ? kReaderGold : Colors.white24,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${surah.number}',
-                        style: TextStyle(
-                          fontFamily: 'Amiri',
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: isCurrent ? kReaderGold : Colors.white70,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Play this surah from the index — the row itself jumps
+                      // the reader, so without this the only way to start
+                      // listening is to navigate first.
+                      IconButton(
+                        onPressed: () => widget.onPlaySurah(surah),
+                        tooltip: surah.number == widget.playingSurah
+                            ? 'إيقاف مؤقت'
+                            : 'استماع',
+                        icon: Icon(
+                          surah.number == widget.playingSurah
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          color: surah.number == widget.playingSurah
+                              ? kReaderGold
+                              : Colors.white54,
                         ),
                       ),
-                    ),
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isCurrent ? kReaderGold : Colors.white24,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${surah.number}',
+                            style: TextStyle(
+                              fontFamily: 'Amiri',
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: isCurrent ? kReaderGold : Colors.white70,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },

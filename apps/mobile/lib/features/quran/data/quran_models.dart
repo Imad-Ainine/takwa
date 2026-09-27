@@ -118,28 +118,43 @@ const kDefaultReciters = <QuranReciter>[
 // ─── Audio State ─────────────────────────────────────────────
 class QuranAudioState {
   final bool isPlaying, isLoading;
-  // Set when the last playAyah() attempt failed (e.g. no network) so the UI
+  // Set when the last play attempt failed (e.g. no network) so the UI
   // can surface it instead of looking like a silent no-op; cleared as soon
   // as a new play attempt starts.
   final bool hasError;
+
+  /// Where the audio is: [surah]/[ayah] are 0 when nothing is loaded, so the
+  /// UI can tell "no session" apart from "playing Al-Fatihah".
   final int surah, ayah;
+
+  /// The surah loaded as a whole-surah sequence (0 for a single-ayah play or
+  /// no session). [surah] follows the ayah currently being recited, which
+  /// only reaches the next surah once its first ayah starts — this is what
+  /// lets a play button know whether it controls the session in progress.
+  final int sessionSurah;
+
   final double speed;
   final String reciterId;
   const QuranAudioState({
     this.isPlaying = false,
     this.isLoading = false,
     this.hasError = false,
-    this.surah = 1,
-    this.ayah = 1,
+    this.surah = 0,
+    this.ayah = 0,
+    this.sessionSurah = 0,
     this.speed = 1.0,
     this.reciterId = 'ar.alafasy',
   });
+
+  bool get hasSession => surah != 0 || sessionSurah != 0;
+
   QuranAudioState copyWith({
     bool? isPlaying,
     bool? isLoading,
     bool? hasError,
     int? surah,
     int? ayah,
+    int? sessionSurah,
     double? speed,
     String? reciterId,
   }) => QuranAudioState(
@@ -148,6 +163,7 @@ class QuranAudioState {
     hasError: hasError ?? this.hasError,
     surah: surah ?? this.surah,
     ayah: ayah ?? this.ayah,
+    sessionSurah: sessionSurah ?? this.sessionSurah,
     speed: speed ?? this.speed,
     reciterId: reciterId ?? this.reciterId,
   );

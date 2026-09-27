@@ -446,10 +446,14 @@ class _QuranReaderScreenState extends ConsumerState<QuranReaderScreen>
       isScrollControlled: true,
       builder: (_) => QuranSurahPickerSheet(
         currentSurah: _surahForPage(_currentPage),
+        playingSurah: ref.read(quranAudioProvider).sessionSurah,
         onSelectSurah: (surah) {
           Navigator.pop(context);
           _jumpToSurah(surah.number);
         },
+        onPlaySurah: (surah) => ref
+            .read(quranAudioProvider.notifier)
+            .togglePlay(surah.number),
       ),
     );
   }
@@ -932,13 +936,13 @@ class _QuranReaderScreenState extends ConsumerState<QuranReaderScreen>
                     isDark: isDark,
                     currentTheme: theme,
                     isBookmarked: isBookmarked,
-                    isAudioPlaying: audio.isPlaying,
+                    isAudioPlaying: audio.sessionSurah == surahNum,
                     onBack: () => Navigator.pop(context),
                     onThemeToggle: _toggleTheme,
                     onFontSize: _showFontSizeDialog,
                     onAudio: () => ref
                         .read(quranAudioProvider.notifier)
-                        .togglePlay(context, surahNum, 1),
+                        .togglePlay(surahNum),
                     onBookmark: _toggleBookmark,
                     onGuide: _showReadingGuide,
                     onSettings: _showSettings,
@@ -967,7 +971,7 @@ class _QuranReaderScreenState extends ConsumerState<QuranReaderScreen>
                     audio: audio,
                     onTogglePlay: () => ref
                         .read(quranAudioProvider.notifier)
-                        .togglePlay(context, surahNum, 1),
+                        .togglePlay(surahNum),
                     onStop: () => ref.read(quranAudioProvider.notifier).stop(),
                     onSpeedTap: () {
                       const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];

@@ -6,10 +6,10 @@ flutter_launcher_icons:
   min_sdk_android: 21
   remove_alpha_ios: true
 
-  # Modern Android adaptive icon: gradient background layer + safe-zoned foreground
-  adaptive_icon_background: "assets/images/launch_icons/takwa_icon_bg.png"
-  adaptive_icon_foreground: "assets/images/takwa_transparent_bg.png"
-
+  # No adaptive_icon_* keys here on purpose: the art (repo-root vibes.png) is one
+  # composed image, so assets/images/launch_icons/_gen_from_vibes.ps1 writes the
+  # adaptive layers + mipmap-anydpi-v26/ic_launcher.xml itself. The plugin skips
+  # those files entirely while the keys are absent, so they survive a regeneration.
   web:
     generate: false
   windows:

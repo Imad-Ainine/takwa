@@ -21,6 +21,7 @@ import '../features/auth/presentation/pages/auth_choice_screen.dart';
 import '../core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/islamic_glyph.dart';
 import '../core/notifications/overlay_background_service.dart';
+import '../features/quran/presentation/widgets/quran_now_playing_bar.dart';
 
 // ─────────────────────────────────────────
 //  CURRENT TAB PROVIDER
@@ -277,11 +278,19 @@ class _MainShellState extends ConsumerState<MainShell>
             }
           },
         ),
-        bottomNavigationBar: _BottomNav(
-          currentIndex: currentIdx,
-          tabs: _getTabs(AppLocalizations.of(context)!),
-          onTap: _switchTab,
-          tabAnims: _tabAnims,
+        bottomNavigationBar: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Recitation keeps running while the reader is closed, so its
+            // transport lives here rather than only in the reader's audio row.
+            const QuranNowPlayingBar(),
+            _BottomNav(
+              currentIndex: currentIdx,
+              tabs: _getTabs(AppLocalizations.of(context)!),
+              onTap: _switchTab,
+              tabAnims: _tabAnims,
+            ),
+          ],
         ),
       ),
     );

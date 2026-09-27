@@ -97,7 +97,7 @@ class QuranStateNotifier extends StateNotifier<QuranReadingState> {
 // AudioCtrl.playAyah(..., playSingleAyah: false) is quran_library's own
 // API for that, but on native platforms (not web) it *requires* the
 // surah's ayahs be downloaded first through its own download-management
-// sheet — and confirmed by reading quran_library 4.3.0's own source
+// sheet — and confirmed by reading quran_library 5.0.1's own source
 // (_playAyahsFile in src/audio/controller/extensions/ayah_ctrl_extension.
 // dart), the check for whether that download actually finished re-reads a
 // variable it captured *before* the download ran and never updates
@@ -129,6 +129,10 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       state = state.copyWith(isLoading: preparing);
     });
     _currentAyahSub = audioState.currentAyahUniqueNumber.listen((uq) {
+      // Whole-surah playback reports its own (surah, ayah) per sequence
+      // index, which is exact — so only the single-ayah path, which leaves
+      // the player entirely in AudioCtrl's hands, is tracked through here.
+      if (_sessionSurah != null) return;
       final (surah, ayah) = _surahAyahFromUQ(uq);
       state = state.copyWith(surah: surah, ayah: ayah);
     });
@@ -137,17 +141,39 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   StreamSubscription? _isPlayingSub, _isPreparingSub, _currentAyahSub;
   StreamSubscription? _sequenceSub, _completionSub;
 
+  /// The surah currently loaded into the shared player as a sequence, or null
+  /// when the player holds a single ayah or nothing. AudioCtrl's
+  /// `currentAyahUniqueNumber` can't answer this: while a newly requested
+  /// surah is still loading its first file it keeps pointing at whichever
+  /// surah played before, which is what made a Play tap on Surah At-Tawbah
+  /// resume At-Tawbah's neighbour instead.
+  int? _sessionSurah;
+
+  /// First ayah of the loaded sequence, so a finished surah replays from the
+  /// place it was started rather than from wherever it happened to stop.
+  int _sessionStartAyah = 1;
+
+  /// True once the loaded sequence ran to its end. just_audio's play() does
+  /// not rewind a completed player (see its docs), so without this the second
+  /// tap on a finished surah resumed silence.
+  bool _sessionCompleted = false;
+
   Future<void> setReciter(String reciterId) async {
     state = state.copyWith(reciterId: reciterId);
     final idx = QuranRecitersSetup.indexOf(reciterId);
     if (idx == -1) return;
     final audioState = ql.AudioCtrl.instance.state;
     audioState.ayahReaderIndex.value = idx;
-    // If a surah is already playing, restart it (from the same ayah) with
-    // the newly selected reciter instead of waiting for the next tap.
-    if (audioState.isPlaying.value) {
-      await _playSurahStreaming(state.surah, state.ayah);
-    }
+    // Reload the surah that's mid-session with the new reciter instead of
+    // waiting for the next tap. Keeps the ayah it was on, and keeps a session
+    // that is paused from suddenly starting up.
+    final surahNum = _sessionSurah;
+    if (surahNum == null) return;
+    await _streamSurah(
+      surahNum,
+      state.ayah != 0 ? state.ayah : _sessionStartAyah,
+      autoplay: audioState.isPlaying.value,
+    );
   }
 
   /// Ayah for (surahNum, ayahNum), or null if not found.
@@ -167,7 +193,9 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
         if (a.ayahUQNumber == uq) return (i + 1, a.ayahNumber);
       }
     }
-    return (1, 1);
+    // 0/0, not 1/1: "no ayah is loaded" has to be tellable apart from
+    // "Al-Fatihah is loaded", or every idle player claims to be Fatihah.
+    return (0, 0);
   }
 
   /// Plays a single ayah (the ayah-options sheet's "Listen") through
@@ -177,43 +205,69 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   Future<void> playAyah(BuildContext context, int surahNum, int ayahNum) async {
     final ayah = _ayah(surahNum, ayahNum);
     if (ayah == null) return;
-    await ql.AudioCtrl.instance.playAyah(
-      context,
-      ayah.ayahUQNumber,
-      playSingleAyah: true,
+    await _endSession();
+    state = state.copyWith(
+      surah: surahNum,
+      ayah: ayahNum,
+      sessionSurah: 0,
+      hasError: false,
     );
-  }
-
-  /// Toggles whole-surah playback starting at [ayahNum] (the reader's top
-  /// and bottom bar play buttons, which always pass ayah 1 — "play this
-  /// surah"): pauses if that surah is already playing, resumes in place if
-  /// it's already loaded but paused, otherwise starts it fresh.
-  Future<void> togglePlay(
-    BuildContext context,
-    int surahNum,
-    int ayahNum,
-  ) async {
-    final audioState = ql.AudioCtrl.instance.state;
-    final surahs = ql.QuranLibrary.quranCtrl.surahs;
-    if (surahNum < 1 || surahNum > surahs.length) return;
-    final isThisSurahLoaded = surahs[surahNum - 1].ayahs.any(
-      (a) => a.ayahUQNumber == audioState.currentAyahUniqueNumber.value,
-    );
-    if (isThisSurahLoaded && audioState.audioPlayer.playing) {
-      await audioState.audioPlayer.pause();
-      audioState.isPlaying.value = false;
-    } else if (isThisSurahLoaded) {
-      audioState.isPlaying.value = true;
-      await audioState.audioPlayer.play();
-    } else {
-      await _playSurahStreaming(surahNum, ayahNum);
+    try {
+      // The ayah sheet pops itself before calling this, so the context can
+      // already be gone by the time the download sheet needs it.
+      if (!context.mounted) return;
+      await ql.AudioCtrl.instance.playAyah(
+        context,
+        ayah.ayahUQNumber,
+        playSingleAyah: true,
+      );
+    } catch (e) {
+      // Leaves the attempted ayah named in the UI; see _streamSurah's catch.
+      state = state.copyWith(hasError: true);
+      developer.log(
+        'Failed to play ayah $surahNum:$ayahNum: $e',
+        name: 'QuranAudio',
+      );
     }
   }
 
+  /// Toggles whole-surah playback starting at [startAyah] (the reader's top
+  /// and bottom bar play buttons, and every surah-list row, pass ayah 1 —
+  /// "play this surah"): pauses if that surah is already playing, resumes in
+  /// place if it's loaded but paused, replays it from [startAyah] if it has
+  /// run to the end, and otherwise loads it — replacing whatever surah the
+  /// player was holding.
+  Future<void> togglePlay(int surahNum, {int startAyah = 1}) async {
+    final audioState = ql.AudioCtrl.instance.state;
+    final player = audioState.audioPlayer;
+    if (_sessionSurah == surahNum) {
+      if (player.playing) {
+        await player.pause();
+        audioState.isPlaying.value = false;
+        return;
+      }
+      if (_sessionCompleted) {
+        await _streamSurah(surahNum, _sessionStartAyah);
+        return;
+      }
+      state = state.copyWith(hasError: false);
+      audioState.isPlaying.value = true;
+      await player.play();
+      return;
+    }
+    await _streamSurah(surahNum, startAyah);
+  }
+
   /// Streams [surahNum] ayah-by-ayah starting at [startAyahNum], straight
-  /// from the network (no local download step — see the class doc comment
-  /// on why the library's own multi-ayah path can't be used for this).
-  Future<void> _playSurahStreaming(int surahNum, int startAyahNum) async {
+  /// from the network (no local download step — see the comment on
+  /// [quranAudioProvider] for why the library's own multi-ayah path can't be
+  /// used for this). [autoplay] false loads the sequence and leaves it
+  /// paused, so switching reciters mid-pause doesn't start audio.
+  Future<void> _streamSurah(
+    int surahNum,
+    int startAyahNum, {
+    bool autoplay = true,
+  }) async {
     final surahs = ql.QuranLibrary.quranCtrl.surahs;
     if (surahNum < 1 || surahNum > surahs.length) return;
     final ayahs = surahs[surahNum - 1].ayahs;
@@ -222,6 +276,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     final playAyahs = ayahs.sublist(foundIndex >= 0 ? foundIndex : 0);
 
     final audioState = ql.AudioCtrl.instance.state;
+    final player = audioState.audioPlayer;
     final reader =
         ql.ReadersConstants.activeAyahReaders[audioState.ayahReaderIndex.value];
 
@@ -234,24 +289,36 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       return '${reader.url}${reader.readerNamePath}/$s$n.mp3';
     }
 
-    await _sequenceSub?.cancel();
-    await _completionSub?.cancel();
+    await _endSession();
+    _sessionSurah = surahNum;
+    _sessionStartAyah = playAyahs.first.ayahNumber;
+    // Also drive AudioCtrl's own preparing flag: the library's audio widgets
+    // read it, and this notifier mirrors it back into [QuranAudioState].
     audioState.isAudioPreparing.value = true;
+    state = state.copyWith(
+      sessionSurah: surahNum,
+      surah: surahNum,
+      ayah: _sessionStartAyah,
+      isLoading: true,
+      hasError: false,
+    );
+
     try {
-      await audioState.audioPlayer.stop();
-      await audioState.audioPlayer.setAudioSources([
+      await player.stop();
+      await player.setAudioSources([
         for (final a in playAyahs) ql.AudioSource.uri(Uri.parse(urlFor(a))),
       ], initialIndex: 0);
-      await audioState.audioPlayer.setShuffleModeEnabled(false);
-      await audioState.audioPlayer.setLoopMode(ql.LoopMode.off);
+      await player.setShuffleModeEnabled(false);
+      await player.setLoopMode(ql.LoopMode.off);
 
       int? lastPage;
-      _sequenceSub = audioState.audioPlayer.sequenceStateStream.listen((seq) {
+      _sequenceSub = player.sequenceStateStream.listen((seq) {
         final idx = seq.currentIndex;
         if (idx == null || idx < 0 || idx >= playAyahs.length) return;
         final ayah = playAyahs[idx];
         audioState.currentAyahUniqueNumber.value = ayah.ayahUQNumber;
         ql.QuranCtrl.instance.toggleAyahSelection(ayah.ayahUQNumber);
+        state = state.copyWith(surah: surahNum, ayah: ayah.ayahNumber);
         if (lastPage != null && lastPage != ayah.page) {
           ql.QuranCtrl.instance.quranPagesController.animateToPage(
             ayah.page - 1,
@@ -261,32 +328,68 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
         }
         lastPage = ayah.page;
       });
-      _completionSub = audioState.audioPlayer.playerStateStream.listen((s) {
-        if (s.processingState == ql.ProcessingState.completed) {
-          audioState.isPlaying.value = false;
-        }
+      _completionSub = player.playerStateStream.listen((s) async {
+        if (s.processingState != ql.ProcessingState.completed) return;
+        _sessionCompleted = true;
+        audioState.isPlaying.value = false;
+        await _unsubscribeSequence();
       });
 
       audioState.isAudioPreparing.value = false;
-      audioState.isPlaying.value = true;
-      await audioState.audioPlayer.play();
+      state = state.copyWith(isLoading: false);
+      if (autoplay) {
+        audioState.isPlaying.value = true;
+        await player.play();
+      }
     } catch (e) {
       audioState.isAudioPreparing.value = false;
       audioState.isPlaying.value = false;
+      await _endSession();
+      // Keeps the surah named in the UI (the error line says why it isn't
+      // playing) and drops only the session, so the next tap reloads it.
+      state = state.copyWith(isLoading: false, hasError: true, sessionSurah: 0);
       developer.log('Failed to stream surah $surahNum: $e', name: 'QuranAudio');
     }
   }
 
   Future<void> stop() async {
-    final audioState = ql.AudioCtrl.instance.state;
-    await _sequenceSub?.cancel();
-    await _completionSub?.cancel();
-    await audioState.stopAllAudio();
+    await _endSession(stopPlayer: true);
+    state = state.copyWith(
+      isPlaying: false,
+      isLoading: false,
+      surah: 0,
+      ayah: 0,
+      sessionSurah: 0,
+    );
   }
 
   Future<void> setSpeed(double s) async {
     state = state.copyWith(speed: s);
     await ql.AudioCtrl.instance.state.audioPlayer.setSpeed(s);
+  }
+
+  Future<void> _unsubscribeSequence() async {
+    await _sequenceSub?.cancel();
+    await _completionSub?.cancel();
+    _sequenceSub = null;
+    _completionSub = null;
+  }
+
+  /// Ends the current session: unsubscribes from the player, drops the
+  /// mushaf highlight playback was driving, and clears [state.sessionSurah]
+  /// so the next Play tap loads fresh. The player itself is only touched with
+  /// [stopPlayer] — the caller that is about to load another surah into it
+  /// wants it left alone.
+  Future<void> _endSession({bool stopPlayer = false}) async {
+    await _unsubscribeSequence();
+    _sessionSurah = null;
+    _sessionCompleted = false;
+    final selected = ql.QuranCtrl.instance.selectedAyahsByUnequeNumber;
+    if (selected.isNotEmpty) selected.clear();
+    if (stopPlayer) {
+      await ql.AudioCtrl.instance.state.stopAllAudio();
+      ql.AudioCtrl.instance.state.isPlaying.value = false;
+    }
   }
 
   @override

@@ -122,7 +122,11 @@ class PrayerTimesCache extends Table {
 // is what `addAchievement`/`_tryGrant` de-duplicate against, so the database
 // enforces it too — two sync sweeps racing on the same threshold used to be
 // able to insert the same achievement twice.
-@TableIndex(name: 'idx_achievements_type_unique', unique: true, columns: {#type})
+@TableIndex(
+  name: 'idx_achievements_type_unique',
+  unique: true,
+  columns: {#type},
+)
 class Achievements extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get type => text()();
@@ -321,14 +325,13 @@ enum NisabStandard { gold, silver }
 // path to a "past calculations" list later without a schema change.
 class ZakatCalculations extends Table {
   IntColumn get id => integer().autoIncrement()();
-  DateTimeColumn get computedAt =>
-      dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get computedAt => dateTime().withDefault(currentDateAndTime)();
 
   RealColumn get cashAmount => real().withDefault(const Constant(0.0))();
   RealColumn get bankAmount => real().withDefault(const Constant(0.0))();
   RealColumn get goldGrams => real().withDefault(const Constant(0.0))();
-  RealColumn get goldPricePerGram =>
-      real().withDefault(const Constant(0.0))();
+  RealColumn get goldPricePerGram => real().withDefault(const Constant(0.0))();
+
   /// Direct money value entered instead of weight × price, for users who
   /// know what their gold is worth but not what it weighs. See R1 in
   /// docs/specs/zakat-calculator.md.
@@ -337,8 +340,7 @@ class ZakatCalculations extends Table {
   RealColumn get silverPricePerGram =>
       real().withDefault(const Constant(0.0))();
   RealColumn get silverValue => real().withDefault(const Constant(0.0))();
-  RealColumn get tradeGoodsValue =>
-      real().withDefault(const Constant(0.0))();
+  RealColumn get tradeGoodsValue => real().withDefault(const Constant(0.0))();
   RealColumn get debtAmount => real().withDefault(const Constant(0.0))();
 
   IntColumn get nisabStandard =>
@@ -420,6 +422,25 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 13;
 
+  /// Drift writes `user_version` only after `onUpgrade` returns, so a step that
+  /// throws midway leaves its DDL applied while the stored version stays
+  /// behind — the next launch replays those steps. `ALTER TABLE … ADD COLUMN`
+  /// and `CREATE INDEX` then fail with "duplicate column name" / "already
+  /// exists", which aborted every later open and blanked the app on launch.
+  Future<bool> _hasColumn(String tableName, String columnName) async {
+    final columns = await customSelect('PRAGMA table_info($tableName)').get();
+    return columns.any((row) => row.read<String>('name') == columnName);
+  }
+
+  Future<void> _createIndex(Migrator m, Index index) async {
+    final existing = await customSelect(
+      "SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = ?",
+      variables: [Variable.withString(index.entityName)],
+    ).get();
+    if (existing.isNotEmpty) return;
+    await m.createIndex(index);
+  }
+
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -431,7 +452,12 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(reminders);
       }
       if (from < 3) {
-        await m.addColumn(dailyRecords, dailyRecords.ghadhBasar);
+        if (!await _hasColumn(
+          dailyRecords.actualTableName,
+          dailyRecords.ghadhBasar.name,
+        )) {
+          await m.addColumn(dailyRecords, dailyRecords.ghadhBasar);
+        }
       }
       if (from < 4) {
         // Rename all legacy camelCase setting keys → snake_case
@@ -508,19 +534,19 @@ class AppDatabase extends _$AppDatabase {
         // (ProhibitionsLog.recordId, and the CustomIbadahLog record+ibadah
         // lookup used by recalcPoints()/logIbadah()) — previously full
         // table scans as history grew.
-        await m.createIndex(idxProhibitionsLogRecord);
-        await m.createIndex(idxCustomIbadahLogRecordIbadah);
+        await _createIndex(m, idxProhibitionsLogRecord);
+        await _createIndex(m, idxCustomIbadahLogRecordIbadah);
       }
       if (from < 8) {
         // RamadanProgress.recordId isn't filtered on by any query today,
         // but it's a FK like the other two indexed below — indexing it now
         // avoids a silent full-table scan the day a lookup-by-record query
         // gets added, for the cost of one small index.
-        await m.createIndex(idxRamadanProgressRecord);
+        await _createIndex(m, idxRamadanProgressRecord);
       }
       if (from < 9) {
         await m.createTable(syncOutbox);
-        await m.createIndex(idxSyncOutboxTableKey);
+        await _createIndex(m, idxSyncOutboxTableKey);
       }
       if (from < 10) {
         await m.createTable(zakatCalculations);
@@ -532,8 +558,18 @@ class AppDatabase extends _$AppDatabase {
         // R1: gold/silver can now be entered as a straight value instead of
         // weight × price. DEFAULT 0 keeps existing rows valid — they simply
         // have no direct-value entry.
-        await m.addColumn(zakatCalculations, zakatCalculations.goldValue);
-        await m.addColumn(zakatCalculations, zakatCalculations.silverValue);
+        if (!await _hasColumn(
+          zakatCalculations.actualTableName,
+          zakatCalculations.goldValue.name,
+        )) {
+          await m.addColumn(zakatCalculations, zakatCalculations.goldValue);
+        }
+        if (!await _hasColumn(
+          zakatCalculations.actualTableName,
+          zakatCalculations.silverValue.name,
+        )) {
+          await m.addColumn(zakatCalculations, zakatCalculations.silverValue);
+        }
       }
       if (from < 13) {
         // One row per achievement `type`. Two sweeps that raced on the same
@@ -548,7 +584,7 @@ class AppDatabase extends _$AppDatabase {
           'DELETE FROM achievements WHERE id NOT IN '
           '(SELECT MIN(id) FROM achievements GROUP BY type)',
         );
-        await m.createIndex(idxAchievementsTypeUnique);
+        await _createIndex(m, idxAchievementsTypeUnique);
       }
     },
     beforeOpen: (details) async {
