@@ -1,11 +1,13 @@
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/takwa_transparent_bg.png"
+  # Takwa launcher: dark-mode background gradient + gold تقوى wordmark
+  image_path: "assets/images/launch_icons/takwa_icon_master.png"
   min_sdk_android: 21
+  remove_alpha_ios: true
 
-  # For modern Android adaptive icons:
-  #adaptive_icon_background: "#FFFFFF" # Or your brand color e.g. "#1B4D3E"
+  # Modern Android adaptive icon: gradient background layer + safe-zoned foreground
+  adaptive_icon_background: "assets/images/launch_icons/takwa_icon_bg.png"
   adaptive_icon_foreground: "assets/images/takwa_transparent_bg.png"
 
   web:
