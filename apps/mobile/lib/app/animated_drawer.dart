@@ -1167,10 +1167,7 @@ class _LogoutButton extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              Text(
-                '🚪',
-                style: TextStyle(fontSize: 18, color: context.colors.danger),
-              ),
+              const IslamicGlyph('🚪', size: 18),
               const SizedBox(width: AppSpacing.md),
               Text(
                 AppLocalizations.of(context)!.drawerLogoutButton,

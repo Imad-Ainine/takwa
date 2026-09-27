@@ -4,6 +4,7 @@ import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/app_bar_widget.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -345,7 +346,7 @@ class AboutMeScreen extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('❤️', style: TextStyle(fontSize: 12)),
+              const IslamicGlyph('❤️', size: 12),
               const SizedBox(width: 6),
               Text(
                 l.aboutFooterCopyright,

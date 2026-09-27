@@ -3,10 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/theme/ramadan_theme.dart';
-import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/auth_field.dart';
 import 'package:takwa/core/routes/app_routes.dart';
+import 'package:takwa/features/auth/presentation/widgets/auth_scaffold.dart';
+import 'package:takwa/features/auth/presentation/widgets/auth_success_overlay.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 class UpdatePasswordScreen extends ConsumerStatefulWidget {
@@ -80,36 +81,15 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
       );
 
       if (mounted) {
-        final colors = context.colors;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(
-                  Icons.check_circle_rounded,
-                  color: colors.onSuccess,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  l10n.updatePasswordSuccessMessage,
-                  style: context.typography.bodyMedium.copyWith(
-                    color: colors.onSuccess,
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: colors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: AppRadius.card,
-            ),
-          ),
-        );
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          Routes.auth,
-          (route) => false,
-        );
+        setState(() => _loading = false);
+        await showAuthSuccess(context, label: l10n.updatePasswordSuccessMessage);
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            Routes.auth,
+            (route) => false,
+          );
+        }
       }
     } on AuthException catch (e) {
       if (mounted) {
@@ -150,173 +130,124 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
     final colors = context.colors;
     final typography = context.typography;
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          const Positioned.fill(
-            child: CustomPatternBackground(pattern: BackgroundPattern.adhkar),
-          ),
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSpacing.xxl),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Icon
-                    Container(
-                      width: 84,
-                      height: 84,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [colors.card, colors.background],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        border: Border.all(
-                          color: colors.gold.withValues(alpha: 0.5),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colors.gold.withValues(alpha: 0.2),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.lock_reset_rounded,
-                          color: colors.gold,
-                          size: 40,
-                        ),
-                      ),
+    return Stack(
+      children: [
+        AuthScaffold(
+          showBack: false,
+          children: [
+            AuthGlassCard(
+              child: Column(
+                children: [
+                  Center(
+                    child: AuthEmblem.icon(
+                      size: 84,
+                      icon: Icons.lock_reset_rounded,
                     ),
-                    const SizedBox(height: AppSpacing.xxl),
-
-                    // Title
-                    Text(
-                      l10n.updatePasswordTitle,
-                      style: typography.displayLarge,
-                      textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.xxl),
+                  Text(
+                    l10n.updatePasswordTitle,
+                    style: typography.displayLarge.copyWith(fontSize: 28),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    l10n.updatePasswordSubtitle,
+                    style: typography.bodyMedium.copyWith(
+                      color: colors.textSecondary,
                     ),
-                    const SizedBox(height: AppSpacing.sm),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.xxxl),
 
-                    // Subtitle
-                    Text(
-                      l10n.updatePasswordSubtitle,
-                      style: typography.bodyMedium.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.xxxl),
-
-                    // Password + confirm fields, grouped so a password
-                    // manager can see them together.
-                    AutofillGroup(
-                      child: Column(
-                        children: [
-                    // Password Field
-                    AuthField(
-                      ctrl: _passCtrl,
-                      hint: l10n.updatePasswordNewHint,
-                      icon: Icons.lock_outline_rounded,
-                      isPassword: true,
-                      style: s,
-                      focusNode: _passFocus,
-                      autofillHints: const [AutofillHints.newPassword],
-                      onChanged: (_) {
-                        if (_error != null) setState(() => _error = null);
-                      },
-                    ),
-
-                    // Strength bar
-                    if (_passCtrl.text.isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.xs,
-                        ),
-                        child: PasswordStrengthBar(
-                          strength: _passStrength,
+                  // Password + confirm fields, grouped so a password
+                  // manager can see them together.
+                  AutofillGroup(
+                    child: Column(
+                      children: [
+                        AuthField(
+                          ctrl: _passCtrl,
+                          hint: l10n.updatePasswordNewHint,
+                          icon: Icons.lock_outline_rounded,
+                          isPassword: true,
                           style: s,
+                          focusNode: _passFocus,
+                          autofillHints: const [AutofillHints.newPassword],
+                          onChanged: (_) {
+                            if (_error != null) setState(() => _error = null);
+                          },
                         ),
-                      ),
-                    ],
-
-                    const SizedBox(height: AppSpacing.lg),
-
-                    // Confirm Password Field
-                    AuthField(
-                      ctrl: _confirmPassCtrl,
-                      hint: l10n.updatePasswordConfirmHint,
-                      icon: Icons.lock_clock_outlined,
-                      isPassword: true,
-                      style: s,
-                      focusNode: _confirmPassFocus,
-                      isLast: true,
-                      onSubmit: _loading ? null : _updatePassword,
-                      autofillHints: const [AutofillHints.newPassword],
-                      onChanged: (_) {
-                        if (_error != null) setState(() => _error = null);
-                      },
-                    ),
-                        ],
-                      ),
-                    ),
-
-                    // Error banner
-                    if (_error != null) ...[
-                      const SizedBox(height: AppSpacing.lg),
-                      Container(
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        decoration: BoxDecoration(
-                          color: colors.dangerDim,
-                          borderRadius: AppRadius.card,
-                          border: Border.all(
-                            color: colors.danger.withValues(alpha: 0.4),
-                          ),
+                        AnimatedSize(
+                          duration: AppMotion.fast,
+                          curve: AppMotion.standard,
+                          alignment: Alignment.topCenter,
+                          child: _passCtrl.text.isNotEmpty
+                              ? Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: AppSpacing.sm,
+                                  ),
+                                  child: PasswordStrengthBar(
+                                    strength: _passStrength,
+                                    style: s,
+                                  ),
+                                )
+                              : const SizedBox(width: double.infinity),
                         ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.warning_amber_rounded,
-                              color: colors.dangerText,
-                              size: 20,
-                            ),
-                            const SizedBox(width: AppSpacing.sm),
-                            Expanded(
-                              child: Text(
-                                _error!,
-                                style: typography.bodySmall.copyWith(
-                                  color: colors.dangerText,
-                                ),
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: AppSpacing.lg),
+                        AuthField(
+                          ctrl: _confirmPassCtrl,
+                          hint: l10n.updatePasswordConfirmHint,
+                          icon: Icons.lock_clock_outlined,
+                          isPassword: true,
+                          style: s,
+                          focusNode: _confirmPassFocus,
+                          isLast: true,
+                          onSubmit: _loading ? null : _updatePassword,
+                          autofillHints: const [AutofillHints.newPassword],
+                          onChanged: (_) {
+                            if (_error != null) setState(() => _error = null);
+                          },
                         ),
-                      ),
-                    ],
-
-                    const SizedBox(height: AppSpacing.xxxl),
-
-                    // Submit Button
-                    PrimaryButton(
-                      onTap: _loading ? null : _updatePassword,
-                      label: _loading
-                          ? l10n.updatePasswordSavingButton
-                          : l10n.updatePasswordSaveAndSignInButton,
+                      ],
                     ),
-                  ],
+                  ),
+
+                  if (_error != null) AuthBanner(message: _error!),
+                  const SizedBox(height: AppSpacing.xl),
+                  PrimaryButton(
+                    onTap: _loading ? null : _updatePassword,
+                    label: _loading
+                        ? l10n.updatePasswordSavingButton
+                        : l10n.updatePasswordSaveAndSignInButton,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+
+            // The recovery session only lives until the password changes —
+            // give an explicit way out that doesn't strand the user.
+            Center(
+              child: TextButton(
+                onPressed: () =>
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      Routes.auth,
+                      (route) => false,
+                    ),
+                child: Text(
+                  l10n.updatePasswordCancelButton,
+                  style: typography.labelMedium.copyWith(
+                    color: colors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+        if (_loading) const Positioned.fill(child: AuthLoadingOverlay()),
+      ],
     );
   }
 }

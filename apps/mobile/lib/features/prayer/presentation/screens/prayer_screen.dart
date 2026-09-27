@@ -2243,7 +2243,7 @@ class _ErrorView extends StatelessWidget {
               ),
             ),
             child: const Center(
-              child: Text('📍', style: TextStyle(fontSize: 32)),
+              child: IslamicGlyph('📍', size: 32),
             ),
           ),
           const SizedBox(height: AppSpacing.md),

@@ -792,7 +792,7 @@ class _StreakBadgeLarge extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('🔥', style: TextStyle(fontSize: 14)),
+        const IslamicGlyph('🔥', size: 14),
         const SizedBox(width: 6),
         Text(
           AppLocalizations.of(context)!.homeStreakDaysLabel(days),
@@ -1590,7 +1590,7 @@ class _EmptyAchievements extends StatelessWidget {
     padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
     child: Column(
       children: [
-        const Text('🏆', style: TextStyle(fontSize: 32)),
+        const IslamicGlyph('🏆', size: 32),
         const SizedBox(height: AppSpacing.sm),
         Text(
           AppLocalizations.of(context)!.statsNoAchievementsYet,
@@ -1680,7 +1680,7 @@ class _LockedAchievementsRow extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('🔒', style: TextStyle(fontSize: 14)),
+                    const IslamicGlyph('🔒', size: 14),
                     const SizedBox(width: 6),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

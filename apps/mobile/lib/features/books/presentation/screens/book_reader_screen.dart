@@ -95,6 +95,8 @@ class _BookReaderScreenState extends ConsumerState<BookReaderScreen>
   bool _showUI = true;
   late AnimationController _uiAnim;
   late Animation<double> _uiFade;
+  late final Animation<Offset> _topSlide;
+  late final Animation<Offset> _bottomSlide;
 
   bool get _hasContent => _pages.isNotEmpty;
 
@@ -117,6 +119,14 @@ class _BookReaderScreenState extends ConsumerState<BookReaderScreen>
       value: 1.0,
     );
     _uiFade = CurvedAnimation(parent: _uiAnim, curve: Curves.easeInOut);
+    _topSlide = Tween<Offset>(
+      begin: const Offset(0, -1),
+      end: Offset.zero,
+    ).animate(_uiFade);
+    _bottomSlide = Tween<Offset>(
+      begin: const Offset(0, 1),
+      end: Offset.zero,
+    ).animate(_uiFade);
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     WidgetsBinding.instance.addObserver(this);
@@ -371,9 +381,17 @@ class _BookReaderScreenState extends ConsumerState<BookReaderScreen>
 
   // ── Navigation ───────────────────────────────────────────────
 
+  /// Single tap anywhere on the reading surface. Deliberately *not* a
+  /// `setState`: the chrome listens to `_uiAnim` on its own, so showing or
+  /// hiding the bars never rebuilds the page list the reader is looking at.
   void _toggleUI() {
-    setState(() => _showUI = !_showUI);
-    if (_showUI) {
+    final shown = !_showUI;
+    _showUI = shown;
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _uiAnim.value = shown ? 1.0 : 0.0;
+      return;
+    }
+    if (shown) {
       _uiAnim.forward();
     } else {
       _uiAnim.reverse();
@@ -543,7 +561,7 @@ class _BookReaderScreenState extends ConsumerState<BookReaderScreen>
     return Scaffold(
       backgroundColor: bgColor,
       body: GestureDetector(
-        onTap: _toggleUI,
+        onTap: _hasContent ? _toggleUI : null,
         behavior: HitTestBehavior.translucent,
         child: Stack(
           children: [
@@ -567,27 +585,43 @@ class _BookReaderScreenState extends ConsumerState<BookReaderScreen>
                   : _buildUnavailable(accentColor, textColor),
             ),
 
+            if (!_hasContent)
+              PositionedDirectional(
+                end: 8,
+                top: 0,
+                child: SafeArea(
+                  child: _IconBtn(
+                    theme: theme,
+                    onTap: () => Navigator.pop(context),
+                    tooltip: AppLocalizations.of(context)!.commonCancel,
+                    child: Icon(
+                      Icons.close_rounded,
+                      color: accentColor,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ),
+
             if (_hasContent) ...[
               Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
-                child: FadeTransition(
-                  opacity: _uiFade,
-                  child: IgnorePointer(
-                    ignoring: !_showUI,
-                    child: _TopBar(
-                      book: widget.book,
-                      chapter: widget.book.chapters[_chapterIdx],
-                      accentColor: accentColor,
-                      theme: theme,
-                      pageNotifier: _pageNotifier,
-                      isBookmarked: (page) => _isBookmarked(bookmarks, page),
-                      onBookmarkToggle: _toggleBookmark,
-                      onOpenChapters: _openChapterList,
-                      onOpenSettings: _openSettings,
-                      onClose: () => Navigator.pop(context),
-                    ),
+                child: _chrome(
+                  key: const ValueKey('reader-chrome-top'),
+                  slide: _topSlide,
+                  child: _TopBar(
+                    book: widget.book,
+                    chapter: widget.book.chapters[_chapterIdx],
+                    accentColor: accentColor,
+                    theme: theme,
+                    pageNotifier: _pageNotifier,
+                    isBookmarked: (page) => _isBookmarked(bookmarks, page),
+                    onBookmarkToggle: _toggleBookmark,
+                    onOpenChapters: _openChapterList,
+                    onOpenSettings: _openSettings,
+                    onClose: () => Navigator.pop(context),
                   ),
                 ),
               ),
@@ -595,29 +629,53 @@ class _BookReaderScreenState extends ConsumerState<BookReaderScreen>
                 bottom: 0,
                 left: 0,
                 right: 0,
-                child: FadeTransition(
-                  opacity: _uiFade,
-                  child: IgnorePointer(
-                    ignoring: !_showUI,
-                    child: _BottomNav(
-                      totalPages: widget.book.totalPages,
-                      chapter: widget.book.chapters[_chapterIdx],
-                      pagesReadAt: _pagesReadAt,
-                      accentColor: accentColor,
-                      theme: theme,
-                      pageNotifier: _pageNotifier,
-                      hasPrevious: (page) => _slot > 0 || page > 0,
-                      hasNext: (page) =>
-                          _slot < _chapterOrder.length - 1 ||
-                          page < _pages.length - 1,
-                      onPrev: _goPrev,
-                      onNext: _goNext,
-                    ),
+                child: _chrome(
+                  key: const ValueKey('reader-chrome-bottom'),
+                  slide: _bottomSlide,
+                  child: _BottomNav(
+                    totalPages: widget.book.totalPages,
+                    chapter: widget.book.chapters[_chapterIdx],
+                    pagesReadAt: _pagesReadAt,
+                    accentColor: accentColor,
+                    theme: theme,
+                    pageNotifier: _pageNotifier,
+                    hasPrevious: (page) => _slot > 0 || page > 0,
+                    hasNext: (page) =>
+                        _slot < _chapterOrder.length - 1 ||
+                        page < _pages.length - 1,
+                    onPrev: _goPrev,
+                    onNext: _goNext,
                   ),
                 ),
               ),
             ],
           ],
+        ),
+      ),
+    );
+  }
+
+  /// A chrome bar, slid off its own edge and faded with `_uiAnim`. The page
+  /// list is not in this subtree and the content padding never changes, so the
+  /// transition cannot shift or stutter the text on screen — and while hidden,
+  /// the bar takes neither taps nor screen-reader focus.
+  Widget _chrome({
+    required Key key,
+    required Animation<Offset> slide,
+    required Widget child,
+  }) {
+    return AnimatedBuilder(
+      animation: _uiAnim,
+      child: child,
+      builder: (context, bar) => SlideTransition(
+        position: slide,
+        child: FadeTransition(
+          opacity: _uiFade,
+          child: IgnorePointer(
+            key: key,
+            ignoring: !_showUI,
+            child: ExcludeSemantics(excluding: !_showUI, child: bar),
+          ),
         ),
       ),
     );

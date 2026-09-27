@@ -7,6 +7,7 @@ import 'package:takwa/core/providers/favorites_providers.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/features/adhkar/presentation/adhkar_labels.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
@@ -58,7 +59,7 @@ class FavoriteAdhkarScreen extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      const Text('❤️', style: TextStyle(fontSize: 22)),
+                      const IslamicGlyph('❤️', size: 22),
                     ],
                   ),
                 ),
@@ -98,7 +99,7 @@ class _EmptyFavs extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('🤍', style: TextStyle(fontSize: 52)),
+          const IslamicGlyph('🤍', size: 52),
           const SizedBox(height: AppSpacing.lg),
           Text(
             l10n.favoriteAdhkarEmptyTitle,
@@ -336,7 +337,7 @@ class _FavDhikrCardState extends ConsumerState<_FavDhikrCard> {
                         ),
                         child: Row(
                           children: [
-                            const Text('✨', style: TextStyle(fontSize: 12)),
+                            const IslamicGlyph('✨', size: 12),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(

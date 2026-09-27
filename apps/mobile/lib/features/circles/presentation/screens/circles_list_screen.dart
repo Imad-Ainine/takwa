@@ -4,6 +4,7 @@ import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/guest_mode_guard.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/takwa_error_state.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
@@ -205,7 +206,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('👨‍👩‍👧‍👦', style: context.typography.displayLarge),
+            IslamicGlyph('👨‍👩‍👧‍👦', size: context.typography.displayLarge.fontSize),
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.circlesEmptyTitle,

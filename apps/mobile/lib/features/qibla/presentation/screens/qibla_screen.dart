@@ -684,7 +684,7 @@ class _QiblaLocationError extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('📍', style: TextStyle(fontSize: 40)),
+          const IslamicGlyph('📍', size: 40),
           const SizedBox(height: AppSpacing.md),
           Text(l10n.qiblaLocationRequiredTitle, style: style.amiri(16)),
           const SizedBox(height: 6),

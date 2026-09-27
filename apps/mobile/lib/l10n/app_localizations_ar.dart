@@ -2843,6 +2843,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get forgotPasswordResendCode => 'إعادة إرسال الرمز';
 
   @override
+  String authOtpSentTo(String email) {
+    return 'أدخل الرمز المكون من 6 أرقام المرسل إلى $email، أو افتح الرابط في البريد الإلكتروني';
+  }
+
+  @override
+  String get otpAutoVerifyNote => 'سيتم التحقق من الرمز تلقائياً بمجرد اكتماله';
+
+  @override
+  String get otpUseAnotherEmail => 'استخدام بريد إلكتروني آخر';
+
+  @override
+  String get otpEnterAllDigits => 'يرجى إدخال الرقم السداسي المكون من 6 أرقام';
+
+  @override
+  String get otpNoneEntered => 'لا شيء';
+
+  @override
+  String get authWelcomeBack => 'مرحباً بعودتك';
+
+  @override
+  String get authBackTooltip => 'رجوع';
+
+  @override
+  String get emailConfirmationSpamHint =>
+      'لم يصلك البريد؟ تحقق من مجلد الرسائل غير المرغوبة.';
+
+  @override
+  String get updatePasswordCancelButton => 'إلغاء والعودة لتسجيل الدخول';
+
+  @override
   String get timePeriodAm => 'ص';
 
   @override

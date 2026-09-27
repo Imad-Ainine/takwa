@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/features/asma/data/asma_data.dart';
 
 import '../../../../core/theme/ramadan_theme.dart';
@@ -198,7 +199,7 @@ class _AsmaList extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('🔍', style: TextStyle(fontSize: 36)),
+            const IslamicGlyph('🔍', size: 36),
             const SizedBox(height: 10),
             Text(l10n.asmaNoResultsLabel, style: style.amiri(16)),
           ],

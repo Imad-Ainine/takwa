@@ -5276,6 +5276,60 @@ abstract class AppLocalizations {
   /// **'إعادة إرسال الرمز'**
   String get forgotPasswordResendCode;
 
+  /// No description provided for @authOtpSentTo.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل الرمز المكون من 6 أرقام المرسل إلى {email}، أو افتح الرابط في البريد الإلكتروني'**
+  String authOtpSentTo(String email);
+
+  /// No description provided for @otpAutoVerifyNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'سيتم التحقق من الرمز تلقائياً بمجرد اكتماله'**
+  String get otpAutoVerifyNote;
+
+  /// No description provided for @otpUseAnotherEmail.
+  ///
+  /// In ar, this message translates to:
+  /// **'استخدام بريد إلكتروني آخر'**
+  String get otpUseAnotherEmail;
+
+  /// No description provided for @otpEnterAllDigits.
+  ///
+  /// In ar, this message translates to:
+  /// **'يرجى إدخال الرقم السداسي المكون من 6 أرقام'**
+  String get otpEnterAllDigits;
+
+  /// No description provided for @otpNoneEntered.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا شيء'**
+  String get otpNoneEntered;
+
+  /// No description provided for @authWelcomeBack.
+  ///
+  /// In ar, this message translates to:
+  /// **'مرحباً بعودتك'**
+  String get authWelcomeBack;
+
+  /// No description provided for @authBackTooltip.
+  ///
+  /// In ar, this message translates to:
+  /// **'رجوع'**
+  String get authBackTooltip;
+
+  /// No description provided for @emailConfirmationSpamHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يصلك البريد؟ تحقق من مجلد الرسائل غير المرغوبة.'**
+  String get emailConfirmationSpamHint;
+
+  /// No description provided for @updatePasswordCancelButton.
+  ///
+  /// In ar, this message translates to:
+  /// **'إلغاء والعودة لتسجيل الدخول'**
+  String get updatePasswordCancelButton;
+
   /// No description provided for @timePeriodAm.
   ///
   /// In ar, this message translates to:

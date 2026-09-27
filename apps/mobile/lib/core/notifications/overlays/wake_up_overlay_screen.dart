@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:takwa/core/theme/app_theme.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/features/settings/providers/user_preferences_provider.dart';
 import 'package:takwa/features/settings/data/user_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -470,7 +471,7 @@ class _WakeUpOverlayScreenState extends ConsumerState<WakeUpOverlayScreen>
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text('🌅', style: TextStyle(fontSize: 14)),
+                                const IslamicGlyph('🌅', size: 14),
                                 const SizedBox(width: 6),
                                 Text(
                                   l10n.adhanOverlayDuaSectionLabel,

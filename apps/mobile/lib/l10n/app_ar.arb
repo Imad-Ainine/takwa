@@ -1632,6 +1632,22 @@
     }
   },
   "forgotPasswordResendCode": "إعادة إرسال الرمز",
+  "authOtpSentTo": "أدخل الرمز المكون من 6 أرقام المرسل إلى {email}، أو افتح الرابط في البريد الإلكتروني",
+  "@authOtpSentTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "otpAutoVerifyNote": "سيتم التحقق من الرمز تلقائياً بمجرد اكتماله",
+  "otpUseAnotherEmail": "استخدام بريد إلكتروني آخر",
+  "otpEnterAllDigits": "يرجى إدخال الرقم السداسي المكون من 6 أرقام",
+  "otpNoneEntered": "لا شيء",
+  "authWelcomeBack": "مرحباً بعودتك",
+  "authBackTooltip": "رجوع",
+  "emailConfirmationSpamHint": "لم يصلك البريد؟ تحقق من مجلد الرسائل غير المرغوبة.",
+  "updatePasswordCancelButton": "إلغاء والعودة لتسجيل الدخول",
   "timePeriodAm": "ص",
   "timePeriodPm": "م",
   "wakeUpOverlayTitle": "حان وقت الاستيقاظ",

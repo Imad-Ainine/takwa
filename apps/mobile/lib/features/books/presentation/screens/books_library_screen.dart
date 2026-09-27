@@ -556,7 +556,7 @@ class _NoResults extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('🧐', style: TextStyle(fontSize: 50)),
+            const IslamicGlyph('🧐', size: 50),
             const SizedBox(height: AppSpacing.lg),
             Text(
               filtered ? hint : l10n.booksNoResultsFound,

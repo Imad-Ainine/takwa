@@ -9,22 +9,27 @@ export 'islamic_glyph_catalog.dart';
 
 /// The one icon widget in the app.
 ///
-/// [glyph] is a reference, not the picture: it is looked up in
+/// [glyph] is a reference, not the picture. It is looked up in
 /// [islamicGlyphCatalog] as a name (`'mosque'`) or as the emoji it replaces
-/// (`'🕌'`), and otherwise treated as an emoji. That indirection exists because
-/// most call sites hold a string from a persisted model field — `Dua.emoji`,
-/// `Book.emoji`, `AchievementDefinition.emoji` — so upgrading an icon is a
-/// catalogue edit, not a 77-site rewrite, and unregistered strings keep
-/// drawing exactly as they always did.
+/// (`'🕌'`), then as an asset path, then as a Noto 3D render under
+/// `assets/emoji3d/`, and only then treated as a plain emoji. That indirection
+/// exists because most call sites hold a string from a persisted model field —
+/// `Dua.emoji`, `Book.emoji`, `AchievementDefinition.emoji` — so upgrading an
+/// icon is a catalogue edit, not a rewrite of the ~87 call sites, and an
+/// unresolvable string keeps drawing exactly as it always did.
 ///
-/// Because emoji cannot be tinted (`Text('🌙', style: TextStyle(color: …))` is
-/// a no-op) and render differently per platform, anything registered draws as
-/// a font glyph or a vector asset instead and follows the app's icon colour.
+/// The three layers differ in one important way. A catalogue entry is line art
+/// or a font glyph, so it takes the app's icon colour. A 3D render is full
+/// colour and cannot be tinted — it buys OS-to-OS consistency at that cost, and
+/// sizes itself to the surrounding text the way the emoji it replaced did. That
+/// is also why the order is fixed: where the two overlap, the hand-drawn icon
+/// wins, because a tintable mark is what the gold line-art set exists to give.
 ///
 /// ```dart
 /// IslamicGlyph('mosque', size: 18)                                  // registered
 /// IslamicGlyph('assets/icons/mosque.svg', size: 18)                  // by path
 /// IslamicGlyph('assets/lottie/ring.lottie', size: 64, animate: false)
+/// IslamicGlyph('✨')                                                 // 3D render
 /// IslamicGlyph('🕌', size: 24, color: context.colors.gold,
 ///              semanticLabel: l10n.prayerTimes)
 /// IslamicGlyph(book.emoji, size: 40, badge: ('📍', AlignmentDirectional.topStart))
@@ -90,9 +95,16 @@ class IslamicGlyph extends StatelessWidget {
         source ?? entry?.source ?? IslamicGlyphSource.emoji(glyph);
     final isEmoji = resolved.kind == IslamicGlyphKind.emoji;
     // Emoji keep inheriting the ambient text size so they match the label
-    // beside them; every real icon needs a definite square box to stay
-    // consistent across screens.
-    final box = size ?? (isEmoji ? null : defaultSize);
+    // beside them. An auto-mapped emoji render has to do the same or it would
+    // change the row it sits in; every hand-registered icon takes a definite
+    // square box so it stays consistent across screens.
+    final box =
+        size ??
+        (isEmoji
+            ? null
+            : resolved.followsTextSize
+            ? _ambientSize(context)
+            : defaultSize);
     final label = semanticLabel ?? entry?.description;
 
     Widget icon = _paint(context, resolved, box, label);
@@ -152,7 +164,9 @@ class IslamicGlyph extends StatelessWidget {
         errorBuilder: onError,
       ),
       IslamicGlyphKind.png => Image.asset(
-        src.asset,
+        (box != null && box >= kGlyphHiResFrom && src.hiResAsset.isNotEmpty)
+            ? src.hiResAsset
+            : src.asset,
         width: box,
         height: box,
         color: tint,
@@ -203,4 +217,12 @@ class IslamicGlyph extends StatelessWidget {
 
   static Color _ambientColor(BuildContext context) =>
       IconTheme.of(context).color ?? Theme.of(context).colorScheme.onSurface;
+
+  /// What an emoji would have been laid out at, which is the row's text size
+  /// rather than the ambient [IconTheme] — that one merges in the theme's 24px
+  /// and would inflate every label-sized glyph.
+  static double _ambientSize(BuildContext context) =>
+      DefaultTextStyle.of(context).style.fontSize ??
+      IconTheme.of(context).size ??
+      defaultSize;
 }

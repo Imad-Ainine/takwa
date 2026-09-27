@@ -1039,7 +1039,7 @@ class _TaqwaSectionMerged extends ConsumerWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Text('🔥', style: TextStyle(fontSize: 12)),
+                              const IslamicGlyph('🔥', size: 12),
                               const SizedBox(width: AppSpacing.xs),
                               Text(
                                 l10n.homeStreakDaysLabel(n),
@@ -1435,7 +1435,7 @@ class _FeatureRow extends StatelessWidget {
     ('📖', null, l10n.labelQuran, '/quran'),
     (
       '🕋',
-      ('', AlignmentDirectional.topStart),
+      ('🧭', AlignmentDirectional.topStart),
       l10n.homeFeatureQibla,
       '/qibla',
     ),

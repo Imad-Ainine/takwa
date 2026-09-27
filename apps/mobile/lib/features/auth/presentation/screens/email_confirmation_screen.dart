@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:takwa/core/theme/app_theme.dart';
-import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
+import 'package:takwa/features/auth/presentation/widgets/auth_scaffold.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 class EmailConfirmationScreen extends StatelessWidget {
@@ -14,74 +14,86 @@ class EmailConfirmationScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = context.colors;
     final typography = context.typography;
-    return Scaffold(
-      body: Stack(
-        children: [
-          const Positioned.fill(
-            child: CustomPatternBackground(pattern: BackgroundPattern.adhkar),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.xxl),
-              child: Column(
+
+    return AuthScaffold(
+      showBack: true,
+      children: [
+        AuthGlassCard(
+          child: Column(
+            children: [
+              Center(
+                child: AuthEmblem.icon(
+                  size: 96,
+                  icon: Icons.mark_email_read_outlined,
+                ),
+              ),              const SizedBox(height: AppSpacing.xxl),
+              Text(
+                l10n.emailConfirmationTitle,
+                style: typography.displayLarge.copyWith(fontSize: 28),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // The address, on a chip — the one detail worth isolating.
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.goldDim.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                  border: Border.all(
+                    color: colors.gold.withValues(alpha: 0.35),
+                  ),
+                ),
+                child: Text(
+                  email,
+                  style: typography.labelLarge.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colors.goldText,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Text(
+                l10n.emailConfirmationInstructions,
+                style: typography.bodyMedium.copyWith(
+                  color: colors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          colors.card,
-                          colors.goldDim,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                  Icon(
+                    Icons.inbox_rounded,
+                    size: 14,
+                    color: colors.textDim,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Flexible(
+                    child: Text(
+                      l10n.emailConfirmationSpamHint,
+                      style: typography.caption.copyWith(
+                        color: colors.textDim,
                       ),
-                      border: Border.all(color: colors.gold, width: 2),
-                      boxShadow: AppShadows.goldGlow,
+                      textAlign: TextAlign.center,
                     ),
-                    child: Icon(
-                      Icons.mark_email_read_outlined,
-                      size: 50,
-                      color: colors.gold,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxxl),
-                  Text(
-                    l10n.emailConfirmationTitle,
-                    style: context.typography.headingLarge.copyWith(
-                      color: context.colors.gold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    l10n.emailConfirmationLinkSentLabel(email),
-                    style: context.typography.bodyLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.xxl),
-                  Text(
-                    l10n.emailConfirmationInstructions,
-                    style: context.typography.bodyMedium.copyWith(
-                      color: context.colors.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.huge),
-                  PrimaryButton(
-                    onTap: () =>
-                        Navigator.pushReplacementNamed(context, '/auth'),
-                    label: l10n.emailConfirmationBackToSignInButton,
                   ),
                 ],
               ),
-            ),
+              const SizedBox(height: AppSpacing.huge),
+              PrimaryButton(
+                onTap: () => Navigator.pushReplacementNamed(context, '/auth'),
+                label: l10n.emailConfirmationBackToSignInButton,
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

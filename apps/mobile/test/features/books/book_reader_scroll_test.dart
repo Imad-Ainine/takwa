@@ -33,6 +33,33 @@ double _offset(WidgetTester tester) => tester
     .position
     .pixels;
 
+/// Taps the middle of the reading surface — the text column, away from both
+/// bars.
+Future<void> _tapReadingArea(WidgetTester tester) async {
+  await tester.tap(find.byType(CustomScrollView));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 320));
+}
+
+/// Each bar keys the `IgnorePointer` that gates its touch input, which is also
+/// the node the slide/fade animations wrap.
+const _topChromeKey = ValueKey('reader-chrome-top');
+const _bottomChromeKey = ValueKey('reader-chrome-bottom');
+
+/// One control per bar, used to ask where that bar paints: the top bar's gear,
+/// the bottom bar's "next" chevron.
+const _topBarControl = Icons.settings_outlined;
+const _bottomBarControl = Icons.chevron_left;
+
+/// Where a bar's control actually paints. The slide moves the paint, so a
+/// hidden bar reports a centre outside the 800×600 test window.
+double _controlTop(WidgetTester tester, IconData control) =>
+    tester.getTopLeft(find.byIcon(control)).dy;
+
+/// Whether a bar currently takes taps.
+bool _chromeIgnoring(WidgetTester tester, Key key) =>
+    tester.widget<IgnorePointer>(find.byKey(key)).ignoring;
+
 IslamicBook _book({
   int chapters = 2,
   int pages = 4,
@@ -276,6 +303,76 @@ void main() {
 
       final row = await BookProgressDao(db).getProgress('test_book');
       expect(row?.pageIndex, 1);
+    });
+  });
+
+  group('distraction-free chrome', () {
+    testWidgets('one tap hides both bars, the next tap brings them back', (
+      tester,
+    ) async {
+      await pumpReader(tester, _book());
+      expect(_chromeIgnoring(tester, _topChromeKey), isFalse);
+      expect(_chromeIgnoring(tester, _bottomChromeKey), isFalse);
+      expect(_controlTop(tester, _topBarControl), inInclusiveRange(0, 600));
+      expect(_controlTop(tester, _bottomBarControl), inInclusiveRange(0, 600));
+
+      await _tapReadingArea(tester);
+      // Slid clear of the screen and no longer reachable by touch.
+      expect(_controlTop(tester, _topBarControl), lessThan(0));
+      expect(_controlTop(tester, _bottomBarControl), greaterThan(600));
+      expect(_chromeIgnoring(tester, _topChromeKey), isTrue);
+      expect(_chromeIgnoring(tester, _bottomChromeKey), isTrue);
+
+      await _tapReadingArea(tester);
+      expect(_controlTop(tester, _topBarControl), inInclusiveRange(0, 600));
+      expect(_controlTop(tester, _bottomBarControl), inInclusiveRange(0, 600));
+      expect(_chromeIgnoring(tester, _topChromeKey), isFalse);
+      await closeReader(tester);
+    });
+
+    testWidgets('hidden bars cannot be tapped through the page', (
+      tester,
+    ) async {
+      await pumpReader(tester, _book());
+      final nextSpot = tester.getCenter(_next());
+      await _tapReadingArea(tester);
+
+      // The bar is gone, so a tap where "next" used to be only brings it back.
+      await tester.tapAt(nextSpot);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 320));
+      expect(find.text(pageIndicator(1, 8)), findsOneWidget);
+      expect(_chromeIgnoring(tester, _bottomChromeKey), isFalse);
+
+      // Now the same tap turns the page.
+      await tester.tap(_next());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.text(pageIndicator(2, 8)), findsOneWidget);
+      await closeReader(tester);
+    });
+
+    testWidgets('hiding the bars leaves the reading position alone', (
+      tester,
+    ) async {
+      await pumpReader(tester, _book());
+      await tester.tap(_next());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+      final before = _offset(tester);
+
+      await _tapReadingArea(tester);
+      expect(_offset(tester), before);
+      expect(find.text(pageIndicator(2, 8)), findsOneWidget);
+
+      // Scrolling still works with the chrome out of the way, and a scroll
+      // does not decide to bring it back.
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -240));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(_offset(tester), greaterThan(before));
+      expect(_chromeIgnoring(tester, _bottomChromeKey), isTrue);
+      await closeReader(tester);
     });
   });
 }

@@ -6,8 +6,9 @@ import 'package:takwa/core/routes/app_routes.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/theme/ramadan_theme.dart';
 import 'package:takwa/core/widgets/auth_field.dart';
-import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
+import 'package:takwa/features/auth/presentation/widgets/auth_scaffold.dart';
+import 'package:takwa/features/auth/presentation/widgets/otp_input_field.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
@@ -24,7 +25,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _emailCtrl = TextEditingController();
   final _otpCtrl = TextEditingController();
   final _emailFocus = FocusNode();
-  final _otpFocus = FocusNode();
+  final _otpFieldKey = GlobalKey<OtpInputFieldState>();
 
   bool _loading = false;
   bool _codeSent = false;
@@ -33,6 +34,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   int _resendCountdown = 0;
   Timer? _timer;
+
+  /// The address the code went to — frozen at send time so editing the email
+  /// field can't desync the "sent to" line from what the server has.
+  String _sentTo = '';
 
   @override
   void initState() {
@@ -48,17 +53,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     _emailCtrl.dispose();
     _otpCtrl.dispose();
     _emailFocus.dispose();
-    _otpFocus.dispose();
     super.dispose();
-  }
-
-  void _submit() {
-    if (_loading) return;
-    if (_codeSent) {
-      _verifyOtp();
-    } else {
-      _sendResetCode();
-    }
   }
 
   void _startCountdown() {
@@ -79,16 +74,18 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     ).hasMatch(email);
   }
 
-  Future<void> _sendResetCode() async {
+  Future<void> _sendResetCode({bool fromResend = false}) async {
     final l10n = AppLocalizations.of(context)!;
     final email = _emailCtrl.text.trim();
-    if (email.isEmpty) {
-      setState(() => _error = l10n.forgotPasswordEnterEmail);
-      return;
-    }
-    if (!_isValidEmail(email)) {
-      setState(() => _error = l10n.forgotPasswordInvalidEmailFormat);
-      return;
+    if (!fromResend) {
+      if (email.isEmpty) {
+        setState(() => _error = l10n.forgotPasswordEnterEmail);
+        return;
+      }
+      if (!_isValidEmail(email)) {
+        setState(() => _error = l10n.forgotPasswordInvalidEmailFormat);
+        return;
+      }
     }
 
     setState(() {
@@ -105,9 +102,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       if (mounted) {
         setState(() {
           _codeSent = true;
+          _sentTo = email;
           _successMessage = l10n.forgotPasswordCodeSentMessage;
         });
         _startCountdown();
+        _otpCtrl.clear();
+        _otpFieldKey.currentState?.requestFocus();
       }
     } on AuthException catch (e) {
       if (mounted) setState(() => _error = _mapAuthError(l10n, e.message));
@@ -121,12 +121,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   }
 
   Future<void> _verifyOtp() async {
+    if (_loading) return;
     final l10n = AppLocalizations.of(context)!;
-    final email = _emailCtrl.text.trim();
     final token = _otpCtrl.text.trim();
 
     if (token.isEmpty) {
       setState(() => _error = l10n.forgotPasswordEnterOtp);
+      return;
+    }
+    if (token.length < 6) {
+      setState(() => _error = l10n.otpEnterAllDigits);
       return;
     }
 
@@ -137,7 +141,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     try {
       final res = await Supabase.instance.client.auth.verifyOTP(
-        email: email,
+        email: _sentTo,
         token: token,
         type: OtpType.recovery,
       );
@@ -156,6 +160,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  void _useAnotherEmail() {
+    _timer?.cancel();
+    setState(() {
+      _codeSent = false;
+      _resendCountdown = 0;
+      _error = null;
+      _successMessage = null;
+      _otpCtrl.clear();
+    });
   }
 
   String _mapAuthError(AppLocalizations l10n, String message) {
@@ -181,261 +196,156 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    return Stack(
+      children: [
+        AuthScaffold(
+          showBack: true,
+          children: [
+            AnimatedSwitcher(
+              duration: AppMotion.base,
+              switchInCurve: AppMotion.emphasized,
+              child: _codeSent
+                  ? _buildCodeStage(l10n, key: const ValueKey('code'))
+                  : _buildEmailStage(l10n, key: const ValueKey('email')),
+            ),
+          ],
+        ),
+        if (_loading) const Positioned.fill(child: AuthLoadingOverlay()),
+      ],
+    );
+  }
+
+  Widget _stageHeader({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
     final colors = context.colors;
     final typography = context.typography;
+    return Column(
+      children: [
+        Center(child: AuthEmblem.icon(size: 84, icon: icon)),
+        const SizedBox(height: AppSpacing.xxl),
+        Text(
+          title,
+          style: typography.displayLarge.copyWith(fontSize: 28),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          subtitle,
+          style: typography.bodyMedium.copyWith(color: colors.textSecondary),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.xxxl),
+      ],
+    );
+  }
 
-    return Scaffold(
-      body: Stack(
+  Widget _buildEmailStage(AppLocalizations l10n, {Key? key}) {
+    return AuthGlassCard(
+      key: key,
+      child: Column(
         children: [
-          const Positioned.fill(
-            child: CustomPatternBackground(pattern: BackgroundPattern.adhkar),
+          _stageHeader(
+            icon: Icons.lock_reset_rounded,
+            title: l10n.forgotPasswordRecoverTitle,
+            subtitle: l10n.forgotPasswordRecoverSubtitle,
           ),
-          SafeArea(
-            child: Column(
-              children: [
-                // App bar with back button
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.sm,
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: colors.gold,
-                        ),
-                      ),
-                      const Spacer(),
-                    ],
-                  ),
+          AuthField(
+            ctrl: _emailCtrl,
+            hint: l10n.authEmailHint,
+            icon: Icons.alternate_email_rounded,
+            style: s,
+            keyboardType: TextInputType.emailAddress,
+            focusNode: _emailFocus,
+            isLast: true,
+            onSubmit: () => _sendResetCode(),
+            onChanged: (_) {
+              if (_error != null) setState(() => _error = null);
+            },
+          ),
+          if (_error != null) AuthBanner(message: _error!),
+          const SizedBox(height: AppSpacing.xl),
+          PrimaryButton(
+            onTap: _loading ? null : () => _sendResetCode(),
+            label: _loading
+                ? l10n.forgotPasswordProcessing
+                : l10n.forgotPasswordSendCode,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCodeStage(AppLocalizations l10n, {Key? key}) {
+    final colors = context.colors;
+    final typography = context.typography;
+    return AuthGlassCard(
+      key: key,
+      child: Column(
+        children: [
+          _stageHeader(
+            icon: Icons.mark_email_read_outlined,
+            title: l10n.forgotPasswordEnterCodeTitle,
+            subtitle: l10n.authOtpSentTo(maskEmail(_sentTo)),
+          ),
+          OtpInputField(
+            key: _otpFieldKey,
+            controller: _otpCtrl,
+            hasError: _error != null,
+            onCompleted: _verifyOtp,
+            onChanged: (_) {
+              if (_error != null) setState(() => _error = null);
+            },
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            l10n.otpAutoVerifyNote,
+            style: typography.caption.copyWith(color: colors.textDim),
+            textAlign: TextAlign.center,
+          ),
+          if (_error != null) AuthBanner(message: _error!),
+          if (_successMessage != null && _error == null)
+            AuthBanner(
+              message: _successMessage!,
+              kind: AuthBannerKind.success,
+            ),
+          const SizedBox(height: AppSpacing.xl),
+          PrimaryButton(
+            onTap: _loading ? null : _verifyOtp,
+            label: _loading
+                ? l10n.forgotPasswordProcessing
+                : l10n.forgotPasswordVerifyAndContinue,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          if (_resendCountdown > 0)
+            Text(
+              l10n.forgotPasswordResendCountdown(_resendCountdown.toString()),
+              style: typography.bodySmall.copyWith(color: colors.textDim),
+            )
+          else
+            TextButton(
+              onPressed: _loading
+                  ? null
+                  : () => _sendResetCode(fromResend: true),
+              child: Text(
+                l10n.forgotPasswordResendCode,
+                style: typography.labelMedium.copyWith(
+                  color: colors.goldText,
+                  fontWeight: FontWeight.w700,
                 ),
-                Expanded(
-                  child: Center(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.xxl,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Icon
-                          Container(
-                            width: 84,
-                            height: 84,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                colors: [colors.card, colors.background],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              border: Border.all(
-                                color: colors.gold.withValues(alpha: 0.5),
-                                width: 1.5,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: colors.gold.withValues(alpha: 0.2),
-                                  blurRadius: 20,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: Icon(
-                                _codeSent
-                                    ? Icons.mark_email_read_outlined
-                                    : Icons.lock_reset_rounded,
-                                color: colors.gold,
-                                size: 40,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.xxl),
-
-                          // Title
-                          Text(
-                            _codeSent
-                                ? l10n.forgotPasswordEnterCodeTitle
-                                : l10n.forgotPasswordRecoverTitle,
-                            style: typography.displayLarge,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-
-                          // Subtitle
-                          Text(
-                            _codeSent
-                                ? l10n.forgotPasswordEnterCodeSubtitle
-                                : l10n.forgotPasswordRecoverSubtitle,
-                            style: typography.bodyMedium.copyWith(
-                              color: colors.textSecondary,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: AppSpacing.xxxl),
-
-                          // Email + OTP fields, grouped so a password
-                          // manager can see them together.
-                          AutofillGroup(
-                            child: Column(
-                              children: [
-                                AuthField(
-                                  ctrl: _emailCtrl,
-                                  hint: l10n.authEmailHint,
-                                  icon: Icons.alternate_email_rounded,
-                                  style: s,
-                                  keyboardType: TextInputType.emailAddress,
-                                  focusNode: _emailFocus,
-                                  isLast: !_codeSent,
-                                  onSubmit: !_codeSent ? _submit : null,
-                                  onChanged: (_) {
-                                    if (_error != null) {
-                                      setState(() => _error = null);
-                                    }
-                                  },
-                                ),
-
-                                // OTP field (shown when code is sent)
-                                if (_codeSent) ...[
-                                  const SizedBox(height: AppSpacing.lg),
-                                  AuthField(
-                                    ctrl: _otpCtrl,
-                                    hint: l10n.forgotPasswordOtpHint,
-                                    icon: Icons.pin_outlined,
-                                    style: s,
-                                    keyboardType: TextInputType.number,
-                                    focusNode: _otpFocus,
-                                    isLast: true,
-                                    onSubmit: _submit,
-                                    autofillHints: const [AutofillHints.oneTimeCode],
-                                    onChanged: (_) {
-                                      if (_error != null) {
-                                        setState(() => _error = null);
-                                      }
-                                    },
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-
-                          // Success Message Banner
-                          if (_successMessage != null) ...[
-                            const SizedBox(height: AppSpacing.lg),
-                            Container(
-                              padding: const EdgeInsets.all(AppSpacing.md),
-                              decoration: BoxDecoration(
-                                color: colors.successDim,
-                                borderRadius: AppRadius.card,
-                                border: Border.all(
-                                  color: colors.success.withValues(alpha: 0.4),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.check_circle_outline_rounded,
-                                    color: colors.successText,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: AppSpacing.sm),
-                                  Expanded(
-                                    child: Text(
-                                      _successMessage!,
-                                      style: typography.bodySmall.copyWith(
-                                        color: colors.successText,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-
-                          // Error Banner
-                          if (_error != null) ...[
-                            const SizedBox(height: AppSpacing.lg),
-                            Container(
-                              padding: const EdgeInsets.all(AppSpacing.md),
-                              decoration: BoxDecoration(
-                                color: colors.dangerDim,
-                                borderRadius: AppRadius.card,
-                                border: Border.all(
-                                  color: colors.danger.withValues(alpha: 0.4),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.warning_amber_rounded,
-                                    color: colors.dangerText,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: AppSpacing.sm),
-                                  Expanded(
-                                    child: Text(
-                                      _error!,
-                                      style: typography.bodySmall.copyWith(
-                                        color: colors.dangerText,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-
-                          const SizedBox(height: AppSpacing.xxl),
-
-                          // Main Action Button
-                          PrimaryButton(
-                            onTap: _loading ? null : _submit,
-                            label: _loading
-                                ? l10n.forgotPasswordProcessing
-                                : (_codeSent
-                                      ? l10n.forgotPasswordVerifyAndContinue
-                                      : l10n.forgotPasswordSendCode),
-                          ),
-
-                          // Resend Code or Change Email
-                          if (_codeSent) ...[
-                            const SizedBox(height: AppSpacing.lg),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (_resendCountdown > 0)
-                                  Text(
-                                    l10n.forgotPasswordResendCountdown(
-                                      _resendCountdown.toString(),
-                                    ),
-                                    style: typography.bodySmall.copyWith(
-                                      color: colors.textDim,
-                                    ),
-                                  )
-                                else
-                                  TextButton(
-                                    onPressed: _loading ? null : _sendResetCode,
-                                    child: Text(
-                                      l10n.forgotPasswordResendCode,
-                                      style: typography.labelMedium.copyWith(
-                                        color: colors.gold,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
+            ),
+          TextButton(
+            onPressed: _loading ? null : _useAnotherEmail,
+            child: Text(
+              l10n.otpUseAnotherEmail,
+              style: typography.labelMedium.copyWith(
+                color: colors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

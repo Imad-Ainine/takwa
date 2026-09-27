@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_islamic_icons/flutter_islamic_icons.dart';
 
+import 'islamic_glyph_emoji3d.dart';
+
 /// How an [IslamicGlyph] gets its pixels.
 ///
 /// The app's icon slots are fed plain strings — persisted model fields such as
@@ -43,6 +45,8 @@ class IslamicGlyphSource {
     required this.asset,
     required this.tintable,
     required this.repeat,
+    this.hiResAsset = '',
+    this.followsTextSize = false,
   });
 
   const IslamicGlyphSource.emoji(String char)
@@ -118,6 +122,16 @@ class IslamicGlyphSource {
   /// icon colour. False for full-colour art, which would lose its meaning.
   final bool tintable;
   final bool repeat;
+
+  /// A larger render of [asset] to use once the box passes [_hiResFrom], for
+  /// rasters that would otherwise go soft on a cover or a disc. Empty when the
+  /// single render is enough.
+  final String hiResAsset;
+
+  /// Whether an omitted `size:` inherits the ambient text size the way an emoji
+  /// does, instead of taking the widget's 24px default. True for the auto-mapped
+  /// emoji renders, which replaced an emoji mid-sentence.
+  final bool followsTextSize;
 }
 
 /// A registered icon: where it comes from, and what to call it out loud.
@@ -284,23 +298,92 @@ const Map<String, IslamicGlyphKind> _pathKinds = {
 
 /// Turns whatever a call site holds into a source, or `null` when the string
 /// is an ordinary emoji (or any text at all) and should draw as one.
+///
+/// Lookup order:
+///
+/// 1. A shipped Noto 3D render of a **literal emoji** input. Full colour,
+///    cross-platform consistent, and what the feature grids want.
+/// 2. The hand-written catalogue entry — semantic names (`'mosque'`, `'fajr'`,
+///    prayer aliases, symbols such as `۞`). Tintable line art, right for
+///    the gold/chrome slots that uses `IslamicGlyph('crescent')` and kin.
+/// 3. An asset path (`'assets/icons/x.svg'` etc.
+///
+/// An emoji string like `'🕌'` therefore resolves to its 3D PNG (matches
+/// Muslim Pro); the same visual can still be reached as tintable line art via the
+/// semantic key `'mosque'` when chrome needs it.
 IslamicGlyphEntry? resolveIslamicGlyph(String glyph) {
+  if (!glyph.contains('/')) {
+    final emoji3d = _emoji3dEntry(glyph);
+    if (emoji3d != null) {
+      return emoji3d;
+    }
+  }
+
   final known = islamicGlyphCatalog[glyph];
   if (known != null) return known;
 
-  if (!glyph.contains('/')) return null;
-  final dot = glyph.lastIndexOf('.');
-  if (dot < 0) return null;
-  final kind = _pathKinds[glyph.substring(dot).toLowerCase()];
-  if (kind == null) return null;
+  if (glyph.contains('/')) {
+    final dot = glyph.lastIndexOf('.');
+    if (dot < 0) return null;
+    final kind = _pathKinds[glyph.substring(dot).toLowerCase()];
+    if (kind == null) return null;
+    return IslamicGlyphEntry(
+      IslamicGlyphSource._(
+        kind: kind,
+        emoji: '',
+        icon: null,
+        asset: glyph,
+        tintable: kind == IslamicGlyphKind.svg,
+        repeat: true,
+      ),
+    );
+  }
+  return null;
+}
+
+/// Above this many logical pixels a 128px render starts to soften on a 3x
+/// screen, so [IslamicGlyphSource.hiResAsset] takes over.
+const double kGlyphHiResFrom = 40;
+
+/// The `assets/emoji3d/` filename stem for an emoji, or `null` when [glyph] is
+/// not a bare emoji or has no render shipped.
+///
+/// U+FE0F is dropped because upstream does not name files with it; U+200D is
+/// kept because a ZWJ sequence's filename contains it.
+@visibleForTesting
+String? emoji3dSlug(String glyph) {
+  final parts = <String>[];
+  for (final rune in glyph.runes) {
+    if (rune == 0xfe0f) continue;
+    if (!_isEmojiRune(rune)) return null;
+    parts.add(rune.toRadixString(16));
+  }
+  if (parts.isEmpty) return null;
+  final slug = parts.join('_');
+  return kEmoji3dShipped.contains(slug) ? slug : null;
+}
+
+bool _isEmojiRune(int rune) =>
+    (rune >= 0x1f000 && rune <= 0x1faff) ||
+    (rune >= 0x2600 && rune <= 0x27bf) ||
+    (rune >= 0x2b00 && rune <= 0x2bff) ||
+    rune == 0x200d;
+
+IslamicGlyphEntry? _emoji3dEntry(String glyph) {
+  final slug = emoji3dSlug(glyph);
+  if (slug == null) return null;
+  final name = 'emoji_u$slug.png';
   return IslamicGlyphEntry(
     IslamicGlyphSource._(
-      kind: kind,
-      emoji: '',
+      kind: IslamicGlyphKind.png,
+      // Still the emoji, so a PNG that fails to decode draws what it replaced.
+      emoji: glyph,
       icon: null,
-      asset: glyph,
-      tintable: kind == IslamicGlyphKind.svg,
+      asset: 'assets/emoji3d/$name',
+      tintable: false,
       repeat: true,
+      hiResAsset: kEmoji3dHiRes.contains(slug) ? 'assets/emoji3d/512/$name' : '',
+      followsTextSize: true,
     ),
   );
 }

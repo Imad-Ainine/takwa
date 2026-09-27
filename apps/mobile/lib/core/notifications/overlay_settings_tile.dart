@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:takwa/core/notifications/overlay_background_service.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/takwa_error_state.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
@@ -168,13 +169,7 @@ class OverlayNotificationSettings extends ConsumerWidget {
                           ),
                           child: Row(
                             children: [
-                              Text(
-                                '📊',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: context.colors.teal,
-                                ),
-                              ),
+                              const IslamicGlyph('📊', size: 18),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(

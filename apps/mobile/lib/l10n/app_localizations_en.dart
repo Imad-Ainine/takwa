@@ -2879,6 +2879,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forgotPasswordResendCode => 'Resend Code';
 
   @override
+  String authOtpSentTo(String email) {
+    return 'Enter the 6-digit code sent to $email, or open the link in the email';
+  }
+
+  @override
+  String get otpAutoVerifyNote =>
+      'The code is verified automatically once complete';
+
+  @override
+  String get otpUseAnotherEmail => 'Use another email';
+
+  @override
+  String get otpEnterAllDigits => 'Please enter the full 6-digit code';
+
+  @override
+  String get otpNoneEntered => 'Empty';
+
+  @override
+  String get authWelcomeBack => 'Welcome back';
+
+  @override
+  String get authBackTooltip => 'Back';
+
+  @override
+  String get emailConfirmationSpamHint =>
+      'Didn\'t get the email? Check your spam folder.';
+
+  @override
+  String get updatePasswordCancelButton => 'Cancel and return to sign in';
+
+  @override
   String get timePeriodAm => 'AM';
 
   @override

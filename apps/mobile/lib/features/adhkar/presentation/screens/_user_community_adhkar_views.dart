@@ -49,7 +49,7 @@ class UserAdhkarTabView extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('✨', style: TextStyle(fontSize: 64)),
+                    const IslamicGlyph('✨', size: 64),
                     const SizedBox(height: AppSpacing.lg),
                     Text(
                       l10n.userAdhkarEmptyTitle,
@@ -382,7 +382,7 @@ class _ShareToCommunitySheetState
               shape: BoxShape.circle,
             ),
             child: const Center(
-              child: Text('🌍', style: TextStyle(fontSize: 28)),
+              child: IslamicGlyph('🌍', size: 28),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -523,7 +523,7 @@ class CommunityAdhkarTabView extends ConsumerWidget {
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('🌍', style: TextStyle(fontSize: 64)),
+                    const IslamicGlyph('🌍', size: 64),
                     const SizedBox(height: AppSpacing.lg),
                     Text(
                       l10n.communityAdhkarEmptyTitle,
@@ -645,7 +645,7 @@ class _CommunityAdhkarCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Center(
-                    child: Text('🤝', style: TextStyle(fontSize: 18)),
+                    child: IslamicGlyph('🤝', size: 18),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -961,7 +961,7 @@ class _AddAdhkarSheetState extends ConsumerState<AddAdhkarSheet> {
               ),
               child: Row(
                 children: [
-                  const Text('🌍', style: TextStyle(fontSize: 20)),
+                  const IslamicGlyph('🌍', size: 20),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(

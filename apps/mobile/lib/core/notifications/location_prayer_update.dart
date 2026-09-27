@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:takwa/core/theme/app_theme.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 
 import 'package:geocoding/geocoding.dart';
@@ -926,7 +927,7 @@ class _LocationUpdateTileState extends ConsumerState<LocationUpdateTile> {
                           size: 18,
                         ),
                       )
-                    : const Text('📍', style: TextStyle(fontSize: 18)),
+                    : const IslamicGlyph('📍', size: 18),
               ),
             ),
             const SizedBox(width: AppSpacing.md),

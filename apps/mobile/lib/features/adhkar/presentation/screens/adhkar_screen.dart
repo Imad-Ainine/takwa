@@ -186,7 +186,7 @@ class _AdhkarTopBar extends StatelessWidget {
                             border: Border.all(color: context.colors.border),
                           ),
                           child: const Center(
-                            child: Text('❤️', style: TextStyle(fontSize: 18)),
+                            child: IslamicGlyph('❤️', size: 18),
                           ),
                         ),
                       ),
@@ -604,10 +604,7 @@ class _DhikrCardState extends ConsumerState<_DhikrCard>
                               ),
                               child: Row(
                                 children: [
-                                  const Text(
-                                    '✨',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
+                                  const IslamicGlyph('✨', size: 12),
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
@@ -947,7 +944,7 @@ class _AdhkarNotifSheet extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
               child: Row(
                 children: [
-                  const Text('🔕', style: TextStyle(fontSize: 20)),
+                  const IslamicGlyph('🔕', size: 20),
                   const SizedBox(width: 10),
                   Text(
                     l10n.adhkarNotifDisabled,

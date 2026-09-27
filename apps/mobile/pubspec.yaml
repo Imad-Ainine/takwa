@@ -146,6 +146,8 @@ flutter:
     - .env
     - assets/sounds/
     - assets/icons/
+    - assets/emoji3d/
+    - assets/emoji3d/512/
     - assets/images/
     - assets/tafsir/
     - assets/lottie/

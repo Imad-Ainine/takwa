@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -329,7 +330,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
                         ),
                       ),
                       child: const Center(
-                        child: Text('🌍', style: TextStyle(fontSize: 18)),
+                        child: IslamicGlyph('🌍', size: 18),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),

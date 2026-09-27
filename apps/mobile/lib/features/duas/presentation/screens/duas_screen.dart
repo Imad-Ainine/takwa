@@ -213,7 +213,7 @@ class _DuasTopBar extends ConsumerWidget {
                               ),
                             ),
                             child: const Center(
-                              child: Text('❤️', style: TextStyle(fontSize: 18)),
+                              child: IslamicGlyph('❤️', size: 18),
                             ),
                           ),
                           if (favCount > 0)
@@ -414,7 +414,7 @@ class _DuasList extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('🔍', style: TextStyle(fontSize: 36)),
+            const IslamicGlyph('🔍', size: 36),
             const SizedBox(height: 10),
             Text(
               AppLocalizations.of(context)!.duasNoResults,
@@ -1022,7 +1022,7 @@ class _CommunityDuasTabView extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('🌍', style: TextStyle(fontSize: 48)),
+                        const IslamicGlyph('🌍', size: 48),
                         const SizedBox(height: AppSpacing.lg),
                         Text(
                           l10n.duasCommunityEmptyTitle,

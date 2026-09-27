@@ -58,7 +58,7 @@ class FavoriteDuasScreen extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      const Text('❤️', style: TextStyle(fontSize: 22)),
+                      const IslamicGlyph('❤️', size: 22),
                     ],
                   ),
                 ),
@@ -99,7 +99,7 @@ class _EmptyFavs extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('🤍', style: TextStyle(fontSize: 52)),
+          const IslamicGlyph('🤍', size: 52),
           const SizedBox(height: AppSpacing.lg),
           Text(
             l10n.favoriteDuasEmptyTitle,
