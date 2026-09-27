@@ -2,6 +2,26 @@
 //  MODELS
 // ─────────────────────────────────────────
 
+import 'package:flutter/painting.dart';
+
+/// Parses a book accent colour coming from either Dart literal (`0xFF…`) or
+/// web (`#RRGGBB` / `RRGGBB`) notation. Server-authored rows use the web form,
+/// so every call site must not re-implement this — most of the earlier copies
+/// silently fell back to gold on `#`-prefixed values.
+Color bookColorFromHex(String? hex, {Color fallback = const Color(0xFFC8A96E)}) {
+  if (hex == null) return fallback;
+  final value = hex.trim();
+  if (value.isEmpty) return fallback;
+  final body = value.startsWith('#') ? value.substring(1) : value;
+  if (body.startsWith('0x')) return _tryColor(int.tryParse(body) ?? 0, fallback);
+  // 6-digit web hex has no alpha channel; promote to opaque.
+  final normalized = body.length == 6 ? 'FF$body' : body;
+  return _tryColor(int.tryParse(normalized, radix: 16) ?? 0, fallback);
+}
+
+Color _tryColor(int value, Color fallback) =>
+    value == 0 ? fallback : Color(value);
+
 enum BookCategory {
   hadith, // الحديث
   fiqh, // الفقه
@@ -27,12 +47,13 @@ class BookChapter {
 
   factory BookChapter.fromJson(Map<String, dynamic> json) {
     return BookChapter(
-      index: json['index'] ?? 0,
-      titleAr: json['title_ar'] ?? '',
+      index: _asInt(json['index']),
+      titleAr: _asString(json['title_ar']),
       pages: (json['pages'] as List? ?? [])
-          .map((p) => BookPage.fromJson(p))
+          .whereType<Map<String, dynamic>>()
+          .map(BookPage.fromJson)
           .toList(),
-      intro: json['intro'],
+      intro: json['intro'] is String ? json['intro'] as String : null,
     );
   }
 
@@ -67,13 +88,17 @@ class BookPage {
   });
 
   factory BookPage.fromJson(Map<String, dynamic> json) {
+    // `hadith_number` used to go through `.toString()`, which turned a
+    // missing value into the literal string "null" and rendered a "null"
+    // badge on every non-hadith page.
+    final hadithNumber = json['hadith_number'];
     return BookPage(
-      index: json['index'] ?? 0,
-      content: json['content'] ?? '',
-      title: json['title'],
-      isHadith: json['is_hadith'] ?? false,
-      hadithNumber: json['hadith_number'].toString(),
-      source: json['source'],
+      index: _asInt(json['index']),
+      content: _asString(json['content']),
+      title: json['title'] is String ? json['title'] as String : null,
+      isHadith: json['is_hadith'] == true,
+      hadithNumber: hadithNumber == null ? null : '$hadithNumber',
+      source: json['source'] is String ? json['source'] as String : null,
     );
   }
 
@@ -122,25 +147,32 @@ class IslamicBook {
 
   factory IslamicBook.fromJson(Map<String, dynamic> json) {
     return IslamicBook(
-      id: json['id'].toString(),
-      titleAr: json['title_ar'] ?? '',
-      titleEn: json['title_en'] ?? '',
-      authorAr: json['author_ar'] ?? '',
-      authorEn: json['author_en'] ?? '',
-      descriptionAr: json['description_ar'] ?? '',
-      emoji: json['emoji'] ?? '📚',
+      id: json['id']?.toString() ?? '',
+      titleAr: _asString(json['title_ar']),
+      titleEn: _asString(json['title_en']),
+      authorAr: _asString(json['author_ar']),
+      authorEn: _asString(json['author_en']),
+      descriptionAr: _asString(json['description_ar']),
+      emoji: json['emoji'] is String && (json['emoji'] as String).isNotEmpty
+          ? json['emoji'] as String
+          : '📚',
       category: BookCategory.values.firstWhere(
         (e) => e.name == json['category'],
         orElse: () => BookCategory.hadith,
       ),
       chapters: (json['chapters'] as List? ?? [])
-          .map((c) => BookChapter.fromJson(c))
+          .whereType<Map<String, dynamic>>()
+          .map(BookChapter.fromJson)
           .toList(),
-      coverUrl: json['cover_url'],
-      pdfUrl: json['pdf_url'],
-      publishYear: json['publish_year'] ?? 0,
-      coverColor: json['cover_color'] ?? '0xFFC8A96E',
-      coverColor2: json['cover_color_2'] ?? '0xFF3AAFA9',
+      coverUrl: _asNonEmptyString(json['cover_url']),
+      pdfUrl: _asNonEmptyString(json['pdf_url']),
+      publishYear: _asInt(json['publish_year']),
+      coverColor: json['cover_color'] is String
+          ? json['cover_color'] as String
+          : '0xFFC8A96E',
+      coverColor2: json['cover_color_2'] is String
+          ? json['cover_color_2'] as String
+          : '0xFF3AAFA9',
     );
   }
 
@@ -175,7 +207,46 @@ class IslamicBook {
     BookCategory.tazkiyah => 'التزكية',
     BookCategory.quran => 'علوم القرآن',
   };
+
+  /// Whether the built-in text reader can render anything at all. Most rows
+  /// in the remote `books` table are PDF-only (or metadata-only), and opening
+  /// the reader on them used to index into an empty `chapters` list and crash
+  /// the route with a RangeError.
+  bool get hasReadableText => chapters.any((c) => c.pages.isNotEmpty);
+
+  /// What the reader can offer: a full PDF, inline text, both, or neither.
+  BookFormat get format {
+    final pdf = pdfUrl != null && pdfUrl!.isNotEmpty;
+    if (pdf && hasReadableText) return BookFormat.pdfAndText;
+    if (pdf) return BookFormat.pdf;
+    return hasReadableText ? BookFormat.text : BookFormat.none;
+  }
+
+  /// Accent colour for covers, app bars and the reader chrome.
+  Color get accentColor => bookColorFromHex(coverColor);
+
+  /// Second stop of the cover gradient.
+  Color get secondaryColor => bookColorFromHex(coverColor2);
 }
+
+/// How a book can be opened.
+enum BookFormat { none, text, pdf, pdfAndText }
+
+/// Colour mode of the inline reader. Declared here because it is persisted by
+/// [BookPrefsRepository] and read back before any screen exists.
+enum ReaderTheme { light, sepia, dark }
+
+int _asInt(Object? value) => switch (value) {
+  final int i => i,
+  final num n => n.toInt(),
+  final String s => int.tryParse(s.trim()) ?? 0,
+  _ => 0,
+};
+
+String _asString(Object? value) => value is String ? value : '';
+
+String? _asNonEmptyString(Object? value) =>
+    value is String && value.trim().isNotEmpty ? value.trim() : null;
 
 // ─────────────────────────────────────────
 //  BOOK 1: الأربعون النووية

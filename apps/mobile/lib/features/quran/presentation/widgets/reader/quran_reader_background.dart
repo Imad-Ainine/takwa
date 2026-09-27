@@ -43,7 +43,7 @@ class _QuranBgPainter extends CustomPainter {
 
     // Top glow
     final topGlow = RadialGradient(
-      colors: [kReaderGreenHdr.withValues(alpha: 0.12), Colors.transparent],
+      colors: [kReaderTeal.withValues(alpha: 0.18), Colors.transparent],
     );
     canvas.drawCircle(
       Offset(size.width / 2, 0),

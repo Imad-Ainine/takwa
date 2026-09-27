@@ -7,6 +7,8 @@ import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/core/widgets/takwa_refresh_indicator.dart';
+import 'package:takwa/core/widgets/takwa_tappable.dart';
+import 'package:takwa/features/books/data/book_search.dart';
 import 'package:takwa/features/books/data/books_data.dart';
 import 'package:takwa/features/books/presentation/screens/books_chapter_screen.dart';
 import 'package:takwa/features/books/providers/books_reading_provider.dart';
@@ -20,15 +22,29 @@ class BooksLibraryScreen extends ConsumerStatefulWidget {
 }
 
 class _BooksLibraryScreenState extends ConsumerState<BooksLibraryScreen> {
-  String _searchQuery = '';
+  final _searchCtrl = TextEditingController();
   BookCategory? _selectedCategory;
   bool _isGridView = true;
   final _scrollCtrl = ScrollController();
 
+  /// Normalised so أنوار/الأنوار/انور and taa/haa spellings all match.
+  String get _query => normalizeArabic(_searchCtrl.text);
+
   @override
   void dispose() {
+    _searchCtrl.dispose();
     _scrollCtrl.dispose();
     super.dispose();
+  }
+
+  void _clearSearch() {
+    _searchCtrl.clear();
+    setState(() {});
+  }
+
+  void _resetFilters() {
+    _searchCtrl.clear();
+    setState(() => _selectedCategory = null);
   }
 
   @override
@@ -37,6 +53,7 @@ class _BooksLibraryScreenState extends ConsumerState<BooksLibraryScreen> {
     final colors = context.colors;
     final typography = context.typography;
     final booksAsync = ref.watch(booksListProvider);
+    final continueReading = ref.watch(continueReadingProvider);
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -45,6 +62,11 @@ class _BooksLibraryScreenState extends ConsumerState<BooksLibraryScreen> {
         leading: const CustomLeadingButton(),
         scrollController: _scrollCtrl,
         actions: [
+          _SortMenu(
+            current: ref.watch(bookSortOrderProvider),
+            onSelect: (order) =>
+                ref.read(bookSortOrderProvider.notifier).select(order),
+          ),
           IconButton(
             onPressed: () => setState(() => _isGridView = !_isGridView),
             icon: Icon(
@@ -71,12 +93,21 @@ class _BooksLibraryScreenState extends ConsumerState<BooksLibraryScreen> {
           controller: _scrollCtrl,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
+            // ── Continue reading ──────────────────────────────────
+            if (continueReading.isNotEmpty)
+              SliverToBoxAdapter(
+                child: _ContinueReadingRow(entries: continueReading),
+              ),
+
             // ── Search Bar ────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
                 child: _SearchBar(
-                  onChanged: (val) => setState(() => _searchQuery = val),
+                  controller: _searchCtrl,
+                  onChanged: (_) => setState(() {}),
+                  onClear: _clearSearch,
+                  clearTooltip: l10n.booksClearSearchTooltip,
                 ),
               ),
             ),
@@ -92,29 +123,28 @@ class _BooksLibraryScreenState extends ConsumerState<BooksLibraryScreen> {
             // ── Book List/Grid ────────────────────────────────────
             booksAsync.when(
               data: (books) {
-                final filtered = books.where((b) {
+                final matches = books.where((b) {
                   final matchCat =
                       _selectedCategory == null ||
                       b.category == _selectedCategory;
-                  final matchSearch =
-                      _searchQuery.isEmpty ||
-                      b.titleAr.contains(_searchQuery) ||
-                      b.authorAr.contains(_searchQuery);
-                  return matchCat && matchSearch;
+                  return matchCat && bookMatchesNormalizedQuery(b, _query);
                 }).toList();
+                final filtered = sortBooks(
+                  matches,
+                  ref.watch(bookSortOrderProvider),
+                  lastRead: ref
+                      .read(readingProgressProvider.notifier)
+                      .lastReadByBook,
+                );
 
                 if (filtered.isEmpty) {
                   return SliverFillRemaining(
                     hasScrollBody: false,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('🧐', style: TextStyle(fontSize: 50)),
-                          const SizedBox(height: AppSpacing.lg),
-                          Text(l10n.booksNoResultsFound),
-                        ],
-                      ),
+                    child: _NoResults(
+                      filtered: _query.isNotEmpty || _selectedCategory != null,
+                      hint: l10n.booksNoResultsHint,
+                      resetLabel: l10n.booksResetFiltersButton,
+                      onReset: _resetFilters,
                     ),
                   );
                 }
@@ -243,8 +273,17 @@ class _BooksLibraryScreenState extends ConsumerState<BooksLibraryScreen> {
 // ─────────────────────────────────────────
 
 class _SearchBar extends StatelessWidget {
+  final TextEditingController controller;
   final ValueChanged<String> onChanged;
-  const _SearchBar({required this.onChanged});
+  final VoidCallback onClear;
+  final String clearTooltip;
+
+  const _SearchBar({
+    required this.controller,
+    required this.onChanged,
+    required this.onClear,
+    required this.clearTooltip,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -264,19 +303,282 @@ class _SearchBar extends StatelessWidget {
         ],
       ),
       child: TextField(
+        controller: controller,
         onChanged: onChanged,
         textAlign: TextAlign.start,
+        textInputAction: TextInputAction.search,
         decoration: InputDecoration(
           hintText: l10n.booksSearchHint,
           hintStyle: TextStyle(
             color: colors.textSecondary.withValues(alpha: 0.5),
           ),
           prefixIcon: Icon(Icons.search, color: colors.gold),
+          // One tap instead of backspacing every character.
+          suffixIcon: controller.text.isEmpty
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                  tooltip: clearTooltip,
+                  onPressed: onClear,
+                ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             vertical: 15,
             horizontal: AppSpacing.xl,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────
+//  SORT MENU
+// ─────────────────────────────────────────
+
+class _SortMenu extends StatelessWidget {
+  final BookSortOrder current;
+  final ValueChanged<BookSortOrder> onSelect;
+
+  const _SortMenu({required this.current, required this.onSelect});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final label = switch (current) {
+      BookSortOrder.title => l10n.booksSortByTitle,
+      BookSortOrder.author => l10n.booksSortByAuthor,
+      BookSortOrder.year => l10n.booksSortByYear,
+      BookSortOrder.recent => l10n.booksSortByRecent,
+    };
+    return PopupMenuButton<BookSortOrder>(
+      initialValue: current,
+      onSelected: onSelect,
+      tooltip: '${l10n.booksSortMenuLabel}: $label',
+      color: context.colors.card,
+      icon: Icon(
+        Icons.sort_rounded,
+        color: AppBarWidget.foregroundColorFor(context),
+      ),
+      itemBuilder: (context) => [
+        for (final order in BookSortOrder.values)
+          PopupMenuItem(
+            value: order,
+            child: Text(
+              switch (order) {
+                BookSortOrder.title => l10n.booksSortByTitle,
+                BookSortOrder.author => l10n.booksSortByAuthor,
+                BookSortOrder.year => l10n.booksSortByYear,
+                BookSortOrder.recent => l10n.booksSortByRecent,
+              },
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────
+//  CONTINUE READING
+// ─────────────────────────────────────────
+
+class _ContinueReadingRow extends StatelessWidget {
+  final List<ContinueReadingEntry> entries;
+
+  const _ContinueReadingRow({required this.entries});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          child: Text(
+            l10n.booksContinueReadingTitle,
+            style: typography.labelLarge.copyWith(
+              fontFamily: 'Amiri',
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.end,
+            textDirection: TextDirection.rtl,
+          ),
+        ),
+        SizedBox(
+          height: 132,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            itemCount: entries.length,
+            itemBuilder: (context, i) {
+              final entry = entries[i];
+              final book = entry.book;
+              final accent = book.accentColor;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                child: SizedBox(
+                  width: 210,
+                  child: _ContinueReadingTile(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BooksChapterScreen(book: book),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 52,
+                          height: 74,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(AppRadius.sm),
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [accent, book.secondaryColor],
+                            ),
+                          ),
+                          child: Center(
+                            child: IslamicGlyph(book.emoji, size: 24),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                book.titleAr,
+                                style: typography.labelLarge.copyWith(
+                                  fontFamily: 'Amiri',
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.start,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(3),
+                                child: LinearProgressIndicator(
+                                  value: entry.fraction,
+                                  minHeight: 4,
+                                  backgroundColor: accent.withValues(
+                                    alpha: 0.15,
+                                  ),
+                                  color: accent,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(
+                                '${(entry.fraction * 100).round()}%',
+                                style: typography.caption.copyWith(
+                                  color: colors.textSecondary,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ContinueReadingTile extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const _ContinueReadingTile({required this.child, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Semantics(
+      link: true,
+      child: TakwaTappable(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: colors.card,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: colors.border),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────
+//  NO RESULTS
+// ─────────────────────────────────────────
+
+class _NoResults extends StatelessWidget {
+  final bool filtered;
+  final String hint;
+  final String resetLabel;
+  final VoidCallback onReset;
+
+  const _NoResults({
+    required this.filtered,
+    required this.hint,
+    required this.resetLabel,
+    required this.onReset,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('🧐', style: TextStyle(fontSize: 50)),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              filtered ? hint : l10n.booksNoResultsFound,
+              style: typography.bodyMedium.copyWith(
+                color: colors.textSecondary,
+                fontFamily: 'Amiri',
+              ),
+              textAlign: TextAlign.center,
+              textDirection: TextDirection.rtl,
+            ),
+            if (filtered) ...[
+              const SizedBox(height: AppSpacing.xl),
+              TextButton.icon(
+                onPressed: onReset,
+                icon: const Icon(Icons.filter_alt_off_outlined, size: 20),
+                label: Text(
+                  resetLabel,
+                  style: const TextStyle(fontFamily: 'Amiri'),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -359,34 +661,15 @@ class _BookCard extends ConsumerWidget {
   final VoidCallback onTap;
   const _BookCard({required this.book, required this.onTap});
 
-  Color _parseColor(String hex) {
-    try {
-      if (hex.startsWith('0x')) return Color(int.parse(hex));
-      return Color(int.parse('0xFF$hex'));
-    } catch (_) {
-      return const Color(0xFFC8A96E);
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final colors = context.colors;
     final typography = context.typography;
     final progress = ref.watch(readingProgressProvider);
-    final p = getProgress(progress, book.id);
-
-    final c1 = _parseColor(book.coverColor);
-    final c2 = _parseColor(book.coverColor2);
-
-    // Build percentage
-    double percent = 0;
-    if (p != null && book.totalPages > 0) {
-      int done = 0;
-      // Note: Supabase books might not have chapters locally loaded yet
-      // This is a placeholder logic for now
-      percent = 0.1; // Demo
-    }
+    final c1 = book.accentColor;
+    final c2 = book.secondaryColor;
+    final fraction = bookCompletionFraction(book, progress[book.id]);
 
     return GestureDetector(
       onTap: onTap,
@@ -465,6 +748,33 @@ class _BookCard extends ConsumerWidget {
                         textAlign: TextAlign.start,
                       ),
                       const SizedBox(height: AppSpacing.sm),
+                      if (fraction > 0) ...[
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(3),
+                                child: LinearProgressIndicator(
+                                  value: fraction,
+                                  minHeight: 4,
+                                  backgroundColor: c1.withValues(alpha: 0.12),
+                                  color: c1,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Text(
+                              '${(fraction * 100).round()}%',
+                              style: typography.caption.copyWith(
+                                color: c1,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                      ],
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -559,26 +869,21 @@ class _BookCard extends ConsumerWidget {
 //  BOOK GRID CARD
 // ─────────────────────────────────────────
 
-class _BookGridCard extends StatelessWidget {
+class _BookGridCard extends ConsumerWidget {
   final IslamicBook book;
   final VoidCallback onTap;
   const _BookGridCard({required this.book, required this.onTap});
 
-  Color _parseColor(String hex) {
-    try {
-      if (hex.startsWith('0x')) return Color(int.parse(hex));
-      return Color(int.parse('0xFF$hex'));
-    } catch (_) {
-      return const Color(0xFFC8A96E);
-    }
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final typography = context.typography;
-    final c1 = _parseColor(book.coverColor);
-    final c2 = _parseColor(book.coverColor2);
+    final c1 = book.accentColor;
+    final c2 = book.secondaryColor;
+    final fraction = bookCompletionFraction(
+      book,
+      ref.watch(readingProgressProvider)[book.id],
+    );
 
     return GestureDetector(
       onTap: onTap,
@@ -625,6 +930,18 @@ class _BookGridCard extends StatelessWidget {
                       )
                     else
                       Center(child: IslamicGlyph(book.emoji, size: 30)),
+                    if (fraction > 0)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: LinearProgressIndicator(
+                          value: fraction,
+                          minHeight: 4,
+                          backgroundColor: Colors.black.withValues(alpha: 0.35),
+                          valueColor: AlwaysStoppedAnimation<Color>(c1),
+                        ),
+                      ),
                   ],
                 ),
               ),

@@ -29,7 +29,7 @@ class QuranReaderAyahOptionsSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       decoration: const BoxDecoration(
-        color: Color(0xFF0F1E2D),
+        color: kReaderBgDark,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -160,7 +160,7 @@ class QuranReaderSettingsSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 36),
       decoration: const BoxDecoration(
-        color: Color(0xFF0D3A26),
+        color: kReaderBgDark,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
@@ -230,7 +230,7 @@ class QuranReaderSettingsSheet extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: 'Amiri',
                           color: selected
-                              ? const Color(0xFF0D3A26)
+                              ? kReaderOnGold
                               : Colors.white70,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,

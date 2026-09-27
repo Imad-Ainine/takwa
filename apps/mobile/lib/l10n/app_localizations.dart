@@ -6428,6 +6428,108 @@ abstract class AppLocalizations {
   /// **'صفحة'**
   String get bookReaderPageLabel;
 
+  /// No description provided for @bookReaderThemeSectionLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'مظهر الصفحة'**
+  String get bookReaderThemeSectionLabel;
+
+  /// No description provided for @bookReaderBookmarksTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإشارات المرجعية'**
+  String get bookReaderBookmarksTitle;
+
+  /// No description provided for @bookReaderBookmarksEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد إشارات مرجعية بعد. اضغط على علامة الصفحة في الأعلى لحفظ موضع.'**
+  String get bookReaderBookmarksEmpty;
+
+  /// No description provided for @bookReaderBookmarkAddTooltip.
+  ///
+  /// In ar, this message translates to:
+  /// **'إضافة إشارة مرجعية'**
+  String get bookReaderBookmarkAddTooltip;
+
+  /// No description provided for @bookReaderBookmarkRemoveTooltip.
+  ///
+  /// In ar, this message translates to:
+  /// **'إزالة الإشارة المرجعية'**
+  String get bookReaderBookmarkRemoveTooltip;
+
+  /// No description provided for @bookReaderBookmarkSavedToast.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حفظ الإشارة المرجعية'**
+  String get bookReaderBookmarkSavedToast;
+
+  /// No description provided for @bookReaderBookmarkRemovedToast.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حذف الإشارة المرجعية'**
+  String get bookReaderBookmarkRemovedToast;
+
+  /// No description provided for @bookReaderContentUnavailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يحتوي هذا الكتاب على نص للقراءة داخل التطبيق'**
+  String get bookReaderContentUnavailable;
+
+  /// No description provided for @booksSortMenuLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'ترتيب'**
+  String get booksSortMenuLabel;
+
+  /// No description provided for @booksSortByTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حسب العنوان'**
+  String get booksSortByTitle;
+
+  /// No description provided for @booksSortByAuthor.
+  ///
+  /// In ar, this message translates to:
+  /// **'حسب المؤلف'**
+  String get booksSortByAuthor;
+
+  /// No description provided for @booksSortByYear.
+  ///
+  /// In ar, this message translates to:
+  /// **'حسب السنة'**
+  String get booksSortByYear;
+
+  /// No description provided for @booksSortByRecent.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكثر قراءة'**
+  String get booksSortByRecent;
+
+  /// No description provided for @booksContinueReadingTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'متابعة القراءة'**
+  String get booksContinueReadingTitle;
+
+  /// No description provided for @booksClearSearchTooltip.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسح البحث'**
+  String get booksClearSearchTooltip;
+
+  /// No description provided for @booksNoResultsHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'جرّب كلمة أخرى أو أزل التصفية'**
+  String get booksNoResultsHint;
+
+  /// No description provided for @booksResetFiltersButton.
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة ضبط التصفية'**
+  String get booksResetFiltersButton;
+
   /// No description provided for @favoriteAdhkarScreenTitle.
   ///
   /// In ar, this message translates to:

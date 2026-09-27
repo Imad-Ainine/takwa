@@ -352,7 +352,7 @@ class _QuranReaderScreenState extends ConsumerState<QuranReaderScreen>
         ),
         duration: const Duration(milliseconds: 1400),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF1A5234),
+        backgroundColor: kReaderTealHdr,
       ),
     );
   }
@@ -495,7 +495,7 @@ class _QuranReaderScreenState extends ConsumerState<QuranReaderScreen>
               ),
               duration: const Duration(seconds: 2),
               behavior: SnackBarBehavior.floating,
-              backgroundColor: const Color(0xFF1A5234),
+              backgroundColor: kReaderTealHdr,
             ),
           );
         },
@@ -523,7 +523,7 @@ class _QuranReaderScreenState extends ConsumerState<QuranReaderScreen>
               ),
               duration: const Duration(seconds: 3),
               behavior: SnackBarBehavior.floating,
-              backgroundColor: const Color(0xFF1A5234),
+              backgroundColor: kReaderTealHdr,
             ),
           );
         },
@@ -859,7 +859,7 @@ class _QuranReaderScreenState extends ConsumerState<QuranReaderScreen>
                       ),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? const Color(0xE01A5234)
+                            ? const Color(0xE00F5C57)
                             : Colors.black87,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
@@ -908,7 +908,7 @@ class _QuranReaderScreenState extends ConsumerState<QuranReaderScreen>
                               'إعادة ضبط',
                               style: TextStyle(
                                 fontFamily: 'Amiri',
-                                color: Color(0xFF0A2818),
+                                color: kReaderOnGold,
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                               ),

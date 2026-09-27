@@ -46,7 +46,7 @@ class QuranReaderTopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final overlay = isDark
-        ? const Color(0xD00A2818)
+        ? const Color(0xD00D1E2D)
         : Colors.white.withValues(alpha: 0.92);
     final fg = isDark ? Colors.white70 : Colors.black54;
     final divider = isDark ? Colors.white12 : Colors.black12;
@@ -283,7 +283,7 @@ class QuranReaderBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final bg = isDark
-        ? const Color(0xF00A2818)
+        ? const Color(0xF00D1E2D)
         : Colors.white.withValues(alpha: 0.95);
     final textDim = isDark ? Colors.white54 : Colors.black45;
     final border = isDark ? Colors.white10 : Colors.black12;
@@ -348,7 +348,7 @@ class QuranReaderBottomBar extends StatelessWidget {
                             l10n.quranReaderJuzChip(
                               localizedNumeral(context, juz),
                             ),
-                            isDark ? kReaderGoldLight : const Color(0xFF1A5234),
+                            isDark ? kReaderGoldLight : kReaderTealHdr,
                           ),
                           const SizedBox(width: 2),
                           Icon(
@@ -459,7 +459,7 @@ class QuranReaderBottomBar extends StatelessWidget {
                   value: readCount / khatmaPages,
                   backgroundColor: Colors.white.withValues(alpha: 0.08),
                   valueColor: const AlwaysStoppedAnimation<Color>(
-                    kReaderGreenHdr,
+                    kReaderTeal,
                   ),
                   minHeight: 3,
                 ),
@@ -530,10 +530,10 @@ class QuranReaderBottomBar extends StatelessWidget {
                           shape: BoxShape.circle,
                           color: isThisSurahLoading
                               ? Colors.white24
-                              : kReaderGreenHdr,
+                              : kReaderTealHdr,
                           boxShadow: [
                             BoxShadow(
-                              color: kReaderGreenHdr.withValues(alpha: 0.4),
+                              color: kReaderTealHdr.withValues(alpha: 0.4),
                               blurRadius: 8,
                             ),
                           ],

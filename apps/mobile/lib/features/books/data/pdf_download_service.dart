@@ -101,6 +101,12 @@ class PdfDownloadService {
         }
       }
     }
+    // Every attempt failed — an expired local copy is still readable, and
+    // without it a reader who flies offline mid-book loses the book entirely.
+    if (await cacheFile.exists()) {
+      progressController?.add(1.0);
+      return cacheFile;
+    }
     throw lastError ?? Exception('Unknown error downloading PDF');
   }
 

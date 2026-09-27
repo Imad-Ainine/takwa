@@ -259,8 +259,8 @@ class _SurahRow extends StatelessWidget {
     final surahNum = s.number as int;
     final colors = [
       style.gold,
-      const Color(0xFF3AAFA9),
-      const Color(0xFF4CAF7D),
+      style.teal,
+      AppPalette.teal300,
       const Color(0xFF9B59B6),
     ];
     final c = colors[(surahNum - 1) % colors.length];
@@ -483,7 +483,10 @@ class _IndexTab extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                color: style.isRamadan ? style.gold : const Color(0xFFD07010),
+                color:
+                    style.isRamadan
+                        ? style.gold
+                        : AppPalette.teal700,
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Center(

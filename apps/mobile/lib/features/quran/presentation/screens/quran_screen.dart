@@ -512,7 +512,7 @@ class _QuranScreenState extends ConsumerState<QuranScreen>
         subtitle: l10n.quranScreenHistoryGridSubtitle,
         color: style.isRamadan
             ? style.gold.withValues(alpha: 0.7)
-            : const Color(0xFF7A6833),
+            : kOlive,
         onTap: () => _push(const KhatmaHistoryScreen()),
       ),
       _GridItem(
@@ -521,7 +521,7 @@ class _QuranScreenState extends ConsumerState<QuranScreen>
         subtitle: l10n.quranScreenProgressGridSubtitle,
         color: style.isRamadan
             ? style.goldDark.withValues(alpha: 0.7)
-            : const Color(0xFF1A5C3A),
+            : AppPalette.teal800,
         onTap: () => _push(const KhatmaProgressScreen()),
       ),
       // _GridItem(
@@ -530,7 +530,7 @@ class _QuranScreenState extends ConsumerState<QuranScreen>
       //   subtitle: l10n.quranScreenSettingsGridSubtitle,
       //   color: style.isRamadan
       //       ? style.gold.withValues(alpha: 0.7)
-      //       : const Color(0xFF7A6833),
+      //       : kOlive,
       //   onTap: () => _push(const KhatmaSettingsScreen()),
       // ),
       _GridItem(

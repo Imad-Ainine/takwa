@@ -174,7 +174,7 @@ class DailyVerseCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Khatma Action Card  (the two big green buttons)
+// Khatma Action Card  (the two big action buttons)
 // ─────────────────────────────────────────────────────────────
 class KhatmaActionCard extends StatelessWidget {
   final String title;

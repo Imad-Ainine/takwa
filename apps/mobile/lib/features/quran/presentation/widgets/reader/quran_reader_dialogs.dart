@@ -4,6 +4,7 @@ import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 import '../../../utils/quran_helpers.dart';
+import 'quran_reader_colors.dart';
 
 class QuranReaderGuideDialog extends StatelessWidget {
   const QuranReaderGuideDialog({super.key});
@@ -16,7 +17,7 @@ class QuranReaderGuideDialog extends StatelessWidget {
       insetPadding: const EdgeInsets.all(AppSpacing.xxl),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF1A5234),
+          color: kReaderTealHdr,
           borderRadius: BorderRadius.circular(AppRadius.xl),
           boxShadow: [
             BoxShadow(
@@ -111,7 +112,7 @@ class QuranReaderGuideDialog extends StatelessWidget {
                         fontFamily: 'Amiri',
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1A5234),
+                        color: kReaderTealHdr,
                       ),
                     ),
                   ),
@@ -223,7 +224,7 @@ class _PageNavigationDialogState
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.xl),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A2D3E),
+          color: kReaderBgDark,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         ),
@@ -350,13 +351,11 @@ class _PageNavigationDialogState
                         vertical: AppSpacing.md,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1A5234),
+                        color: kReaderTealHdr,
                         borderRadius: BorderRadius.circular(AppRadius.md),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(
-                              0xFF1A5234,
-                            ).withValues(alpha: 0.4),
+                            color: kReaderTealHdr.withValues(alpha: 0.4),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),

@@ -101,7 +101,7 @@ class KhatmaProgressSettingsScreen extends ConsumerWidget {
             icon: Icons.auto_stories_rounded,
             label: l10n.khatmaStatPagesReadLabel,
             value: localizedNumeral(context, khatma?.pagesRead ?? 0),
-            color: const Color(0xFF3AAFA9),
+            color: style.teal,
           ),
           const SizedBox(width: AppSpacing.md),
           _StatsCard(
@@ -109,7 +109,7 @@ class KhatmaProgressSettingsScreen extends ConsumerWidget {
             icon: Icons.speed_rounded,
             label: l10n.khatmaStatPagesPerDayLabel,
             value: avgPerDay,
-            color: const Color(0xFF4CAF7D),
+            color: AppPalette.teal600,
           ),
         ],
       ),

@@ -3497,6 +3497,59 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bookReaderPageLabel => 'صفحة';
 
   @override
+  String get bookReaderThemeSectionLabel => 'مظهر الصفحة';
+
+  @override
+  String get bookReaderBookmarksTitle => 'الإشارات المرجعية';
+
+  @override
+  String get bookReaderBookmarksEmpty =>
+      'لا توجد إشارات مرجعية بعد. اضغط على علامة الصفحة في الأعلى لحفظ موضع.';
+
+  @override
+  String get bookReaderBookmarkAddTooltip => 'إضافة إشارة مرجعية';
+
+  @override
+  String get bookReaderBookmarkRemoveTooltip => 'إزالة الإشارة المرجعية';
+
+  @override
+  String get bookReaderBookmarkSavedToast => 'تم حفظ الإشارة المرجعية';
+
+  @override
+  String get bookReaderBookmarkRemovedToast => 'تم حذف الإشارة المرجعية';
+
+  @override
+  String get bookReaderContentUnavailable =>
+      'لا يحتوي هذا الكتاب على نص للقراءة داخل التطبيق';
+
+  @override
+  String get booksSortMenuLabel => 'ترتيب';
+
+  @override
+  String get booksSortByTitle => 'حسب العنوان';
+
+  @override
+  String get booksSortByAuthor => 'حسب المؤلف';
+
+  @override
+  String get booksSortByYear => 'حسب السنة';
+
+  @override
+  String get booksSortByRecent => 'الأكثر قراءة';
+
+  @override
+  String get booksContinueReadingTitle => 'متابعة القراءة';
+
+  @override
+  String get booksClearSearchTooltip => 'مسح البحث';
+
+  @override
+  String get booksNoResultsHint => 'جرّب كلمة أخرى أو أزل التصفية';
+
+  @override
+  String get booksResetFiltersButton => 'إعادة ضبط التصفية';
+
+  @override
   String get favoriteAdhkarScreenTitle => 'أذكاري المفضلة';
 
   @override

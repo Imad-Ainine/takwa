@@ -3535,6 +3535,59 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookReaderPageLabel => 'Page';
 
   @override
+  String get bookReaderThemeSectionLabel => 'Page appearance';
+
+  @override
+  String get bookReaderBookmarksTitle => 'Bookmarks';
+
+  @override
+  String get bookReaderBookmarksEmpty =>
+      'No bookmarks yet. Tap the page marker at the top to save a spot.';
+
+  @override
+  String get bookReaderBookmarkAddTooltip => 'Add bookmark';
+
+  @override
+  String get bookReaderBookmarkRemoveTooltip => 'Remove bookmark';
+
+  @override
+  String get bookReaderBookmarkSavedToast => 'Bookmark saved';
+
+  @override
+  String get bookReaderBookmarkRemovedToast => 'Bookmark removed';
+
+  @override
+  String get bookReaderContentUnavailable =>
+      'This book has no text to read inside the app';
+
+  @override
+  String get booksSortMenuLabel => 'Sort';
+
+  @override
+  String get booksSortByTitle => 'By title';
+
+  @override
+  String get booksSortByAuthor => 'By author';
+
+  @override
+  String get booksSortByYear => 'By year';
+
+  @override
+  String get booksSortByRecent => 'Recently read';
+
+  @override
+  String get booksContinueReadingTitle => 'Continue reading';
+
+  @override
+  String get booksClearSearchTooltip => 'Clear search';
+
+  @override
+  String get booksNoResultsHint => 'Try another word or clear the filter';
+
+  @override
+  String get booksResetFiltersButton => 'Reset filters';
+
+  @override
   String get favoriteAdhkarScreenTitle => 'My Favorite Adhkar';
 
   @override

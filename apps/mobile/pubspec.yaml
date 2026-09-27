@@ -84,6 +84,11 @@ dependencies:
   # ── Animations ──
   lottie: ^3.3.1
 
+  # ── Vector icons (IslamicGlyph's SVG sources) ──
+  # Already resolved transitively via quran_library; declared so the app's
+  # own icon code may import it.
+  flutter_svg: ^2.3.0
+
   # ── PDF and Images ──
   syncfusion_flutter_pdfviewer: ^34.2.6 # upgraded to resolve win32 ^6.x conflict
   cached_network_image: ^3.4.1
@@ -140,6 +145,7 @@ flutter:
   assets:
     - .env
     - assets/sounds/
+    - assets/icons/
     - assets/images/
     - assets/tafsir/
     - assets/lottie/

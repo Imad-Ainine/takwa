@@ -41,7 +41,7 @@ class _FontSizeSheetState extends State<QuranReaderFontSizeSheet> {
     return Container(
       padding: const EdgeInsets.fromLTRB(22, 20, 22, 34),
       decoration: const BoxDecoration(
-        color: Color(0xFF0E2F20),
+        color: kReaderBgDark,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
@@ -246,7 +246,7 @@ class _FontSizeSheetState extends State<QuranReaderFontSizeSheet> {
                 fontFamily: 'Amiri',
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: selected ? const Color(0xFF0A2818) : Colors.white70,
+                color: selected ? kReaderOnGold : Colors.white70,
               ),
             ),
           ),
@@ -301,7 +301,7 @@ class _SurahPickerSheetState extends State<QuranSurahPickerSheet> {
       height: MediaQuery.of(context).size.height * 0.78,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
       decoration: const BoxDecoration(
-        color: Color(0xFF0F261C),
+        color: kReaderBgDark,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
@@ -401,7 +401,7 @@ class _SurahPickerSheetState extends State<QuranSurahPickerSheet> {
                         fontFamily: 'NotoNaskhArabic',
                         fontSize: 11,
                         color: isCurrent
-                            ? const Color(0xFF0F261C)
+                            ? kReaderOnGold
                             : Colors.white70,
                         fontWeight: FontWeight.bold,
                       ),
@@ -496,7 +496,7 @@ class QuranJuzPickerSheet extends StatelessWidget {
       height: MediaQuery.of(context).size.height * 0.72,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
       decoration: const BoxDecoration(
-        color: Color(0xFF0E2A1E),
+        color: kReaderBgDark,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
@@ -553,7 +553,7 @@ class QuranJuzPickerSheet extends StatelessWidget {
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                             color: isSelected
-                                ? const Color(0xFF0A2818)
+                                ? kReaderOnGold
                                 : Colors.white,
                           ),
                         ),
@@ -564,7 +564,7 @@ class QuranJuzPickerSheet extends StatelessWidget {
                             fontFamily: 'NotoNaskhArabic',
                             fontSize: 11,
                             color: isSelected
-                                ? const Color(0xFF0A2818).withValues(alpha: 0.8)
+                                ? kReaderOnGold.withValues(alpha: 0.8)
                                 : Colors.white60,
                           ),
                         ),
@@ -597,7 +597,7 @@ class QuranReciterSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 30),
       decoration: const BoxDecoration(
-        color: Color(0xFF0F261C),
+        color: kReaderBgDark,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
@@ -690,7 +690,7 @@ class QuranDownloadSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(22, 20, 22, 34),
       decoration: const BoxDecoration(
-        color: Color(0xFF0F261C),
+        color: kReaderBgDark,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
@@ -730,11 +730,11 @@ class QuranDownloadSheet extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                color: const Color(0xFF1A5234),
+                color: kReaderTealHdr,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF1A5234).withValues(alpha: 0.5),
+                    color: kReaderTealHdr.withValues(alpha: 0.5),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -785,7 +785,7 @@ class QuranKhatmaStatsSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(22, 20, 22, 34),
       decoration: const BoxDecoration(
-        color: Color(0xFF0F261C),
+        color: kReaderBgDark,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(

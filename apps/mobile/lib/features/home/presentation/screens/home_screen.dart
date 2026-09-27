@@ -1911,7 +1911,7 @@ class _BooksSection extends ConsumerWidget {
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.xxl),
         SizedBox(
           height: 216,
           child: booksAsync.when(
@@ -1949,7 +1949,7 @@ class _BookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = style;
-    final color = Color(int.parse(book.coverColor));
+    final color = book.accentColor;
 
     return TakwaTappable(
       onTap: () =>
@@ -1985,7 +1985,7 @@ class _BookCard extends StatelessWidget {
                     end: Alignment.bottomRight,
                     colors: [
                       color.withValues(alpha: 0.8),
-                      Color(int.parse(book.coverColor2)).withValues(alpha: 0.6),
+                      book.secondaryColor.withValues(alpha: 0.6),
                     ],
                   ),
                 ),

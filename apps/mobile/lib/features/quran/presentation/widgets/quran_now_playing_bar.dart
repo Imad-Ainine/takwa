@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/takwa_tappable.dart';
 import '../../providers/quran_providers.dart';
 import '../../utils/quran_helpers.dart';
@@ -22,8 +23,8 @@ class QuranNowPlayingBar extends ConsumerWidget {
 
     final notifier = ref.read(quranAudioProvider.notifier);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF10261C) : Colors.white;
-    final fg = isDark ? Colors.white70 : const Color(0xFF10261C);
+    final bg = isDark ? context.colors.card : Colors.white;
+    final fg = isDark ? Colors.white70 : context.colors.textPrimary;
     final dim = isDark ? Colors.white38 : Colors.black45;
     final surah = audio.sessionSurah != 0 ? audio.sessionSurah : audio.surah;
 
@@ -48,7 +49,7 @@ class QuranNowPlayingBar extends ConsumerWidget {
                   height: 36,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: kReaderGreenHdr,
+                    color: kReaderTealHdr,
                   ),
                   child: Icon(
                     Icons.graphic_eq_rounded,

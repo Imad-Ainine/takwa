@@ -220,7 +220,7 @@ class _AiMemorizeScreenState extends ConsumerState<AiMemorizeScreen>
         final colors = [
           style.gold,
           style.teal,
-          const Color(0xFF4CAF7D),
+          AppPalette.teal300,
           const Color(0xFF9B59B6),
           const Color(0xFFE07070),
         ];

@@ -27,7 +27,7 @@ class BookPdfReaderScreen extends ConsumerStatefulWidget {
 }
 
 class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
-    with SingleTickerProviderStateMixin {
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   // ── PDF viewer ────────────────────────────
   final GlobalKey<SfPdfViewerState> _pdfViewerKey = GlobalKey();
   final PdfViewerController _pdfController = PdfViewerController();
@@ -63,6 +63,7 @@ class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
       value: 1.0,
     );
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    WidgetsBinding.instance.addObserver(this);
 
     // Load persisted session (page + timer)
     _sessionNotifier = ref.read(pdfSessionProvider(_bookId).notifier);
@@ -80,11 +81,30 @@ class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _uiAnim.dispose();
     _pdfController.dispose();
     _progressCtrl?.close();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
+  }
+
+  /// The reading timer is wall-clock, so it has to stop with the screen:
+  /// left running it billed a locked phone as reading time and pushed the
+  /// inflated total to Supabase every 30 s.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!mounted || _localFile == null) return;
+    switch (state) {
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+        _sessionNotifier.pause();
+      case AppLifecycleState.resumed:
+        _sessionNotifier.start();
+      default:
+        break;
+    }
   }
 
   // ── PDF Download ──────────────────────────
@@ -139,26 +159,15 @@ class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
   }
 
   void _clearSelection() {
+    // Runs on every page change; without this guard each scroll step rebuilt
+    // the whole viewer for a selection that was never there.
+    if (!_isTextSelected && _selectedText.isEmpty) return;
     _pdfController.clearSelection();
-    if (mounted) {
-      setState(() {
-        _isTextSelected = false;
-        _selectedText = '';
-      });
-    }
-  }
-
-  Color _parseColor(String? hex) {
-    if (hex == null) return const Color(0xFFC8A96E);
-    try {
-      if (hex.startsWith('0x')) return Color(int.parse(hex));
-      if (hex.startsWith('#')) {
-        return Color(int.parse('0xFF${hex.substring(1)}'));
-      }
-      return Color(int.parse('0xFF$hex'));
-    } catch (_) {
-      return const Color(0xFFC8A96E);
-    }
+    if (!mounted) return;
+    setState(() {
+      _isTextSelected = false;
+      _selectedText = '';
+    });
   }
 
   // ─────────────────────────────────────────
@@ -170,7 +179,7 @@ class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
     final l10n = AppLocalizations.of(context)!;
     final colors = context.colors;
     final typography = context.typography;
-    final accentColor = _parseColor(widget.book.coverColor);
+    final accentColor = widget.book.accentColor;
     final session = ref.watch(pdfSessionProvider(_bookId));
 
     // No PDF URL fallback
@@ -263,7 +272,13 @@ class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
                     _sessionNotifier.start();
                   });
 
-                  final savedPage = session.currentPage;
+                  // Read the session live: `session` is this build's snapshot,
+                  // written before the async loadSession() reply landed, so it
+                  // could still say page 1 and drop the reader back to the
+                  // start of a book they were halfway through.
+                  final savedPage = ref
+                      .read(pdfSessionProvider(_bookId))
+                      .currentPage;
                   if (savedPage > 1 && savedPage <= total) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       _pdfController.jumpToPage(savedPage);
@@ -275,6 +290,7 @@ class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
                   _sessionNotifier.setPage(details.newPageNumber);
                 },
                 onDocumentLoadFailed: (details) {
+                  if (!mounted) return;
                   setState(() {
                     _error = details.error;
                   });

@@ -1,38 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:hijri/hijri_calendar.dart';
+import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 import '../data/quran_data.dart';
 
-// ─── Color Palette ────────────────────────────────────────────
-const kGold = Color(0xFFC8A96E);
-const kGoldL = Color(0xFFE4C98A);
-const kGoldD = Color(0xFF9A7040);
-const kTeal = Color(0xFF3AAFA9);
+// ─── Color Palette (Takwa brand tokens) ───────────────────────
+const kGold = AppPalette.gold500;
+const kGoldL = AppPalette.gold300;
+const kTeal = AppPalette.teal500;
 const kNight = Color(0xFF0D1117);
 const kCard = Color(0xFF1A2332);
 const kBorder = Color(0xFF2A3A50);
 const kText = Color(0xFFE8EDF3);
 const kTextS = Color(0xFF8FA3BB);
 
-// Khatma Green Palette
-const kGreen = Color(0xFF1A5C3A); // main green
-const kGreenDark = Color(0xFF0D3D24); // darker bg
-const kGreenMid = Color(0xFF2A7A4E); // lighter card
-const kGreenCard = Color(0xFF1E6B43); // action card
-const kGoldChip = Color(0xFFD4A843); // chip badge
-const kOlive = Color(0xFF7A6833); // history icon bg
+const kGoldChip = AppPalette.gold400; // chip badge
+const kOlive = AppPalette.gold700; // history icon bg
 
 // ─── Surah Colors ─────────────────────────────────────────────
 Color surahColor(int n) {
   const colors = [
-    Color(0xFFC8A96E),
-    Color(0xFF3AAFA9),
-    Color(0xFF4CAF7D),
+    AppPalette.gold500,
+    AppPalette.teal500,
+    AppPalette.teal300,
     Color(0xFF9B59B6),
     Color(0xFFE67E22),
     Color(0xFF2980B9),
     Color(0xFFE74C3C),
-    Color(0xFF16A085),
+    AppPalette.gold600,
     Color(0xFFD35400),
   ];
   return colors[n % colors.length];
