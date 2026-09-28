@@ -19,7 +19,7 @@
 		"@next/swc-linux-x64-musl": "16.2.4",
 		"@parcel/watcher-linux-x64-glibc": "2.5.6",
 		"@parcel/watcher-linux-x64-musl": "2.5.6",
-		"@swc/core-linux-x64-gnu": "1.15.30",
+		"@swc/core-linux-x64-gnu": "1.16.2",
 		"@swc/core-linux-x64-musl": "1.15.30"
 	},
 	"dependencies": {
