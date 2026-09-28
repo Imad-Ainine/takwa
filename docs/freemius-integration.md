@@ -18,7 +18,8 @@ FreemiusPaymentScreen (mobile)
   │ 1. POST /api/payments/freemius/checkout   (Bearer = Supabase access token)
   ▼
 apps/web proxy  ── verifies the Supabase session, owns the plan id,
-  │                embeds custom={"takwa_user_id": <auth.uid()>}
+  │                embeds custom={"takwa_user_id": <auth.uid()>} (kept as a
+  │                fast path; Freemius' hosted checkout does not echo it)
   │ 2. returns checkout_url (https://checkout.freemius.com/app/{id}/plan/{id}/…)
   ▼
 Freemius hosted checkout (browser Custom Tab; email locked with readonly_user)
@@ -28,7 +29,8 @@ Freemius hosted checkout (browser Custom Tab; email locked with readonly_user)
   ▼
 POST /api/payments/freemius/webhook
   │    verify HMAC x-signature → log to freemius_events (idempotent)
-  │    → derive entitlement → upsert premium_entitlements
+  │    → derive entitlement → resolve owner by matching the locked buyer email
+  │      against auth.users → upsert premium_entitlements
   ▼
 Mobile polls its OWN premium_entitlements row (RLS: owner-read only)
        → "Payment received" screen + subscription status card
@@ -47,43 +49,43 @@ period end, expiry, refund, chargeback, reactivation.
 
 Implemented in `lib/core/payments/payment_router.dart` (pure + unit-tested):
 
-| Signal (in order)                              | Rail chosen |
-| ---------------------------------------------- | ----------- |
-| Manual override `payment_country_override = 'dz'`   | Chargily |
-| Manual override `= 'intl'`                          | Freemius |
-| Device region country code `DZ`                     | Chargily |
-| No region (bare locale) and language `ar`           | Chargily (safe default for the core audience) |
-| Any other detected region                           | Freemius |
+| Signal (in order)                                 | Rail chosen                                   |
+| ------------------------------------------------- | --------------------------------------------- |
+| Manual override `payment_country_override = 'dz'` | Chargily                                      |
+| Manual override `= 'intl'`                        | Freemius                                      |
+| Device region country code `DZ`                   | Chargily                                      |
+| No region (bare locale) and language `ar`         | Chargily (safe default for the core audience) |
+| Any other detected region                         | Freemius                                      |
 
 The override is a user-facing row on the payment-methods screen ("Where do you want
 to pay from?" → Auto / Algeria / International), persisted in the local settings DAO;
-it only affects the *suggested/default* rail — both cards remain visible and tappable.
+it only affects the _suggested/default_ rail — both cards remain visible and tappable.
 Chargily behaviour for Algerian customers is otherwise byte-for-byte unchanged.
 
 ## 3. Configuration
 
 ### apps/web (Vercel env — server-side only)
 
-| Variable                       | Required | Purpose |
-| ------------------------------ | -------- | ------- |
-| `FREEMIUS_PRODUCT_ID`          | Yes      | Freemius app/product id (numeric) |
-| `FREEMIUS_PUBLISHABLE_KEY`     | Yes      | `pk_test_…` / `pk_live_…` — only ever placed into checkout URLs server-side |
-| `FREEMIUS_SECRET_KEY`          | Yes      | `sk_…` — REST auth **and** the HMAC secret for `x-signature` webhook verification |
-| `FREEMIUS_MONTHLY_PLAN_ID`     | Yes      | Plan id charged for the default monthly tier |
-| `FREEMIUS_PLAN_IDS`            | No       | Comma list of plan ids the app may select (default: only the monthly plan) |
-| `FREEMIUS_PORTAL_URL`          | No       | Billing-portal URL template; `{PRODUCT_ID}`, `{PUBLIC_KEY}`, `{USER_EMAIL}` are substituted. Default `https://billing.freemius.com/app/{PRODUCT_ID}/account/?public_key={PUBLIC_KEY}` — **verify once against the dashboard's portal link and adjust here via env only** |
-| `TAKWA_ADMIN_SECRET`           | Yes      | Protects `POST /api/payments/freemius/reconcile` |
-| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY` | already present | webhook writes + JWT validation |
+| Variable                                                         | Required        | Purpose                                                                                                                                                                                                                                                                  |
+| ---------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `FREEMIUS_PRODUCT_ID`                                            | Yes             | Freemius app/product id (numeric)                                                                                                                                                                                                                                        |
+| `FREEMIUS_PUBLISHABLE_KEY`                                       | Yes             | `pk_test_…` / `pk_live_…` — only ever placed into checkout URLs server-side                                                                                                                                                                                              |
+| `FREEMIUS_SECRET_KEY`                                            | Yes             | `sk_…` — REST auth **and** the HMAC secret for `x-signature` webhook verification                                                                                                                                                                                        |
+| `FREEMIUS_MONTHLY_PLAN_ID`                                       | Yes             | Plan id charged for the default monthly tier                                                                                                                                                                                                                             |
+| `FREEMIUS_PLAN_IDS`                                              | No              | Comma list of plan ids the app may select (default: only the monthly plan)                                                                                                                                                                                               |
+| `FREEMIUS_PORTAL_URL`                                            | No              | Billing-portal URL template; `{PRODUCT_ID}`, `{PUBLIC_KEY}`, `{USER_EMAIL}` are substituted. Default `https://billing.freemius.com/app/{PRODUCT_ID}/account/?public_key={PUBLIC_KEY}` — **verify once against the dashboard's portal link and adjust here via env only** |
+| `TAKWA_ADMIN_SECRET`                                             | Yes             | Protects `POST /api/payments/freemius/reconcile`                                                                                                                                                                                                                         |
+| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY` | already present | webhook writes + JWT validation                                                                                                                                                                                                                                          |
 
 ### apps/mobile (public `.env`)
 
-| Variable               | Purpose |
-| ---------------------- | ------- |
-| `FREEMIUS_MONTHLY_USD` | Display mirror of the plan price in USD (default `10`). Never authoritative. |
-| `TAKWA_WEB_BASE_URL`   | Shared with Chargily; points at the proxy. |
+| Variable               | Purpose                                                                      |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| `FREEMIUS_MONTHLY_EUR` | Display mirror of the plan price in EUR (default `10`). Never authoritative. |
+| `TAKWA_WEB_BASE_URL`   | Shared with Chargily; points at the proxy.                                   |
 
-The international plan bills in **USD**, so `FreemiusConfig.monthlyDisplay`
-renders `$…` and local payment history records `currency: 'usd'`. If the plan
+The international plan bills in **EUR**, so `FreemiusConfig.monthlyDisplay`
+renders `€…` and local payment history records `currency: 'eur'`. If the plan
 currency ever changes in the Freemius dashboard, change both in
 `lib/core/payments/payment_config.dart` — the screen and the history entry are
 the only two consumers.
@@ -91,8 +93,8 @@ the only two consumers.
 ## 4. Freemius dashboard setup checklist (one-time, needs your account)
 
 1. Create the Takwa **Application** product; enable **SaaS billing mode**.
-2. Define plans (at least the monthly tier priced in **USD**, currently
-   $10.00; Freemius handles currency conversion, coupons and VAT itself).
+2. Define plans (at least the monthly tier priced in **EUR**, currently
+   €10.00; Freemius handles currency conversion, coupons and VAT itself).
 3. Product → **Settings → API & Keys**: copy the **product id**, **publishable
    key** (`pk_…`) and **secret key** (`sk_…`) into the Vercel env
    (Settings → Environment Variables for `takwa-web`), never into the repo or
@@ -125,7 +127,7 @@ the only two consumers.
 - **`premium_entitlements`** — one row per Supabase user; written only by the
   webhook/proxy. Clients get `SELECT` on their own row via RLS
   (`user_id = auth.uid()`). Status vocabulary: `trial, active, past_due, canceled,
-  expired, refunded`; access rule (shared with the Dart model):
+expired, refunded`; access rule (shared with the Dart model):
   `active/trial` until `current_period_end`; `past_due`/`canceled` keep access until
   the already-paid period lapses; `expired`/`refunded` never grant access.
 - `last_event_id` monotonic guard: an older delivery can never overwrite a newer state.
@@ -157,16 +159,30 @@ cd apps/mobile && flutter test test/core/payments
 Manual end-to-end (sandbox):
 
 1. Apply the migration; set test-mode env; deploy (`git push` — Vercel builds).
-2. On a device/emulator with region ≠ DZ (or set the override to
+2. **Stay signed in with one account for the whole test.** Attribution is by
+   buyer email, and the entitlement lands on whichever Supabase account was
+   signed in when the checkout was opened. Switching accounts between checkout
+   and confirmation looks exactly like "paid but still free".
+3. On a device/emulator with region ≠ DZ (or set the override to
    International), open Subscription → Pay monthly → card 1 → Freemius screen:
    expect "Sign in to subscribe" when logged out, otherwise the hosted page
    opens with your account email locked.
-3. Pay with a Freemius sandbox card. The app polls its own entitlement row;
+4. Pay with `4242 4242 4242 4242` (any future expiry, any CVV) — accepted only
+   while the product is in Freemius test mode, and the admin alert for such a
+   payment is prefixed `[SANDBOX]`. The app polls its own entitlement row;
    within a few seconds of the webhook it must flip to "Payment received",
    and the subscription screen must show the status card.
-4. In the dashboard: cancel at period end → status card "premium stays active
+5. If the card never appears, read the audit trail rather than guessing — with
+   the service-role key, `GET /rest/v1/freemius_events?select=id,event_type,
+apply_status,apply_error&order=id.asc` shows one row per delivery, and
+   `premium_entitlements?select=user_id,email,status` shows who was granted
+   access. `apply_status: "failed"` + `no_matching_supabase_user` means the
+   buyer email matches no account; a row whose `user_id` and `email` disagree
+   means attribution went wrong (see `findUserIdByEmail` — GoTrue's admin list
+   has no `email` filter, so it must be paged and matched, never `users[0]`).
+6. In the dashboard: cancel at period end → status card "premium stays active
    until …"; issue a refund → card "refunded, premium paused".
-5. Verify rejection paths: `POST webhook` with a bad `x-signature` → 401 and
+7. Verify rejection paths: `POST webhook` with a bad `x-signature` → 401 and
    no DB rows; replay the same valid body → `outcome: "duplicate"`.
 
 ## 7. Deployment & rollback
@@ -183,6 +199,7 @@ Old installed builds are unaffected: they still talk to `/api/payments/checkout`
 (untouched) and the removed Wise screen simply never existed server-side.
 
 Rollback:
+
 - **Fast kill-switch**: remove/blank `FREEMIUS_SECRET_KEY` in Vercel → every
   Freemius route answers 503 `payments_not_configured`, the app shows the
   error state; Chargily keeps working; remove the webhook URL in the dashboard.
@@ -214,16 +231,16 @@ their Supabase account). Optionally schedule it via Vercel Cron — see
 
 Symptom table:
 
-| Symptom | Meaning / fix |
-| ------- | ------------- |
-| Webhook 401 `invalid_signature` | Wrong `FREEMIUS_SECRET_KEY`, or a CDN/proxy re-serialized the body (the HMAC is over raw bytes; the route reads `.text()` before parsing — keep it that way). |
-| 503 `payments_not_configured` | Missing `FREEMIUS_*` env in Vercel. |
+| Symptom                                       | Meaning / fix                                                                                                                                                                                                                                                                                                                 |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Webhook 401 `invalid_signature`               | Wrong `FREEMIUS_SECRET_KEY`, or a CDN/proxy re-serialized the body (the HMAC is over raw bytes; the route reads `.text()` before parsing — keep it that way).                                                                                                                                                                 |
+| 503 `payments_not_configured`                 | Missing `FREEMIUS_*` env in Vercel.                                                                                                                                                                                                                                                                                           |
 | App shows `Freemius … failed (404): http_404` | The route is not deployed yet — `apps/web/.env` only feeds `next dev`; the app calls the production URL, so the code must be merged to `main` and the env vars added in Vercel. Check with `curl -X POST https://takwa-web.vercel.app/api/payments/freemius/checkout` (expect 503 JSON once deployed, 404 HTML while absent). |
-| App stuck on "not confirmed yet" | Webhook not configured, or event row shows `failed: no_matching_supabase_user` → run reconcile after the account exists. |
-| `duplicate` outcome on every event | Freemius event body lacks a unique id and normalization picked a per-delivery field — check `freemius_events.event_uid` values; it should not re-send identical ids for distinct events. |
-| 404 `no_active_license` on change-plan | User has no Freemius license (Chargily supporter / never paid) → client must fall back to a normal new checkout. |
-| Checkout params rejected by Freemius | Dashboard-generated link differs from `buildCheckoutUrl` → adjust that one function (and its unit test). |
-| Refund/chargeback not revoking | The event arrived with an unknown shape: find it in `freemius_events` (still fully logged), extend `deriveEntitlement` + test, then `POST /reconcile`. |
+| App stuck on "not confirmed yet"              | Webhook not configured, or event row shows `failed: no_matching_supabase_user` → run reconcile after the account exists.                                                                                                                                                                                                      |
+| `duplicate` outcome on every event            | Freemius event body lacks a unique id and normalization picked a per-delivery field — check `freemius_events.event_uid` values; it should not re-send identical ids for distinct events.                                                                                                                                      |
+| 404 `no_active_license` on change-plan        | User has no Freemius license (Chargily supporter / never paid) → client must fall back to a normal new checkout.                                                                                                                                                                                                              |
+| Checkout params rejected by Freemius          | Dashboard-generated link differs from `buildCheckoutUrl` → adjust that one function (and its unit test).                                                                                                                                                                                                                      |
+| Refund/chargeback not revoking                | The event arrived with an unknown shape: find it in `freemius_events` (still fully logged), extend `deriveEntitlement` + test, then `POST /reconcile`.                                                                                                                                                                        |
 
 Logs: `[freemius] …` lines in Vercel's function logs for API failures (error
 bodies are truncated and never forwarded to the client).

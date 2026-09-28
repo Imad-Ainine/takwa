@@ -211,7 +211,7 @@ class _FreemiusPaymentScreenState extends ConsumerState<FreemiusPaymentScreen>
         channel: SupportChannel.freemius,
         checkoutId: entitlement.planId ?? _session?.planId,
         status: 'paid',
-        amountMinor: (FreemiusConfig.monthlyUsd * 100).round(),
+        amountMinor: (FreemiusConfig.monthlyEur * 100).round(),
         currency: FreemiusConfig.currencyCode,
         at: DateTime.now(),
       ),

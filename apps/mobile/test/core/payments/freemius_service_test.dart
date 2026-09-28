@@ -161,16 +161,17 @@ void main() {
   });
 
   group('FreemiusConfig', () {
-    // The Freemius plan bills in USD, so the mirror must never render a euro
-    // sign — a buyer seeing €10 and charged $10 is a trust problem.
-    test(r'monthly price defaults to $10.00 and honors overrides', () {
+    // The Freemius plan bills in EUR, so the mirror must render the euro sign
+    // it actually charges — a buyer seeing $10 and charged €10 is a trust
+    // problem.
+    test('monthly price defaults to €10.00 and honors overrides', () {
       dotenv.loadFromString(envString: 'TAKWA_TEST_PLACEHOLDER=1');
-      expect(FreemiusConfig.monthlyUsd, 10.0);
-      expect(FreemiusConfig.monthlyDisplay, r'$10.00');
-      expect(FreemiusConfig.currencyCode, 'usd');
-      dotenv.loadFromString(envString: 'FREEMIUS_MONTHLY_USD=7');
-      expect(FreemiusConfig.monthlyUsd, 7.0);
-      expect(FreemiusConfig.monthlyDisplay, r'$7.00');
+      expect(FreemiusConfig.monthlyEur, 10.0);
+      expect(FreemiusConfig.monthlyDisplay, '€10.00');
+      expect(FreemiusConfig.currencyCode, 'eur');
+      dotenv.loadFromString(envString: 'FREEMIUS_MONTHLY_EUR=7');
+      expect(FreemiusConfig.monthlyEur, 7.0);
+      expect(FreemiusConfig.monthlyDisplay, '€7.00');
     });
   });
 }

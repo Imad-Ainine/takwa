@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --test src/lib/freemius.test.ts src/lib/freemius-events.test.ts",
+    "test": "node --test src/lib/freemius.test.ts src/lib/freemius-events.test.ts src/lib/freemius-db.test.ts",
     "lint": "eslint",
     "release:apk": "node scripts/release-apk.mjs"
   },

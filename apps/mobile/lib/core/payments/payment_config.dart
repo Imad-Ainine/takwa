@@ -39,16 +39,16 @@ class ChargilyConfig {
 class FreemiusConfig {
   FreemiusConfig._();
 
-  /// Monthly plan price in US dollars, e.g. `10` — display/local-record only;
+  /// Monthly plan price in euros, e.g. `10` — display/local-record only;
   /// the Freemius plan (FREEMIUS_MONTHLY_PLAN_ID) decides what is charged.
-  static double get monthlyUsd =>
-      double.tryParse(dotenv.env['FREEMIUS_MONTHLY_USD'] ?? '') ?? 10.0;
+  static double get monthlyEur =>
+      double.tryParse(dotenv.env['FREEMIUS_MONTHLY_EUR'] ?? '') ?? 10.0;
 
-  /// The Freemius plan bills in USD; recorded with each local payment so the
+  /// The Freemius plan bills in EUR; recorded with each local payment so the
   /// history never implies a currency the checkout did not charge.
-  static const String currencyCode = 'usd';
+  static const String currencyCode = 'eur';
 
-  static String get monthlyDisplay => '\$${monthlyUsd.toStringAsFixed(2)}';
+  static String get monthlyDisplay => '€${monthlyEur.toStringAsFixed(2)}';
 
   /// Same web app that hosts the Chargily proxy and the payment-redirect hop.
   static String get webBaseUrl => ChargilyConfig.webBaseUrl;

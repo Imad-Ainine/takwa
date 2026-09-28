@@ -81,8 +81,9 @@ export function normalizeFreemiusEvent(body: Dict): NormalizedEvent | null {
   const payment = asDict(pick(content, 'payment', 'payments'));
   const subscription = asDict(pick(content, 'subscription'));
   const user = asDict(pick(content, 'user'));
-  // The checkout `custom` param is echoed back on the payment (and some
-  // license payloads) — that is our only guaranteed link to auth.uid().
+  // Kept as the exact fast path, but the hosted checkout has never actually
+  // echoed `custom` in a delivered event — see findUserIdByEmail in
+  // freemius-db.ts, which is the attribution path in production.
   const custom =
     asDictLoose(pick(payment, 'custom')) ??
     asDictLoose(pick(license, 'custom')) ??

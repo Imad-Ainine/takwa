@@ -10,8 +10,8 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { eventUid, firstString, supabaseAdmin } from './freemius';
-import { normalizeFreemiusEvent, deriveEntitlement, type NormalizedEvent, type EntitlementPatch } from './freemius-events';
+import { eventUid, firstString, supabaseAdmin } from './freemius.ts';
+import { normalizeFreemiusEvent, deriveEntitlement, type NormalizedEvent, type EntitlementPatch } from './freemius-events.ts';
 
 export interface ProcessResult {
   outcome: 'applied' | 'ignored' | 'failed' | 'duplicate';
@@ -114,27 +114,51 @@ export async function processStoredEvent(eventRow: { id: number; payload: Record
 
 /**
  * Prefer the takwa_user_id echoed via the checkout `custom` param — it is
- * exact. Fall back to matching the buyer email to an auth.users row via the
- * GoTrue admin API (no getUserByEmail in supabase-js), which is safe
- * because the checkout locks `readonly_user=true` to the signed-in
- * account's email.
+ * exact. In practice Freemius' hosted checkout never echoes it: none of the
+ * six events delivered by a real 2026-09-28 subscription carried a `custom`
+ * key at all, so the email match below is the live attribution path. It is
+ * safe because the checkout locks `readonly_user=true` to the signed-in
+ * account's verified email.
+ *
+ * GoTrue's /auth/v1/admin/users has no email filter: an `?email=` param is
+ * ignored and the call answers with the newest-first, unfiltered page.
+ * Paging and matching here is therefore mandatory — reading `users[0]`
+ * silently grants the entitlement to whoever signed up last.
  */
-async function resolveUserId(evt: NormalizedEvent, email: string | null): Promise<string | null> {
-  if (evt.takwaUserId && /^[0-9a-fA-F-]{36}$/.test(evt.takwaUserId)) return evt.takwaUserId;
-  if (!email) return null;
+const USER_PAGE_SIZE = 1000;
+const MAX_USER_PAGES = 20;
+
+export async function findUserIdByEmail(email: string): Promise<string | null> {
   const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) return null;
+  const wanted = email.trim().toLowerCase();
   try {
-    const res = await fetch(`${url}/auth/v1/admin/users?email=${encodeURIComponent(email)}`, {
-      headers: { Authorization: `Bearer ${serviceKey}`, apikey: serviceKey },
-    });
-    if (!res.ok) return null;
-    const json = (await res.json()) as { users?: Array<{ id?: string }> };
-    return json.users?.[0]?.id ?? null;
+    for (let page = 1; page <= MAX_USER_PAGES; page++) {
+      const res = await fetch(
+        `${url}/auth/v1/admin/users?page=${page}&per_page=${USER_PAGE_SIZE}`,
+        { headers: { Authorization: `Bearer ${serviceKey}`, apikey: serviceKey } }
+      );
+      if (!res.ok) return null;
+      const json = (await res.json()) as { users?: Array<{ id?: string; email?: string }> };
+      const users = json.users ?? [];
+      // GoTrue stores emails lowercased and enforces uniqueness, so the
+      // first exact match is the only one.
+      for (const u of users) {
+        if (u.id && u.email?.trim().toLowerCase() === wanted) return u.id;
+      }
+      if (users.length < USER_PAGE_SIZE) return null;
+    }
+    return null;
   } catch {
     return null;
   }
+}
+
+async function resolveUserId(evt: NormalizedEvent, email: string | null): Promise<string | null> {
+  if (evt.takwaUserId && /^[0-9a-fA-F-]{36}$/.test(evt.takwaUserId)) return evt.takwaUserId;
+  if (!email) return null;
+  return findUserIdByEmail(email);
 }
 
 async function finish(db: SupabaseClient, eventRowId: number, status: 'applied' | 'ignored' | 'failed', detail?: string): Promise<ProcessResult> {

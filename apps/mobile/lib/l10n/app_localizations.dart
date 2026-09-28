@@ -7619,7 +7619,7 @@ abstract class AppLocalizations {
   /// No description provided for @paymentSupportMessage.
   ///
   /// In ar, this message translates to:
-  /// **'بمساهمتك البسيطة، تجعل \"تقوى\" متاحاً لملايين المسلمين كصدقة جارية عنك وعن والديك. 200 دج أو 10 دولارات شهرياً تضمن استمرار هذا العمل وتطويره الدائم.'**
+  /// **'بمساهمتك البسيطة، تجعل \"تقوى\" متاحاً لملايين المسلمين كصدقة جارية عنك وعن والديك. 200 دج أو 10 يورو شهرياً تضمن استمرار هذا العمل وتطويره الدائم.'**
   String get paymentSupportMessage;
 
   /// No description provided for @paymentContinueButton.

@@ -181,7 +181,7 @@ Create `apps/mobile/.env` (not committed) with:
 | `SENTRY_DSN`             | No       | Enables crash/error reporting via Sentry. Left unset, the app runs with no crash reporting — no events are sent anywhere. |
 | `TAKWA_WEB_BASE_URL`     | No       | Base URL of the deployed Takwa web app, which hosts the Chargily checkout proxy (`/api/payments/checkout`) and the Freemius proxy (`/api/payments/freemius/*`). Defaults to `https://takwa-web.vercel.app`. |
 | `CHARGILY_SUBSCRIPTION_AMOUNT` | No | Mirrors the proxy's charged amount in whole DZD, for local payment records/display only — the server decides what is actually charged. Defaults to `200`. |
-| `FREEMIUS_MONTHLY_USD` | No       | Monthly amount in USD displayed on the international Visa/Mastercard (Freemius) path — display/local-record only; the Freemius plan decides what is actually charged. Defaults to `10`. |
+| `FREEMIUS_MONTHLY_EUR` | No       | Monthly amount in EUR displayed on the international Visa/Mastercard (Freemius) path — display/local-record only; the Freemius plan decides what is actually charged. Defaults to `10`. |
 
 ---
 
