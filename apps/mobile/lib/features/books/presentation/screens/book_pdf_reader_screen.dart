@@ -47,6 +47,12 @@ class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
   bool _showUI = true;
   late AnimationController _uiAnim;
 
+  // ── Reconstructed tap (see _trackTapUp) ───
+  int _pointers = 0;
+  Offset? _tapDownPos;
+  Duration? _tapDownTime;
+  Duration? _lastTapUpTime;
+
   // ── Session Notifier ──────────────────────
   late PdfSessionNotifier _sessionNotifier;
 
@@ -149,6 +155,49 @@ class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
 
   // ── UI helpers ────────────────────────────
 
+  /// Pointer events are observed rather than claimed, so a tap has to be
+  /// rebuilt from its down/up pair: everything else the viewer does with a
+  /// finger — flicking through pages, long-pressing to select, pinching to
+  /// zoom — moves, holds, or arrives as two pointers.
+  void _trackTapDown(PointerDownEvent event) {
+    if (++_pointers > 1) {
+      _tapDownPos = null;
+      return;
+    }
+    _tapDownPos = event.position;
+    _tapDownTime = event.timeStamp;
+  }
+
+  void _trackTapUp(PointerUpEvent event) {
+    if (_pointers > 0) _pointers--;
+    final downPos = _tapDownPos;
+    final downTime = _tapDownTime;
+    _tapDownPos = null;
+    _tapDownTime = null;
+    if (downPos == null || downTime == null) return;
+    if ((event.position - downPos).distance > 20) return;
+    if (event.timeStamp - downTime > const Duration(milliseconds: 300)) return;
+    // Double-tap zoom arrives as two ups a few ms apart; honouring both would
+    // flash the chrome off and back on.
+    final lastUp = _lastTapUpTime;
+    if (lastUp != null &&
+        event.timeStamp - lastUp < const Duration(milliseconds: 400)) {
+      return;
+    }
+    _lastTapUpTime = event.timeStamp;
+    if (_isTextSelected) {
+      _clearSelection();
+    } else {
+      _toggleUI();
+    }
+  }
+
+  void _dropTap(PointerCancelEvent event) {
+    if (_pointers > 0) _pointers--;
+    _tapDownPos = null;
+    _tapDownTime = null;
+  }
+
   void _toggleUI() {
     setState(() => _showUI = !_showUI);
     if (_showUI) {
@@ -221,20 +270,18 @@ class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
           else if (_isLoading || _localFile == null)
             _buildLoadingView(accentColor)
           else
-            // Wrap with GestureDetector for tap-to-toggle-UI.
-            // Text selection gestures are handled entirely by SfPdfViewer
-            // and must not be intercepted, so we only react to single taps
-            // when no text is selected.
-            GestureDetector(
+            // Tap-to-toggle-UI. SfPdfViewer's page canvas registers its own
+            // TapGestureRecognizer, and the innermost recognizer wins the
+            // arena, so a GestureDetector wrapped around the viewer never
+            // fires over page content. A Listener sits outside the arena and
+            // still sees every pointer event, so the tap is reconstructed from
+            // the down/up pair here — leaving selection, scrolling and pinch
+            // zoom to the viewer.
+            Listener(
               behavior: HitTestBehavior.translucent,
-              onTap: () {
-                if (_isTextSelected) {
-                  _clearSelection();
-                } else {
-                  _toggleUI();
-                }
-              },
-              // Pass all child events through so selection handles still work
+              onPointerDown: _trackTapDown,
+              onPointerUp: _trackTapUp,
+              onPointerCancel: _dropTap,
               child: SfPdfViewer.file(
                 _localFile!,
                 key: _pdfViewerKey,
@@ -251,7 +298,10 @@ class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
 
                 // Misc viewer options
                 canShowPageLoadingIndicator: true,
-                canShowScrollHead: true,
+                // The page-number badge is chrome like the bars above and below
+                // it, so it goes away with them instead of floating over the
+                // page after a tap.
+                canShowScrollHead: _showUI,
                 enableDoubleTapZooming: true,
 
                 onTextSelectionChanged:
@@ -361,34 +411,20 @@ class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
   Widget _buildLoadingView(Color accentColor) {
     final l10n = AppLocalizations.of(context)!;
     final pct = (_downloadProgress * 100).toInt();
-    return Center(
-      child: Container(
-        width: 240,
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.xxxl,
-          horizontal: AppSpacing.xxl,
-        ),
-        decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2C),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white12),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black54,
-              blurRadius: 20,
-              offset: Offset(0, 10),
-            ),
-          ],
-        ),
+    return Positioned.fill(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TakwaLoadingIndicator(color: accentColor),
+            Center(child: TakwaLoadingIndicator(color: accentColor)),
             const SizedBox(height: AppSpacing.xl),
             Text(
               _downloadProgress > 0
                   ? l10n.bookPdfDownloadingPercentLabel(pct)
                   : l10n.bookPdfDownloadingLabel,
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white70,
                 fontSize: 14,
@@ -396,7 +432,7 @@ class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.lg),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
