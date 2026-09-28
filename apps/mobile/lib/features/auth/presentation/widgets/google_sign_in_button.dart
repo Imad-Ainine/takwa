@@ -53,8 +53,8 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton>
     final colors = context.colors;
     final disabled = widget.onTap == null;
 
-    final surface = colors.card;
-    final border = colors.borderSubdued;
+    final surface = colors.background;
+    final border = colors.border;
     final labelColor = colors.textPrimary;
     final radius = BorderRadius.circular(widget.height / 2);
 

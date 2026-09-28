@@ -103,8 +103,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
       await _syncGender();
       if (mounted) {
         setState(() => _loading = false);
-        await showAuthSuccess(context, label: l10n.authWelcomeBack);
-        if (mounted) Navigator.pushReplacementNamed(context, '/');
+        await showAuthSuccess(context, label: l10n.authWelcomeBack, confetti: true);
+        // '/' replays the splash route, which then stacks a second MainShell
+        // over the live one — the splash round-trip is what left users on a
+        // black screen after signing in.
+        if (mounted) {
+          Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil(Routes.home, (route) => false);
+        }
       }
     } on AuthException catch (e) {
       if (mounted) setState(() => _error = _authError(l10n, e.message));
@@ -166,8 +173,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
         await _syncGender();
         if (mounted) {
           setState(() => _loading = false);
-          await showAuthSuccess(context, label: l10n.authWelcomeBack);
-          if (mounted) Navigator.pushReplacementNamed(context, '/');
+          await showAuthSuccess(context, label: l10n.authWelcomeBack, confetti: true);
+          if (mounted) {
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil(Routes.home, (route) => false);
+          }
         }
       }
     } catch (e) {
@@ -273,7 +284,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
             const SizedBox(height: AppSpacing.xxl),
             Center(
               child: TakwaTappable(
-                onTap: () => Navigator.pushReplacementNamed(context, '/'),
+                onTap: () => Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil(Routes.home, (route) => false),
                 minTapSize: null,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
