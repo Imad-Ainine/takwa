@@ -128,11 +128,22 @@ class _FreemiusPaymentScreenState extends ConsumerState<FreemiusPaymentScreen>
         _stage = e is FreemiusException && e.isSignInRequired
             ? _Stage.auth
             : _Stage.error;
-        _errorMessage = e is TimeoutException || e is SocketException
-            ? l10n.paymentNetworkError
-            : '$e';
+        _errorMessage = _describeError(e, l10n);
       });
     }
+  }
+
+  /// Server-side operational states (payments not configured yet) are not
+  /// something the supporter can act on, so they get a plain sentence; every
+  /// other failure keeps its machine code, which is what support needs.
+  String _describeError(Object error, AppLocalizations l10n) {
+    if (error is TimeoutException || error is SocketException) {
+      return l10n.paymentNetworkError;
+    }
+    if (error is FreemiusException && error.code == 'payments_not_configured') {
+      return l10n.paymentComingSoonMessage;
+    }
+    return '$error';
   }
 
   /// Open the hosted page as a Custom Tab, with the same external-browser
