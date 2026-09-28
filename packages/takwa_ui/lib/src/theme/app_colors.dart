@@ -428,7 +428,8 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     backgroundGradient: LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Color(0xFF04011E), Color(0xFF111827)],
+      colors: [Color(0xFF04011E), Color(0xFF111827), Color(0xFF04011E)],
+      stops: [0.0, 0.55, 1.0],
     ),
     cardGradient: LinearGradient(
       begin: Alignment.topLeft,
@@ -505,7 +506,8 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     backgroundGradient: LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Color(0xFFF9FAFB), Color(0xFFF3F4F6), Color(0xFFF9FAFB)],
+      colors: [Color(0xFFF9FAFB), Color(0xFFF3F4F6)],
+      stops: [0.0, 1.0],
     ),
     cardGradient: LinearGradient(
       begin: Alignment.topLeft,
@@ -550,6 +552,7 @@ abstract final class AppColors {
   static const backgroundGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFF0D1117), Color(0xFF111827), Color(0xFF0D1117)],
+    colors: [Color(0xFF04011E), Color(0xFF111827), Color(0xFF04011E)],
+    stops: [0.0, 0.55, 1.0],
   );
 }

@@ -313,7 +313,6 @@ class _QiyamDashboardScreenState extends ConsumerState<QiyamDashboardScreen>
             height: 240,
             child: TakwaLoadingIndicator(
               size: 240,
-              strokeWidth: 4,
               color: stage.color,
             ),
           ),

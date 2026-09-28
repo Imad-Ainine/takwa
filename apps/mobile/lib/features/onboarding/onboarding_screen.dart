@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:lottie/lottie.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/islamic_glyph.dart';
 
@@ -341,7 +342,13 @@ class _IntroStep extends StatelessWidget {
       child: Column(
         children: [
           const SizedBox(height: 60),
-          Expanded(child: Center(child: IslamicGlyph(data.emoji, size: 100))),
+          Expanded(
+            child: Center(
+              child: data.animation == null
+                  ? IslamicGlyph(data.emoji, size: 100)
+                  : _IntroAnimation(page: data),
+            ),
+          ),
           _InfoCard(
             title: data.title(l10n),
             titleColor: context.colors.gold,
@@ -356,10 +363,62 @@ class _IntroStep extends StatelessWidget {
   }
 }
 
+class _IntroAnimation extends StatefulWidget {
+  final _OnboardingPage page;
+  const _IntroAnimation({required this.page});
+
+  @override
+  State<_IntroAnimation> createState() => _IntroAnimationState();
+}
+
+class _IntroAnimationState extends State<_IntroAnimation>
+    with SingleTickerProviderStateMixin {
+  /// Under reduce-motion this controller is handed to Lottie and never started,
+  /// so the composition renders its completed final frame instead of looping.
+  late final AnimationController _staticCtrl = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 1),
+    value: 1,
+  );
+
+  @override
+  void dispose() {
+    _staticCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final reduced = prefersReducedMotion(context);
+    return SizedBox(
+      width: 240,
+      height: 240,
+      child: Lottie.asset(
+        widget.page.animation!,
+        repeat: widget.page.loop && !reduced,
+        controller: reduced ? _staticCtrl : null,
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) => IslamicGlyph(widget.page.emoji, size: 100),
+      ),
+    );
+  }
+}
+
 class _OnboardingPage {
   final String Function(AppLocalizations) title, subtitle;
   final String emoji;
-  const _OnboardingPage(this.title, this.subtitle, this.emoji);
+  final String? animation;
+
+  /// False for animations that start from an empty canvas: they play once and
+  /// hold the finished frame instead of restarting from nothing.
+  final bool loop;
+  const _OnboardingPage(
+    this.title,
+    this.subtitle,
+    this.emoji, {
+    this.animation,
+    this.loop = true,
+  });
 }
 
 final _onboardPages = [
@@ -367,16 +426,20 @@ final _onboardPages = [
     (l10n) => l10n.onboardingIntro1Title,
     (l10n) => l10n.onboardingIntro1Subtitle,
     '🌙',
+    animation: 'assets/lottie/onboarding_moon.json',
   ),
   _OnboardingPage(
     (l10n) => l10n.onboardingIntro2Title,
     (l10n) => l10n.onboardingIntro2Subtitle,
     '✅',
+    animation: 'assets/lottie/onboarding_check.json',
+    loop: false,
   ),
   _OnboardingPage(
     (l10n) => l10n.onboardingIntro3Title,
     (l10n) => l10n.onboardingIntro3Subtitle,
     '📊',
+    animation: 'assets/lottie/onboarding_chart.json',
   ),
 ];
 

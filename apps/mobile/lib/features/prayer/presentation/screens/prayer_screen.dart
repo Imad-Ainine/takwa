@@ -806,7 +806,6 @@ class _PrayerHeader extends StatelessWidget {
                                       height: 18,
                                       child: TakwaLoadingIndicator(
                                         color: style.gold,
-                                        strokeWidth: 2,
                                         size: 18,
                                       ),
                                     )

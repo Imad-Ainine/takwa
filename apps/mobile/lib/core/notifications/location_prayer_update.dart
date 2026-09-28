@@ -923,7 +923,6 @@ class _LocationUpdateTileState extends ConsumerState<LocationUpdateTile> {
                         height: 18,
                         child: TakwaLoadingIndicator(
                           color: context.colors.teal,
-                          strokeWidth: 2,
                           size: 18,
                         ),
                       )

@@ -355,7 +355,6 @@ class _MisbahaScreenState extends ConsumerState<MisbahaScreen>
                 height: size,
                 child: TakwaLoadingIndicator(
                   size: size,
-                  strokeWidth: 4 * scale,
                   color: style.gold.withValues(alpha: 0.6),
                 ),
               ),

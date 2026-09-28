@@ -3,6 +3,7 @@ import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/custom_time_picker.dart';
 import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/core/widgets/primary_switch.dart';
+import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 class SectionHeader extends StatelessWidget {
@@ -641,13 +642,10 @@ class SyncStatusIndicator extends StatelessWidget {
 
   Widget _buildIndicator(BuildContext context) {
     if (isSyncing) {
-      return SizedBox(
-        width: 12,
-        height: 12,
-        child: CircularProgressIndicator(
-          strokeWidth: 1.5,
-          valueColor: AlwaysStoppedAnimation<Color>(context.colors.gold),
-        ),
+      return const SizedBox(
+        width: 18,
+        height: 18,
+        child: TakwaLoadingIndicator(size: 18),
       );
     }
     if (_hasIssue) {

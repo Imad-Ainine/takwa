@@ -82,7 +82,7 @@ class _UpdatePasswordScreenState extends ConsumerState<UpdatePasswordScreen> {
 
       if (mounted) {
         setState(() => _loading = false);
-        await showAuthSuccess(context, label: l10n.updatePasswordSuccessMessage);
+        await showAuthSuccess(context);
         if (mounted) {
           Navigator.pushNamedAndRemoveUntil(
             context,

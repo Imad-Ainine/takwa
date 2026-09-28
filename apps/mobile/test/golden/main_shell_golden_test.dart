@@ -20,16 +20,13 @@
 // one of the five here too — confirmed by that test already passing with
 // exactly this override set.
 //
-// Known limitation: TakwaLoadingIndicator / TakwaRefreshIndicator spin
-// unconditionally (they're excluded from the reduce-motion gate added
-// elsewhere in this audit pass — see ReducedMotionRepeat's own doc
-// comment — because a real loading/refresh spinner communicates actual
-// in-progress work, and stopping it would misrepresent that). If a
-// screen is still in a loading state at capture time, its spinner's
-// rotation angle is a source of flakiness these tests can't fully rule
-// out. The bounded-pump schedule below (matching widget_test.dart) is
-// chosen to let each screen's initial async providers resolve before
-// capture, same as that test already relies on.
+// Known limitation: TakwaLoadingIndicator / TakwaRefreshIndicator animate
+// while visible. They hold a resting frame under reduce-motion, but this
+// harness doesn't request it, so a screen that is still loading at capture
+// time contributes that animation's current frame to the pixel diff. The
+// bounded-pump schedule below (matching widget_test.dart) is chosen to let
+// each screen's initial async providers resolve before capture, same as
+// that test already relies on.
 
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';

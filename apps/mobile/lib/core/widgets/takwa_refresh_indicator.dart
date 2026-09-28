@@ -23,12 +23,12 @@ class TakwaRefreshIndicator extends StatefulWidget {
 
 class _TakwaRefreshIndicatorState extends State<TakwaRefreshIndicator>
     with SingleTickerProviderStateMixin {
-  late AnimationController _spinController;
+  late AnimationController _pulseController;
 
   @override
   void initState() {
     super.initState();
-    _spinController = AnimationController(
+    _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     );
@@ -36,7 +36,7 @@ class _TakwaRefreshIndicatorState extends State<TakwaRefreshIndicator>
 
   @override
   void dispose() {
-    _spinController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -50,10 +50,10 @@ class _TakwaRefreshIndicatorState extends State<TakwaRefreshIndicator>
       offsetToArmed: widget.displacement,
       onStateChanged: (IndicatorStateChange state) {
         if (state.currentState == IndicatorState.loading) {
-          _spinController.repeat();
+          _pulseController.repeat();
         } else if (state.currentState == IndicatorState.idle) {
-          _spinController.stop();
-          _spinController.reset();
+          _pulseController.stop();
+          _pulseController.reset();
         }
       },
       builder: (BuildContext context, Widget child, IndicatorController controller) {
@@ -72,7 +72,7 @@ class _TakwaRefreshIndicatorState extends State<TakwaRefreshIndicator>
 
             // Custom Takwa Animated Logo
             AnimatedBuilder(
-              animation: Listenable.merge([controller, _spinController]),
+              animation: Listenable.merge([controller, _pulseController]),
               builder: (context, _) {
                 final isArmedOrLoading =
                     controller.isArmed ||
@@ -87,10 +87,14 @@ class _TakwaRefreshIndicatorState extends State<TakwaRefreshIndicator>
                     -containerSize +
                     (controller.value * widget.displacement * 1.2);
 
-                // Rotations: Half a turn while pulling, continuous spin while loading
+                // Half a turn follows the finger while pulling, then the mark
+                // stops upright: a wide wordmark tumbling in circles reads as a
+                // glitch, not as brand. The same controller drives the glow
+                // pulse while the refresh is in flight.
                 final rotation = controller.isLoading
-                    ? _spinController.value * 2 * math.pi
+                    ? 0.0
                     : controller.value * math.pi;
+                final pulse = math.sin(_pulseController.value * 2 * math.pi);
 
                 // Slight popping scale when armed
                 final scale = isArmedOrLoading
@@ -117,7 +121,11 @@ class _TakwaRefreshIndicatorState extends State<TakwaRefreshIndicator>
                             boxShadow: [
                               BoxShadow(
                                 color: logoColor.withValues(alpha: isArmedOrLoading ? 0.35 : 0.15),
-                                blurRadius: isArmedOrLoading ? 25 : 10,
+                                blurRadius: controller.isLoading
+                                    ? 18.0 + 10.0 * pulse
+                                    : isArmedOrLoading
+                                    ? 25
+                                    : 10,
                                 spreadRadius: isArmedOrLoading ? 2 : 0,
                                 offset: const Offset(0, 5),
                               ),

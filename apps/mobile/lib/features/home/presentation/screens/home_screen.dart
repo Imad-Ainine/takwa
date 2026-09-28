@@ -1448,18 +1448,15 @@ class _FeatureRow extends StatelessWidget {
       l10n.homeFeatureMosques,
       '/mosques',
     ),
-    ('📊', null, l10n.homeFeatureStatistics, '/statistics'),
-    ('🏆', null, l10n.homeFeatureAchievements, '/achievements'),
-    ('🔔', null, l10n.homeFeatureReminders, '/reminders'),
+    ('📊', null, l10n.homeFeatureStatistics, Routes.statistics),
+    ('🏆', null, l10n.homeFeatureAchievements, Routes.achievements),
+    ('🔔', null, l10n.homeFeatureReminders, Routes.reminders),
     ('💰', null, l10n.homeFeatureZakat, Routes.zakatCalculator),
     ('👨‍👩‍👧‍👦', null, l10n.homeFeatureCircles, Routes.circles),
     ('🔁', null, l10n.homeFeatureQada, Routes.qadaTracker),
     ('💧', null, l10n.homeFeatureSadaqah, Routes.sadaqahTracker),
     ('📅', null, l10n.homeFeatureOccasions, Routes.islamicOccasions),
-    // Only surfaced during the Hijri month of Ramadan — same `hMonth == 9`
-    // check statistics_screen.dart uses for its own Ramadan-only UI.
-    if (HijriCalendar.now().hMonth == 9)
-      ('🌙', null, l10n.homeFeatureRamadan, Routes.ramadanTracker),
+    ('🌙', null, l10n.homeFeatureRamadan, Routes.ramadanTracker),
   ];
 
   @override
@@ -1911,6 +1908,7 @@ class _BooksSection extends ConsumerWidget {
             ],
           ),
         ),
+        const SizedBox(height: AppSpacing.xxl),
         const SizedBox(height: AppSpacing.xxl),
         SizedBox(
           height: 216,

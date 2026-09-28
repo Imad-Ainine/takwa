@@ -7,6 +7,7 @@ import 'package:takwa/l10n/app_localizations.dart';
 
 import '../core/theme/app_theme.dart';
 import '../core/widgets/takwa_error_state.dart';
+import '../core/widgets/takwa_loading_indicator.dart';
 import '../core/providers/database_providers.dart';
 import '../core/notifications/notifications_service.dart';
 import '../features/home/presentation/screens/home_screen.dart';
@@ -19,7 +20,6 @@ import '../core/providers/auth_providers.dart';
 import '../core/supabase/supabase_providers.dart';
 import '../features/auth/presentation/pages/auth_choice_screen.dart';
 import '../core/widgets/custom_pattern_background.dart';
-import 'package:takwa/core/widgets/islamic_glyph.dart';
 import '../core/notifications/overlay_background_service.dart';
 import '../features/quran/presentation/widgets/quran_now_playing_bar.dart';
 
@@ -514,43 +514,10 @@ class _SplashScreenState extends State<_SplashScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo ring
-                SizedBox(
-                  width: 100,
-                  height: 100,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      ...List.generate(
-                        3,
-                        (i) => Container(
-                          width: 100 - i * 20.0,
-                          height: 100 - i * 20.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: context.colors.gold.withValues(
-                                alpha: 0.3 - i * 0.08,
-                              ),
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const IslamicGlyph('🌙', size: 32),
-                    ],
-                  ),
-                ),
+                // Hand-off from the native splash: the same wordmark, now
+                // breathing, while auth and the database finish warming up.
+                const TakwaLoadingIndicator(size: 176),
                 const SizedBox(height: AppSpacing.xxl),
-                Text(
-                  l10n.authChoiceAppName,
-                  style: context.typography.displayMedium.copyWith(
-                    fontSize: 32,
-                    color: context.colors.gold,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
                 Text(
                   l10n.splashQuote,
                   style: context.typography.quranicVerse.copyWith(

@@ -383,7 +383,7 @@ class _BookPdfReaderScreenState extends ConsumerState<BookPdfReaderScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TakwaLoadingIndicator(color: accentColor, strokeWidth: 2.5),
+            TakwaLoadingIndicator(color: accentColor),
             const SizedBox(height: AppSpacing.xl),
             Text(
               _downloadProgress > 0

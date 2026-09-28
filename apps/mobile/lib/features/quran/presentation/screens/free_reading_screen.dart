@@ -754,7 +754,6 @@ class _RubTab extends StatelessWidget {
                           children: [
                             TakwaLoadingIndicator(
                               size: 36,
-                              strokeWidth: 2.5,
                               color: idx == 0
                                   ? style.textDim
                                   : idx == 1

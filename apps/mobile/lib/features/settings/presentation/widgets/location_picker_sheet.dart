@@ -57,7 +57,6 @@ class LocationPickerSheet extends ConsumerStatefulWidget {
                   height: 18,
                   child: TakwaLoadingIndicator(
                     size: 18,
-                    strokeWidth: 2,
                     color: Colors.white,
                   ),
                 ),

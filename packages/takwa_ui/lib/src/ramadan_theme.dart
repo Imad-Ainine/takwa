@@ -73,13 +73,16 @@ class RamadanTheme {
 
   /// [locale] defaults to Arabic, matching this app's default UI language.
   static ThemeData dark([Locale locale = const Locale('ar')]) {
+    const bg = RamadanColors.deepLapis;
+    const dp = RamadanColors.lapis;
+    const nt = RamadanColors.deepLapis;
     final colors = AppColorsExtension(
-      background: RamadanColors.deepLapis,
-      deep: RamadanColors.lapis,
+      background: bg,
+      deep: dp,
       card: RamadanColors.lapisCard,
       card2: RamadanColors.lapisCard,
       border: RamadanColors.border,
-      night: RamadanColors.deepLapis,
+      night: nt,
       gold: RamadanColors.goldenAura,
       goldLight: RamadanColors.goldenLight,
       goldDark: RamadanColors.goldenDeep,
@@ -130,7 +133,12 @@ class RamadanTheme {
       overlay: const Color(0xB3000000),
       disabledBackground: const Color(0xFF101A32),
       disabledContent: const Color(0xFF5A6684),
-      backgroundGradient: RamadanColors.nightSky,
+      backgroundGradient: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [nt, bg, dp],
+        stops: [0.0, 0.5, 1.0],
+      ),
       cardGradient: RamadanColors.cardGlow,
       goldGradient: AppColorsExtension.dark.goldGradient,
       tealGoldGradient: AppColorsExtension.dark.tealGoldGradient,
@@ -162,13 +170,16 @@ class RamadanTheme {
   }
 
   static ThemeData light([Locale locale = const Locale('ar')]) {
+    const bg = RamadanColors.ivoryLight;
+    const dp = RamadanColors.ivory;
+    const nt = RamadanColors.deepLapis;
     final colors = AppColorsExtension(
-      background: RamadanColors.ivoryLight,
-      deep: RamadanColors.ivory,
+      background: bg,
+      deep: dp,
       card: Colors.white,
       card2: RamadanColors.ivoryLight,
       border: RamadanColors.border,
-      night: RamadanColors.deepLapis,
+      night: nt,
       gold: RamadanColors.goldenAura,
       goldLight: RamadanColors.goldenLight,
       goldDark: RamadanColors.goldenDeep,
@@ -218,7 +229,12 @@ class RamadanTheme {
       overlay: const Color(0x80000000),
       disabledBackground: const Color(0xFFEFE7D2),
       disabledContent: const Color(0xFFA89A78),
-      backgroundGradient: RamadanColors.daySky,
+      backgroundGradient: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [bg, dp, Color(0xFFE8DDC3)],
+        stops: [0.0, 0.55, 1.0],
+      ),
       cardGradient: RamadanColors.cardGlowLight,
       goldGradient: AppColorsExtension.light.goldGradient,
       tealGoldGradient: AppColorsExtension.light.tealGoldGradient,

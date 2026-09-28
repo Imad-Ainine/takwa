@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 
 /// Google's official "Sign in with Google" button shape — pill, 18dp
@@ -101,10 +102,16 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SvgPicture.asset(
-                        'assets/icons/google.svg',
-                        width: 18,
-                        height: 18,
+                      Lottie.asset(
+                        'assets/lottie/Google Logo Effect.json',
+                        width: 24,
+                        height: 24,
+                        repeat: true,
+                        errorBuilder: (_, __, ___) => SvgPicture.asset(
+                          'assets/icons/google.svg',
+                          width: 24,
+                          height: 24,
+                        ),
                       ),
                       const SizedBox(width: AppSpacing.md),
                       Flexible(

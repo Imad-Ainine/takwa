@@ -5,6 +5,7 @@ import '../../data/quran_models.dart';
 import '../../providers/quran_providers.dart';
 import 'package:takwa/core/widgets/app_bar_widget.dart';
 import 'package:takwa/core/widgets/custom_leading_button.dart';
+import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import '../../utils/quran_helpers.dart';
 import '../widgets/quran_widgets.dart';
 import 'package:takwa/core/theme/ramadan_theme.dart';
@@ -140,7 +141,7 @@ class KhatmaProgressScreen extends ConsumerWidget {
                           loading: () => const SizedBox(
                             height: 80,
                             child: Center(
-                              child: CircularProgressIndicator(),
+                              child: TakwaLoadingIndicator(size: 40),
                             ),
                           ),
                           error: (_, __) => const SizedBox.shrink(),

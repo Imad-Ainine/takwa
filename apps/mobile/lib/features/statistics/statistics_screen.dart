@@ -1227,7 +1227,7 @@ class _PrayerAttendanceCard extends ConsumerWidget {
             loading: () => const Center(
               child: Padding(
                 padding: EdgeInsets.all(AppSpacing.lg),
-                child: TakwaLoadingIndicator(strokeWidth: 2),
+                child: TakwaLoadingIndicator(),
               ),
             ),
             error: (_, _) => TakwaErrorState(
@@ -1414,7 +1414,6 @@ class _AchievementsSection extends ConsumerWidget {
             loading: () => Center(
               child: TakwaLoadingIndicator(
                 color: context.colors.gold,
-                strokeWidth: 2,
               ),
             ),
             error: (_, _) => TakwaErrorState(
@@ -1917,8 +1916,8 @@ class _StatSkeleton extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppRadius.lg),
       border: Border.all(color: context.colors.border),
     ),
-    child: Center(
-      child: TakwaLoadingIndicator(color: context.colors.gold, strokeWidth: 2),
+    child: const Center(
+      child: TakwaLoadingIndicator(),
     ),
   );
 }

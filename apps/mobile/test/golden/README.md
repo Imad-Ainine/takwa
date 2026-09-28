@@ -71,14 +71,12 @@ would test a combination that can't occur.
 
 ## A known source of flakiness
 
-`TakwaLoadingIndicator` / `TakwaRefreshIndicator` spin unconditionally —
-they're deliberately excluded from the reduce-motion gate added elsewhere
-in this audit pass, since a real loading/refresh spinner communicates
-actual in-progress work and stopping it would misrepresent that (see
-`ReducedMotionRepeat`'s own doc comment in
-`packages/takwa_ui/lib/src/app_theme.dart`). If a screen is still loading
-at the moment a golden test captures it, that spinner's rotation angle is
-a source of pixel-diff flakiness this test setup doesn't fully rule out.
-If a specific case turns out flaky in practice, the fix is likely a longer
-or more deterministic pump schedule for that one screen, not disabling the
-spinner.
+`TakwaLoadingIndicator` sweeps a band of light over the wordmark while it is
+visible, and `TakwaRefreshIndicator` pulses its halo during a refresh. Both
+are gated on reduce-motion (see `ReducedMotionRepeat` in
+`packages/takwa_ui/lib/src/app_theme.dart`), so a harness that sets
+`disableAnimations: true` captures a deterministic resting frame. Without
+that flag, any screen still loading at capture time contributes an
+animation frame to the pixel diff. If a specific case turns out flaky in
+practice, the fix is likely a longer or more deterministic pump schedule for
+that one screen, not disabling the animation.

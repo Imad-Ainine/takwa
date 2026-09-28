@@ -179,7 +179,6 @@ class _ChecklistScreenState extends ConsumerState<ChecklistScreen>
             loading: () => Center(
               child: TakwaLoadingIndicator(
                 color: context.colors.gold,
-                strokeWidth: 2,
               ),
             ),
             error: (e, _) => Center(

@@ -5,12 +5,11 @@ import 'package:takwa/core/theme/app_theme.dart';
 
 /// Short success moment shown after sign-in before the app reveals itself.
 /// With [confetti] the celebration is a full-screen exploding ribbon and
-/// confetti burst (LottieFiles "Exploding Ribbon and Confetti" by Lexi
-/// Michel); otherwise it stays the calm gold ring over a frosted scrim. The
-/// future resolves once the overlay is gone, so callers navigate right after.
+/// confetti burst (Lotties "Exploding Ribbon and Confetti"); otherwise it
+/// stays the calm gold ring over a frosted scrim. The future resolves once
+/// the overlay is gone, so callers navigate right after.
 Future<void> showAuthSuccess(
   BuildContext context, {
-  required String label,
   bool confetti = false,
 }) async {
   if (!context.mounted) return;
@@ -31,11 +30,7 @@ Future<void> showAuthSuccess(
       Future.delayed(hold, () {
         if (dialogContext.mounted) Navigator.of(dialogContext).pop();
       });
-      return _AuthSuccessView(
-        label: label,
-        reduced: reduced,
-        confetti: confetti,
-      );
+      return _AuthSuccessView(reduced: reduced, confetti: confetti);
     },
     transitionBuilder: (dialogContext, anim, _, child) {
       final curved = CurvedAnimation(parent: anim, curve: AppMotion.emphasized);
@@ -51,14 +46,9 @@ Future<void> showAuthSuccess(
 }
 
 class _AuthSuccessView extends StatelessWidget {
-  final String label;
   final bool reduced;
   final bool confetti;
-  const _AuthSuccessView({
-    required this.label,
-    required this.reduced,
-    this.confetti = false,
-  });
+  const _AuthSuccessView({required this.reduced, this.confetti = false});
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +61,6 @@ class _AuthSuccessView extends StatelessWidget {
           : Lottie.asset(
               'assets/lottie/success_animation.json',
               repeat: false,
-              // A bad asset must never block entry into the app.
               errorBuilder: (_, __, ___) => Icon(
                 Icons.check_circle_rounded,
                 size: 96,
@@ -79,43 +68,13 @@ class _AuthSuccessView extends StatelessWidget {
               ),
             ),
     );
-    final title = ShaderMask(
-      shaderCallback: (bounds) =>
-          colors.goldGradient.createShader(bounds),
-      child: Text(
-        label,
-        textAlign: TextAlign.center,
-        style: context.typography.headingMedium.copyWith(
-          fontWeight: FontWeight.w800,
-          color: Colors.white,
-        ),
-      ),
-    );
 
     if (confetti) {
       return Stack(
         fit: StackFit.expand,
         children: [
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                badge,
-                const SizedBox(height: AppSpacing.lg),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xl,
-                  ),
-                  child: title,
-                ),
-              ],
-            ),
-          ),
           if (!reduced)
             IgnorePointer(
-              // The source animation is 16:9 with the burst starting at the
-              // top-left; contain-fitting it on a phone leaves the confetti
-              // raining from off-frame, so pull it in and scale it up.
               child: Transform.scale(
                 scale: 1.3,
                 child: Transform.translate(
@@ -135,14 +94,7 @@ class _AuthSuccessView extends StatelessWidget {
     return Center(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            badge,
-            const SizedBox(height: AppSpacing.lg),
-            title,
-          ],
-        ),
+        child: badge,
       ),
     );
   }

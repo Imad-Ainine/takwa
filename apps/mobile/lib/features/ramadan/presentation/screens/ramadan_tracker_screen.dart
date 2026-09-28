@@ -14,6 +14,7 @@ import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
 import 'package:takwa/core/widgets/primary_switch.dart';
 import 'package:takwa/core/widgets/takwa_error_state.dart';
+import 'package:takwa/core/widgets/takwa_loading_indicator.dart';
 import 'package:takwa/core/widgets/islamic_glyph.dart';
 import 'package:takwa/features/ramadan/data/ramadan_duas_data.dart';
 import 'package:takwa/features/ramadan/providers/ramadan_providers.dart';
@@ -180,7 +181,7 @@ class _CountdownCard extends ConsumerWidget {
       child: prayers.when(
         loading: () => const Padding(
           padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(child: TakwaLoadingIndicator(size: 32)),
         ),
         // Same fallback shape as prayer_screen.dart's own _ErrorView (this
         // is almost always a missing/denied location permission, since

@@ -103,7 +103,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
       await _syncGender();
       if (mounted) {
         setState(() => _loading = false);
-        await showAuthSuccess(context, label: l10n.authWelcomeBack, confetti: true);
+        await showAuthSuccess(context, confetti: true);
         // '/' replays the splash route, which then stacks a second MainShell
         // over the live one — the splash round-trip is what left users on a
         // black screen after signing in.
@@ -173,7 +173,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
         await _syncGender();
         if (mounted) {
           setState(() => _loading = false);
-          await showAuthSuccess(context, label: l10n.authWelcomeBack, confetti: true);
+          await showAuthSuccess(context, confetti: true);
           if (mounted) {
             Navigator.of(
               context,
