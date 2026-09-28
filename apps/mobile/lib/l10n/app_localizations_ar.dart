@@ -4201,7 +4201,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get paymentSupportMessage =>
-      'بمساهمتك البسيطة، تجعل \"تقوى\" متاحاً لملايين المسلمين كصدقة جارية عنك وعن والديك. 200دج أو 10€  شهرياً تضمن استمرار هذا العمل وتطويره الدائم.';
+      'بمساهمتك البسيطة، تجعل \"تقوى\" متاحاً لملايين المسلمين كصدقة جارية عنك وعن والديك. 200 دج أو 10 دولارات شهرياً تضمن استمرار هذا العمل وتطويره الدائم.';
 
   @override
   String get paymentContinueButton => 'المتابعة للدفع';
@@ -4286,50 +4286,86 @@ class AppLocalizationsAr extends AppLocalizations {
   String get paymentRetryButton => 'إعادة المحاولة';
 
   @override
-  String get wiseScreenTitle => 'فيزا / ماستركارد عبر Wise';
+  String get paymentFreemiusSignInTitle => 'سجّل الدخول للاشتراك';
 
   @override
-  String get wiseIntroMessage =>
-      'أرسل دعمك الشهري مباشرة إلى حساب المطوّر على Wise من تطبيق Wise أو تطبيق بنكك. استخدم المرجع أدناه حتىتمكن معرفة تحويلك.';
+  String get paymentFreemiusSignInSubtitle =>
+      'الاشتراكات بالبطاقة ترتبط بحسابك ليتم تأكيد دعمك تلقائياً. سجّل الدخول للمتابعة.';
 
   @override
-  String wiseCopiedMessage(String label) {
-    return 'تم نسخ $label إلى الحافظة';
+  String get paymentCreatingFreemiusSubtitle =>
+      'جارٍ إنشاء جلسة دفع آمنة عبر Freemius.';
+
+  @override
+  String get paymentAwaitingFreemiusSubtitle =>
+      'أكمل الدفع في الصفحة المفتوحة. سنؤكد الدفع هنا تلقائياً فور وصول إشعار من Freemius — قد يستغرق ذلك دقيقة.';
+
+  @override
+  String get paymentRecommendedBadge => 'موصى به';
+
+  @override
+  String get paymentSignInButton => 'تسجيل الدخول';
+
+  @override
+  String get paymentRegionLabel => 'من أين تريد الدفع؟';
+
+  @override
+  String paymentRegionAuto(String detected) {
+    return 'تلقائي ($detected)';
   }
 
   @override
-  String get wiseHolderLabel => 'صاحب الحساب';
+  String get paymentRegionAlgeria => 'الجزائر — الذهبية / سي بي';
 
   @override
-  String get wiseIbanLabel => 'الآيبان (IBAN)';
+  String get paymentRegionInternational => 'دولي — فيزا / ماستركارد';
 
   @override
-  String get wiseAccountLabel => 'رقم الحساب';
+  String get paymentRegionDetectedDz => 'الجزائر';
 
   @override
-  String get wiseSortCodeLabel => 'رمز الترتيب';
+  String get paymentRegionDetectedIntl => 'دولي';
 
   @override
-  String get wiseBankLabel => 'البنك';
+  String get subscriptionStatusActive =>
+      'الاشتراك المميز نشط — جزاكم الله خيراً!';
 
   @override
-  String get wiseAmountLabel => 'المبلغ';
+  String subscriptionStatusRenews(String date) {
+    return 'يتجدد في $date';
+  }
 
   @override
-  String get wiseReferenceLabel => 'مرجع الدفع';
+  String subscriptionStatusTrialUntil(String date) {
+    return 'التجربة المجانية حتى $date';
+  }
 
   @override
-  String get wiseOpenButton => 'فتح Wise';
+  String get subscriptionStatusPastDue =>
+      'لم ينجح دفع التجديد. حدّث بطاقتك من «إدارة الاشتراك» للاحتفاظ بالاشتراك المميز.';
 
   @override
-  String get wiseSentButton => 'لقد أرسلت الدفع';
+  String subscriptionStatusCancelingUntil(String date) {
+    return 'تم إلغاء الاشتراك — يبقى المميز فعّالاً حتى $date.';
+  }
 
   @override
-  String get wiseThanksTitle => 'جزاكم الله خيراً';
+  String get subscriptionStatusExpired =>
+      'انتهى اشتراكك. يمكنك إعادة الاشتراك متى شئت.';
 
   @override
-  String get wiseThanksSubtitle =>
-      'تم تسجيل تحويلك هنا. يظهر رسمياً بعد مطابقة كشف الحساب.';
+  String get subscriptionStatusRefunded =>
+      'تم استرداد آخر دفعة، لذلك أُوقف الاشتراك المميز. اشترك مجدداً متى شئت.';
+
+  @override
+  String get subscriptionManageButton => 'إدارة الاشتراك';
+
+  @override
+  String get subscriptionPortalLoading => 'جارٍ فتح بوابة الاشتراك…';
+
+  @override
+  String get subscriptionPortalError =>
+      'تعذّر فتح بوابة الاشتراك. حاول مجدداً من فضلك.';
 
   @override
   String get qiyamOnboardingTitle => 'مرحباً بك في قيام الليل';
@@ -4365,7 +4401,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get subscriptionHonorSystemNote =>
-      'ما لم نعلن على خلاف ذلك، لا نقوم بالتأكد من سداد المستخدم لرسوم الاشتراك. ونقصد ترك ذلك لرغبة المستخدم.';
+      'المدفوعات بالبطاقة من خارج الجزائر يتم التحقق منها تلقائياً وتفتح الاشتراك المميز على جميع أجهزتك. أما الدعم من داخل الجزائر (الذهبية/سي بي) فيبقى على أساس الأمانة.';
 
   @override
   String get subscriptionPayMonthlyButton => 'بإمكاني الدفع شهرياً';

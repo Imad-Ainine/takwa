@@ -7619,7 +7619,7 @@ abstract class AppLocalizations {
   /// No description provided for @paymentSupportMessage.
   ///
   /// In ar, this message translates to:
-  /// **'بمساهمتك البسيطة، تجعل \"تقوى\" متاحاً لملايين المسلمين كصدقة جارية عنك وعن والديك. 200دج أو 10€  شهرياً تضمن استمرار هذا العمل وتطويره الدائم.'**
+  /// **'بمساهمتك البسيطة، تجعل \"تقوى\" متاحاً لملايين المسلمين كصدقة جارية عنك وعن والديك. 200 دج أو 10 دولارات شهرياً تضمن استمرار هذا العمل وتطويره الدائم.'**
   String get paymentSupportMessage;
 
   /// No description provided for @paymentContinueButton.
@@ -7772,89 +7772,137 @@ abstract class AppLocalizations {
   /// **'إعادة المحاولة'**
   String get paymentRetryButton;
 
-  /// No description provided for @wiseScreenTitle.
+  /// No description provided for @paymentFreemiusSignInTitle.
   ///
   /// In ar, this message translates to:
-  /// **'فيزا / ماستركارد عبر Wise'**
-  String get wiseScreenTitle;
+  /// **'سجّل الدخول للاشتراك'**
+  String get paymentFreemiusSignInTitle;
 
-  /// No description provided for @wiseIntroMessage.
+  /// No description provided for @paymentFreemiusSignInSubtitle.
   ///
   /// In ar, this message translates to:
-  /// **'أرسل دعمك الشهري مباشرة إلى حساب المطوّر على Wise من تطبيق Wise أو تطبيق بنكك. استخدم المرجع أدناه حتىتمكن معرفة تحويلك.'**
-  String get wiseIntroMessage;
+  /// **'الاشتراكات بالبطاقة ترتبط بحسابك ليتم تأكيد دعمك تلقائياً. سجّل الدخول للمتابعة.'**
+  String get paymentFreemiusSignInSubtitle;
 
-  /// Snack-bar shown after copying a Wise recipient field
+  /// No description provided for @paymentCreatingFreemiusSubtitle.
   ///
   /// In ar, this message translates to:
-  /// **'تم نسخ {label} إلى الحافظة'**
-  String wiseCopiedMessage(String label);
+  /// **'جارٍ إنشاء جلسة دفع آمنة عبر Freemius.'**
+  String get paymentCreatingFreemiusSubtitle;
 
-  /// No description provided for @wiseHolderLabel.
+  /// No description provided for @paymentAwaitingFreemiusSubtitle.
   ///
   /// In ar, this message translates to:
-  /// **'صاحب الحساب'**
-  String get wiseHolderLabel;
+  /// **'أكمل الدفع في الصفحة المفتوحة. سنؤكد الدفع هنا تلقائياً فور وصول إشعار من Freemius — قد يستغرق ذلك دقيقة.'**
+  String get paymentAwaitingFreemiusSubtitle;
 
-  /// No description provided for @wiseIbanLabel.
+  /// No description provided for @paymentRecommendedBadge.
   ///
   /// In ar, this message translates to:
-  /// **'الآيبان (IBAN)'**
-  String get wiseIbanLabel;
+  /// **'موصى به'**
+  String get paymentRecommendedBadge;
 
-  /// No description provided for @wiseAccountLabel.
+  /// No description provided for @paymentSignInButton.
   ///
   /// In ar, this message translates to:
-  /// **'رقم الحساب'**
-  String get wiseAccountLabel;
+  /// **'تسجيل الدخول'**
+  String get paymentSignInButton;
 
-  /// No description provided for @wiseSortCodeLabel.
+  /// No description provided for @paymentRegionLabel.
   ///
   /// In ar, this message translates to:
-  /// **'رمز الترتيب'**
-  String get wiseSortCodeLabel;
+  /// **'من أين تريد الدفع؟'**
+  String get paymentRegionLabel;
 
-  /// No description provided for @wiseBankLabel.
+  /// No description provided for @paymentRegionAuto.
   ///
   /// In ar, this message translates to:
-  /// **'البنك'**
-  String get wiseBankLabel;
+  /// **'تلقائي ({detected})'**
+  String paymentRegionAuto(String detected);
 
-  /// No description provided for @wiseAmountLabel.
+  /// No description provided for @paymentRegionAlgeria.
   ///
   /// In ar, this message translates to:
-  /// **'المبلغ'**
-  String get wiseAmountLabel;
+  /// **'الجزائر — الذهبية / سي بي'**
+  String get paymentRegionAlgeria;
 
-  /// No description provided for @wiseReferenceLabel.
+  /// No description provided for @paymentRegionInternational.
   ///
   /// In ar, this message translates to:
-  /// **'مرجع الدفع'**
-  String get wiseReferenceLabel;
+  /// **'دولي — فيزا / ماستركارد'**
+  String get paymentRegionInternational;
 
-  /// No description provided for @wiseOpenButton.
+  /// No description provided for @paymentRegionDetectedDz.
   ///
   /// In ar, this message translates to:
-  /// **'فتح Wise'**
-  String get wiseOpenButton;
+  /// **'الجزائر'**
+  String get paymentRegionDetectedDz;
 
-  /// No description provided for @wiseSentButton.
+  /// No description provided for @paymentRegionDetectedIntl.
   ///
   /// In ar, this message translates to:
-  /// **'لقد أرسلت الدفع'**
-  String get wiseSentButton;
+  /// **'دولي'**
+  String get paymentRegionDetectedIntl;
 
-  /// No description provided for @wiseThanksTitle.
+  /// No description provided for @subscriptionStatusActive.
   ///
   /// In ar, this message translates to:
-  /// **'جزاكم الله خيراً'**
-  String get wiseThanksTitle;
+  /// **'الاشتراك المميز نشط — جزاكم الله خيراً!'**
+  String get subscriptionStatusActive;
 
-  /// No description provided for @wiseThanksSubtitle.
+  /// No description provided for @subscriptionStatusRenews.
   ///
   /// In ar, this message translates to:
-  /// **'تم تسجيل تحويلك هنا. يظهر رسمياً بعد مطابقة كشف الحساب.'**
-  String get wiseThanksSubtitle;
+  /// **'يتجدد في {date}'**
+  String subscriptionStatusRenews(String date);
+
+  /// No description provided for @subscriptionStatusTrialUntil.
+  ///
+  /// In ar, this message translates to:
+  /// **'التجربة المجانية حتى {date}'**
+  String subscriptionStatusTrialUntil(String date);
+
+  /// No description provided for @subscriptionStatusPastDue.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم ينجح دفع التجديد. حدّث بطاقتك من «إدارة الاشتراك» للاحتفاظ بالاشتراك المميز.'**
+  String get subscriptionStatusPastDue;
+
+  /// No description provided for @subscriptionStatusCancelingUntil.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم إلغاء الاشتراك — يبقى المميز فعّالاً حتى {date}.'**
+  String subscriptionStatusCancelingUntil(String date);
+
+  /// No description provided for @subscriptionStatusExpired.
+  ///
+  /// In ar, this message translates to:
+  /// **'انتهى اشتراكك. يمكنك إعادة الاشتراك متى شئت.'**
+  String get subscriptionStatusExpired;
+
+  /// No description provided for @subscriptionStatusRefunded.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم استرداد آخر دفعة، لذلك أُوقف الاشتراك المميز. اشترك مجدداً متى شئت.'**
+  String get subscriptionStatusRefunded;
+
+  /// No description provided for @subscriptionManageButton.
+  ///
+  /// In ar, this message translates to:
+  /// **'إدارة الاشتراك'**
+  String get subscriptionManageButton;
+
+  /// No description provided for @subscriptionPortalLoading.
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ فتح بوابة الاشتراك…'**
+  String get subscriptionPortalLoading;
+
+  /// No description provided for @subscriptionPortalError.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر فتح بوابة الاشتراك. حاول مجدداً من فضلك.'**
+  String get subscriptionPortalError;
 
   /// No description provided for @qiyamOnboardingTitle.
   ///
@@ -7919,7 +7967,7 @@ abstract class AppLocalizations {
   /// No description provided for @subscriptionHonorSystemNote.
   ///
   /// In ar, this message translates to:
-  /// **'ما لم نعلن على خلاف ذلك، لا نقوم بالتأكد من سداد المستخدم لرسوم الاشتراك. ونقصد ترك ذلك لرغبة المستخدم.'**
+  /// **'المدفوعات بالبطاقة من خارج الجزائر يتم التحقق منها تلقائياً وتفتح الاشتراك المميز على جميع أجهزتك. أما الدعم من داخل الجزائر (الذهبية/سي بي) فيبقى على أساس الأمانة.'**
   String get subscriptionHonorSystemNote;
 
   /// No description provided for @subscriptionPayMonthlyButton.

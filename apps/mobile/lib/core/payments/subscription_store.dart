@@ -3,8 +3,11 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:takwa/core/providers/database_providers.dart';
 
-/// Which channel a support payment was made through.
-enum SupportChannel { chargily, wise }
+/// Which channel a support payment was made through. `wise` stays in the
+/// enum even though the Wise flow was replaced by Freemius: historical
+/// on-device records under [SubscriptionStore.paymentsKey] reference it and
+/// must keep parsing.
+enum SupportChannel { chargily, wise, freemius }
 
 /// One recorded support contribution (honor-system: Chargily entries carry a
 /// server-verified `paid` status; Wise entries are user-declared until the
@@ -46,10 +49,10 @@ class SupportPayment {
 }
 
 /// Local-first record of the user's support payments, stored in the
-/// `premium_payments` settings key (JSON list, newest first). Follows the
-/// same honor-system spirit as the rest of the subscription screens —
-/// Chargily status is verified server-side when available, Wise receipts
-/// cannot be verified from the app.
+/// `premium_payments` settings key (JSON list, newest first). Freemius
+/// entries mirror the server-side entitlement (which is the real gate);
+/// Chargily entries carry the proxy-verified `paid` status; legacy `wise`
+/// entries are user-declared history only.
 class SubscriptionStore {
   static const paymentsKey = 'premium_payments';
   static const _maxKept = 24;

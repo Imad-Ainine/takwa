@@ -1803,7 +1803,7 @@
   "paymentMethodEdahabiaTitle": "Edahabia / CIB",
   "paymentMethodVisaTitle": "Visa / Mastercard",
   "paymentSupportTitle": "Ongoing Charity",
-  "paymentSupportMessage": "With your small contribution, you help make \"Takwa\" available to millions of Muslims as an ongoing charity (sadaqah jariyah) on your behalf and your parents'. 200 DZD or €10 a month ensures this work continues and keeps improving.",
+  "paymentSupportMessage": "With your small contribution, you help make \"Takwa\" available to millions of Muslims as an ongoing charity (sadaqah jariyah) on your behalf and your parents'. 200 DZD or $10 a month ensures this work continues and keeps improving.",
   "paymentContinueButton": "Continue to Payment",
   "paymentComingSoonMessage": "Payment will be enabled soon, insha'Allah",
   "paymentChooseCardSheetTitle": "Choose your card network",
@@ -1829,28 +1829,56 @@
   "paymentIAmDone": "I have completed the payment",
   "paymentDoneButton": "Done",
   "paymentRetryButton": "Try again",
-  "wiseScreenTitle": "Visa / Mastercard via Wise",
-  "wiseIntroMessage": "Send your monthly support directly to the developer's Wise account from the Wise app or your banking app. Use the reference below so your transfer can be recognized.",
-  "wiseCopiedMessage": "{label} copied to clipboard",
-  "@wiseCopiedMessage": {
-    "description": "Snack-bar shown after copying a Wise recipient field",
+  "paymentFreemiusSignInTitle": "Sign in to subscribe",
+  "paymentFreemiusSignInSubtitle": "Card subscriptions are tied to your account so your support is confirmed automatically. Please sign in to continue.",
+  "paymentCreatingFreemiusSubtitle": "Creating a secure payment session with Freemius.",
+  "paymentAwaitingFreemiusSubtitle": "Complete the payment in the opened page. We confirm it here automatically once Freemius reports it — this can take a minute.",
+  "paymentRecommendedBadge": "Recommended",
+  "paymentSignInButton": "Sign in",
+  "paymentRegionLabel": "Where do you want to pay from?",
+  "paymentRegionAuto": "Auto ({detected})",
+  "@paymentRegionAuto": {
     "placeholders": {
-      "label": {
+      "detected": {
         "type": "String"
       }
     }
   },
-  "wiseHolderLabel": "Account holder",
-  "wiseIbanLabel": "IBAN",
-  "wiseAccountLabel": "Account number",
-  "wiseSortCodeLabel": "Sort code",
-  "wiseBankLabel": "Bank",
-  "wiseAmountLabel": "Amount",
-  "wiseReferenceLabel": "Payment reference",
-  "wiseOpenButton": "Open Wise",
-  "wiseSentButton": "I've sent the payment",
-  "wiseThanksTitle": "Jazakum Allahu khayran",
-  "wiseThanksSubtitle": "Your transfer has been recorded here. It will appear once the account statement is reconciled.",
+  "paymentRegionAlgeria": "Algeria — Edahabia / CIB",
+  "paymentRegionInternational": "International — Visa / Mastercard",
+  "paymentRegionDetectedDz": "Algeria",
+  "paymentRegionDetectedIntl": "international",
+  "subscriptionStatusActive": "Premium is active — jazakum Allahu khayran!",
+  "subscriptionStatusRenews": "Renews on {date}",
+  "@subscriptionStatusRenews": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionStatusTrialUntil": "Free trial until {date}",
+  "@subscriptionStatusTrialUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionStatusPastDue": "The renewal payment did not go through. Update your card in \"Manage subscription\" to keep premium.",
+  "subscriptionStatusCancelingUntil": "Subscription canceled — premium stays active until {date}.",
+  "@subscriptionStatusCancelingUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionStatusExpired": "Your subscription has ended. You can resubscribe whenever you are ready.",
+  "subscriptionStatusRefunded": "The last payment was refunded, so premium has been paused. Resubscribe anytime.",
+  "subscriptionManageButton": "Manage subscription",
+  "subscriptionPortalLoading": "Opening the subscription portal…",
+  "subscriptionPortalError": "The subscription portal could not be opened. Please try again.",
   "qiyamOnboardingTitle": "Welcome to Qiyam al-Layl",
   "qiyamOnboardingDescription": "A calm spiritual journey in the depth of the night — beginning with dhikr, passing through the Quran, and completed with prayer and istighfar.",
   "qiyamOnboardingStep1": "Prepare with dhikr and praise",
@@ -1861,7 +1889,7 @@
   "subscriptionScreenTitle": "Subscription",
   "subscriptionIntroText": "Subscriptions help keep the project going.",
   "subscriptionFreeAccessNote": "Anyone who can't afford the subscription is welcome to use the app for free.",
-  "subscriptionHonorSystemNote": "Unless stated otherwise, we don't verify that a user has paid the subscription fee — this is intentionally left to the user's discretion.",
+  "subscriptionHonorSystemNote": "International card payments are verified automatically and unlock premium on all your devices. Contributions from Algeria (Edahabia/CIB) remain on the honor system.",
   "subscriptionPayMonthlyButton": "I can pay monthly",
   "subscriptionUseFreeButton": "I want to use the app for free",
   "aiMemorizeScreenTitle": "Smart Memorization",

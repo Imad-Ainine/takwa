@@ -4236,7 +4236,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paymentSupportMessage =>
-      'With your small contribution, you help make \"Takwa\" available to millions of Muslims as an ongoing charity (sadaqah jariyah) on your behalf and your parents\'. 200 DZD or €10 a month ensures this work continues and keeps improving.';
+      'With your small contribution, you help make \"Takwa\" available to millions of Muslims as an ongoing charity (sadaqah jariyah) on your behalf and your parents\'. 200 DZD or \$10 a month ensures this work continues and keeps improving.';
 
   @override
   String get paymentContinueButton => 'Continue to Payment';
@@ -4323,50 +4323,86 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paymentRetryButton => 'Try again';
 
   @override
-  String get wiseScreenTitle => 'Visa / Mastercard via Wise';
+  String get paymentFreemiusSignInTitle => 'Sign in to subscribe';
 
   @override
-  String get wiseIntroMessage =>
-      'Send your monthly support directly to the developer\'s Wise account from the Wise app or your banking app. Use the reference below so your transfer can be recognized.';
+  String get paymentFreemiusSignInSubtitle =>
+      'Card subscriptions are tied to your account so your support is confirmed automatically. Please sign in to continue.';
 
   @override
-  String wiseCopiedMessage(String label) {
-    return '$label copied to clipboard';
+  String get paymentCreatingFreemiusSubtitle =>
+      'Creating a secure payment session with Freemius.';
+
+  @override
+  String get paymentAwaitingFreemiusSubtitle =>
+      'Complete the payment in the opened page. We confirm it here automatically once Freemius reports it — this can take a minute.';
+
+  @override
+  String get paymentRecommendedBadge => 'Recommended';
+
+  @override
+  String get paymentSignInButton => 'Sign in';
+
+  @override
+  String get paymentRegionLabel => 'Where do you want to pay from?';
+
+  @override
+  String paymentRegionAuto(String detected) {
+    return 'Auto ($detected)';
   }
 
   @override
-  String get wiseHolderLabel => 'Account holder';
+  String get paymentRegionAlgeria => 'Algeria — Edahabia / CIB';
 
   @override
-  String get wiseIbanLabel => 'IBAN';
+  String get paymentRegionInternational => 'International — Visa / Mastercard';
 
   @override
-  String get wiseAccountLabel => 'Account number';
+  String get paymentRegionDetectedDz => 'Algeria';
 
   @override
-  String get wiseSortCodeLabel => 'Sort code';
+  String get paymentRegionDetectedIntl => 'international';
 
   @override
-  String get wiseBankLabel => 'Bank';
+  String get subscriptionStatusActive =>
+      'Premium is active — jazakum Allahu khayran!';
 
   @override
-  String get wiseAmountLabel => 'Amount';
+  String subscriptionStatusRenews(String date) {
+    return 'Renews on $date';
+  }
 
   @override
-  String get wiseReferenceLabel => 'Payment reference';
+  String subscriptionStatusTrialUntil(String date) {
+    return 'Free trial until $date';
+  }
 
   @override
-  String get wiseOpenButton => 'Open Wise';
+  String get subscriptionStatusPastDue =>
+      'The renewal payment did not go through. Update your card in \"Manage subscription\" to keep premium.';
 
   @override
-  String get wiseSentButton => 'I\'ve sent the payment';
+  String subscriptionStatusCancelingUntil(String date) {
+    return 'Subscription canceled — premium stays active until $date.';
+  }
 
   @override
-  String get wiseThanksTitle => 'Jazakum Allahu khayran';
+  String get subscriptionStatusExpired =>
+      'Your subscription has ended. You can resubscribe whenever you are ready.';
 
   @override
-  String get wiseThanksSubtitle =>
-      'Your transfer has been recorded here. It will appear once the account statement is reconciled.';
+  String get subscriptionStatusRefunded =>
+      'The last payment was refunded, so premium has been paused. Resubscribe anytime.';
+
+  @override
+  String get subscriptionManageButton => 'Manage subscription';
+
+  @override
+  String get subscriptionPortalLoading => 'Opening the subscription portal…';
+
+  @override
+  String get subscriptionPortalError =>
+      'The subscription portal could not be opened. Please try again.';
 
   @override
   String get qiyamOnboardingTitle => 'Welcome to Qiyam al-Layl';
@@ -4406,7 +4442,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionHonorSystemNote =>
-      'Unless stated otherwise, we don\'t verify that a user has paid the subscription fee — this is intentionally left to the user\'s discretion.';
+      'International card payments are verified automatically and unlock premium on all your devices. Contributions from Algeria (Edahabia/CIB) remain on the honor system.';
 
   @override
   String get subscriptionPayMonthlyButton => 'I can pay monthly';

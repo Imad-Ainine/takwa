@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:takwa/core/payments/payment_config.dart';
+import 'package:takwa/core/payments/payment_router.dart';
+import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/theme/app_theme.dart';
 import 'package:takwa/core/widgets/app_bar_widget.dart';
 import 'package:takwa/core/widgets/custom_pattern_background.dart';
@@ -7,7 +10,7 @@ import 'package:takwa/core/widgets/custom_leading_button.dart';
 import 'package:takwa/core/widgets/primary_button.dart';
 import 'package:takwa/core/widgets/takwa_tappable.dart';
 import 'package:takwa/features/settings/presentation/screens/chargily_payment_screen.dart';
-import 'package:takwa/features/settings/presentation/screens/wise_payment_screen.dart';
+import 'package:takwa/features/settings/presentation/screens/freemius_payment_screen.dart';
 import 'package:takwa/l10n/app_localizations.dart';
 
 class PaymentMethodsScreen extends ConsumerStatefulWidget {
@@ -19,7 +22,37 @@ class PaymentMethodsScreen extends ConsumerStatefulWidget {
 }
 
 class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
-  int _selectedMethod = 0; // 0: Edahabia/CIB, 1: Visa/Mastercard
+  /// 0: Edahabia/CIB (Chargily), 1: Visa/Mastercard (Freemius). Defaults to
+  /// the country-detected rail; a manual tap always wins over the default.
+  int _selectedMethod = 0;
+  String? _regionOverride; // null/'' = auto, 'dz', 'intl'
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRegionPreference();
+  }
+
+  Future<void> _loadRegionPreference() async {
+    final raw = await ref
+        .read(settingsDaoProvider)
+        .get(PaymentRouting.settingsOverrideKey);
+    if (!mounted) return;
+    setState(() {
+      _regionOverride = (raw == null || raw.isEmpty) ? null : raw;
+      _selectedMethod =
+          _suggestedRail() == PaymentRail.chargily ? 0 : 1;
+    });
+  }
+
+  PaymentRail _suggestedRail() {
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    return PaymentRouting.suggest(
+      countryCode: locale.countryCode,
+      languageCode: locale.languageCode,
+      overrideValue: _regionOverride,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,11 +83,14 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
                       children: [
                         const SizedBox(height: 10),
                         _buildSupportMessage(context),
-                        const SizedBox(height: AppSpacing.xxl),
+                        const SizedBox(height: AppSpacing.lg),
+                        _buildRegionRow(context),
+                        const SizedBox(height: AppSpacing.xl),
                         _buildMethodCard(
                           index: 0,
                           title: l10n.paymentMethodEdahabiaTitle,
                           subtitle: '200.00 DZD',
+                          recommended: _suggestedRail() == PaymentRail.chargily,
                           icon: Image.asset(
                             'assets/images/edahabia.png',
                             fit: BoxFit.contain,
@@ -66,7 +102,8 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
                         _buildMethodCard(
                           index: 1,
                           title: l10n.paymentMethodVisaTitle,
-                          subtitle: '€10.00',
+                          subtitle: FreemiusConfig.monthlyDisplay,
+                          recommended: _suggestedRail() == PaymentRail.freemius,
                           icon: Image.asset(
                             'assets/images/visa_mastercard.webp',
                             fit: BoxFit.contain,
@@ -92,6 +129,7 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
   required String title,
   required String subtitle,
   required Widget icon, // <-- was: required String icon (fed to IslamicGlyph)
+  bool recommended = false,
 }) {
   final isSelected = _selectedMethod == index;
   return TakwaTappable(
@@ -138,15 +176,40 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
-                Text(
-                  subtitle,
-                  style: context.typography.caption.copyWith(
-                    color: isSelected
-                        ? context.colors.gold
-                        : context.colors.textDim,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      subtitle,
+                      style: context.typography.caption.copyWith(
+                        color: isSelected
+                            ? context.colors.gold
+                            : context.colors.textDim,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    if (recommended) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: context.colors.gold.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)!.paymentRecommendedBadge,
+                          style: context.typography.caption.copyWith(
+                            color: context.colors.gold,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -236,6 +299,117 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
     );
   }
 
+  String _detectedRegionLabel(AppLocalizations l10n) {
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    return (locale.countryCode ?? '').toUpperCase() == 'DZ'
+        ? l10n.paymentRegionDetectedDz
+        : l10n.paymentRegionDetectedIntl;
+  }
+
+  Widget _buildRegionRow(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final detected = _detectedRegionLabel(l10n);
+    final String current = switch (_regionOverride) {
+      'dz' => l10n.paymentRegionAlgeria,
+      'intl' => l10n.paymentRegionInternational,
+      _ => l10n.paymentRegionAuto(detected),
+    };
+    return TakwaTappable(
+      onTap: _pickRegion,
+      semanticLabel: '${l10n.paymentRegionLabel}: $current',
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xs,
+          vertical: AppSpacing.sm,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.public_rounded,
+              size: 18,
+              color: context.colors.textDim,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              l10n.paymentRegionLabel,
+              style: context.typography.bodyMedium.copyWith(
+                color: context.colors.textSecondary,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              current,
+              style: context.typography.bodyMedium.copyWith(
+                color: context.colors.gold,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 20,
+              color: context.colors.gold,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickRegion() async {
+    final l10n = AppLocalizations.of(context)!;
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: context.colors.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxl)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Text(
+                l10n.paymentRegionLabel,
+                style: context.typography.labelLarge.copyWith(
+                  color: context.colors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            for (final (value, label) in [
+              ('', l10n.paymentRegionAuto(_detectedRegionLabel(l10n))),
+              ('dz', l10n.paymentRegionAlgeria),
+              ('intl', l10n.paymentRegionInternational),
+            ])
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xl,
+                  vertical: AppSpacing.sm,
+                ),
+                title: Text(label),
+                trailing: (_regionOverride ?? '') == value
+                    ? Icon(Icons.check_rounded, color: context.colors.gold)
+                    : null,
+                onTap: () => Navigator.pop(sheetContext, value),
+              ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ),
+      ),
+    );
+    if (choice == null || !mounted) return;
+    await ref
+        .read(settingsDaoProvider)
+        .set(PaymentRouting.settingsOverrideKey, choice);
+    if (!mounted) return;
+    setState(() {
+      _regionOverride = choice.isEmpty ? null : choice;
+      _selectedMethod = _suggestedRail() == PaymentRail.chargily ? 0 : 1;
+    });
+  }
+
   Widget _buildRadioIndicator(bool isSelected) {
     return Container(
       width: 24,
@@ -278,7 +452,7 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => const WisePaymentScreen(),
+          builder: (_) => const FreemiusPaymentScreen(),
         ),
       );
       return;

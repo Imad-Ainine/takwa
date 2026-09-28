@@ -2334,7 +2334,7 @@
   "paymentMethodEdahabiaTitle": "الذهبية / CIB",
   "paymentMethodVisaTitle": "فيزا / ماستركارد",
   "paymentSupportTitle": "صدقة جارية",
-  "paymentSupportMessage": "بمساهمتك البسيطة، تجعل \"تقوى\" متاحاً لملايين المسلمين كصدقة جارية عنك وعن والديك. 200دج أو 10€  شهرياً تضمن استمرار هذا العمل وتطويره الدائم.",
+  "paymentSupportMessage": "بمساهمتك البسيطة، تجعل \"تقوى\" متاحاً لملايين المسلمين كصدقة جارية عنك وعن والديك. 200 دج أو 10 دولارات شهرياً تضمن استمرار هذا العمل وتطويره الدائم.",
   "paymentContinueButton": "المتابعة للدفع",
   "paymentComingSoonMessage": "سيتم تفعيل الدفع قريباً إن شاء الله",
   "paymentChooseCardSheetTitle": "اختر شبكة بطاقتك",
@@ -2360,28 +2360,56 @@
   "paymentIAmDone": "لقد أكملت الدفع",
   "paymentDoneButton": "تم",
   "paymentRetryButton": "إعادة المحاولة",
-  "wiseScreenTitle": "فيزا / ماستركارد عبر Wise",
-  "wiseIntroMessage": "أرسل دعمك الشهري مباشرة إلى حساب المطوّر على Wise من تطبيق Wise أو تطبيق بنكك. استخدم المرجع أدناه حتىتمكن معرفة تحويلك.",
-  "wiseCopiedMessage": "تم نسخ {label} إلى الحافظة",
-  "@wiseCopiedMessage": {
-    "description": "Snack-bar shown after copying a Wise recipient field",
+  "paymentFreemiusSignInTitle": "سجّل الدخول للاشتراك",
+  "paymentFreemiusSignInSubtitle": "الاشتراكات بالبطاقة ترتبط بحسابك ليتم تأكيد دعمك تلقائياً. سجّل الدخول للمتابعة.",
+  "paymentCreatingFreemiusSubtitle": "جارٍ إنشاء جلسة دفع آمنة عبر Freemius.",
+  "paymentAwaitingFreemiusSubtitle": "أكمل الدفع في الصفحة المفتوحة. سنؤكد الدفع هنا تلقائياً فور وصول إشعار من Freemius — قد يستغرق ذلك دقيقة.",
+  "paymentRecommendedBadge": "موصى به",
+  "paymentSignInButton": "تسجيل الدخول",
+  "paymentRegionLabel": "من أين تريد الدفع؟",
+  "paymentRegionAuto": "تلقائي ({detected})",
+  "@paymentRegionAuto": {
     "placeholders": {
-      "label": {
+      "detected": {
         "type": "String"
       }
     }
   },
-  "wiseHolderLabel": "صاحب الحساب",
-  "wiseIbanLabel": "الآيبان (IBAN)",
-  "wiseAccountLabel": "رقم الحساب",
-  "wiseSortCodeLabel": "رمز الترتيب",
-  "wiseBankLabel": "البنك",
-  "wiseAmountLabel": "المبلغ",
-  "wiseReferenceLabel": "مرجع الدفع",
-  "wiseOpenButton": "فتح Wise",
-  "wiseSentButton": "لقد أرسلت الدفع",
-  "wiseThanksTitle": "جزاكم الله خيراً",
-  "wiseThanksSubtitle": "تم تسجيل تحويلك هنا. يظهر رسمياً بعد مطابقة كشف الحساب.",
+  "paymentRegionAlgeria": "الجزائر — الذهبية / سي بي",
+  "paymentRegionInternational": "دولي — فيزا / ماستركارد",
+  "paymentRegionDetectedDz": "الجزائر",
+  "paymentRegionDetectedIntl": "دولي",
+  "subscriptionStatusActive": "الاشتراك المميز نشط — جزاكم الله خيراً!",
+  "subscriptionStatusRenews": "يتجدد في {date}",
+  "@subscriptionStatusRenews": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionStatusTrialUntil": "التجربة المجانية حتى {date}",
+  "@subscriptionStatusTrialUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionStatusPastDue": "لم ينجح دفع التجديد. حدّث بطاقتك من «إدارة الاشتراك» للاحتفاظ بالاشتراك المميز.",
+  "subscriptionStatusCancelingUntil": "تم إلغاء الاشتراك — يبقى المميز فعّالاً حتى {date}.",
+  "@subscriptionStatusCancelingUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionStatusExpired": "انتهى اشتراكك. يمكنك إعادة الاشتراك متى شئت.",
+  "subscriptionStatusRefunded": "تم استرداد آخر دفعة، لذلك أُوقف الاشتراك المميز. اشترك مجدداً متى شئت.",
+  "subscriptionManageButton": "إدارة الاشتراك",
+  "subscriptionPortalLoading": "جارٍ فتح بوابة الاشتراك…",
+  "subscriptionPortalError": "تعذّر فتح بوابة الاشتراك. حاول مجدداً من فضلك.",
   "qiyamOnboardingTitle": "مرحباً بك في قيام الليل",
   "qiyamOnboardingDescription": "رحلة إيمانية هادئة في جوف الليل، تبدأ بالذكر، وتمر بالقرآن، وتكتمل بالصلاة والاستغفار.",
   "qiyamOnboardingStep1": "استعد بالذكر والثناء",
@@ -2392,7 +2420,7 @@
   "subscriptionScreenTitle": "الاشتراك",
   "subscriptionIntroText": "الاشتراكات لاستمرار المشروع.",
   "subscriptionFreeAccessNote": "كل من لا يستطيع سداد الاشتراك مرحب به للاستفادة من التطبيق مجاناً.",
-  "subscriptionHonorSystemNote": "ما لم نعلن على خلاف ذلك، لا نقوم بالتأكد من سداد المستخدم لرسوم الاشتراك. ونقصد ترك ذلك لرغبة المستخدم.",
+  "subscriptionHonorSystemNote": "المدفوعات بالبطاقة من خارج الجزائر يتم التحقق منها تلقائياً وتفتح الاشتراك المميز على جميع أجهزتك. أما الدعم من داخل الجزائر (الذهبية/سي بي) فيبقى على أساس الأمانة.",
   "subscriptionPayMonthlyButton": "بإمكاني الدفع شهرياً",
   "subscriptionUseFreeButton": "أريد استخدام التطبيق مجاناً",
   "aiMemorizeScreenTitle": "التحفيظ الذكي",

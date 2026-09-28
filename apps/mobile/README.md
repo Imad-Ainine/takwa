@@ -179,12 +179,9 @@ Create `apps/mobile/.env` (not committed) with:
 | `SUPABASE_URL`           | Yes      | Supabase project URL — see [`auth_setup_guide.md`](docs/auth_setup_guide.md) |
 | `SUPABASE_ANON_KEY`      | Yes      | Supabase anon/public key                                              |
 | `SENTRY_DSN`             | No       | Enables crash/error reporting via Sentry. Left unset, the app runs with no crash reporting — no events are sent anywhere. |
-| `TAKWA_WEB_BASE_URL`     | No       | Base URL of the deployed Takwa web app, which hosts the Chargily checkout proxy (`/api/payments/checkout`). Defaults to `https://takwa-web.vercel.app`. |
+| `TAKWA_WEB_BASE_URL`     | No       | Base URL of the deployed Takwa web app, which hosts the Chargily checkout proxy (`/api/payments/checkout`) and the Freemius proxy (`/api/payments/freemius/*`). Defaults to `https://takwa-web.vercel.app`. |
 | `CHARGILY_SUBSCRIPTION_AMOUNT` | No | Mirrors the proxy's charged amount in whole DZD, for local payment records/display only — the server decides what is actually charged. Defaults to `200`. |
-| `WISE_IBAN` / `WISE_ACCOUNT_NUMBER` / `WISE_SORT_CODE` / `WISE_HOLDER_NAME` / `WISE_BANK_NAME` | No | Visa/Mastercard path: recipient details of the Wise account, shown on the Wise screen for the user to transfer from. Unset, that screen shows "coming soon". |
-| `WISE_PROFILE_LINK`      | No       | `wise.com/pay/me/…` profile link opened by the "Open Wise" button (falls back to `https://app.wise.com`). |
-| `WISE_MONTHLY_EUR`       | No       | Monthly amount in euro displayed on the Wise screen. Defaults to `10`. |
-| `WISE_PAYMENT_REFERENCE` | No       | Transfer reference users should put on the payment so it can be matched. Defaults to `TAKWA`. |
+| `FREEMIUS_MONTHLY_USD` | No       | Monthly amount in USD displayed on the international Visa/Mastercard (Freemius) path — display/local-record only; the Freemius plan decides what is actually charged. Defaults to `10`. |
 
 ---
 
