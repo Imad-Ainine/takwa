@@ -640,7 +640,9 @@ class _OverlayTaskHandler extends TaskHandler {
       final showType = _shouldShowDua() ? 'dua' : 'adhkar';
 
       await ow.FlutterOverlayWindow.showOverlay(
-        enableDrag: true,
+        // نافذة بارتفاع الشاشة كاملاً: لا داعي للسحب، وتفعيله كان يلتهم
+        // إيماءات السحب العمودية قبل أن تصل إلى محتوى الذكر/الدعاء.
+        enableDrag: false,
         overlayTitle: showType == 'dua'
             ? _l10n.overlayServiceDuaOverlayTitle
             : _l10n.overlayServiceAdhkarOverlayTitle,

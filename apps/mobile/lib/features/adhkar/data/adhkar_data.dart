@@ -322,6 +322,22 @@ const kAdhkarData = <AdhkarCategory, List<DhikrItem>>{
       category: AdhkarCategory.morning,
       source: 'مسند أحمد',
     ),
+    DhikrItem(
+      id: 117,
+      arabic:
+          'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ، وَأَعُوذُ بِكَ مِنَ الْفَقْرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، لَا إِلَهَ إِلَّا أَنْتَ',
+      count: 3,
+      category: AdhkarCategory.morning,
+      source: 'سنن أبي داود — صحيح',
+    ),
+    DhikrItem(
+      id: 118,
+      arabic:
+          'اللَّهُمَّ إِنَّا نَعُوذُ بِكَ مِنْ أَنْ نُشْرِكَ بِكَ شَيْئًا نَعْلَمُهُ، وَنَسْتَغْفِرُكَ لِمَا لَا نَعْلَمُهُ',
+      count: 3,
+      category: AdhkarCategory.morning,
+      source: 'مسند أحمد — صحيح',
+    ),
   ],
 
   // ────────────── أذكار المساء ──────────────
@@ -872,6 +888,31 @@ const kAdhkarData = <AdhkarCategory, List<DhikrItem>>{
       category: AdhkarCategory.misc,
       transliteration: 'الصلاة الإبراهيمية',
       source: 'صحيح البخاري',
+    ),
+    DhikrItem(
+      id: 607,
+      arabic: 'اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي',
+      count: 1,
+      category: AdhkarCategory.misc,
+      transliteration: 'دعاء ليلة القدر',
+      source: 'سنن الترمذي وابن ماجه — صحيح',
+    ),
+    DhikrItem(
+      id: 608,
+      arabic:
+          'رَبَّنَا اغْفِرْ لَنَا ذُنُوبَنَا وَإِسْرَافَنَا فِي أَمْرِنَا وَثَبِّتْ أَقْدَامَنَا وَانْصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ',
+      count: 1,
+      category: AdhkarCategory.misc,
+      source: 'سورة آل عمران: ١٤٧',
+    ),
+    DhikrItem(
+      id: 609,
+      arabic:
+          'سُبْحَانَ رَبِّكَ رَبِّ الْعِزَّةِ عَمَّا يَصِفُونَ، وَسَلَامٌ عَلَى الْمُرْسَلِينَ، وَالْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ',
+      count: 1,
+      category: AdhkarCategory.misc,
+      transliteration: 'ذكرٍ بعد الوضوء والصلاة',
+      source: 'سورة الصافات: ١٨٠-١٨٢ — سنن أبي داود',
     ),
   ],
 };

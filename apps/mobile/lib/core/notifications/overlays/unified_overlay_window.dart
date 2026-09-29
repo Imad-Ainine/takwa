@@ -166,12 +166,35 @@ class _PopupItem {
 /// literal maps keyed by category: the adhkar one read values with `!` (a new
 /// category crashed the overlay), and the dua one skipped missing keys (a new
 /// category's duas silently never appeared).
+///
+/// Tashkeel, tatweel and the Qur'anic annotation signs are dropped before
+/// comparing, so a text counts once whether or not it is fully vocalised.
+final _poolDiacritics = RegExp(
+  '[\u0610-\u061A\u064B-\u065F\u0640\u0670\u06D6-\u06ED\u08D3-\u08FF]',
+  unicode: true,
+);
+
+String _poolKey(String arabic) => arabic
+    .replaceAll(_poolDiacritics, '')
+    .replaceAll(RegExp(r'[^\p{L}\p{N}]+', unicode: true), ' ')
+    .replaceAll(RegExp(r'\s+'), ' ')
+    .trim();
+
 List<_PopupItem> _buildAllItems() {
   final items = <_PopupItem>[];
+  // Both data files repeat several texts (a morning dhikr is also a general
+  // du'a, etc). Roughly one slot in six used to be a repeat of something the
+  // user had already been shown, so the pool only offers distinct texts.
+  final seen = <String>{};
+
+  void add(_PopupItem item) {
+    if (item.arabic.trim().isEmpty) return;
+    if (seen.add(_poolKey(item.arabic))) items.add(item);
+  }
 
   for (final entry in kAdhkarData.entries) {
     for (final d in entry.value) {
-      items.add(
+      add(
         _PopupItem(
           arabic: d.arabic,
           fadl: d.fadl,
@@ -186,7 +209,7 @@ List<_PopupItem> _buildAllItems() {
 
   for (final entry in kDuasData.entries) {
     for (final d in entry.value) {
-      items.add(
+      add(
         _PopupItem(
           arabic: d.arabic,
           meaning: d.meaning,
@@ -496,6 +519,8 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
   Timer? _closeTimer;
   String? _filter;
   final Duration _displayDuration = const Duration(seconds: 15);
+  static const Duration _readingDuration = Duration(seconds: 45);
+  bool _reading = false;
   bool _copied = false;
 
   late final AnimationController _slideCtrl;
@@ -565,11 +590,23 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
     _glowCtrl.repeatUnlessReducedMotion(context, reverse: true);
   }
 
+  Duration get _closeDuration =>
+      _reading ? _readingDuration : _displayDuration;
+
   void _startCloseTimer() {
     _closeTimer?.cancel();
-    _closeTimer = Timer(_displayDuration, () {
+    _closeTimer = Timer(_closeDuration, () {
       if (mounted) _closeOverlay();
     });
+  }
+
+  /// المستخدم يقرأ فعلياً (تمرير أو لمس البطاقة): نمدّد مهلة الإغلاق
+  /// بدل أن تختفي الآية الوسطى أثناء القراءة.
+  void _onReadingInteraction() {
+    if (!_reading) {
+      setState(() => _reading = true);
+    }
+    _startCloseTimer();
   }
 
   void _closeOverlay() {
@@ -589,7 +626,10 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
     if (pool.isEmpty) pool = _allItems;
 
     final next = pool[_random.nextInt(pool.length)];
-    setState(() => _copied = false);
+    setState(() {
+      _copied = false;
+      _reading = false;
+    });
     if (animate) {
       _slideCtrl.reverse().then((_) {
         if (!mounted) return;
@@ -659,15 +699,25 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
                   position: _slideAnim,
                   child: FadeTransition(
                     opacity: _fadeAnim,
-                    child: GestureDetector(
-                      onTap: () {},
-                      onHorizontalDragEnd: (details) {
-                        if (details.primaryVelocity != null &&
-                            details.primaryVelocity!.abs() > 80) {
-                          _pickRandom(animate: true);
-                        }
-                      },
-                      child: _buildCard(palette),
+                    child: ConstrainedBox(
+                      // البطاقة محدودة بارتفاع الشاشة حتى يتمرر المحتوى كله
+                      // بدل ما يُقصم آخرها تحت الحافة السفلية.
+                      constraints: BoxConstraints(
+                        maxHeight: math.max(
+                          320.0,
+                          MediaQuery.sizeOf(context).height - 244,
+                        ),
+                      ),
+                      child: GestureDetector(
+                        onTap: _onReadingInteraction,
+                        onHorizontalDragEnd: (details) {
+                          if (details.primaryVelocity != null &&
+                              details.primaryVelocity!.abs() > 80) {
+                            _pickRandom(animate: true);
+                          }
+                        },
+                        child: _buildCard(palette),
+                      ),
                     ),
                   ),
                 ),
@@ -790,9 +840,11 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
                     bottom: Radius.circular(20),
                   ),
                   child: _GoldProgressBar(
-                    duration: _displayDuration,
+                    duration: _closeDuration,
                     isDark: palette.isDark,
-                    barKey: ValueKey('progress_${item.arabic.hashCode}'),
+                    barKey: ValueKey(
+                      'progress_${item.arabic.hashCode}_${_closeDuration.inSeconds}',
+                    ),
                   ),
                 ),
               ),
@@ -807,7 +859,9 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
                     const SizedBox(height: 10),
                     _GoldDivider(isDark: palette.isDark),
                     const SizedBox(height: AppSpacing.md),
-                    _buildArabicText(item, palette),
+                    // منطقة التمرير تأخذ كل المسافة المتبقية بدل سقف ثابت
+                    // 240px كان يقصّ الأدعية والأذكار الطويلة.
+                    Flexible(child: _buildArabicText(item, palette)),
                     const SizedBox(height: 10),
                     _GoldDivider(isDark: palette.isDark),
                     const SizedBox(height: AppSpacing.sm),
@@ -916,12 +970,16 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
-                  Text(
-                    _l10n.overlayTapOutsideToClose,
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 10,
-                      color: palette.textSecondary,
+                  Flexible(
+                    child: Text(
+                      _l10n.overlayTapOutsideToClose,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 10,
+                        color: palette.textSecondary,
+                      ),
                     ),
                   ),
                 ],
@@ -992,8 +1050,15 @@ class _UnifiedOverlayWindowState extends State<UnifiedOverlayWindow>
   //  ARABIC TEXT & MEANING
   // ─────────────────────────────
   Widget _buildArabicText(_PopupItem item, _OverlayPalette palette) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 240),
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is UserScrollNotification ||
+            (notification is ScrollUpdateNotification &&
+                notification.dragDetails != null)) {
+          _onReadingInteraction();
+        }
+        return false;
+      },
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Container(
