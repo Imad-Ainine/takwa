@@ -111,7 +111,7 @@ dependencies:
   custom_refresh_indicator: ^4.0.1
   sensors_plus: ^7.1.0 # 7.1.0 added built-in Kotlin support
   flutter_islamic_icons: ^1.0.2
-  sentry_flutter: ^9.30.0
+  sentry_flutter: ^9.30.1
   logging: ^1.3.0
   # Dhikr recitation voices (Microsoft Edge neural TTS). Needs `crypto`, which
   # was only a transitive dep before this.
