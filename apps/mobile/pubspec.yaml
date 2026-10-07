@@ -52,7 +52,7 @@ dependencies:
   adhan: ^2.0.0+1
 
   # ── Location ──
-  geolocator: ^14.0.2
+  geolocator: ^14.1.1
   flutter_compass: ^0.8.0
 
   # ── Permissions ──
