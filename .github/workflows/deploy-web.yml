@@ -46,7 +46,7 @@ jobs:
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
 
     steps:
       - uses: actions/checkout@v4
@@ -64,11 +64,23 @@ jobs:
       - name: Build Next.js app
         run: npm run web:build
 
-      - name: Deploy to Netlify
+      - name: Deploy to Netlify (Production)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           SECRETS_SCAN_ENABLED: false
         run: |
           npx netlify-cli deploy --build --prod \
-            --message "Deploy from GitHub Actions - Commit ${{ github.sha }}"
+            --message "Production Deploy - Commit ${{ github.sha }}"
+
+      - name: Deploy to Netlify (Preview)
+        if: github.event_name == 'pull_request'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          SECRETS_SCAN_ENABLED: false
+        run: |
+          npx netlify-cli deploy --build \
+            --alias "pr-${{ github.event.pull_request.number }}" \
+            --message "Preview Deploy - PR #${{ github.event.pull_request.number }} - Commit ${{ github.sha }}"
