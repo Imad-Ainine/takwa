@@ -41,6 +41,13 @@
 # Flutter Local Notifications
 -keep class com.dexterous.flutterlocalnotifications.** { *; }
 
+# flutter_foreground_task: TakwaBootReceiver.kt starts this plugin's service
+# from app code and matches its class *name* against ActivityManager's
+# running-services list, so shrinking the plugin's names would silently make
+# every boot retry think the service is dead. The plugin ships no consumer
+# rules of its own.
+-keep class com.pravera.flutter_foreground_task.** { *; }
+
 # Gson TypeToken relies on generic superclass signatures at runtime; R8
 # minification of gson itself crashed the plugin's boot receiver
 # (ScheduledNotificationBootReceiver -> TypeToken.getSuperclassTypeParameter)

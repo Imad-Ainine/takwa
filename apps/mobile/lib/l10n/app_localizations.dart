@@ -9697,6 +9697,42 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'فشل الحفظ. يرجى المحاولة مجدداً.'**
   String get sadaqahLogErrorText;
+
+  /// Row label in Adhan & notification settings for restarting the background service on device boot
+  ///
+  /// In ar, this message translates to:
+  /// **'تشغيل تلقائي بعد إعادة تشغيل الهاتف'**
+  String get bootAutostartLabel;
+
+  /// Sublabel shown while the app reads the device's boot-autostart state
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ التحقق من حالة التشغيل في الخلفية…'**
+  String get bootAutostartStatusChecking;
+
+  /// Sublabel when the background service is running and armed to restart after boot
+  ///
+  /// In ar, this message translates to:
+  /// **'الخدمة تعمل الآن، وستعود وحدها بعد إقلاع الهاتف أو تحديث التطبيق'**
+  String get bootAutostartStatusActive;
+
+  /// Sublabel when boot restart is armed but the service is not currently running
+  ///
+  /// In ar, this message translates to:
+  /// **'ستعود الخدمة وحدها بعد الإقلاع، لكنها متوقفة الآن — اضغط لإعادة تشغيلها'**
+  String get bootAutostartStatusArmedIdle;
+
+  /// Sublabel when the ongoing notification is disabled, so the app cannot restart itself after boot
+  ///
+  /// In ar, this message translates to:
+  /// **'غير مُهيّأ — أبقِ «إشعار الوقت الحالي» مفعلاً ليشتغل تقوى وحده بعد إعادة تشغيل الهاتف'**
+  String get bootAutostartStatusOff;
+
+  /// SnackBar shown after the user taps the auto-start row to re-arm the background service
+  ///
+  /// In ar, this message translates to:
+  /// **'أُعيد تهيئة التشغيل التلقائي في الخلفية'**
+  String get bootAutostartRearmedToast;
 }
 
 class _AppLocalizationsDelegate

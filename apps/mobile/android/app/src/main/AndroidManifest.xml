@@ -70,6 +70,20 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
             </intent-filter>
         </receiver>
+        <!-- Retry arm for the adhan background service after a reboot or an
+             app update, for the case the plugin's own RebootReceiver cannot
+             cover: its single start attempt is swallowed when the OEM launch
+             manager or Android's background-start rule refuses it, and the
+             service then stays dead until the app is opened by hand.
+             See TakwaBootReceiver.kt. -->
+        <receiver android:name=".TakwaBootReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
         <!-- Home screen prayer-times widget -->
         <receiver android:name=".PrayerWidgetProvider"
             android:label="تقوى - أوقات الصلاة"

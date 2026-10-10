@@ -16,6 +16,19 @@ class MainActivity : AudioServiceActivity() {
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "canUseFullScreenIntent" -> result.success(canUseFullScreenIntent())
+                // The background service has to be armed for boot from here,
+                // not from the receiver: only the Dart side knows the user's
+                // settings (see TakwaBootPrefs for why native holds the flag).
+                "setBootAutostart" -> {
+                    TakwaBootPrefs.setAutoStartEnabled(
+                        this,
+                        call.arguments as? Boolean ?: false,
+                    )
+                    result.success(true)
+                }
+                "isBootAutostartArmed" -> result.success(
+                    TakwaBootPrefs.isAutoStartEnabled(this),
+                )
                 else -> result.notImplemented()
             }
         }

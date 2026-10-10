@@ -5357,4 +5357,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get sadaqahLogErrorText => 'فشل الحفظ. يرجى المحاولة مجدداً.';
+
+  @override
+  String get bootAutostartLabel => 'تشغيل تلقائي بعد إعادة تشغيل الهاتف';
+
+  @override
+  String get bootAutostartStatusChecking =>
+      'جارٍ التحقق من حالة التشغيل في الخلفية…';
+
+  @override
+  String get bootAutostartStatusActive =>
+      'الخدمة تعمل الآن، وستعود وحدها بعد إقلاع الهاتف أو تحديث التطبيق';
+
+  @override
+  String get bootAutostartStatusArmedIdle =>
+      'ستعود الخدمة وحدها بعد الإقلاع، لكنها متوقفة الآن — اضغط لإعادة تشغيلها';
+
+  @override
+  String get bootAutostartStatusOff =>
+      'غير مُهيّأ — أبقِ «إشعار الوقت الحالي» مفعلاً ليشتغل تقوى وحده بعد إعادة تشغيل الهاتف';
+
+  @override
+  String get bootAutostartRearmedToast =>
+      'أُعيد تهيئة التشغيل التلقائي في الخلفية';
 }

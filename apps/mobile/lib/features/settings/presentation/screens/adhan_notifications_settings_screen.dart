@@ -94,6 +94,16 @@ final fullScreenIntentGrantedProvider = FutureProvider<bool>((ref) {
   return NotificationsService.canUseFullScreenIntent();
 });
 
+/// Whether Takwa will come back by itself after the phone reboots. Both halves
+/// are read from the device rather than from the app's own settings: the armed
+/// flag is native's (`TakwaBootReceiver.kt`), and "running" is the actual
+/// foreground service — so this row reports what would happen after a reboot,
+/// not what the toggles are set to. Re-read via
+/// `ref.invalidate(bootAutostartProvider)`.
+final bootAutostartProvider = FutureProvider<BootAutostartStatus>((ref) {
+  return OverlayBackgroundService.autostartStatus();
+});
+
 class AdhanNotificationSettingsScreen extends ConsumerWidget {
   const AdhanNotificationSettingsScreen({super.key});
 
@@ -148,6 +158,16 @@ class AdhanNotificationSettingsScreen extends ConsumerWidget {
                             .watch(notificationPermissionsGrantedProvider)
                             .valueOrNull;
                         final needsPermission = permissionGranted == false;
+                        final autostartSublabel = switch (ref
+                            .watch(bootAutostartProvider)
+                            .valueOrNull) {
+                          null => l10n.bootAutostartStatusChecking,
+                          final s when s.armed && s.serviceRunning =>
+                            l10n.bootAutostartStatusActive,
+                          final s when s.armed =>
+                            l10n.bootAutostartStatusArmedIdle,
+                          _ => l10n.bootAutostartStatusOff,
+                        };
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -548,10 +568,44 @@ class AdhanNotificationSettingsScreen extends ConsumerWidget {
                                   label: l10n.adhanOngoingNotifLabel,
                                   sublabel: l10n.adhanOngoingNotifSublabel,
                                   value: prefs.ongoingNotifEnabled,
-                                  onChanged: (v) => ref
-                                      .read(userPreferencesProvider.notifier)
-                                      .updatePref('ongoing_notif_enabled', v),
+                                  onChanged: (v) async {
+                                    await ref
+                                        .read(userPreferencesProvider.notifier)
+                                        .updatePref('ongoing_notif_enabled', v);
+                                    // The row below reports native's boot
+                                    // flag, and the background service's own
+                                    // start gate is this pref, so changing it
+                                    // has to re-mirror it at once instead of
+                                    // waiting for the next app launch.
+                                    await OverlayBackgroundService.syncBootAutostart();
+                                    ref.invalidate(bootAutostartProvider);
+                                  },
                                 ),
+                                if (defaultTargetPlatform ==
+                                    TargetPlatform.android) ...[
+                                  const SettingsDivider(),
+                                  ActionSetting(
+                                    icon: '🔁',
+                                    label: l10n.bootAutostartLabel,
+                                    sublabel: autostartSublabel,
+                                    onTap: () async {
+                                      await OverlayBackgroundService.syncBootAutostart();
+                                      await OverlayBackgroundService.start();
+                                      ref.invalidate(bootAutostartProvider);
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            l10n.bootAutostartRearmedToast,
+                                          ),
+                                          behavior: SnackBarBehavior.floating,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
                                 // Android 14+ can revoke the adhan's
                                 // full-screen intent without any in-app
                                 // signal, and the battery optimizer can hold

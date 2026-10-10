@@ -53,6 +53,10 @@ migrate_working_dir/
 *.env
 **/.env
 **/*.env
+.env.local
+**.env.local
+**/.env.cloudflare
+wrangler.toml.user
 
 # Keystore and signing
 *.jks

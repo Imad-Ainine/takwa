@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart' as ow;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -64,9 +67,19 @@ const _kDefaultPopupIntervalMins = 24;
 // through one shared code path and can't drift apart.
 typedef _PrayerInfo = PrayerTimeInfo;
 
+/// Snapshot of the boot path as the device sees it: [armed] is native's flag
+/// for "restart the service when the phone boots", [serviceRunning] whether
+/// it is up at this moment.
+typedef BootAutostartStatus = ({bool armed, bool serviceRunning});
+
 class OverlayBackgroundService {
   static const _channelId = 'takkwa_background_overlay';
   static const _channelName = 'Takkwa Overlay Background';
+
+  // Platform state no plugin exposes: `canUseFullScreenIntent` (Android 14+)
+  // and the boot-autostart flag a BOOT_COMPLETED receiver reads before any
+  // Dart exists. See `MainActivity.kt` and `TakwaBootReceiver.kt`.
+  static const _permissionsChannel = MethodChannel('com.takwa/permissions');
 
   static void init() {
     FlutterForegroundTask.init(
@@ -87,18 +100,38 @@ class OverlayBackgroundService {
         eventAction: ForegroundTaskEventAction.repeat(1000), // كل ثانية
         autoRunOnBoot: true,
         allowWifiLock: true,
+        // An app update kills the service, and this is the only flag that
+        // brings it back without the user opening Takwa first. Releases here
+        // are frequent, so without it every update silently stopped the
+        // adhkar popups and the Adhan screen until the next manual launch.
+        autoRunOnMyPackageReplaced: true,
+        // The plugin re-arms itself (RestartReceiver) when the system kills
+        // the process, which is routine on OEM skins. Default is true; set
+        // explicitly so a plugin upgrade can't quietly flip it.
+        allowAutoRestart: true,
+        // `stopWithTask="false"` is already on the <service> element, but the
+        // plugin checks a persisted pref *first* and, when the manifest read
+        // fails, `isSetStopWithTaskFlag` returns true — which makes its
+        // RebootReceiver skip autoRunOnBoot entirely. Writing the pref keeps
+        // the boot path off that fragile code path.
+        stopWithTask: false,
       ),
     );
   }
 
   static Future<void> start() async {
+    // Mirror the setting before the gates below, so a run that decides not to
+    // start the service still records the same answer for the next boot.
+    unawaited(syncBootAutostart());
+
     if (await FlutterForegroundTask.isRunningService) return;
     final perm = await FlutterForegroundTask.checkNotificationPermission();
     if (perm != NotificationPermission.granted) return;
 
     final prefs = await SharedPreferences.getInstance();
-    // Gate: respect the user's choice to hide the persistent foreground notification.
-    if (!(prefs.getBool(_kOngoingNotifEnabledKey) ?? true)) return;
+    // Gate: respect the user's choice to hide the persistent foreground
+    // notification — the service cannot run without one on API 26+.
+    if (!_OverlayTaskHandler._boolPref(prefs, _kOngoingNotifEnabledKey)) return;
 
     final cityName =
         prefs.getString(_kCityNameKey) ?? _l10n.overlayServiceDefaultCity;
@@ -118,6 +151,47 @@ class OverlayBackgroundService {
       ],
       callback: startCallback,
     );
+  }
+
+  /// Mirrors "should Takwa restart itself after the phone reboots" into native
+  /// storage, because a BOOT_COMPLETED receiver runs with no Flutter engine
+  /// attached and so cannot read this app's Dart-side settings. The gate is
+  /// the same one [start] applies, so the recorded answer never disagrees
+  /// with what the app actually does when it is opened. See
+  /// `TakwaBootReceiver.kt`.
+  static Future<void> syncBootAutostart() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final enabled = _OverlayTaskHandler._boolPref(
+        prefs,
+        _kOngoingNotifEnabledKey,
+      );
+      await _permissionsChannel.invokeMethod<bool>('setBootAutostart', enabled);
+    } catch (e) {
+      debugPrint('OverlayBackgroundService: boot autostart sync failed: $e');
+    }
+  }
+
+  /// The device's own view of the boot path, for the settings screen: whether
+  /// native is armed to restart the service and whether it is running right
+  /// now. Never throws — no channel (iOS, tests) simply reads as not armed.
+  static Future<BootAutostartStatus> autostartStatus() async {
+    var armed = false;
+    var running = false;
+    try {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        armed =
+            await _permissionsChannel.invokeMethod<bool>(
+              'isBootAutostartArmed',
+            ) ??
+            false;
+      }
+      running = await FlutterForegroundTask.isRunningService;
+    } catch (e) {
+      debugPrint('OverlayBackgroundService: autostart status failed: $e');
+    }
+    return (armed: armed, serviceRunning: running);
   }
 
   /// Tells the running background task (when there is one) to re-read the

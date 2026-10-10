@@ -5405,4 +5405,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sadaqahLogErrorText => 'Failed to save. Please try again.';
+
+  @override
+  String get bootAutostartLabel => 'Auto-start after the phone restarts';
+
+  @override
+  String get bootAutostartStatusChecking => 'Checking the background service…';
+
+  @override
+  String get bootAutostartStatusActive =>
+      'Running now, and it will come back on its own after the phone boots or the app updates';
+
+  @override
+  String get bootAutostartStatusArmedIdle =>
+      'It will come back on its own after boot, but the service is stopped now — tap to start it';
+
+  @override
+  String get bootAutostartStatusOff =>
+      'Not armed — keep the ongoing notification on so Takwa can start by itself after the phone restarts';
+
+  @override
+  String get bootAutostartRearmedToast => 'Background auto-start re-armed';
 }

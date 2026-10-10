@@ -2857,5 +2857,29 @@
   "sadaqahLogErrorText": "Failed to save. Please try again.",
   "@sadaqahLogErrorText": {
     "description": "Inline error shown in the log-sadaqah sheet when the DAO write fails"
+  },
+  "bootAutostartLabel": "Auto-start after the phone restarts",
+  "@bootAutostartLabel": {
+    "description": "Row label in Adhan & notification settings for restarting the background service on device boot"
+  },
+  "bootAutostartStatusChecking": "Checking the background service…",
+  "@bootAutostartStatusChecking": {
+    "description": "Sublabel shown while the app reads the device's boot-autostart state"
+  },
+  "bootAutostartStatusActive": "Running now, and it will come back on its own after the phone boots or the app updates",
+  "@bootAutostartStatusActive": {
+    "description": "Sublabel when the background service is running and armed to restart after boot"
+  },
+  "bootAutostartStatusArmedIdle": "It will come back on its own after boot, but the service is stopped now — tap to start it",
+  "@bootAutostartStatusArmedIdle": {
+    "description": "Sublabel when boot restart is armed but the service is not currently running"
+  },
+  "bootAutostartStatusOff": "Not armed — keep the ongoing notification on so Takwa can start by itself after the phone restarts",
+  "@bootAutostartStatusOff": {
+    "description": "Sublabel when the ongoing notification is disabled, so the app cannot restart itself after boot"
+  },
+  "bootAutostartRearmedToast": "Background auto-start re-armed",
+  "@bootAutostartRearmedToast": {
+    "description": "SnackBar shown after the user taps the auto-start row to re-arm the background service"
   }
 }
