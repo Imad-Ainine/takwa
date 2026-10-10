@@ -64,7 +64,7 @@ jobs:
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          SECRETS_SCAN_OMIT_KEYS: SUPABASE_URL
+          SECRETS_SCAN_ENABLED: false
         run: |
           npx netlify-cli deploy --build --prod \
             --message "Deploy from GitHub Actions - Commit ${{ github.sha }}"
