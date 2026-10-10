@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
 	subsets: ['latin'],
@@ -131,9 +132,11 @@ export default async function RootLayout({
 				className={`${plusJakartaSans.variable} ${amiri.variable} ${locale === 'ar' ? 'amiri' : ''}`}
 				suppressHydrationWarning>
 				<NextIntlClientProvider messages={messages}>
-					<Navbar />
-					<div className="main-wrapper">{children}</div>
-					<Footer />
+					<ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem={false}>
+						<Navbar />
+						<div className="main-wrapper">{children}</div>
+						<Footer />
+					</ThemeProvider>
 				</NextIntlClientProvider>
 			</body>
 		</html>

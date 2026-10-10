@@ -5,6 +5,7 @@ import { Link } from '@/i18n/routing';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import LanguageSwitcher from '../common/LanguageSwitcher';
+import { ThemeToggle } from '../ThemeToggle';
 
 export default function Navbar() {
   const t = useTranslations('Navigation');
@@ -50,6 +51,7 @@ export default function Navbar() {
             <a href="#screenshots" className="nav-link">{t('screenshots')}</a>
             <Link href="/support" className="nav-link">{t('support')}</Link>
             <Link href="/privacy" className="nav-link">{t('privacy')}</Link>
+            <ThemeToggle />
             <LanguageSwitcher />
             <a
               href="#download"
@@ -91,7 +93,8 @@ export default function Navbar() {
               <Link href="/privacy" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
                 {t('privacy')}
               </Link>
-              <div className="mobile-lang-wrap">
+              <div className="mobile-lang-wrap" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <ThemeToggle />
                 <LanguageSwitcher />
               </div>
               <a

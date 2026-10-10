@@ -76,8 +76,59 @@
   --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(200, 169, 110, 0.16);
   --shadow-card-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(200, 169, 110, 0.3);
 
-  /* Spacing */
+  /* Container & Sections */
   --container-max: 1240px;
+}
+
+[data-theme='light'] {
+  --background: #f8fafc;
+  --background-secondary: #f1f5f9;
+  --foreground: #0f172a;
+  --deep: #e2e8f0;
+  --deep-alt: #cbd5e1;
+
+  --card: rgba(255, 255, 255, 0.9);
+  --card-hover: rgba(255, 255, 255, 1);
+  --card-border: rgba(200, 169, 110, 0.4);
+  --card-border-glow: rgba(228, 201, 138, 0.8);
+  --card-solid: #ffffff;
+
+  --gold: #b48a40;
+  --gold-light: #d4a350;
+  --gold-vibrant: #d97706;
+  --gold-dark: #78350f;
+  --gold-dim: rgba(200, 169, 110, 0.2);
+  --gold-dimmer: rgba(200, 169, 110, 0.1);
+  --gold-glow: 0 0 25px rgba(217, 119, 6, 0.15);
+  --gold-glow-lg: 0 0 50px rgba(217, 119, 6, 0.2);
+
+  --emerald: #059669;
+  --emerald-deep: #047857;
+  --emerald-dim: rgba(16, 185, 129, 0.1);
+  --teal: #0d9488;
+  --teal-dim: rgba(13, 148, 136, 0.1);
+
+  --border: rgba(200, 169, 110, 0.3);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --card-light: rgba(255, 255, 255, 0.8);
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-gold: #92400e;
+
+  --gold-gradient: linear-gradient(135deg, #b48a40 0%, #d4a350 45%, #92400e 100%);
+  --gold-gradient-subtle: linear-gradient(135deg, rgba(200, 169, 110, 0.1) 0%, rgba(200, 169, 110, 0.02) 100%);
+  --gold-gradient-radial: radial-gradient(circle at 50% 0%, rgba(217, 119, 6, 0.1) 0%, transparent 70%);
+  --hero-mesh: radial-gradient(at 0% 0%, rgba(217, 119, 6, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 20%, rgba(13, 148, 136, 0.08) 0px, transparent 50%),
+    radial-gradient(at 50% 80%, rgba(16, 185, 129, 0.05) 0px, transparent 60%);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.12);
+  --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(200, 169, 110, 0.3);
+  --shadow-card-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 0 20px rgba(200, 169, 110, 0.4);
 }
 
 * {
@@ -95,6 +146,7 @@ body {
   font-family: var(--font-sans), 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @media (prefers-reduced-motion: no-preference) {
