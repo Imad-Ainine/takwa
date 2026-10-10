@@ -32,7 +32,7 @@ export async function generateMetadata({
 
 	return {
 		metadataBase: new URL(
-			process.env.NEXT_PUBLIC_SITE_URL ?? 'https://takwa-web.vercel.app/'
+			process.env.NEXT_PUBLIC_SITE_URL ?? 'https://takwadz.netlify.app/'
 		),
 		title: t('title'),
 		description: t('description'),
@@ -50,7 +50,7 @@ export async function generateMetadata({
 		openGraph: {
 			title: t('title'),
 			description: t('description'),
-			url: 'https://takwa-web.vercel.app/',
+			url: 'https://takwadz.netlify.app/',
 			siteName: 'Takwa',
 			images: [
 				{

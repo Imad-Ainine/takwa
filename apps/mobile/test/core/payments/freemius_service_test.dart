@@ -35,7 +35,7 @@ void main() {
     client = _StubClient();
     service = FreemiusService(
       client: client,
-      baseUrl: 'https://takwa-web.vercel.app/api/payments/freemius',
+      baseUrl: 'https://takwadz.netlify.app/api/payments/freemius',
     );
   });
 
@@ -155,7 +155,7 @@ void main() {
       await defaultService.portal(accessToken: 'sat_abc');
       expect(
         client.lastRequest!.url.toString(),
-        'https://takwa-web.vercel.app/api/payments/freemius/portal',
+        'https://takwadz.netlify.app/api/payments/freemius/portal',
       );
     });
   });

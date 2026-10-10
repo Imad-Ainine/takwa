@@ -34,7 +34,7 @@ void main() {
     client = _StubClient();
     service = ChargilyService(
       client: client,
-      baseUrl: 'https://takwa-web.vercel.app/api/payments/checkout',
+      baseUrl: 'https://takwadz.netlify.app/api/payments/checkout',
     );
   });
 
@@ -137,7 +137,7 @@ void main() {
         ChargilyService(client: client)
             .createCheckout()
             .then((_) => client.lastRequest!.url.toString()),
-        completion('https://takwa-web.vercel.app/api/payments/checkout'),
+        completion('https://takwadz.netlify.app/api/payments/checkout'),
       );
     });
   });
@@ -145,7 +145,7 @@ void main() {
   group('ChargilyConfig', () {
     test('webBaseUrl falls back to the deployed app and honors overrides', () {
       dotenv.loadFromString(envString: 'TAKWA_TEST_PLACEHOLDER=1');
-      expect(ChargilyConfig.webBaseUrl, 'https://takwa-web.vercel.app');
+      expect(ChargilyConfig.webBaseUrl, 'https://takwadz.netlify.app');
       dotenv.loadFromString(envString: 'TAKWA_WEB_BASE_URL=https://staging.example');
       expect(ChargilyConfig.webBaseUrl, 'https://staging.example');
     });

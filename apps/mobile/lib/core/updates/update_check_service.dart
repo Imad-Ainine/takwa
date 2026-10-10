@@ -15,7 +15,7 @@ import 'package:takwa/l10n/app_localizations.dart';
 /// in .github/workflows/release-apk.yml (search for "release_update") —
 /// there is no single source of truth shareable between Dart and YAML
 /// across this monorepo, so both were set by hand to the same value.
-const String kReleaseDownloadUrl = 'https://takwa-web.vercel.app/#download';
+const String kReleaseDownloadUrl = 'https://takwadz.netlify.app/#download';
 
 /// The JSON behind that page, served by apps/web's route handler
 /// (`src/app/api/releases/latest/route.ts`) as `{version, apkUrl, …}`. This
@@ -23,7 +23,7 @@ const String kReleaseDownloadUrl = 'https://takwa-web.vercel.app/#download';
 /// answers 200 — so `jsonDecode` threw on `<!DOCTYPE html>` and the check
 /// never ran.
 const String _kLatestReleaseUrl =
-    'https://takwa-web.vercel.app/api/releases/latest';
+    'https://takwadz.netlify.app/api/releases/latest';
 
 const String _kLastNotifiedVersionKey = 'last_notified_release_version';
 

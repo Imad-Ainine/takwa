@@ -10,10 +10,10 @@ import { processStoredEvent } from '@/lib/freemius-db';
  * then but does now, out-of-order guard false-positives after a fix).
  *
  * Protected by the TAKWA_ADMIN_SECRET shared header — not user-callable.
- * Intended for manual ops runs and, optionally, a Vercel Cron (see
+ * Intended for manual ops runs and, optionally, a Netlify Cron (see
  * docs/freemius-integration.md §Operational troubleshooting).
  */
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic' as const;
 
 export async function POST(request: NextRequest) {
   if (!secretsMatch(request.headers.get('x-takwa-admin-secret'), process.env.TAKWA_ADMIN_SECRET)) {

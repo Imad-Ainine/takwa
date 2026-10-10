@@ -76,7 +76,7 @@ const publicUrl = urlData.publicUrl;
 console.log('\n✅  Upload successful!\n');
 console.log('──────────────────────────────────────────────────────');
 console.log(`🔗  Public URL:\n   ${publicUrl}`);
-console.log('\n📝  Add to your .env (and Vercel env vars):');
+console.log('\n📝  Add to your .env (and Netlify env vars):');
 console.log(`   NEXT_PUBLIC_APK_URL=${publicUrl}`);
 console.log(`   NEXT_PUBLIC_APK_SIZE=${sizeMB} MB`);
 console.log('──────────────────────────────────────────────────────\n');

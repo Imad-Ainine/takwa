@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js';
  *
  * Returns the current APK release metadata by reading the manifest.json
  * published to Supabase Storage after each CI release.  This avoids the
- * need to trigger a full Vercel redeploy just to update the version number.
+ * need to trigger a full Netlify redeploy just to update the version number.
  *
  * Falls back to NEXT_PUBLIC_APK_* env vars when Supabase is unreachable
  * (e.g. local development without credentials).
@@ -16,7 +16,7 @@ import { createClient } from '@supabase/supabase-js';
  *   SUPABASE_SERVICE_ROLE_KEY – Service-role key (server-side only)
  *   SUPABASE_APK_BUCKET      – Storage bucket name (defaults to "apk-releases")
  */
-export const dynamic = 'force-dynamic'; // Never cache — always fetch fresh manifest
+export const dynamic = 'force-dynamic' as const; // Never cache — always fetch fresh manifest
 
 interface ReleaseManifest {
   version: string;
@@ -71,7 +71,7 @@ export async function GET() {
     });
   }
 
-  // 2. Fall back to NEXT_PUBLIC_APK_* env vars (set at build time or in Vercel dashboard)
+  // 2. Fall back to NEXT_PUBLIC_APK_* env vars (set at build time or in Netlify dashboard)
   const apkUrl = process.env.NEXT_PUBLIC_APK_URL || null;
   const version = process.env.NEXT_PUBLIC_APK_VERSION || null;
   const size = process.env.NEXT_PUBLIC_APK_SIZE || null;

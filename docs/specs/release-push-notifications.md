@@ -83,7 +83,7 @@ this was split into two halves on purpose (see the two goals below).
   a local notification and record that version as notified.
 - R3: WHEN the user taps either the in-app update notification or a real
   push notification for a release, THE SYSTEM SHALL open
-  `https://takwa-web.vercel.app/#download` in the external browser.
+  `https://takwadz.netlify.app/#download` in the external browser.
 - R4: WHEN `PushNotificationService.initialize()` cannot initialize Firebase
   (no config present), THE SYSTEM SHALL log and continue app startup
   normally — never crash or block on a missing/invalid Firebase config.

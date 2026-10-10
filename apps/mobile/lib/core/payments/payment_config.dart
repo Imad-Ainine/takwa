@@ -26,7 +26,7 @@ class ChargilyConfig {
   /// the `/payment-redirect` hop that bounces the browser back into the app
   /// after the card attempt (Chargily only accepts http(s) callbacks).
   static String get webBaseUrl =>
-      dotenv.env['TAKWA_WEB_BASE_URL'] ?? 'https://takwa-web.vercel.app';
+      dotenv.env['TAKWA_WEB_BASE_URL'] ?? 'https://takwadz.netlify.app';
 }
 
 /// Freemius (Visa / Mastercard, international supporters) configuration.

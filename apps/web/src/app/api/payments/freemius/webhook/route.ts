@@ -15,7 +15,7 @@ import { processFreemiusBody } from '@/lib/freemius-db';
  * answers 5xx, so Freemius redelivers without hammering on permanent
  * business failures.
  */
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic' as const;
 
 export async function POST(request: NextRequest) {
   const cfg = freemiusConfig();

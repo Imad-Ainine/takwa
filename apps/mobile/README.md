@@ -170,7 +170,7 @@ Create `apps/mobile/.env` (not committed) with:
 > ⚠️ `.env` is bundled into the APK as a Flutter asset — it must only ever
 > contain public/client keys. The Chargily SECRET key and the Supabase
 > service-role key live server-side: `CHARGILY_SECRET_KEY` in the web app's
-> env (Vercel → Environment Variables, or `apps/web/.env` for local dev),
+> env (Netlify → Environment Variables, or `apps/web/.env` for local dev),
 > and the service-role key in `apps/mobile/local-secrets.env` (git-ignored,
 > not bundled) for local CLI use only.
 
@@ -179,7 +179,7 @@ Create `apps/mobile/.env` (not committed) with:
 | `SUPABASE_URL`           | Yes      | Supabase project URL — see [`auth_setup_guide.md`](docs/auth_setup_guide.md) |
 | `SUPABASE_ANON_KEY`      | Yes      | Supabase anon/public key                                              |
 | `SENTRY_DSN`             | No       | Enables crash/error reporting via Sentry. Left unset, the app runs with no crash reporting — no events are sent anywhere. |
-| `TAKWA_WEB_BASE_URL`     | No       | Base URL of the deployed Takwa web app, which hosts the Chargily checkout proxy (`/api/payments/checkout`) and the Freemius proxy (`/api/payments/freemius/*`). Defaults to `https://takwa-web.vercel.app`. |
+| `TAKWA_WEB_BASE_URL`     | No       | Base URL of the deployed Takwa web app, which hosts the Chargily checkout proxy (`/api/payments/checkout`) and the Freemius proxy (`/api/payments/freemius/*`). Defaults to `https://takwadz.netlify.app`. |
 | `CHARGILY_SUBSCRIPTION_AMOUNT` | No | Mirrors the proxy's charged amount in whole DZD, for local payment records/display only — the server decides what is actually charged. Defaults to `200`. |
 | `FREEMIUS_MONTHLY_EUR` | No       | Monthly amount in EUR displayed on the international Visa/Mastercard (Freemius) path — display/local-record only; the Freemius plan decides what is actually charged. Defaults to `10`. |
 

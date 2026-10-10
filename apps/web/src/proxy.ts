@@ -22,7 +22,7 @@ export const config = {
 	// Match all pathnames except for:
 	// - API routes
 	// - _next (Next.js internals)
-	// - _vercel (Vercel internals)
+	// - _netlify (Netlify internals)
 	// - static files (e.g. /favicon.ico, /logo.png, etc.)
-	matcher: ['/', '/(ar|en|fr)/:path*', '/((?!api|_next|_vercel|.*\\..*).*)'],
+	matcher: ['/', '/(ar|en|fr)/:path*', '/((?!api|_next|_netlify|.*\\..*).*)'],
 };

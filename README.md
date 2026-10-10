@@ -15,7 +15,7 @@ _Hold yourselves accountable before you are held accountable._
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![CI](https://github.com/Imad-Ainine/takwa/actions/workflows/mobile-ci.yml/badge.svg)](https://github.com/Imad-Ainine/takwa/actions/workflows/mobile-ci.yml)
 
-[📥 Download APK](https://github.com/Imad-Ainine/takwa/releases/latest) · [🌐 Web App](https://takwa-web.vercel.app/) · [📋 Changelog](https://github.com/Imad-Ainine/takwa/releases)
+[📥 Download APK](https://github.com/Imad-Ainine/takwa/releases/latest) · [🌐 Web App](https://takwadz.netlify.app/) · [📋 Changelog](https://github.com/Imad-Ainine/takwa/releases)
 
 </div>
 
@@ -55,7 +55,7 @@ _Hold yourselves accountable before you are held accountable._
 | 📊 **Qada Prayer Tracker** | Log and track missed prayers to make them up |
 | 🌟 **Sadaqah Tracker** | Record and reflect on your daily charity |
 | 🏠 **Home Screen Widget** | At-a-glance prayer times right on your Android home screen |
-| 🌐 **Web Companion** | Full-featured web dashboard at [takwa-web.vercel.app](https://takwa-web.vercel.app/) |
+| 🌐 **Web Companion** | Full-featured web dashboard at [takwadz.netlify.app](https://takwadz.netlify.app/) |
 
 ---
 
@@ -153,7 +153,7 @@ cp apps/mobile/.env.example apps/mobile/.env
 | `mobile-ci.yml` | Push / PR to `main` | Analyze + test on Linux |
 | `release-apk.yml` | `v*.*.*` tag or manual | Build signed APK → GitHub Release |
 | `release-testflight.yml` | `v*.*.*` tag | Build signed IPA → TestFlight |
-| `deploy-web.yml` | Push to `main` | Deploy web app to Vercel |
+| `deploy-web.yml` | Push to `main` | Deploy web app to Netlify |
 
 ### Creating a new release
 

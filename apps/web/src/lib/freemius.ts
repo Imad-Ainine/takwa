@@ -2,7 +2,7 @@
  * Server-side Freemius SaaS helpers — config, webhook signature
  * verification, hosted-checkout URL building and the Freemius REST API.
  *
- * The FREEMIUS_SECRET_KEY lives ONLY here (Vercel env), same rule as
+ * The FREEMIUS_SECRET_KEY lives ONLY here (Netlify env), same rule as
  * CHARGILY_SECRET_KEY: the mobile app never holds Freemius credentials, it
  * only talks to these /api/payments/freemius/* routes.
  *

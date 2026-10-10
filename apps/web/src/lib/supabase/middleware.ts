@@ -21,7 +21,7 @@ export async function updateSession(
 	const supabaseKey =
 		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 
-	// If Supabase environment variables are missing (e.g. not configured on Vercel),
+	// If Supabase environment variables are missing (e.g. not configured on Netlify),
 	// skip session refresh gracefully instead of crashing the middleware with a 500 error.
 	if (!supabaseUrl || !supabaseKey) {
 		return response;

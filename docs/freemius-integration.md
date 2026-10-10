@@ -6,7 +6,7 @@ worldwide, while **Chargily** (CIB / Edahabia, DZD) stays exactly as before for
 Algerian customers.
 
 - App: `apps/mobile` (Flutter)
-- Server: `apps/web` (Next.js on Vercel, auto-deploys from `main`)
+- Server: `apps/web` (Next.js on Netlify, auto-deploys from `main`)
 - Database: Supabase (`apps/mobile/supabase/migrations/20260928120000_add_freemius_payments.sql`)
 
 ---
@@ -64,7 +64,7 @@ Chargily behaviour for Algerian customers is otherwise byte-for-byte unchanged.
 
 ## 3. Configuration
 
-### apps/web (Vercel env — server-side only)
+### apps/web (Netlify env — server-side only)
 
 | Variable                                                         | Required        | Purpose                                                                                                                                                                                                                                                                  |
 | ---------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -96,7 +96,7 @@ the only two consumers.
 2. Define plans (at least the monthly tier priced in **EUR**, currently
    €10.00; Freemius handles currency conversion, coupons and VAT itself).
 3. Product → **Settings → API & Keys**: copy the **product id**, **publishable
-   key** (`pk_…`) and **secret key** (`sk_…`) into the Vercel env
+   key** (`pk_…`) and **secret key** (`sk_…`) into the Netlify env
    (Settings → Environment Variables for `takwa-web`), never into the repo or
    `apps/mobile/.env`. If that tab shows an "API Bearer Authorization Token"
    that differs from the secret key, say so — `change-plan` currently sends the
@@ -106,7 +106,7 @@ the only two consumers.
    plans go in `FREEMIUS_PLAN_IDS`. Plans differ by features, not billing
    cycle — an annual pricing lives inside the same plan id.
 5. Real-time updates: **Webhooks → Listeners → Add Webhook**, URL
-   `https://takwa-web.vercel.app/api/payments/freemius/webhook`, all event
+   `https://takwadz.netlify.app/api/payments/freemius/webhook`, all event
    types, active. Freemius signs with the product secret key (no separate
    signing secret), so `FREEMIUS_SECRET_KEY` must match the product exactly.
 6. Sanity-check the checkout link shape: generate a test checkout link in the
@@ -158,7 +158,7 @@ cd apps/mobile && flutter test test/core/payments
 
 Manual end-to-end (sandbox):
 
-1. Apply the migration; set test-mode env; deploy (`git push` — Vercel builds).
+1. Apply the migration; set test-mode env; deploy (`git push` — Netlify builds).
 2. **Stay signed in with one account for the whole test.** Attribution is by
    buyer email, and the entitlement lands on whichever Supabase account was
    signed in when the checkout was opened. Switching accounts between checkout
@@ -190,7 +190,7 @@ apply_status,apply_error&order=id.asc` shows one row per delivery, and
 Deploy order (the app fails safe on every intermediate state):
 
 1. Paste the Supabase migration.
-2. Add the `FREEMIUS_*` + `TAKWA_ADMIN_SECRET` env vars in Vercel.
+2. Add the `FREEMIUS_*` + `TAKWA_ADMIN_SECRET` env vars in Netlify.
 3. Commit + push `main` → takwa-web auto-deploys (~1 min).
 4. Configure the webhook URL in the Freemius dashboard.
 5. Ship the mobile build (routing + Freemius screen + status card).
@@ -200,7 +200,7 @@ Old installed builds are unaffected: they still talk to `/api/payments/checkout`
 
 Rollback:
 
-- **Fast kill-switch**: remove/blank `FREEMIUS_SECRET_KEY` in Vercel → every
+- **Fast kill-switch**: remove/blank `FREEMIUS_SECRET_KEY` in Netlify → every
   Freemius route answers 503 `payments_not_configured`, the app shows the
   error state; Chargily keeps working; remove the webhook URL in the dashboard.
 - **Code rollback**: revert the mobile/web commits; tables can stay (they are
@@ -224,30 +224,30 @@ where status in ('trial','active','past_due','canceled')
 ```
 
 Retry/reconciliation: `curl -X POST -H "x-takwa-admin-secret: …"
-https://takwa-web.vercel.app/api/payments/freemius/reconcile` re-applies every
+https://takwadz.netlify.app/api/payments/freemius/reconcile` re-applies every
 `received`/`failed` event (e.g. someone subscribed with an email before creating
-their Supabase account). Optionally schedule it via Vercel Cron — see
-`vercel.json` `crons` key.
+their Supabase account). Optionally schedule it via Netlify Cron — see
+`netlify.toml` `[functions]` key.
 
 Symptom table:
 
 | Symptom                                       | Meaning / fix                                                                                                                                                                                                                                                                                                                 |
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Webhook 401 `invalid_signature`               | Wrong `FREEMIUS_SECRET_KEY`, or a CDN/proxy re-serialized the body (the HMAC is over raw bytes; the route reads `.text()` before parsing — keep it that way).                                                                                                                                                                 |
-| 503 `payments_not_configured`                 | Missing `FREEMIUS_*` env in Vercel.                                                                                                                                                                                                                                                                                           |
-| App shows `Freemius … failed (404): http_404` | The route is not deployed yet — `apps/web/.env` only feeds `next dev`; the app calls the production URL, so the code must be merged to `main` and the env vars added in Vercel. Check with `curl -X POST https://takwa-web.vercel.app/api/payments/freemius/checkout` (expect 503 JSON once deployed, 404 HTML while absent). |
+| 503 `payments_not_configured`                 | Missing `FREEMIUS_*` env in Netlify.                                                                                                                                                                                                                                                                                           |
+| App shows `Freemius … failed (404): http_404` | The route is not deployed yet — `apps/web/.env` only feeds `next dev`; the app calls the production URL, so the code must be merged to `main` and the env vars added in Netlify. Check with `curl -X POST https://takwadz.netlify.app/api/payments/freemius/checkout` (expect 503 JSON once deployed, 404 HTML while absent). |
 | App stuck on "not confirmed yet"              | Webhook not configured, or event row shows `failed: no_matching_supabase_user` → run reconcile after the account exists.                                                                                                                                                                                                      |
 | `duplicate` outcome on every event            | Freemius event body lacks a unique id and normalization picked a per-delivery field — check `freemius_events.event_uid` values; it should not re-send identical ids for distinct events.                                                                                                                                      |
 | 404 `no_active_license` on change-plan        | User has no Freemius license (Chargily supporter / never paid) → client must fall back to a normal new checkout.                                                                                                                                                                                                              |
 | Checkout params rejected by Freemius          | Dashboard-generated link differs from `buildCheckoutUrl` → adjust that one function (and its unit test).                                                                                                                                                                                                                      |
 | Refund/chargeback not revoking                | The event arrived with an unknown shape: find it in `freemius_events` (still fully logged), extend `deriveEntitlement` + test, then `POST /reconcile`.                                                                                                                                                                        |
 
-Logs: `[freemius] …` lines in Vercel's function logs for API failures (error
+Logs: `[freemius] …` lines in Netlify's function logs for API failures (error
 bodies are truncated and never forwarded to the client).
 
 ## 9. Security notes
 
-- Freemius secret key: Vercel env only; never in the APK, never in the repo
+- Freemius secret key: Netlify env only; never in the APK, never in the repo
   (the pre-2026-09-26 leaks are tracked separately — see the payments runbook notes).
 - Webhook: constant-time HMAC comparison on raw bytes; length-mismatch
   short-circuit before `timingSafeEqual`; unrecognized bodies are 200-acked after

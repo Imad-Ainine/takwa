@@ -8,7 +8,7 @@ import { buildPortalUrl, freemiusConfig, userFromBearer } from '@/lib/freemius';
  * they cancel, resume, or change the card behind their subscription. The
  * app never gets the publishable/secret keys — same proxy rule as checkout.
  */
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic' as const;
 
 export async function POST(request: NextRequest) {
   const cfg = freemiusConfig();

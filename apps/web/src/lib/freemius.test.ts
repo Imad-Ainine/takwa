@@ -55,7 +55,7 @@ test('buildCheckoutUrl targets the SaaS app checkout with locked identity', () =
     userEmail: 'me@example.com',
     custom: { takwa_user_id: 'uid-1' },
     locale: 'ar',
-    webBase: 'https://takwa-web.vercel.app',
+    webBase: 'https://takwadz.netlify.app',
   });
   const parsed = new URL(url);
   assert.equal(parsed.origin, 'https://checkout.freemius.com');
@@ -67,7 +67,7 @@ test('buildCheckoutUrl targets the SaaS app checkout with locked identity', () =
   // Redirect hop must come back through our own https relay (takwa:// only
   // exists as a custom scheme, which hosted checkouts refuse).
   const success = new URL(parsed.searchParams.get('success_url')!);
-  assert.equal(success.origin, 'https://takwa-web.vercel.app');
+  assert.equal(success.origin, 'https://takwadz.netlify.app');
   assert.equal(success.pathname, '/ar/payment-redirect');
   assert.equal(success.searchParams.get('to'), 'takwa://payment-success');
   assert.match(parsed.searchParams.get('cancel_url')!, /payment-failure/);

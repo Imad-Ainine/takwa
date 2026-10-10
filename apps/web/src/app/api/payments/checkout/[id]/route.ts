@@ -9,7 +9,7 @@ import { chargilyFetch } from '@/lib/chargily';
  * page is never treated as proof of payment — the app polls this until the
  * status leaves pending/processing.
  */
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic' as const;
 
 export async function GET(
   _request: NextRequest,

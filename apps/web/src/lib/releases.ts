@@ -14,10 +14,10 @@ export interface ReleaseInfo {
  * 1. Checks Supabase Storage manifest.json first — release-apk.yml publishes
  *    it (with a service-role key, no rate limit) as the very last step of
  *    every release, so it's the most reliable "source of truth" and needs
- *    no Vercel redeploy to pick up a new version.
+ *    no Netlify redeploy to pick up a new version.
  * 2. Falls back to the GitHub Releases API. NOTE: unauthenticated requests
  *    are rate-limited to 60/hour — set a server-side GITHUB_TOKEN env var on
- *    Vercel to avoid this silently falling through on a busy deploy.
+ *    Netlify to avoid this silently falling through on a busy deploy.
  * 3. Falls back to NEXT_PUBLIC_APK_* environment variables.
  *
  * If none of the above resolve, version/apkUrl come back as empty strings
@@ -70,7 +70,7 @@ export async function getLatestRelease(): Promise<ReleaseInfo> {
 
   // 2. Try GitHub Releases API
   // For private repos (or to avoid the 60/hour unauthenticated rate limit)
-  // this needs a server-side GITHUB_TOKEN env var on Vercel.
+  // this needs a server-side GITHUB_TOKEN env var on Net.
   try {
     const repo = process.env.GITHUB_REPO || 'Imad-Ainine/Takwa';
     const githubToken = process.env.GITHUB_TOKEN; // server-side only, never NEXT_PUBLIC_
@@ -108,7 +108,7 @@ export async function getLatestRelease(): Promise<ReleaseInfo> {
         };
       }
     } else if (res.status === 403) {
-      console.warn('[getLatestRelease] GitHub API rate-limited (set GITHUB_TOKEN on Vercel to fix)');
+      console.warn('[getLatestRelease] GitHub API rate-limited (set GITHUB_TOKEN on Netlify to fix)');
     }
   } catch (err) {
     console.warn('[getLatestRelease] Error checking GitHub Releases API:', err);
@@ -139,7 +139,7 @@ export async function getLatestRelease(): Promise<ReleaseInfo> {
 
 /**
  * The iOS install link (TestFlight public link, or an App Store link once
- * published) — set via the NEXT_PUBLIC_IOS_APP_URL env var in the Vercel
+ * published) — set via the NEXT_PUBLIC_IOS_APP_URL env var in the Netlify
  * project settings. Unlike the Android APK there's no GitHub Release asset
  * or checksum to resolve automatically: TestFlight builds are uploaded
  * straight to App Store Connect by release-testflight.yml (see

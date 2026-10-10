@@ -13,7 +13,7 @@ import { freemiusApi, freemiusConfig, normalizePlanId, supabaseAdmin, userFromBe
  * Users without a server-side license (Chargily supporters, guests) get
  * 404 no_active_license and the app routes them to a normal new checkout.
  */
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic' as const;
 
 export async function POST(request: NextRequest) {
   const cfg = freemiusConfig();

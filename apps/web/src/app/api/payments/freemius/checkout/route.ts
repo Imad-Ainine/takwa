@@ -19,7 +19,7 @@ import {
  *   plan_id must be one of FREEMIUS_PLAN_IDS (default: monthly plan only),
  *   so the app can never be tricked into charging an attacker-chosen plan.
  */
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic' as const;
 
 export async function POST(request: NextRequest) {
   const cfg = freemiusConfig();

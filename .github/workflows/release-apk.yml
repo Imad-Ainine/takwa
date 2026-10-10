@@ -88,7 +88,7 @@ jobs:
           fi
           # Chargily payments go through the web app's checkout proxy
           # (apps/web /api/payments/checkout) — the secret key lives in the
-          # Vercel env, never in the APK.
+          # Netlify env, never in the APK.
           # Secrets travel as env vars, not heredoc literals, so no credential
           # value ever appears in the expanded step script.
           cat > .env <<EOF
@@ -170,7 +170,7 @@ jobs:
             ## 🕌 Takwa v${{ steps.get_version.outputs.VERSION }}
 
             ### Download
-            Download the APK directly from the Assets section below or from the [Takwa website](https://takwa-web.vercel.app/#download).
+            Download the APK directly from the Assets section below or from the [Takwa website](https://takwadz.netlify.app/#download).
 
             ### Verification
             | Algorithm | Hash |
@@ -190,7 +190,7 @@ jobs:
 
       # ── Publish manifest.json to Supabase (metadata only, <1 KB) ─────
       #    The landing page & dashboard read this file at request time,
-      #    so no Vercel redeploy is needed after each release.
+      #    so no Netlify redeploy is needed after each release.
       - name: Publish release manifest to Supabase
         run: |
           VERSION="${{ steps.get_version.outputs.VERSION }}"
@@ -330,7 +330,7 @@ jobs:
           # apps/mobile/lib/core/updates/update_check_service.dart —
           # both notification paths (this CI push and the in-app
           # update check) must send the user to the same place.
-          DOWNLOAD_URL="https://takwa-web.vercel.app/#download"
+          DOWNLOAD_URL="https://takwadz.netlify.app/#download"
 
           HTTP_CODE=$(curl -s -o response.json -w "%{http_code}" \
             -X POST "https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send" \

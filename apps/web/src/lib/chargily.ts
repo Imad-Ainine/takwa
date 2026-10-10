@@ -1,7 +1,7 @@
 /**
  * Server-side Chargily Pay V2 helpers.
  *
- * The CHARGILY_SECRET_KEY lives ONLY here (Vercel env) — never in the
+ * The CHARGILY_SECRET_KEY lives ONLY here (Netlify env) — never in the
  * mobile client. The app calls /api/payments/checkout, which proxies to
  * Chargily with the secret key attached.
  *

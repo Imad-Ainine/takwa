@@ -20,7 +20,7 @@ import {
  *   locale         – "ar" | "en" | "fr" (default "en")
  *   description    – text shown on the hosted page (truncated to 200 chars)
  */
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic' as const;
 
 export async function POST(request: NextRequest) {
   let body: Record<string, unknown> = {};
