@@ -8,8 +8,8 @@ export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
-  // Avoid Hydration Mismatch
-  React.useEffect(() => {
+  // Use useLayoutEffect to set mounted before render
+  React.useLayoutEffect(() => {
     setMounted(true);
   }, []);
 

@@ -78,6 +78,15 @@
 
   /* Container & Sections */
   --container-max: 1240px;
+
+  /* Section Backgrounds */
+  --bg-features: linear-gradient(180deg, #04011e 0%, #070340 50%, #04011e 100%);
+  --bg-quote: linear-gradient(135deg, rgba(10, 5, 56, 0.95) 0%, rgba(18, 11, 75, 0.98) 50%, rgba(10, 5, 56, 0.95) 100%);
+  --bg-screenshots: linear-gradient(180deg, #04011e 0%, #0a0538 60%, #04011e 100%);
+  --bg-download: linear-gradient(180deg, #04011e 0%, #070340 60%, #04011e 100%);
+  --bg-switcher: rgba(17, 24, 39, 0.8);
+  --bg-switcher-hover: rgba(26, 35, 50, 0.95);
+  --text-switcher-active: #04011e;
 }
 
 [data-theme='light'] {
@@ -129,6 +138,15 @@
   --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.12);
   --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(200, 169, 110, 0.3);
   --shadow-card-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 0 20px rgba(200, 169, 110, 0.4);
+
+  /* Section Backgrounds */
+  --bg-features: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #f8fafc 100%);
+  --bg-quote: linear-gradient(135deg, rgba(241, 245, 249, 0.95) 0%, rgba(226, 232, 240, 0.98) 50%, rgba(241, 245, 249, 0.95) 100%);
+  --bg-screenshots: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 60%, #f8fafc 100%);
+  --bg-download: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 60%, #f8fafc 100%);
+  --bg-switcher: rgba(255, 255, 255, 0.8);
+  --bg-switcher-hover: rgba(248, 250, 252, 0.95);
+  --text-switcher-active: #ffffff;
 }
 
 * {
@@ -1074,7 +1092,7 @@ a {
    FeaturesSection
    -------------------------------------------------------------------------- */
 .features-section {
-  background: linear-gradient(180deg, #04011e 0%, #070340 50%, #04011e 100%);
+  background: var(--bg-features);
 }
 
 .features-header {
@@ -1178,10 +1196,7 @@ a {
   position: relative;
   overflow: hidden;
   padding: 64px 0;
-  background: linear-gradient(135deg,
-      rgba(10, 5, 56, 0.95) 0%,
-      rgba(18, 11, 75, 0.98) 50%,
-      rgba(10, 5, 56, 0.95) 100%);
+  background: var(--bg-quote);
   border-top: 1px solid rgba(200, 169, 110, 0.18);
   border-bottom: 1px solid rgba(200, 169, 110, 0.18);
 }
@@ -1259,7 +1274,7 @@ a {
    ScreenshotsShowcase
    -------------------------------------------------------------------------- */
 .screenshots-section {
-  background: linear-gradient(180deg, #04011e 0%, #0a0538 60%, #04011e 100%);
+  background: var(--bg-screenshots);
   overflow: hidden;
 }
 
@@ -1479,7 +1494,7 @@ a {
    DownloadSection
    -------------------------------------------------------------------------- */
 .download-section {
-  background: linear-gradient(180deg, #04011e 0%, #070340 60%, #04011e 100%);
+  background: var(--bg-download);
 }
 
 .download-header {
@@ -1610,8 +1625,8 @@ a {
 
 .qr-image-wrap,
 .qr-placeholder {
-  background: #04011e;
-  border: 2px solid rgba(200, 169, 110, 0.3);
+  background: var(--background);
+  border: 2px solid var(--border);
   border-radius: 16px;
   padding: 12px;
   box-shadow: 0 0 20px rgba(229, 185, 88, 0.12);
@@ -2060,7 +2075,7 @@ a {
 .segmented-control {
   display: flex;
   align-items: center;
-  background: rgba(17, 24, 39, 0.8);
+  background: var(--bg-switcher);
   border: 1px solid var(--border);
   border-radius: 9999px;
   padding: 3px;
@@ -2092,7 +2107,7 @@ a {
 
 .segment-btn.active {
   background: var(--gold-gradient);
-  color: #04011e;
+  color: var(--text-switcher-active);
   box-shadow: 0 2px 10px rgba(200, 169, 110, 0.35);
   font-weight: 700;
 }
@@ -2111,7 +2126,7 @@ a {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(17, 24, 39, 0.8);
+  background: var(--bg-switcher);
   border: 1px solid var(--border);
   color: var(--text-primary);
   padding: 6px 12px;
@@ -2125,7 +2140,7 @@ a {
 .dropdown-trigger:hover,
 .dropdown-trigger.open {
   border-color: var(--gold);
-  background: rgba(26, 35, 50, 0.95);
+  background: var(--bg-switcher-hover);
 }
 
 .globe-icon {
@@ -2184,7 +2199,7 @@ a {
 
 .menu-item:hover {
   background: var(--gold-dim);
-  color: var(--gold-light);
+  color: var(--gold-vibrant);
 }
 
 .menu-item.selected {
@@ -2197,7 +2212,7 @@ a {
   font-size: 0.72rem;
   color: var(--text-dim);
   font-family: monospace;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--border-subtle);
   padding: 2px 6px;
   border-radius: 4px;
 }
