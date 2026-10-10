@@ -10,6 +10,7 @@ export function ThemeToggle() {
 
   // Use useLayoutEffect to set mounted before render
   React.useLayoutEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
