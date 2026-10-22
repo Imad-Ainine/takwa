@@ -149,6 +149,15 @@
       "copy": "Copier l'Empreinte",
       "comingSoonBadge": "Bientôt Disponible — Accès Anticipé",
       "securityTrust": "Fichier Vérifié & Certifié • Zéro Logiciel Malveillant • Architecture Transparente",
+      "postDownload": {
+        "title": "Téléchargement lancé — terminez l'installation",
+        "note": "Android n'ouvre jamais l'installateur pour un site web : le fichier attend dans vos téléchargements. Encore trois gestes :",
+        "step1": "Faites glisser le volet de notifications et touchez le fichier Takwa (ou ouvrez Fichiers → Téléchargements).",
+        "step2": "Si on vous le demande, touchez Réglages et autorisez « Installer des applications inconnues » pour votre navigateur, puis revenez ici.",
+        "step3": "Touchez Installer, puis Ouvrir. Vos données restent sur votre appareil.",
+        "settings": "Ouvrir l'autorisation d'installation de votre navigateur",
+        "close": "Fermer"
+      },
       "platformTabs": {
         "ariaLabel": "Choisissez une plateforme",
         "android": "Android",

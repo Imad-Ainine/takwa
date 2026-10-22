@@ -1,10 +1,19 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo, useSyncExternalStore } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 
 type PlatformKey = 'android' | 'ios';
+
+// Read through useSyncExternalStore rather than an effect: the user agent is
+// a constant for the life of the page, so a setState here would only buy a
+// second render — and trip react-hooks/set-state-in-effect. The server
+// snapshot has to claim neither platform, since `navigator` doesn't exist
+// there and a mismatch would hydrate into a different tree than SSR rendered.
+const subscribeNoop = () => () => {};
+const readUaPlatform = () => (/android/i.test(navigator.userAgent) ? 'android' : 'other');
+const readUaPlatformOnServer = () => 'other';
 
 interface DownloadSectionProps {
   apkUrl?: string;
@@ -85,10 +94,13 @@ export default function DownloadSection({
   const t = useTranslations('HomePage');
   const sectionRef = useRef<HTMLElement>(null);
   const [copiedSha, setCopiedSha] = useState<'sha256' | 'sha1' | null>(null);
+  const [showInstallPanel, setShowInstallPanel] = useState(false);
   // Default to whichever platform actually has a live link — if only one of
   // the two is ready, land the visitor straight on it instead of an
   // "unavailable" tab.
   const [platform, setPlatform] = useState<PlatformKey>(apkUrl || !iosUrl ? 'android' : 'ios');
+  const isAndroidDevice =
+    useSyncExternalStore(subscribeNoop, readUaPlatform, readUaPlatformOnServer) === 'android';
 
   const PLATFORMS = useMemo(
     () =>
@@ -133,7 +145,13 @@ export default function DownloadSection({
   const isAndroid = platform === 'android';
   const isAvailable = isAndroid ? Boolean(apkUrl) : Boolean(iosUrl);
   const downloadUrl = isAndroid ? (apkUrl || '#') : (iosUrl || '#');
-  const downloadFilename = `takwa-v${apkVersion}.apk`;
+  // Same-origin, so the link the visitor taps never has to change between
+  // releases and the version resolves in one place. Passing ?version= also
+  // lets the route skip its GitHub API round-trip (60 requests/hour when
+  // unauthenticated). The `download` attribute is deliberately absent: it is
+  // ignored cross-origin, and the filename already comes from the asset's own
+  // Content-Disposition.
+  const apkHref = apkVersion ? `/api/releases/download?version=${apkVersion}` : downloadUrl;
   // Scanning the QR always lands somewhere useful, even pre-launch: the
   // platform's real link once it exists, otherwise the download page itself.
   const qrUrl = downloadUrl !== '#' ? downloadUrl : 'https://takwadz.netlify.app/#download';
@@ -171,7 +189,7 @@ export default function DownloadSection({
                 role="tab"
                 aria-selected={isAndroid}
                 className={`platform-switch-btn ${isAndroid ? 'platform-switch-btn-active' : ''}`}
-                onClick={() => setPlatform('android')}
+                onClick={() => { setPlatform('android'); setShowInstallPanel(false); }}
               >
                 <span className="platform-switch-icon" aria-hidden="true">🤖</span>
                 {t('downloadHub.platformTabs.android')}
@@ -181,7 +199,7 @@ export default function DownloadSection({
                 role="tab"
                 aria-selected={!isAndroid}
                 className={`platform-switch-btn ${!isAndroid ? 'platform-switch-btn-active' : ''}`}
-                onClick={() => setPlatform('ios')}
+                onClick={() => { setPlatform('ios'); setShowInstallPanel(false); }}
               >
                 <span className="platform-switch-icon" aria-hidden="true">🍎</span>
                 {t('downloadHub.platformTabs.ios')}
@@ -236,11 +254,11 @@ export default function DownloadSection({
                 ) : isAvailable ? (
                   isAndroid ? (
                     <a
-                      href={downloadUrl}
-                      download={downloadFilename}
+                      href={apkHref}
                       className="btn-primary dl-btn"
                       id="main-download-apk-btn"
                       aria-label={`Download Takwa APK version ${apkVersion}`}
+                      onClick={() => setShowInstallPanel(true)}
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -272,6 +290,36 @@ export default function DownloadSection({
                   <div className="dl-btn-unavailable" id="download-unavailable-msg">
                     <span>⏳</span>
                     <span>{t('downloadHub.comingSoonBadge')}</span>
+                  </div>
+                )}
+
+                {/* Android hands the file to its Download Manager and stops
+                    there — no web API may launch the package installer, so the
+                    hand-off has to be spelled out the moment the tap happens. */}
+                {showInstallPanel && isAndroid && (
+                  <div className="post-dl-panel" role="status" aria-live="polite">
+                    <div className="post-dl-head">
+                      <span className="post-dl-title">{t('downloadHub.postDownload.title')}</span>
+                      <button
+                        type="button"
+                        className="post-dl-close"
+                        onClick={() => setShowInstallPanel(false)}
+                        aria-label={t('downloadHub.postDownload.close')}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <p className="post-dl-note">{t('downloadHub.postDownload.note')}</p>
+                    <ol className="post-dl-steps">
+                      <li>{t('downloadHub.postDownload.step1')}</li>
+                      <li>{t('downloadHub.postDownload.step2')}</li>
+                      <li>{t('downloadHub.postDownload.step3')}</li>
+                    </ol>
+                    {isAndroidDevice && (
+                      <a href="app-settings:" className="post-dl-settings">
+                        {t('downloadHub.postDownload.settings')}
+                      </a>
+                    )}
                   </div>
                 )}
 
@@ -363,6 +411,7 @@ export default function DownloadSection({
                   onClick={() => {
                     if (platformItem.key === 'android' || platformItem.key === 'ios') {
                       setPlatform(platformItem.key);
+                      setShowInstallPanel(false);
                     }
                   }}
                   disabled={platformItem.key !== 'android' && platformItem.key !== 'ios'}

@@ -47,12 +47,26 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Final fallback: env var or hardcoded latest
-  version = version || process.env.NEXT_PUBLIC_APK_VERSION || '1.0.5';
+  version = version || process.env.NEXT_PUBLIC_APK_VERSION || null;
+
+  // Never invent a version: a redirect to a takwa-v<stale>.apk asset that no
+  // longer exists is worse for the visitor than a redirect to the page that
+  // lists the builds which do.
+  if (!version) {
+    return NextResponse.redirect(`https://github.com/${githubRepo}/releases`, {
+      status: 302,
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  }
 
   // Build the GitHub Releases direct-download URL
   const downloadUrl = `https://github.com/${githubRepo}/releases/download/v${version}/takwa-v${version}.apk`;
 
-  // Redirect directly to GitHub — no signed URL needed since GitHub Releases are public
-  return NextResponse.redirect(downloadUrl, { status: 302 });
+  // Redirect directly to GitHub — no signed URL needed since GitHub Releases
+  // are public. no-store matters: a cached 302 would keep serving an older
+  // APK to every visitor after the next release ships.
+  return NextResponse.redirect(downloadUrl, {
+    status: 302,
+    headers: { 'Cache-Control': 'no-store' },
+  });
 }

@@ -1810,6 +1810,85 @@ a {
   margin-top: -6px;
 }
 
+.post-dl-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-left: 3px solid var(--gold-vibrant);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+}
+
+.post-dl-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.post-dl-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gold-light);
+  line-height: 1.4;
+}
+
+.post-dl-close {
+  flex-shrink: 0;
+  background: transparent;
+  border: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 2px 6px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.post-dl-close:hover {
+  color: var(--text-secondary);
+  background: var(--gold-dim);
+}
+
+.post-dl-note {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.post-dl-steps {
+  margin: 0;
+  padding-inline-start: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.post-dl-steps li::marker {
+  color: var(--gold-vibrant);
+  font-weight: 700;
+}
+
+.post-dl-settings {
+  align-self: flex-start;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gold-vibrant);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 7px 12px;
+  text-decoration: none;
+}
+
+.post-dl-settings:hover {
+  background: var(--gold-dim);
+}
+
 .install-guide {
   border-top: 1px solid rgba(200, 169, 110, 0.15);
   padding-top: 28px;

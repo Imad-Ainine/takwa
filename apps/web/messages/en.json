@@ -119,6 +119,15 @@
       "copy": "Copy Hash",
       "comingSoonBadge": "Coming Soon — Early Access",
       "securityTrust": "Signed & Verified Safe • Zero Malware • Open Architecture",
+      "postDownload": {
+        "title": "Download started — finish the install",
+        "note": "Android never opens the installer on a website's behalf, so the file waits in your downloads. Three taps left:",
+        "step1": "Pull down the notification shade and tap the Takwa file (or open Files → Downloads).",
+        "step2": "If asked, tap Settings and allow 'Install unknown apps' for your browser, then come back.",
+        "step3": "Tap Install, then Open. Your data stays on your device.",
+        "settings": "Open your browser's install permission",
+        "close": "Dismiss"
+      },
       "platformTabs": {
         "ariaLabel": "Choose a platform",
         "android": "Android",
