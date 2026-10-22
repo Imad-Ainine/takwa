@@ -1017,7 +1017,7 @@
   "@updateAvailableNotifTitle": {
     "description": "Local notification title shown when a newer app version is detected"
   },
-  "updateAvailableNotifBody": "الإصدار {version} متوفر الآن — اضغط للتحميل",
+  "updateAvailableNotifBody": "الإصدار {version} متوفر الآن — اضغط للتثبيت",
   "@updateAvailableNotifBody": {
     "description": "Local notification body shown when a newer app version is detected",
     "placeholders": {
@@ -1025,6 +1025,75 @@
         "type": "String"
       }
     }
+  },
+  "updateSheetTitle": "تحديث تقوى",
+  "@updateSheetTitle": {
+    "description": "Title of the in-app updater sheet"
+  },
+  "updateSheetBody": "الإصدار {version} جاهز للتثبيت — حجمه {size}.",
+  "@updateSheetBody": {
+    "description": "Body of the in-app updater sheet",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "updateSheetCellularNote": "التنزيل كبير؛ يُفضّل استخدام واي فاي.",
+  "@updateSheetCellularNote": {
+    "description": "Warning that the APK download is large"
+  },
+  "updateSheetInstall": "تنزيل وتثبيت",
+  "@updateSheetInstall": {
+    "description": "Primary button on the in-app updater sheet"
+  },
+  "updateSheetDownloading": "جارٍ التنزيل… {percent}٪",
+  "@updateSheetDownloading": {
+    "description": "Progress line under the download progress bar",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "updateSheetDownloadingLabel": "جارٍ التنزيل…",
+  "@updateSheetDownloadingLabel": {
+    "description": "Button label while the download is in flight"
+  },
+  "updateSheetInstallerHint": "أكمل التثبيت من نافذة أندرويد التي فُتحت الآن.",
+  "@updateSheetInstallerHint": {
+    "description": "Shown after the APK is handed to the system package installer"
+  },
+  "updateSheetFailed": "تعذّر تنزيل التحديث. تحقّق من اتصالك ثم أعد المحاولة.",
+  "@updateSheetFailed": {
+    "description": "Generic download failure message"
+  },
+  "updateSheetFailedChecksum": "لم تطابق بصمة الملف النسخة المنشورة، لذا رفض تقوى تثبيته. أعد المحاولة.",
+  "@updateSheetFailedChecksum": {
+    "description": "Shown when the downloaded APK's SHA-256 does not match the manifest"
+  },
+  "updateSheetUnavailable": "تعذّر جلب معلومات التحديث الآن.",
+  "@updateSheetUnavailable": {
+    "description": "Shown when /api/releases/latest cannot be reached"
+  },
+  "updateSheetRetry": "إعادة المحاولة",
+  "@updateSheetRetry": {
+    "description": "Retry button after a failed download"
+  },
+  "updateSheetClose": "إغلاق",
+  "@updateSheetClose": {
+    "description": "Dismiss button on the in-app updater sheet"
+  },
+  "updateSheetOpenSite": "فتح صفحة التحميل بدلاً من ذلك",
+  "@updateSheetOpenSite": {
+    "description": "Fallback link to the website download page"
+  },
+  "settingsCheckUpdateHint": "اضغط للتحقق من التحديثات",
+  "@settingsCheckUpdateHint": {
+    "description": "Hint under the app version row in Settings"
   },
   "overlayServiceChannelDesc": "يُبقي خدمة الأذان والأذكار نشطة",
   "overlayServiceLoadingPrayerTimes": "جاري تحميل أوقات الصلاة...",

@@ -18,6 +18,7 @@ import 'package:takwa/core/supabase/supabase_config.dart';
 import 'package:takwa/core/supabase/sync_manager.dart';
 import 'package:takwa/core/providers/auth_providers.dart';
 import 'package:takwa/core/routes/app_routes.dart';
+import 'package:takwa/core/updates/app_update_sheet.dart';
 import 'package:takwa/core/notifications/overlay_settings_tile.dart';
 import 'package:takwa/features/settings/providers/user_preferences_provider.dart';
 import 'package:takwa/features/settings/presentation/widgets/settings_widgets.dart';
@@ -417,11 +418,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                             ),
                           ),
                           const SizedBox(height: AppSpacing.xs),
-                          Text(
-                            '${l10n.appName} — v${ref.watch(appVersionProvider)}',
-                            style: context.typography.caption.copyWith(
-                              fontSize: 11,
-                              color: context.colors.textDim,
+                          // Tapping the version opens the in-app updater. Needed
+                          // because checkForUpdate notifies only once per
+                          // version — dismiss that notification and the release
+                          // is otherwise unreachable without the website.
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => showAppUpdateSheet(context),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${l10n.appName} — v${ref.watch(appVersionProvider)}',
+                                  style: context.typography.caption.copyWith(
+                                    fontSize: 11,
+                                    color: context.colors.textDim,
+                                  ),
+                                ),
+                                Text(
+                                  l10n.settingsCheckUpdateHint,
+                                  style: context.typography.caption.copyWith(
+                                    fontSize: 10,
+                                    color: context.colors.goldDim,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],

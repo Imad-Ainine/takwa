@@ -1685,8 +1685,57 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String updateAvailableNotifBody(String version) {
-    return 'الإصدار $version متوفر الآن — اضغط للتحميل';
+    return 'الإصدار $version متوفر الآن — اضغط للتثبيت';
   }
+
+  @override
+  String get updateSheetTitle => 'تحديث تقوى';
+
+  @override
+  String updateSheetBody(String version, String size) {
+    return 'الإصدار $version جاهز للتثبيت — حجمه $size.';
+  }
+
+  @override
+  String get updateSheetCellularNote => 'التنزيل كبير؛ يُفضّل استخدام واي فاي.';
+
+  @override
+  String get updateSheetInstall => 'تنزيل وتثبيت';
+
+  @override
+  String updateSheetDownloading(int percent) {
+    return 'جارٍ التنزيل… $percent٪';
+  }
+
+  @override
+  String get updateSheetDownloadingLabel => 'جارٍ التنزيل…';
+
+  @override
+  String get updateSheetInstallerHint =>
+      'أكمل التثبيت من نافذة أندرويد التي فُتحت الآن.';
+
+  @override
+  String get updateSheetFailed =>
+      'تعذّر تنزيل التحديث. تحقّق من اتصالك ثم أعد المحاولة.';
+
+  @override
+  String get updateSheetFailedChecksum =>
+      'لم تطابق بصمة الملف النسخة المنشورة، لذا رفض تقوى تثبيته. أعد المحاولة.';
+
+  @override
+  String get updateSheetUnavailable => 'تعذّر جلب معلومات التحديث الآن.';
+
+  @override
+  String get updateSheetRetry => 'إعادة المحاولة';
+
+  @override
+  String get updateSheetClose => 'إغلاق';
+
+  @override
+  String get updateSheetOpenSite => 'فتح صفحة التحميل بدلاً من ذلك';
+
+  @override
+  String get settingsCheckUpdateHint => 'اضغط للتحقق من التحديثات';
 
   @override
   String get overlayServiceChannelDesc => 'يُبقي خدمة الأذان والأذكار نشطة';

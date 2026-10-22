@@ -15,6 +15,11 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- In-app updates: lets Takwa hand a downloaded APK straight to the
+         system package installer. A browser can't do this at all (the
+         installer declares no CATEGORY_BROWSABLE), which is why returning
+         users update from inside the app instead of from the website. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
     <application android:label="تقوى" android:name="${applicationName}" android:icon="@mipmap/ic_launcher" android:theme="@style/LaunchTheme">
         <!-- showWhenLocked + turnScreenOn: the adhan's full-screen-intent
              notification is the one path that reaches a locked, asleep phone,

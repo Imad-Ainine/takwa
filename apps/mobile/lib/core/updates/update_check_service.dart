@@ -6,6 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:takwa/core/database/daos.dart';
 import 'package:takwa/core/notifications/notifications_service.dart';
+import 'package:takwa/core/updates/release_info.dart';
 import 'package:takwa/core/updates/version_compare.dart';
 import 'package:takwa/core/utils/app_logger.dart';
 import 'package:takwa/l10n/app_localizations.dart';
@@ -48,14 +49,9 @@ class UpdateCheckService {
       // runs right at app launch, exactly when that race is most likely.
       final installedVersion = (await PackageInfo.fromPlatform()).version;
 
-      final response = await _client
-          .get(Uri.parse(_kLatestReleaseUrl))
-          .timeout(const Duration(seconds: 8));
-      if (response.statusCode != 200) return;
-
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
-      final latestVersion = body['version'] as String?;
-      if (latestVersion == null || latestVersion.isEmpty) return;
+      final release = await fetchLatestRelease();
+      if (release == null) return;
+      final latestVersion = release.version;
 
       if (!isNewerVersion(latestVersion, installedVersion)) return;
 
@@ -76,5 +72,22 @@ class UpdateCheckService {
       // best-effort courtesy check, not a critical path.
       AppLogger.warning('Update check failed', e, st);
     }
+  }
+
+  /// The newest published build, or null when the endpoint is unreachable,
+  /// answers non-200, or sends a manifest missing a version or a URL.
+  ///
+  /// Exposed separately from [checkForUpdate] because the in-app update sheet
+  /// needs the download URL and checksum, and must be able to re-resolve them
+  /// when it opens — a notification tap can arrive after a cold start, when
+  /// nothing has run this check yet.
+  Future<ReleaseInfo?> fetchLatestRelease() async {
+    final response = await _client
+        .get(Uri.parse(_kLatestReleaseUrl))
+        .timeout(const Duration(seconds: 8));
+    if (response.statusCode != 200) return null;
+    return ReleaseInfo.tryParse(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

@@ -881,7 +881,7 @@
   "@updateAvailableNotifTitle": {
     "description": "Local notification title shown when a newer app version is detected"
   },
-  "updateAvailableNotifBody": "Version {version} is ready — tap to download",
+  "updateAvailableNotifBody": "Version {version} is ready — tap to install",
   "@updateAvailableNotifBody": {
     "description": "Local notification body shown when a newer app version is detected",
     "placeholders": {
@@ -889,6 +889,75 @@
         "type": "String"
       }
     }
+  },
+  "updateSheetTitle": "Update Takwa",
+  "@updateSheetTitle": {
+    "description": "Title of the in-app updater sheet"
+  },
+  "updateSheetBody": "Version {version} is ready to install — {size}.",
+  "@updateSheetBody": {
+    "description": "Body of the in-app updater sheet",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "updateSheetCellularNote": "This is a large download. Wi-Fi is recommended.",
+  "@updateSheetCellularNote": {
+    "description": "Warning that the APK download is large"
+  },
+  "updateSheetInstall": "Download & install",
+  "@updateSheetInstall": {
+    "description": "Primary button on the in-app updater sheet"
+  },
+  "updateSheetDownloading": "Downloading… {percent}%",
+  "@updateSheetDownloading": {
+    "description": "Progress line under the download progress bar",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "updateSheetDownloadingLabel": "Downloading…",
+  "@updateSheetDownloadingLabel": {
+    "description": "Button label while the download is in flight"
+  },
+  "updateSheetInstallerHint": "Finish in the Android installer that just opened.",
+  "@updateSheetInstallerHint": {
+    "description": "Shown after the APK is handed to the system package installer"
+  },
+  "updateSheetFailed": "Couldn't download the update. Check your connection and try again.",
+  "@updateSheetFailed": {
+    "description": "Generic download failure message"
+  },
+  "updateSheetFailedChecksum": "The file didn't match the published checksum, so Takwa refused to install it. Try again.",
+  "@updateSheetFailedChecksum": {
+    "description": "Shown when the downloaded APK's SHA-256 does not match the manifest"
+  },
+  "updateSheetUnavailable": "Couldn't load the update info right now.",
+  "@updateSheetUnavailable": {
+    "description": "Shown when /api/releases/latest cannot be reached"
+  },
+  "updateSheetRetry": "Try again",
+  "@updateSheetRetry": {
+    "description": "Retry button after a failed download"
+  },
+  "updateSheetClose": "Close",
+  "@updateSheetClose": {
+    "description": "Dismiss button on the in-app updater sheet"
+  },
+  "updateSheetOpenSite": "Open the download page instead",
+  "@updateSheetOpenSite": {
+    "description": "Fallback link to the website download page"
+  },
+  "settingsCheckUpdateHint": "Tap to check for updates",
+  "@settingsCheckUpdateHint": {
+    "description": "Hint under the app version row in Settings"
   },
   "overlayServiceChannelDesc": "Keeps the adhan and adhkar service active",
   "overlayServiceLoadingPrayerTimes": "Loading prayer times...",

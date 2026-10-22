@@ -3275,8 +3275,92 @@ abstract class AppLocalizations {
   /// Local notification body shown when a newer app version is detected
   ///
   /// In ar, this message translates to:
-  /// **'الإصدار {version} متوفر الآن — اضغط للتحميل'**
+  /// **'الإصدار {version} متوفر الآن — اضغط للتثبيت'**
   String updateAvailableNotifBody(String version);
+
+  /// Title of the in-app updater sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'تحديث تقوى'**
+  String get updateSheetTitle;
+
+  /// Body of the in-app updater sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'الإصدار {version} جاهز للتثبيت — حجمه {size}.'**
+  String updateSheetBody(String version, String size);
+
+  /// Warning that the APK download is large
+  ///
+  /// In ar, this message translates to:
+  /// **'التنزيل كبير؛ يُفضّل استخدام واي فاي.'**
+  String get updateSheetCellularNote;
+
+  /// Primary button on the in-app updater sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'تنزيل وتثبيت'**
+  String get updateSheetInstall;
+
+  /// Progress line under the download progress bar
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ التنزيل… {percent}٪'**
+  String updateSheetDownloading(int percent);
+
+  /// Button label while the download is in flight
+  ///
+  /// In ar, this message translates to:
+  /// **'جارٍ التنزيل…'**
+  String get updateSheetDownloadingLabel;
+
+  /// Shown after the APK is handed to the system package installer
+  ///
+  /// In ar, this message translates to:
+  /// **'أكمل التثبيت من نافذة أندرويد التي فُتحت الآن.'**
+  String get updateSheetInstallerHint;
+
+  /// Generic download failure message
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تنزيل التحديث. تحقّق من اتصالك ثم أعد المحاولة.'**
+  String get updateSheetFailed;
+
+  /// Shown when the downloaded APK's SHA-256 does not match the manifest
+  ///
+  /// In ar, this message translates to:
+  /// **'لم تطابق بصمة الملف النسخة المنشورة، لذا رفض تقوى تثبيته. أعد المحاولة.'**
+  String get updateSheetFailedChecksum;
+
+  /// Shown when /api/releases/latest cannot be reached
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر جلب معلومات التحديث الآن.'**
+  String get updateSheetUnavailable;
+
+  /// Retry button after a failed download
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة المحاولة'**
+  String get updateSheetRetry;
+
+  /// Dismiss button on the in-app updater sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'إغلاق'**
+  String get updateSheetClose;
+
+  /// Fallback link to the website download page
+  ///
+  /// In ar, this message translates to:
+  /// **'فتح صفحة التحميل بدلاً من ذلك'**
+  String get updateSheetOpenSite;
+
+  /// Hint under the app version row in Settings
+  ///
+  /// In ar, this message translates to:
+  /// **'اضغط للتحقق من التحديثات'**
+  String get settingsCheckUpdateHint;
 
   /// No description provided for @overlayServiceChannelDesc.
   ///

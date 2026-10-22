@@ -117,6 +117,11 @@ dependencies:
   # was only a transitive dep before this.
   flutter_edge_tts: ^0.0.2
   crypto: ^3.0.5
+  # In-app APK updates. The plugin merges its own FileProvider into the app
+  # manifest (authority "${applicationId}.fileProvider.com.crazecoder.openfile"),
+  # which is what Android 7+ needs: the installer intent is refused a plain
+  # file:// Uri, so the APK is handed over as a content:// with a read grant.
+  open_filex: ^4.7.0
 
 dev_dependencies:
   flutter_test:

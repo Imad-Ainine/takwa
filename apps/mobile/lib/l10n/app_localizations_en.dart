@@ -1723,8 +1723,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String updateAvailableNotifBody(String version) {
-    return 'Version $version is ready — tap to download';
+    return 'Version $version is ready — tap to install';
   }
+
+  @override
+  String get updateSheetTitle => 'Update Takwa';
+
+  @override
+  String updateSheetBody(String version, String size) {
+    return 'Version $version is ready to install — $size.';
+  }
+
+  @override
+  String get updateSheetCellularNote =>
+      'This is a large download. Wi-Fi is recommended.';
+
+  @override
+  String get updateSheetInstall => 'Download & install';
+
+  @override
+  String updateSheetDownloading(int percent) {
+    return 'Downloading… $percent%';
+  }
+
+  @override
+  String get updateSheetDownloadingLabel => 'Downloading…';
+
+  @override
+  String get updateSheetInstallerHint =>
+      'Finish in the Android installer that just opened.';
+
+  @override
+  String get updateSheetFailed =>
+      'Couldn\'t download the update. Check your connection and try again.';
+
+  @override
+  String get updateSheetFailedChecksum =>
+      'The file didn\'t match the published checksum, so Takwa refused to install it. Try again.';
+
+  @override
+  String get updateSheetUnavailable =>
+      'Couldn\'t load the update info right now.';
+
+  @override
+  String get updateSheetRetry => 'Try again';
+
+  @override
+  String get updateSheetClose => 'Close';
+
+  @override
+  String get updateSheetOpenSite => 'Open the download page instead';
+
+  @override
+  String get settingsCheckUpdateHint => 'Tap to check for updates';
 
   @override
   String get overlayServiceChannelDesc =>

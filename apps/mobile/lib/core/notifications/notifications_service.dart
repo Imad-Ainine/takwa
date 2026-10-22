@@ -10,13 +10,13 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:hijri/hijri_calendar.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:takwa/features/duas/data/duas_data.dart';
 import 'package:takwa/core/providers/database_providers.dart';
 import 'package:takwa/core/providers/locale_provider.dart';
 import 'package:takwa/core/providers/shared_preferences_provider.dart';
 import 'package:takwa/core/routes/app_routes.dart';
+import 'package:takwa/core/updates/app_update_sheet.dart';
 import 'package:takwa/core/providers/adhkar_providers.dart';
 import 'package:takwa/core/utils/prayer_display.dart';
 import 'package:takwa/core/utils/prayer_schedule_params.dart';
@@ -1772,15 +1772,13 @@ class NotificationRouter {
         Navigator.pushNamed(ctx, Routes.prayer);
         break;
       case 'release_update':
-        // The URL itself contains colons (scheme + query), so it can't use
-        // the shared `param` above (a naive split(':') on
-        // "https://example.com/#x" fragments the URL) — reconstruct
-        // everything after the first colon instead. See
-        // docs/specs/release-push-notifications.md.
-        final url = payload.substring(payload.indexOf(':') + 1);
-        if (url.isNotEmpty) {
-          launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-        }
+        // In-app rather than in a browser: a web page can only drop the APK in
+        // the Downloads folder, because the system package installer declares
+        // no CATEGORY_BROWSABLE activity for it to launch. Takwa holds
+        // REQUEST_INSTALL_PACKAGES, so it is the only place the update can be
+        // handed to the installer directly. The payload still carries the
+        // website URL (CI sends it) — the sheet offers it as a fallback.
+        showAppUpdateSheet(ctx);
         break;
     }
   }
